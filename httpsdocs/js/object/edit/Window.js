@@ -144,6 +144,13 @@ Ext.define('CB.object.edit.Window', {
                 ,scope: this
                 ,handler: this.onRefreshClick
             })
+
+            ,rename: new Ext.Action({
+                text: L.Rename
+                ,scope: this
+                ,handler: this.onRenameClick
+            })
+
             ,showInfoPanel: new Ext.Action({
                 iconCls: 'i-info'
                 ,enableToggle: true
@@ -172,6 +179,7 @@ Ext.define('CB.object.edit.Window', {
                 ,iconCls: 'i-points'
                 ,menu: [
                     this.actions['delete']
+                    ,this.actions.rename
                 ]
             })
             ,this.actions.showInfoPanel
@@ -661,11 +669,15 @@ Ext.define('CB.object.edit.Window', {
             this.actions.edit.show();
             this.actions.save.hide();
             this.actions.cancel.hide();
+
+            this.actions.rename.show();
         } else {
             this.actions.edit.hide();
             this.actions.save.show();
             this.actions.save.setDisabled(!this._isDirty);
             this.actions.cancel.show();
+
+            this.actions.rename.hide();
         }
     }
 
@@ -1085,5 +1097,21 @@ Ext.define('CB.object.edit.Window', {
         }
 
         return rez;
+    }
+
+    ,onRenameClick: function(b, e) {
+        var d = this.data
+            ,data = {
+                path: d.id
+                ,name: Ext.util.Format.htmlDecode(d.name)
+                ,scope: this
+                ,callback: function(r, e) {
+                    this.data.name = r.data.newName;
+                    this.updateWindowTitle();
+                    this.titleView.update(this.data);
+                }
+            };
+
+        App.promptRename(data);
     }
 });

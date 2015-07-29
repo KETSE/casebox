@@ -619,7 +619,7 @@ Ext.define('CB.browser.view.Grid', {
     }
 
     ,onSelectionChange: function () {
-        if(!App.mouseDown) {
+        if(!App.mouseDown || (App.lastMouseButton !== 0)) {
             this.fireSelectionChangeEvent();
         }
     }

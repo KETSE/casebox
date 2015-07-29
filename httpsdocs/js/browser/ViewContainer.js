@@ -38,14 +38,14 @@ Ext.define('CB.browser.ViewContainer', {
                 iconCls: 'im-refresh'
                 ,itemId: 'reload'
                 ,scale: 'medium'
-                ,tooltip: L.Refresh
+                ,tooltip: L.Reload
                 ,scope: this
                 ,handler: this.onReloadClick
             })
 
             ,contextReload: new Ext.Action({
                 iconCls: 'icon-refresh'
-                ,text: L.Refresh
+                ,text: L.Reload
                 ,scope: this
                 ,handler: this.onReloadClick
             })
@@ -77,6 +77,12 @@ Ext.define('CB.browser.ViewContainer', {
                 ,hidden: true
                 ,scope: this
                 ,handler: this.onDownloadClick
+            })
+            ,contextPreview: new Ext.Action({
+                text: L.Preview
+                ,hidden: true
+                ,scope: this
+                ,handler: this.onContextPreviewClick
             })
 
             ,cut: new Ext.Action({
@@ -186,7 +192,31 @@ Ext.define('CB.browser.ViewContainer', {
                 ,disabled: true
                 ,handler: this.onPreviewClick
             })
+
+            ,webdavlink: new Ext.Action({
+                text: L.WebDAVLink
+                ,itemId: 'webdavlink'
+                ,scope: this
+                ,handler: this.onWebDAVLinkClick
+            })
+
+            ,permalink: new Ext.Action({
+                text: L.Permalink
+                ,itemId: 'permalink'
+                ,scope: this
+                ,handler: this.onPermalinkClick
+            })
         };
+
+        this.descendantsCheckItem = Ext.create({
+            xtype: 'menucheckitem'
+            ,text: L.Descendants
+            ,checked: (this.params.descendants === true)
+            ,listeners: {
+                scope: this
+                ,checkchange: this.onDescendantsCheckChange
+            }
+        });
 
         this.tbarMoreMenu = new Ext.menu.Menu({
             items: [
@@ -224,6 +254,7 @@ Ext.define('CB.browser.ViewContainer', {
                         }
                     ]
                 }
+                ,this.descendantsCheckItem
                 ,this.actions.contextExport
             ]
         });
@@ -299,16 +330,6 @@ Ext.define('CB.browser.ViewContainer', {
                     }
                 }
             }
-        });
-
-        this.descendantsButton = new Ext.Button({
-            text: ' ... '
-            ,tooltip: L.Descendants
-            ,enableToggle: true
-            ,allowDepress: true
-            ,width: 20
-            ,scope: this
-            ,handler: this.onDescendantsClick
         });
 
         this.objectPanel = new CB.object.ViewContainer({
@@ -699,9 +720,13 @@ Ext.define('CB.browser.ViewContainer', {
         this.folderProperties.pathtext = result.pathtext;
 
         //switch from NotificationView if active
-        this.containersPanel.setActiveItem(this.cardContainer);
+        if(!this.isRequestFromObjectChange) {
+            this.containersPanel.setActiveItem(this.cardContainer);
+        } else {
+            delete this.isRequestFromObjectChange;
+        }
 
-        this.descendantsButton.toggle(ep.descendants === true);
+        this.descendantsCheckItem.setChecked(ep.descendants === true);
 
         /* change view if set in params */
         if(!this.userViewSet) {
@@ -762,7 +787,7 @@ Ext.define('CB.browser.ViewContainer', {
         Ext.apply(options, vp);
 
         //workaround to set from param for search by template
-        if(this.requestParams.from && (this.requestParams.from != 'tree')) {
+        if(this.requestParams && this.requestParams.from && (this.requestParams.from != 'tree')) {
             options.from = this.requestParams.from;
         }
 
@@ -959,12 +984,15 @@ Ext.define('CB.browser.ViewContainer', {
         ).setVisible(inGridView);
 
         if(Ext.isEmpty(selection)) {
+            this.actions.edit.setDisabled(true);
             this.actions.cut.setDisabled(true);
             this.actions.copy.setDisabled(true);
             this.actions.takeOwnership.setDisabled(true);
 
             this.actions.download.setDisabled(true);
             this.actions.download.hide();
+            this.actions.contextPreview.setDisabled(true);
+            this.actions.contextPreview.hide();
             this.actions.contextDownload.setDisabled(true);
             this.actions.contextDownload.hide();
 
@@ -972,14 +1000,32 @@ Ext.define('CB.browser.ViewContainer', {
             this.actions['delete'].hide();
             this.actions.contextDelete.setDisabled(true);
 
+            this.actions.webdavlink.setDisabled(true);
+            this.actions.webdavlink.hide();
+
+            this.actions.permalink.setDisabled(true);
+            this.actions.permalink.hide();
+
             this.actions.restore.setDisabled(true);
             this.actions.restore.hide();
             this.actions.permissions.setDisabled(isNaN(fp.id));
         } else {
-            var firstObjId = Ext.valueFrom(selection[0].nid, selection[0].id);
+            var firstObjId = Ext.valueFrom(selection[0].nid, selection[0].id)
+                ,firstObjType = CB.DB.templates.getType(selection[0].template_id)
+                ,firstFileEditor = (firstObjType == 'file')
+                    ? detectFileEditor(selection[0].name)
+                    : false;
 
             this.actions.cut.setDisabled(false);
             this.actions.copy.setDisabled(false);
+
+            this.actions.edit.setDisabled(
+                (firstObjType == 'file') &&
+                (firstFileEditor === false)
+            );
+
+            this.actions.contextPreview.setDisabled(false);
+            this.actions.contextPreview.show();
 
             var canDownload = true;
             for (var i = 0; i < selection.length; i++) {
@@ -1001,6 +1047,12 @@ Ext.define('CB.browser.ViewContainer', {
 
             this.actions['delete'].setDisabled(inRecycleBin);
             this.actions.contextDelete.setDisabled(inRecycleBin);
+
+            this.actions.webdavlink.setDisabled(firstObjType != 'file');
+            this.actions.webdavlink.setHidden(firstObjType != 'file' || (firstFileEditor != 'webdav'));
+
+            this.actions.permalink.setDisabled(firstObjType != 'file');
+            this.actions.permalink.setHidden(firstObjType != 'file');
 
             if(!inRecycleBin && inGridView) {
                 this.actions['delete'].show();
@@ -1029,13 +1081,6 @@ Ext.define('CB.browser.ViewContainer', {
         return this.cardContainer.getLayout().activeItem.currentSelection;
     }
 
-    ,onDescendantsClick: function(b, e) {
-        this.changeSomeParams({
-            descendants: b.pressed
-            ,start: 0
-        });
-    }
-
     ,onObjectsSelectionChange: function(objectsDataArray){
         this.cardContainer.getLayout().activeItem.currentSelection = objectsDataArray;
         this.updateToolbarButtons();
@@ -1058,12 +1103,14 @@ Ext.define('CB.browser.ViewContainer', {
             e.stopEvent();
         }
 
-        var data = Ext.apply({}, objectData);
+        var data = Ext.apply({}, objectData)
+            ,templateType = CB.DB.templates.getType(data.template_id);
+
         if(!Ext.isEmpty(data.nid)) {
             data.id = data.nid;
         }
 
-        if(CB.DB.templates.getType(data.template_id) == 'file') {
+        if(templateType == 'file') {
             switch(detectFileEditor(data.name)) {
                 case 'text':
                 case 'html':
@@ -1144,6 +1191,19 @@ Ext.define('CB.browser.ViewContainer', {
             ids.push(selection[i].nid);
         }
         this.fireEvent('filedownload', ids, false, e);
+    }
+
+    ,onContextPreviewClick: function(b, e) {
+        var ids = [];
+        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+        if(Ext.isEmpty(selection)) {
+            return;
+        }
+
+        var data = Ext.clone(selection[0]);
+        data.id = data.nid;
+        clog('opening', data);
+        App.openObjectWindow(data);
     }
 
     ,onDeleteClick: function(b, e) {
@@ -1258,16 +1318,21 @@ Ext.define('CB.browser.ViewContainer', {
 
     ,onEditClick: function (b, e) {
         var selection = this.cardContainer.getLayout().activeItem.currentSelection;
-        var id = Ext.isEmpty(selection)
-            ? this.folderProperties.id
-            : Ext.valueFrom(selection[0].nid, selection[0].id);
 
-        this.editObject(
-            {
-                id: id
-                ,template_id: selection[0].template_id
+        if(!Ext.isEmpty(selection)) {
+            var p = Ext.apply({}, selection[0]);
+            p.id = p.nid;
+
+            switch(detectFileEditor(p.name)) {
+                case 'webdav':
+                    App.openWebdavDocument(p);
+                    break;
+
+                default:
+                    this.editObject(p);
+                    break;
             }
-        );
+        }
     }
 
     ,onClipboardChange: function(cb){
@@ -1282,14 +1347,17 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onObjectChanged: function(objData, component){
-        var idx = this.store.findExact('nid', String(objData.id));
+        var idx = this.store.findExact('nid', String(objData.id))
+            ,fp = Ext.valueFrom(this.folderProperties, {});
 
         if(
             (idx >= 0) ||
-            isNaN(this.folderProperties.id) || // virtual folders
-            (objData.pid == this.folderProperties.id)
+
+            isNaN(fp.id) || // virtual folders
+            (objData.pid == fp.id)
         ) {
             // App.locateObject(objData);
+            this.isRequestFromObjectChange = true;
             this.onReloadClick();
         }
     }
@@ -1334,37 +1402,24 @@ Ext.define('CB.browser.ViewContainer', {
 
             this.contextMenu = new Ext.menu.Menu({
                 items: [
-                this.actions.edit
-                ,this.actions.contextDownload
-                ,'-'
-                ,{
-                    text: L.View
-                    ,hideOnClick: false
-                    ,menu: [{
-                        xtype: 'menucheckitem'
-                        ,text: L.Descendants
-                        ,checked: (this.params.descendants === true)
-                        ,listeners: {
-                            scope: this
-                            ,checkchange: this.onShowDescendantsCheckChange
-                        }
-                    }
-                    ]
-                }
-                ,'-'
-                ,this.actions.cut
-                ,this.actions.copy
-                ,this.actions.paste
-                ,this.actions.pasteShortcut
-                ,'-'
-                ,this.actions.contextReload
-                ,this.actions.createShortcut
-                ,this.actions.contextDelete
-                ,this.actions.contextRename
-                ,'-'
-                ,this.createItem
-                ,'-'
-                ,this.actions.permissions
+                    this.actions.edit
+                    ,this.actions.contextPreview
+                    ,this.actions.contextDownload
+                    ,'-'
+                    ,this.actions.cut
+                    ,this.actions.copy
+                    ,this.actions.paste
+                    ,this.actions.pasteShortcut
+                    ,'-'
+                    ,this.actions.contextReload
+                    ,this.actions.contextDelete
+                    ,this.actions.contextRename
+                    ,this.actions.webdavlink
+                    ,this.actions.permalink
+                    ,'-'
+                    ,this.createItem
+                    ,'-'
+                    ,this.actions.permissions
                 ]
             });
         }
@@ -1384,8 +1439,11 @@ Ext.define('CB.browser.ViewContainer', {
         this.fireEvent('exportrecords', this, e);
     }
 
-    ,onShowDescendantsCheckChange: function(cb, checked, eOpts) {
-        this.onDescendantsClick({pressed: checked}, eOpts);
+    ,onDescendantsCheckChange: function(cb, checked, eOpts) {
+        this.changeSomeParams({
+            descendants: checked
+            ,start: 0
+        });
     }
 
     /**
@@ -1408,5 +1466,28 @@ Ext.define('CB.browser.ViewContainer', {
     ,onPreviewClick: function(b, e) {
         this.objectPanel.expand();
         this.actions.preview.hide();
+    }
+
+    ,onWebDAVLinkClick: function(b, e) {
+        var selection = this.getSelection();
+
+        if(!Ext.isEmpty(selection)) {
+            var data = Ext.clone(selection[0]);
+            data.id = data.nid;
+            App.openWebdavDocument(
+                data
+                ,false
+            );
+        }
+    }
+
+    ,onPermalinkClick: function(b, e) {
+        var selection = this.getSelection();
+
+        if(!Ext.isEmpty(selection)) {
+            window.prompt(
+                'Copy to clipboard: Ctrl+C, Enter'
+                , window.location.origin + '/' + App.config.coreName + '/view/' + selection[0].nid + '/');
+        }
     }
 });

@@ -13,6 +13,11 @@ if (!$cd['success']) {
     exit(1);
 }
 
+// This storage is freed on error (case of allowed memory exhausted)
+Cache::set('memory', str_repeat('*', 1024 * 1024));
+
+register_shutdown_function('CB\\onScriptShutdown');
+
 $rez = array(
     'Total' => 0
     ,'Processed' =>0
@@ -43,12 +48,15 @@ if (!empty($scriptOptions['all'])) {
 $sql = 'SELECT id
     ,path
     ,`type`
+    ,`size`
     ,pages
 FROM files_content
 WHERE '.$where;
 $res = DB\dbQuery($sql) or die(DB\dbQueryError()); //and name like \'%.pdf\'
 
 while ($r = $res->fetch_assoc()) {
+    Cache::set('lastRecId', $r['id']);
+
     $filename = Config::get('files_dir').$r['path'].DIRECTORY_SEPARATOR.$r['id'];
     echo "\nFile: $filename (".$r['type'].") ";
     if (file_exists($filename)) {
@@ -57,7 +65,13 @@ while ($r = $res->fetch_assoc()) {
         if (substr($r['type'], 0, 5) != 'image') {
             if (!file_exists($filename.'.gz')) {
                 echo "\nnot image processing content ...";
-                $tikaRez = getTikaResult($filename);
+                $tikaRez = false;
+                try {
+                    $tikaRez = getTikaResult($filename);
+                } catch (\Exception $e) {
+
+                }
+
                 if ($tikaRez !== false) {
                     file_put_contents($filename.'.zip', $tikaRez);
                     $text = getZipFileContent($filename.'.zip', '__TEXT__');
@@ -79,7 +93,9 @@ while ($r = $res->fetch_assoc()) {
                     echo " pages: $pages";
 
                     unlink($filename.'.zip');
-                }//else $skip_parsing = 1;
+                } else {
+                    $skip_parsing = 1;
+                }
             }
         } else {
             $skip_parsing = 1;
@@ -172,12 +188,30 @@ function getTikaResult($filename)
     if (curl_errno($ch)) {
         $rez = false;
     }
+
     // Close handle
     curl_close($ch);
     fclose($file);
 
     return $rez;
 }
+
+function onScriptShutdown ()
+{
+    Cache::remove('memory');
+    if ((!is_null($err = error_get_last())) && (!in_array($err['type'], array (E_NOTICE, E_WARNING)))) {
+        //mark last processed file to be skipped parsing
+        $id = Cache::get('lastRecId', false);
+        if (!empty($id)) {
+            DB\dbQuery(
+                'UPDATE files_content
+                SET skip_parsing = 1
+                WHERE id = $1',
+                $id
+            ) or die(DB\dbQueryError());
+        }
+    }
+};
 
 function getZipFileContent ($zip_file, $filename)
 {

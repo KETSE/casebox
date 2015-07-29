@@ -144,4 +144,8 @@ DB\dbQuery($sql, array('languages', $languages)) or die(DB\dbQueryError());
 
 createSolrCore($cfg, $coreName);
 
+echo 'Creating language files .. ';
+exec('php "' . $binDirectorty . 'languages_update_js_files.php"');
+showMessage();
+
 echo "Done.\n";

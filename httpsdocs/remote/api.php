@@ -29,6 +29,7 @@ $cfg = array(
     'url'=>'remote/router.php'
     ,'type'=>'remoting'
     ,'enableBuffer' => true
+    ,'maxRetries' => 0
     ,'actions'=>$actions
 );
 

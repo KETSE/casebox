@@ -38,6 +38,21 @@ Ext.define('CB.file.edit.Window', {
                 ,scope: this
                 ,handler: this.onRestoreVersionClick
             })
+
+            ,webdavlink: new Ext.Action({
+                text: L.WebDAVLink
+                ,itemId: 'webdavlink'
+                ,scope: this
+                ,handler: this.onWebDAVLinkClick
+            })
+
+            ,permalink: new Ext.Action({
+                text: L.Permalink
+                ,itemId: 'permalink'
+                ,scope: this
+                ,handler: this.onPermalinkClick
+            })
+
         });
     }
 
@@ -63,6 +78,9 @@ Ext.define('CB.file.edit.Window', {
                 ,iconCls: 'i-points'
                 ,menu: [
                     this.actions['delete']
+                    ,this.actions.webdavlink
+                    ,this.actions.rename
+                    ,this.actions.permalink
                 ]
             })
             ,this.actions.showInfoPanel
@@ -257,6 +275,8 @@ Ext.define('CB.file.edit.Window', {
             !Ext.isEmpty(this.loadedVersionId)
         );
 
+        this.actions.webdavlink.setHidden(this.editType !== 'webdav');
+
         this.actions.save.setDisabled(false);
 
         this.actions.restoreVersion.setHidden(Ext.isEmpty(this.loadedVersionId));
@@ -422,6 +442,17 @@ Ext.define('CB.file.edit.Window', {
                 this.doLoad();
             }
             ,this
+        );
+    }
+
+    ,onWebDAVLinkClick: function(b, e) {
+        App.openWebdavDocument(this.data ,false);
+    }
+
+    ,onPermalinkClick: function(b, e) {
+        window.prompt(
+            'Copy to clipboard: Ctrl+C, Enter'
+            , window.location.origin + '/' + App.config.coreName + '/view/' + this.data.id + '/'
         );
     }
 

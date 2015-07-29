@@ -1107,15 +1107,26 @@ class Files
 
                 return array('html' => $html);
                 break;
+
             case 'tif':
             case 'tiff':
             case 'svg':
-                $convertedImage = $filesPreviewDir.$file['content_id'].'_.png';
-                if (!file_exists($convertedImage)) {
+                $pfn = $filesPreviewDir . $file['content_id'];
+                $convertedImages = array(
+                    $pfn . '_.png'
+                );
+
+                if (!file_exists($convertedImages[0])) {
+                    $convertedImages = array();
                     try {
-                        $image = new \Imagick($fn);
-                        $image->setImageFormat('png');
-                        $image->writeImage($convertedImage);
+                        $images = new \Imagick($fn);
+                        $i = 1;
+                        foreach ($images as $image) {
+                            $image->setImageFormat('png');
+                            $image->writeImage($pfn . $i . '_.png');
+                            $convertedImages[] = $file['content_id'] . $i . '_.png';
+                            $i++;
+                        }
                     } catch (\Exception $e) {
                         return $rez;
                     }
@@ -1123,8 +1134,14 @@ class Files
 
                 file_put_contents(
                     $preview_filename,
-                    '<img src="/' . $coreName . '/view/'.$file['content_id'].
-                    '_.png" class="fit-img" style="margin: auto" />'
+                    '<img src="/' . $coreName . '/view/'.
+                    implode(
+                        '" class="fit-img" style="margin: auto" />' .
+                        "<br /><hr />\n" .
+                        '<img src="/' . $coreName . '/view/',
+                        $convertedImages
+                    ) .
+                    '" class="fit-img" style="margin: auto" />'
                 );
                 break;
 
@@ -1139,6 +1156,18 @@ class Files
                     );
                 }
         }
+
+        //save generated file reference in db
+        DB\dbQuery(
+            'INSERT INTO file_previews (id, filename)
+                VALUES($1, $2)
+                ON DUPLICATE KEY
+                UPDATE filename = $2',
+            array(
+                $file['content_id']
+                ,$rez['filename']
+            )
+        ) or die(DB\dbQueryError());
 
         return $rez;
     }

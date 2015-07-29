@@ -722,6 +722,34 @@ class Browser
             throw new \Exception(L\get('Access_denied'));
         }
 
+        $p['name']  = Purify::filename($p['name']);
+
+        $rez = array(
+            'success' => true
+            ,'data' => array(
+                'id' => $id
+                ,'pid' => null
+                ,'newName' => $p['name']
+            )
+        );
+
+
+        $objectType = Objects::getType($id);
+
+        if ($objectType == 'shortcut') {
+            $res = DB\dbQuery(
+                'SELECT target_id
+                FROM tree
+                WHERE id = $1',
+                $id
+            ) or die(DB\dbQueryError());
+            if ($r = $res->fetch_assoc()) {
+                $id = $r['target_id'];
+                $objectType = Objects::getType($id);
+            }
+            $res->close();
+        }
+
         DB\dbQuery(
             'UPDATE tree
             SET name = $1
@@ -732,9 +760,9 @@ class Browser
             )
         ) or die(DB\dbQueryError());
 
-        switch (Objects::getType($id)) {
+
+        switch ($objectType) {
             case 'file':
-                $p['name']  = Purify::filename($p['name']);
 
                 DB\dbQuery(
                     'UPDATE files
@@ -747,7 +775,6 @@ class Browser
                 ) or die(DB\dbQueryError());
 
                 break;
-
         }
 
         /*updating renamed document into solr directly (before runing background cron)
@@ -761,24 +788,16 @@ class Browser
         $p['name'] = htmlspecialchars($p['name'], ENT_COMPAT);
 
         //get pid
-        $pid = null;
         $res = DB\dbQuery(
             'SELECT pid FROM tree WHERE id = $1',
-            $id
+            $rez['data']['id']
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
-            $pid = $r['pid'];
+            $rez['data']['pid'] = $r['pid'];
         }
         $res->close();
 
-        return array(
-            'success' => true
-            ,'data' => array(
-                'id' => $id
-                ,'pid' => $pid
-                ,'newName' => $p['name']
-            )
-        );
+        return $rez;
     }
 
     /**

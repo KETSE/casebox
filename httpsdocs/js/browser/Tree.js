@@ -11,7 +11,7 @@ Ext.define('CB.browser.Tree', {
     ,animate: false
     ,lines: false
     ,useArrows: true
-    ,showFoldersContent: false
+    // ,showFoldersContent: false
     ,border: false
     ,bodyBoder: false
     ,style: {
@@ -76,15 +76,9 @@ Ext.define('CB.browser.Tree', {
                 ,handler: this.onPasteShortcutClick
             })
 
-            ,createShortcut: new Ext.Action({
-                text: L.CreateShortcut
-                ,scope: this
-                ,disabled: true
-                ,handler: this.onCreateShortcutClick
-            })
-
             ,'delete': new Ext.Action({
                 text: L.Delete
+                ,iconCls: 'i-trash'
                 ,disabled: true
                 ,scope: this
                 ,handler: this.onDeleteClick
@@ -98,17 +92,11 @@ Ext.define('CB.browser.Tree', {
             })
 
             ,reload: new Ext.Action({
-                text: L.Reload
+                iconCls: 'icon-refresh'
+                ,text: L.Reload
                 ,disabled: true
                 ,scope: this
                 ,handler: this.onReloadClick
-            })
-
-            ,properties: new Ext.Action({
-                text: L.Properties
-                ,scope: this
-                ,disabled: true
-                ,handler: this.onPropertiesClick
             })
 
             ,permissions: new Ext.Action({
@@ -163,7 +151,7 @@ Ext.define('CB.browser.Tree', {
 
                     var p = {
                         path: path
-                        ,showFoldersContent: this.showFoldersContent
+                        // ,showFoldersContent: this.showFoldersContent
                     };
                     Ext.apply(store.proxy.extraParams, p);
                 }
@@ -294,13 +282,6 @@ Ext.define('CB.browser.Tree', {
                     this.onReloadClick();
                 }
                 break;
-
-            case e.ENTER:
-                if(!e.ctrlKey && !e.shiftKey && e.altKey) {
-                    e.stopEvent();
-                    this.onPropertiesClick();
-                }
-                break;
         }
     }
 
@@ -383,8 +364,6 @@ Ext.define('CB.browser.Tree', {
             this.actions.copy.setDisabled(true);
             this.actions.paste.setDisabled(true);
             this.actions.pasteShortcut.setDisabled(true);
-            this.actions.createShortcut.setDisabled(true);
-            this.actions.createShortcut.setDisabled(true);
             this.actions['delete'].setDisabled(true);
             this.actions.rename.setDisabled(true);
             this.actions.reload.setDisabled(true);
@@ -458,33 +437,18 @@ Ext.define('CB.browser.Tree', {
                 items: [
                 this.actions.edit
                 ,'-'
-                ,{
-                    text: L.View
-                    ,hideOnClick: false
-                    ,menu: [{
-                        xtype: 'menucheckitem'
-                        ,text: L.ShowFoldersContent
-                        ,checked: this.showFoldersContent
-                        ,scope: this
-                        ,handler: this.onShowFoldersChildsClick
-                    }
-                    ]
-                }
-                ,'-'
                 ,this.actions.cut
                 ,this.actions.copy
                 ,this.actions.paste
                 ,this.actions.pasteShortcut
                 ,'-'
-                ,this.actions.createShortcut
+                ,this.actions.reload
                 ,this.actions['delete']
                 ,this.actions.rename
-                ,this.actions.reload
                 ,'-'
                 ,this.createItem
                 ,'-'
                 ,this.actions.permissions
-                ,this.actions.properties
                 ]
             });
 
@@ -606,17 +570,17 @@ Ext.define('CB.browser.Tree', {
         // this.onSelectionChange(this.sm, n);
     }
 
-    ,onShowFoldersChildsClick: function(b, e){
-        this.showFoldersContent = !b.checked;
+    // ,onShowFoldersChildsClick: function(b, e){
+    //     this.showFoldersContent = !b.checked;
 
-        this.fireEvent('savestate');
+    //     this.fireEvent('savestate');
 
-        this.store.reload({
-            node: this.getRootNode()
-            ,scope: this
-            ,callback: this.restoreTreeState
-        });
-    }
+    //     this.store.reload({
+    //         node: this.getRootNode()
+    //         ,scope: this
+    //         ,callback: this.restoreTreeState
+    //     });
+    // }
 
     ,getState: function () {
         var rez = {
@@ -802,12 +766,6 @@ Ext.define('CB.browser.Tree', {
             return;
         }
         App.mainViewPort.openPermissions(n.data.nid);
-    }
-
-    ,onPropertiesClick: function(b, e){
-        if(this.actions.properties.isDisabled()) {
-            return;
-        }
     }
 
     ,onRenameClick: function(b, e){

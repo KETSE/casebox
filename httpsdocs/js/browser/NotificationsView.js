@@ -183,7 +183,7 @@ Ext.define('CB.browser.NotificationsView', {
             '"></td><td class="pl10 vaT">' + v + '</td></tr></table>'
             ;
 
-        m.tdCls = r.get('read') ? '': 'bgcLG';
+        m.tdCls = r.get('read') ? '': 'notification-record-unread';
 
         return rez;
     }
