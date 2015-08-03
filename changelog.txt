@@ -1,3 +1,14 @@
+CaseBox 1.9.500 (2015-08-03)
+==============================
+New Features, Improvements
+--------------------------
+- updated unoconv to last version (0.7)
+- remember columns state for vertical edit grid
+
+Fixed Bugs:
+----------
+- issue #16 - Casebox and Filepreview/Download (Libreoffice&unoconv) - Ubuntu Server 14.04
+
 CaseBox 1.9.499 (2015-07-29)
 ==============================
 New Features, Improvements

@@ -94,7 +94,6 @@ Ext.define('CB.VerticalEditGrid', {
                 }
             })
             ,columns: Ext.apply([], this.gridColumns) //leave default column definitions intact
-            ,forceFit: true
             ,selType: 'cellmodel'
             ,header: false
             ,listeners: {
@@ -110,6 +109,13 @@ Ext.define('CB.VerticalEditGrid', {
             }
             ,stateful: true
             ,stateId: Ext.valueFrom(this.stateId, 'veg')//vertical edit grid
+            ,stateEvents: [
+                'columnhide'
+                ,'columnmove'
+                ,'columnresize'
+                ,'columnschanged'
+                ,'columnshow'
+            ]
             ,viewConfig: viewCfg
             ,editors: {
                 iconcombo: function(){
@@ -241,7 +247,6 @@ Ext.define('CB.VerticalEditGrid', {
     }
 
     ,initColumns: function() {
-
         this.gridColumns = [
             {
                 header: L.Property
@@ -250,6 +255,7 @@ Ext.define('CB.VerticalEditGrid', {
                 ,stateId: 'title'
                 ,editable: false
                 ,scope: this
+                ,size: 100
                 ,renderer: this.renderers.title
             },{
                 header: L.Value
@@ -259,6 +265,7 @@ Ext.define('CB.VerticalEditGrid', {
                 ,stateId: 'value'
                 ,editor: new Ext.form.TextField()
                 ,scope: this
+                ,flex: 1
                 ,resizable: true
                 ,renderer: this.renderers.value
             },{
@@ -267,6 +274,7 @@ Ext.define('CB.VerticalEditGrid', {
                 ,dataIndex: 'info'
                 ,stateId: 'info'
                 ,editor: new Ext.form.TextField()
+                ,size: 200
                 ,hideable: false
             }
         ];
@@ -425,21 +433,24 @@ Ext.define('CB.VerticalEditGrid', {
                 if(!colRequired) {
                     newConfig.pop();
                 }
-                // newConfig.push({
-                //     header: ''
-                //     ,dataIndex: 'id'
-                //     ,hideable: false
-                //     ,width: 3
-                //     ,resizable: false
-                //     ,renderer: Ext.emptyFn
-                // });
 
-                // cm.setConfig(newConfig);
+                //apply state to columns
+                if(this.stateful) {
+                    var state = Ext.state.Manager.get(this.stateId);
+                    if(state.columns) {
+                        Ext.iterate(
+                            newConfig,
+                            function(c) {
+                                if(state.columns[c.dataIndex]) {
+                                    Ext.apply(c, state.columns[c.dataIndex]);
+                                }
+                            }
+                            ,this
+                        );
+                    }
+                }
+
                 this.reconfigure(this.store, newConfig);
-                // var el = this.getEl();
-                // if(el && el.isVisible(true)) {
-                //     this.getView().refresh(true);
-                // }
             }
         }
         // if parent have a helperTree then it is responsible for helper reload

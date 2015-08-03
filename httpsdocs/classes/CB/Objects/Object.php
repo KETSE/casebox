@@ -584,7 +584,7 @@ class Object
             )
         ) or die(DB\dbQueryError());
 
-        //mark the item as updated so that it would be reindexed to solr
+        //mark the item as updated so that it'll be reindexed into solr
         DB\dbQuery(
             'UPDATE tree
             SET updated = (updated | 1)
