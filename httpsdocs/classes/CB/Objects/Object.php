@@ -213,7 +213,9 @@ class Object
             ,'new' => $this
         );
 
-        Log::add($logParams);
+        if (!\CB\Cache::get('disable_logs', false)) {
+            Log::add($logParams);
+        }
 
         return $this->id;
     }
@@ -582,7 +584,7 @@ class Object
             )
         ) or die(DB\dbQueryError());
 
-        //mark the item as updated so that it would be reindexed to solr
+        //mark the item as updated so that it'll be reindexed into solr
         DB\dbQuery(
             'UPDATE tree
             SET updated = (updated | 1)

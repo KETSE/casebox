@@ -215,3 +215,11 @@ span.order-arrows b.arrow-down {
   background-image: url(s/ic_arrow_drop_down_black_24dp.png);
   background-position: -5px;
 }
+
+/* notifications view */
+.notification-record-unread {
+  background-color: #e7e7e7;
+}
+.x-grid-item-over .notification-record-unread{
+  background-color: inherit;
+}

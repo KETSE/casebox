@@ -22,11 +22,14 @@ class File extends Object
     {
         //disable default log from parent Object class
         //we'll set comments add as comment action for parent
+
+        $disableActivityLogStatus = \CB\Config::getFlag('disableActivityLog');
+
         Config::setFlag('disableActivityLog', true);
 
         $rez = parent::create($p);
 
-        Config::setFlag('disableActivityLog', false);
+        Config::setFlag('disableActivityLog', $disableActivityLogStatus);
 
         $p = &$this->data;
 
@@ -37,14 +40,16 @@ class File extends Object
         // log the action
         $logParams = array(
             'type' => 'file_upload'
-            ,'new' => $this->parentObj
-            ,'file' => array(
+            , 'new' => $this->parentObj
+            , 'file' => array(
                 'id' => $p['id'],
                 'name' => $p['name']
             )
         );
 
-        Log::add($logParams);
+        if (!\CB\Cache::get('disable_logs', false)) {
+            Log::add($logParams);
+        }
 
         return $rez;
     }

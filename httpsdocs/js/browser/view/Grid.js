@@ -21,7 +21,6 @@ Ext.define('CB.browser.view.Grid', {
                 header: 'ID'
                 ,width: 80
                 ,dataIndex: 'nid'
-                // ,hidden: true
                 ,sort: this.columnSortOverride
                 ,groupable: false
             },{
@@ -52,7 +51,6 @@ Ext.define('CB.browser.view.Grid', {
                 ,groupable: false
             },{
                 header: L.Path
-                // ,hidden: true
                 ,width: 150
                 ,dataIndex: 'path'
                 ,renderer: function(v, m, r, ri, ci, s){
@@ -87,7 +85,6 @@ Ext.define('CB.browser.view.Grid', {
                 ,sort: this.columnSortOverride
             },{
                 header: L.Creator
-                // ,hidden: true
                 ,width: 200
                 ,dataIndex: 'cid'
                 ,renderer: function(v){
@@ -120,7 +117,6 @@ Ext.define('CB.browser.view.Grid', {
                 ,sort: this.columnSortOverride
             },{
                 header: L.CreatedDate
-                // ,hidden: true
                 ,width: 120
                 ,dataIndex: 'cdate'
                 ,xtype: 'datecolumn'
@@ -128,7 +124,6 @@ Ext.define('CB.browser.view.Grid', {
                 ,sort: this.columnSortOverride
             },{
                 header: L.UpdatedDate
-                // ,hidden: true
                 ,width: 120
                 ,dataIndex: 'udate'
                 ,xtype: 'datecolumn'
@@ -136,7 +131,6 @@ Ext.define('CB.browser.view.Grid', {
                 ,sort: this.columnSortOverride
             },{
                 header: L.CommentedDate
-                // ,hidden: true
                 ,width: 120
                 ,dataIndex: 'comment_date'
                 ,xtype: 'datecolumn'
@@ -229,7 +223,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,itemcontextmenu: this.onItemContextMenu
             }
             ,keys: [{
-                    key: Ext.event.Event.DOWN //down arrow (select forst row in the greed if no row already selected)  - does not work
+                    key: Ext.event.Event.DOWN //down arrow (select forst row in the grid if no row already selected)  - does not work
                     ,ctrl: false
                     ,shift: false
                     ,stopEvent: true
@@ -384,16 +378,10 @@ Ext.define('CB.browser.view.Grid', {
             title: L.Explorer
             ,header: false
             ,layout: 'border'
-            ,items:
+            ,viewName: 'grid'
+            ,items: [
                 this.grid
-            // [
-            //     this.grid
-            //     ,this.objectPanel
-            // ]
-            // ,listeners: {
-            //     scope: this
-            //     ,activate: this.onActivate
-            // }
+            ]
         });
         this.callParent(arguments);
 
@@ -428,7 +416,7 @@ Ext.define('CB.browser.view.Grid', {
     }
 
     /**
-     * fire the venet for main browser view to update its buttons
+     * fire the evnet for main browser view to update its buttons
      * @return void
      */
     ,updateToolbarButtons: function() {
@@ -453,8 +441,6 @@ Ext.define('CB.browser.view.Grid', {
     ,onBeforeStoreLoad: function(store, operation, eOpts) {
         this.savedSelection = this.getSelectedItems();
         this.grid.getSelectionModel().suspendEvents();
-        // App.mainViewPort.selectGridObject(this.grid);
-
     }
 
     ,onStoreLoad: function(store, recs, successful, options) {
@@ -619,7 +605,7 @@ Ext.define('CB.browser.view.Grid', {
     }
 
     ,onSelectionChange: function () {
-        if(!App.mouseDown) {
+        if(!App.mouseDown || (App.lastMouseButton !== 0)) {
             this.fireSelectionChangeEvent();
         }
     }
@@ -687,7 +673,7 @@ Ext.define('CB.browser.view.Grid', {
 
     ,getViewParams: function() {
         var rez = {
-            from: 'grid'
+            from: this.viewName
         };
 
         if(this.grid.userSort) {
@@ -700,18 +686,4 @@ Ext.define('CB.browser.view.Grid', {
     ,onItemContextMenu: function(grid, record, item, index, e, eOpts) {
         this.fireEvent('itemcontextmenu', e);
     }
-
-    // /**
-    //  * handler for close right panel button
-    //  * @param  button b
-    //  * @param  event e
-    //  * @return void
-    //  */
-    // ,onCloseObjectPanelClick: function(b, e) {
-    //     this.objectPanel.collapse();
-    //     this.buttonCollection.get('filter').hide();
-    //     this.buttonCollection.get('properties').hide();
-    //     this.actions.preview.show();
-    // }
-
 });

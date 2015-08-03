@@ -283,7 +283,7 @@ createDirectStores = function(){
         }
 
         ,getType: function(id){
-            var rec = this.findRecord('id', parseInt(id, 10))
+            var rec = this.findRecord('id', parseInt(id, 10), 0, false, false, true)
 
             return rec ? rec.get('type') : '';
         }

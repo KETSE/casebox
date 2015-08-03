@@ -24,15 +24,13 @@ import subprocess
 import sys
 import time
 
-__version__ = "$Revision$"
-# $Source$
-
-VERSION = '0.6'
+__version__ = '0.7'
 
 doctypes = ('document', 'graphics', 'presentation', 'spreadsheet')
 
 global convertor, office, ooproc, product
 ooproc = None
+uno = unohelper = None
 exitcode = 0
 
 class Office:
@@ -90,6 +88,7 @@ def find_offices():
         elif os.name in ( 'mac', ) or sys.platform in ( 'darwin', ):
             extrapaths += [ '/Applications/LibreOffice.app/Contents',
                             '/Applications/NeoOffice.app/Contents',
+                            '/Applications/OpenOffice.app/Contents',
                             '/Applications/OpenOffice.org.app/Contents' ]
 
         else:
@@ -113,7 +112,7 @@ def find_offices():
             pythonhomes = ()
         elif os.name in ( 'mac', ) or sys.platform in ( 'darwin', ):
             officelibraries = ( 'pyuno.so', 'libpyuno.dylib' )
-            officebinaries = ( 'soffice.bin', )
+            officebinaries = ( 'soffice.bin', 'soffice')
             pythonbinaries = ( 'python.bin', 'python' )
             pythonhomes = ( 'OOoPython.framework/Versions/*/lib/python*', )
         else:
@@ -200,7 +199,10 @@ def find_offices():
 
 def office_environ(office):
     ### Set PATH so that crash_report is found
-    os.environ['PATH'] = realpath(office.basepath, 'program') + os.pathsep + os.environ['PATH']
+    if 'PATH' in os.environ:
+        os.environ['PATH'] = realpath(office.basepath, 'program') + os.pathsep + os.environ['PATH']
+    else:
+        os.environ['PATH'] = realpath(office.basepath, 'program')
 
     ### Set UNO_PATH so that "officehelper.bootstrap()" can find soffice executable:
     os.environ['UNO_PATH'] = office.unopath
@@ -264,7 +266,7 @@ def python_switch(office):
         ### os.execv is broken on Windows and can't properly parse command line
         ### arguments and executable name if they contain whitespaces. subprocess
         ### fixes that behavior.
-        ret = subprocess.call([office.python] + sys.argv[0:])
+        ret = subprocess.call([office.python, ] + sys.argv[0:])
         sys.exit(ret)
     else:
 
@@ -375,6 +377,7 @@ fmts.add('document', 'uot', 'uot', 'Unified Office Format text','UOF text') ### 
 fmts.add('document', 'vor', 'vor', 'StarWriter 5.0 Template', 'StarWriter 5.0 Vorlage/Template') ### 6
 fmts.add('document', 'vor4', 'vor', 'StarWriter 4.0 Template', 'StarWriter 4.0 Vorlage/Template') ### 5
 fmts.add('document', 'vor3', 'vor', 'StarWriter 3.0 Template', 'StarWriter 3.0 Vorlage/Template') ### 4
+fmts.add('document', 'wps', 'wps', 'Microsoft Works', 'MS_Works')
 fmts.add('document', 'xhtml', 'html', 'XHTML Document', 'XHTML Writer File') ### 33
 
 ### WebDocument
@@ -421,6 +424,7 @@ fmts.add('spreadsheet', 'xls95', 'xls', 'Microsoft Excel 95', 'MS Excel 95') ###
 fmts.add('spreadsheet', 'xlt', 'xlt', 'Microsoft Excel 97/2000/XP Template', 'MS Excel 97 Vorlage/Template') ### 6
 fmts.add('spreadsheet', 'xlt5', 'xlt', 'Microsoft Excel 5.0 Template', 'MS Excel 5.0/95 Vorlage/Template') ### 28
 fmts.add('spreadsheet', 'xlt95', 'xlt', 'Microsoft Excel 95 Template', 'MS Excel 95 Vorlage/Template') ### 21
+fmts.add('spreadsheet', 'xlsx', 'xlsx', 'Microsoft Excel 2007/2010 XML', 'Calc MS Excel 2007 XML')
 
 ### Graphics
 fmts.add('graphics', 'bmp', 'bmp', 'Windows Bitmap', 'draw_bmp_Export') ### 21
@@ -507,18 +511,22 @@ class Options:
         self.doctype = None
         self.exportfilter = []
         self.exportfilteroptions = ""
+        self.fields = {}
         self.filenames = []
         self.format = None
         self.importfilter = []
         self.importfilteroptions = ""
         self.listener = False
+        self.metadata = {}
         self.nolaunch = False
         self.output = None
         self.password = None
         self.pipe = None
         self.port = '2002'
+        self.preserve = False
         self.server = '127.0.0.1'
         self.showlist = False
+        self.stdin = False
         self.stdout = False
         self.template = None
         self.timeout = 6
@@ -526,12 +534,12 @@ class Options:
 
         ### Get options from the commandline
         try:
-            opts, args = getopt.getopt (args, 'c:Dd:e:f:hi:Llo:np:s:T:t:vV',
-                ['connection=', 'debug', 'doctype=', 'export=', 'format=',
-                 'help', 'import', 'listener', 'no-launch', 'output=',
-                 'outputpath', 'password=', 'pipe=', 'port=', 'server=',
-                 'timeout=', 'show', 'stdout', 'template', 'verbose',
-                 'version'] )
+            opts, args = getopt.getopt (args, 'c:Dd:e:F:f:hi:LlM:no:p:s:T:t:vV',
+                ['connection=', 'debug', 'doctype=', 'export=', 'field=', 'format=',
+                 'help', 'import=', 'listener', 'meta=', 'no-launch', 'output=',
+                 'outputpath', 'password=', 'pipe=', 'port=', 'preserve',
+                 'server=', 'timeout=', 'show', 'stdin', 'stdout', 'template',
+                 'verbose', 'version'] )
         except getopt.error as exc:
             print('unoconv: %s, try unoconv -h for a list of all the options' % str(exc))
             sys.exit(255)
@@ -541,7 +549,7 @@ class Options:
                 self.usage()
                 print()
                 self.help()
-                sys.exit(1)
+                sys.exit(0)
             elif opt in ['-c', '--connection']:
                 self.connection = arg
             elif opt in ['--debug']:
@@ -565,6 +573,9 @@ class Options:
                             self.exportfilter.append( PropertyValue( name, 0, value, 0 ) )
                 else:
                     print('Warning: Option %s cannot be parsed, ignoring.' % arg, file=sys.stderr)
+            elif opt in ['-F', '--field']:
+                l = arg.split('=')
+                self.fields[l[0]] = '='.join(l[1:])
             elif opt in ['-f', '--format']:
                 self.format = arg
             elif opt in ['-i', '--import']:
@@ -586,6 +597,9 @@ class Options:
                     print('Warning: Option %s cannot be parsed, ignoring.' % arg, file=sys.stderr)
             elif opt in ['-l', '--listener']:
                 self.listener = True
+            elif opt in ['-M', '--meta']:
+                l = arg.split('=')
+                self.metadata[l[0]] = '='.join(l[1:])
             elif opt in ['-n', '--no-launch']:
                 self.nolaunch = True
             elif opt in ['-o', '--output']:
@@ -599,10 +613,14 @@ class Options:
                 self.pipe = arg
             elif opt in ['-p', '--port']:
                 self.port = arg
+            elif opt in ['--preserve']:
+                self.preserve = True
             elif opt in ['-s', '--server']:
                 self.server = arg
             elif opt in ['--show']:
                 self.showlist = True
+            elif opt in ['--stdin']:
+                self.stdin = True
             elif opt in ['--stdout']:
                 self.stdout = True
             elif opt in ['-t', '--template']:
@@ -613,7 +631,7 @@ class Options:
                 self.verbose = self.verbose + 1
             elif opt in ['-V', '--version']:
                 self.version()
-                sys.exit(255)
+                sys.exit(0)
 
         ### Enable verbosity
         if self.verbose >= 2:
@@ -621,16 +639,15 @@ class Options:
 
         self.filenames = args
 
-        if not self.listener and not self.showlist and self.doctype != 'list' and not self.filenames:
-            print('unoconv: you have to provide a filename as argument', file=sys.stderr)
+        if not self.listener and not self.showlist and not self.stdin and self.doctype != 'list' and not self.filenames:
+            print('unoconv: you have to provide a filename or url as argument', file=sys.stderr)
             print('Try `unoconv -h\' for more information.', file=sys.stderr)
             sys.exit(255)
 
         ### Set connection string
         if not self.connection:
             if not self.pipe:
-                self.connection = "socket,host=%s,port=%s;urp;StarOffice.ComponentContext" % (self.server, self.port)
-#               self.connection = "socket,host=%s,port=%s;urp;" % (self.server, self.port)
+                self.connection = "socket,host=%s,port=%s,tcpNoDelay=1;urp;StarOffice.ComponentContext" % (self.server, self.port)
             else:
                 self.connection = "pipe,name=%s;urp;StarOffice.ComponentContext" % (self.pipe)
 
@@ -651,25 +668,29 @@ class Options:
 
         ### If no format was specified, probe it or provide it
         if not self.format:
+            ### Check if the command is in the form odt2pdf
             l = sys.argv[0].split('2')
             if len(l) == 2:
                 self.format = l[1]
-            else:
-                self.format = 'pdf'
+            ### Use the extension of the output file
+            elif self.output and os.path.basename(self.output).find('.') >= 0:
+                self.format = os.path.splitext(self.output)[1].lstrip('.')
+
+        ### Default to PDF
+        if not self.format:
+            self.format = 'pdf'
 
     def version(self):
-        ### Get office product information
-        product = uno.getComponentContext().ServiceManager.createInstance("com.sun.star.configuration.ConfigurationProvider").createInstanceWithArguments("com.sun.star.configuration.ConfigurationAccess", UnoProps(nodepath="/org.openoffice.Setup/Product"))
-
-        print('unoconv %s' % VERSION)
+        print('unoconv %s' % __version__)
         print('Written by Dag Wieers <dag@wieers.com>')
         print('Homepage at http://dag.wieers.com/home-made/unoconv/')
         print()
         print('platform %s/%s' % (os.name, sys.platform))
         print('python %s' % sys.version)
-        print(product.ooName, product.ooSetupVersion)
-#        print
-#        print 'build revision $Rev$'
+        if uno:
+            ### Get office product information
+            product = uno.getComponentContext().ServiceManager.createInstance("com.sun.star.configuration.ConfigurationProvider").createInstanceWithArguments("com.sun.star.configuration.ConfigurationAccess", UnoProps(nodepath="/org.openoffice.Setup/Product"))
+            print(product.ooName, product.ooSetupVersionAboutBox)
 
     def usage(self):
         print('usage: unoconv [options] file [file2 ..]', file=sys.stderr)
@@ -684,6 +705,8 @@ unoconv options:
   -e, --export=name=value  set export filter options
                              eg. -e PageRange=1-2
   -f, --format=format      specify the output format
+  -F, --field=name=value   replace user-defined text field with value
+                             eg. -F Client_Name="Oracle"
   -i, --import=string      set import filter option string
                              eg. -i utf8
   -l, --listener           start a permanent listener to use by unoconv clients
@@ -693,13 +716,16 @@ unoconv options:
   -p, --port=port          specify the port (default: 2002)
                              to be used by client or listener
       --password=string    provide a password to decrypt the document
+      --preserve           keep timestamp and permissions of the original document
   -s, --server=server      specify the server address (default: 127.0.0.1)
                              to be used by client or listener
       --show               list the available output formats
+      --stdin              read from stdin (filenames are ignored if provided)
       --stdout             write output to stdout
   -t, --template=file      import the styles from template (.ott)
   -T, --timeout=secs       timeout after secs if connection to listener fails
   -v, --verbose            be more and more verbose (-vvv for debugging)
+      --version            display version number of unoconv, OOo/LO and platform details
 ''', file=sys.stderr)
 
 class Convertor:
@@ -714,46 +740,7 @@ class Convertor:
 
         ### Test for an existing connection
         info(3, 'Connection type: %s' % op.connection)
-        try:
-            unocontext = resolver.resolve("uno:%s" % op.connection)
-        except NoConnectException as e:
-#            info(3, "Existing listener not found.\n%s" % e)
-            info(3, "Existing listener not found.")
-
-            if op.nolaunch:
-                die(113, "Existing listener not found. Unable start listener by parameters. Aborting.")
-
-            ### Start our own OpenOffice instance
-            info(3, "Launching our own listener using %s." % office.binary)
-            try:
-                product = self.svcmgr.createInstance("com.sun.star.configuration.ConfigurationProvider").createInstanceWithArguments("com.sun.star.configuration.ConfigurationAccess", UnoProps(nodepath="/org.openoffice.Setup/Product"))
-                if product.ooName != "LibreOffice" or LooseVersion(product.ooSetupVersion) <= LooseVersion('3.3'):
-                    ooproc = subprocess.Popen([office.binary, "-headless", "-invisible", "-nocrashreport", "-nodefault", "-nofirststartwizard", "-nologo", "-norestore", "-accept=%s" % op.connection], env=os.environ)
-                else:
-                    ooproc = subprocess.Popen([office.binary, "--headless", "--invisible", "--nocrashreport", "--nodefault", "--nofirststartwizard", "--nologo", "--norestore", "--accept=%s" % op.connection], env=os.environ)
-                info(2, '%s listener successfully started. (pid=%s)' % (product.ooName, ooproc.pid))
-
-                ### Try connection to it for op.timeout seconds (flakky OpenOffice)
-                timeout = 0
-                while timeout <= op.timeout:
-                    ### Is it already/still running ?
-                    retcode = ooproc.poll()
-                    if retcode != None:
-                        info(3, "Process %s (pid=%s) exited with %s." % (office.binary, ooproc.pid, retcode))
-                        break
-                    try:
-                        unocontext = resolver.resolve("uno:%s" % op.connection)
-                        break
-                    except NoConnectException:
-                        time.sleep(0.5)
-                        timeout += 0.5
-                    except:
-                        raise
-                else:
-                    error("Failed to connect to %s (pid=%s) in %d seconds.\n%s" % (office.binary, ooproc.pid, op.timeout, e))
-            except Exception as e:
-                raise
-                error("Launch of %s failed.\n%s" % (office.binary, e))
+        unocontext = self.connect(resolver)
 
         if not unocontext:
             die(251, "Unable to connect or start own listener. Aborting.")
@@ -768,6 +755,59 @@ class Convertor:
 #        for filter in self.filters.getElementNames():
 #            print filter
 #            #print dir(filter), dir(filter.format)
+
+    def connect(self, resolver):
+        global ooproc, product, office
+        unocontext = None
+
+        try:
+            unocontext = resolver.resolve("uno:%s" % op.connection)
+        except NoConnectException as e:
+#            info(3, "Existing listener not found.\n%s" % e)
+            info(3, "Existing listener not found.")
+
+            if op.nolaunch:
+                die(113, "Existing listener not found. Unable start listener by parameters. Aborting.")
+
+            ### Start our own OpenOffice instance
+            info(3, "Launching our own listener using %s." % office.binary)
+            try:
+                product = self.svcmgr.createInstance("com.sun.star.configuration.ConfigurationProvider").createInstanceWithArguments("com.sun.star.configuration.ConfigurationAccess", UnoProps(nodepath="/org.openoffice.Setup/Product"))
+                if product.ooName not in ('LibreOffice', 'LOdev') or LooseVersion(product.ooSetupVersion) <= LooseVersion('3.3'):
+                    ooproc = subprocess.Popen([office.binary, "-headless", "-invisible", "-nocrashreport", "-nodefault", "-nofirststartwizard", "-nologo", "-norestore", "-accept=%s" % op.connection], env=os.environ)
+                else:
+                    ooproc = subprocess.Popen([office.binary, "--headless", "--invisible", "--nocrashreport", "--nodefault", "--nofirststartwizard", "--nologo", "--norestore", "--accept=%s" % op.connection], env=os.environ)
+                info(2, '%s listener successfully started. (pid=%s)' % (product.ooName, ooproc.pid))
+
+                ### Try connection to it for op.timeout seconds (flakky OpenOffice)
+                timeout = 0
+                while timeout <= op.timeout:
+                    ### Is it already/still running ?
+                    retcode = ooproc.poll()
+                    if retcode == 81:
+                        info(3, "Caught exit code 81 (new installation). Restarting listener.")
+                        return self.connect(resolver)
+                        break
+
+                    elif retcode != None:
+                        info(3, "Process %s (pid=%s) exited with %s." % (office.binary, ooproc.pid, retcode))
+                        break
+
+                    try:
+                        unocontext = resolver.resolve("uno:%s" % op.connection)
+                        break
+                    except NoConnectException:
+                        time.sleep(0.5)
+                        timeout += 0.5
+                    except:
+                        raise
+                else:
+                    error("Failed to connect to %s (pid=%s) in %d seconds.\n%s" % (office.binary, ooproc.pid, op.timeout, e))
+            except Exception as e:
+                raise
+                error("Launch of %s failed.\n%s" % (office.binary, e))
+
+        return unocontext
 
     def getformat(self, inputfn):
         doctype = None
@@ -801,12 +841,26 @@ class Convertor:
         ### No format found, throw error
         if not outputfmt:
             if doctype:
-                print('unoconv: format [%s/%s] is not known to unoconv.' % (op.doctype, op.format), file=sys.stderr)
+                error('unoconv: format [%s/%s] is not known to unoconv.' % (op.doctype, op.format), file=sys.stderr)
             else:
-                print('unoconv: format [%s] is not known to unoconv.' % op.format, file=sys.stderr)
+                error('unoconv: format [%s] is not known to unoconv.' % op.format, file=sys.stderr)
             die(1)
 
         return outputfmt
+
+    def preserve(self, inputfn, outputfn):
+        # Get timestamp of input file
+        s = os.stat(inputfn)
+        times = (s.st_atime, s.st_mtime)
+        mode = s.st_mode
+        # Set it to output file
+        with open(outputfn, "a") as f:
+            os.utime(f.fileno()
+                     if hasattr(os, "supports_fd") and os.utime in os.supports_fd else inputfn,
+                     times=times)
+            os.chmod(f.fileno()
+                     if hasattr(os, "supports_fd") and os.chmod in os.supports_fd else inputfn,
+                     mode)
 
     def convert(self, inputfn):
         global exitcode
@@ -816,10 +870,6 @@ class Convertor:
 
         if op.verbose > 0:
             print('Input file:', inputfn, file=sys.stderr)
-
-        if not os.path.exists(inputfn):
-            print('unoconv: file `%s\' does not exist.' % inputfn, file=sys.stderr)
-            exitcode = 1
 
         try:
             ### Import phase
@@ -841,7 +891,16 @@ class Convertor:
             if op.importfilter:
                 inputprops += ( PropertyValue( "FilterData", 0, uno.Any("[]com.sun.star.beans.PropertyValue", tuple( op.importfilter ), ), 0 ), )
 
-            inputurl = unohelper.absolutize(self.cwd, unohelper.systemPathToFileUrl(inputfn))
+            if op.stdin:
+                inputStream = self.svcmgr.createInstanceWithContext("com.sun.star.io.SequenceInputStream", self.context)
+                inputStream.initialize((uno.ByteSequence(inputfn),))
+                inputprops += UnoProps(InputStream=inputStream)
+                inputurl = 'private:stream'
+            else:
+                if os.path.exists(inputfn):
+                    inputurl = unohelper.absolutize(self.cwd, unohelper.systemPathToFileUrl(inputfn))
+                else:
+                    inputurl = inputfn
             document = self.desktop.loadComponentFromURL( inputurl , "_blank", 0, inputprops )
 
             if not document:
@@ -859,30 +918,83 @@ class Convertor:
                     print('unoconv: template file `%s\' does not exist.' % op.template, file=sys.stderr)
                     exitcode = 1
 
+            ### Force all cells to recalculate if we are able to. This will get rid of errors in cells.
+            ### FIXME: We cannot recalculate the cells because it breaks issue #97 (cells get #VALUE)
+#            phase = "recalculate"
+#            try:
+#                document.calculateAll()
+#            except AttributeError:
+#                pass
+
             ### Update document links
             phase = "update-links"
             try:
                 document.updateLinks()
+                # Found that when converting HTML files with external images, OO would only load five or six of 
+                # the images in the file. In the resulting document, the rest of the images did not appear. Cycling 
+                # through all the image references in the document seems to force OO to actually load them. Found 
+                # some helpful guidance in this thread:
+                # https://forum.openoffice.org/en/forum/viewtopic.php?f=30&t=23909
+                # Ideally we would like to have the option to embed the images into the document, but I have not been
+                # able to figure out how to do this yet.
+                graphObjs = document.GraphicObjects
+                for i in range(0, graphObjs.getCount()):
+                    graphObj = graphObjs.getByIndex(i)
             except AttributeError:
                 # the document doesn't implement the XLinkUpdate interface
                 pass
 
+            ### Add/Replace variables
+            phase = "replace-fields"
+            for f in op.fields:
+              try:
+                field = document.TextFieldMasters.getByName("com.sun.star.text.fieldmaster.SetExpression.%s" % f)
+                field.DependentTextFields[0].setPropertyValue('Content', op.fields[f])
+              except UnoException as e:
+                error("unoconv: failed to replace variable '%s' with value '%s' in the document." % (f, op.fields[f]))
+                pass
+
+            ### Add/Replace metadata
+            phase = "replace-metadata"
+            props = document.getDocumentProperties()
+            user_props = props.getUserDefinedProperties()
+            for prop, value in op.metadata.items():
+                for container in ( props, user_props ):
+                    curr = getattr(container, prop, None)
+                    if curr is not None:
+                        setattr(container, prop, value)
+                        break
+                else:
+                    user_props.addProperty(prop, 0, '')
+                    user_props.setPropertyValue(prop, value)
+
             ### Update document indexes
             phase = "update-indexes"
-            try:
-                document.refresh()
-                indexes = document.getDocumentIndexes()
-            except AttributeError:
-                # the document doesn't implement the XRefreshable and/or
-                # XDocumentIndexesSupplier interfaces
-                pass
-            else:
-                for i in range(0, indexes.getCount()):
-                    indexes.getByIndex(i).update()
+            for ii in range(2):
+                # At first update Table-of-Contents.
+                # ToC grows, so page numbers grows too.
+                # On second turn update page numbers in ToC.
+                try:
+                    document.refresh()
+                    indexes = document.getDocumentIndexes()
+                except AttributeError:
+                    # the document doesn't implement the XRefreshable and/or
+                    # XDocumentIndexesSupplier interfaces
+                    break
+                else:
+                    for i in range(0, indexes.getCount()):
+                        indexes.getByIndex(i).update()
 
             info(1, "Selected output format: %s" % outputfmt)
             info(2, "Selected office filter: %s" % outputfmt.filter)
             info(2, "Used doctype: %s" % outputfmt.doctype)
+
+            ### Document properties phase
+            phase = "disable-showchanges"
+            try:
+                document.ShowChanges = False
+            except AttributeError:
+                pass
 
             ### Export phase
             phase = "export"
@@ -895,34 +1007,42 @@ class Convertor:
                 outputprops += UnoProps(FilterOptions=op.exportfilteroptions)
             else:
                 if outputfmt.filter == 'Text (encoded)':
-                    outputprops += UnoProps(FilterOptions="76,LF")
+                    outputprops += UnoProps(FilterOptions="UTF8,LF")
 
                 elif outputfmt.filter == 'Text':
-                    outputprops += UnoProps(FilterOptions="76")
+                    outputprops += UnoProps(FilterOptions="UTF8")
 
                 elif outputfmt.filter == 'Text - txt - csv (StarCalc)':
-                    outputprops += UnoProps(FilterOptions="44,34,76")
-
+                    outputprops += UnoProps(FilterOptions="44,34,UTF8")
 
             ### Cannot use UnoProps for FilterData property
             if op.exportfilter:
                 outputprops += ( PropertyValue( "FilterData", 0, uno.Any("[]com.sun.star.beans.PropertyValue", tuple( op.exportfilter ), ), 0 ), )
 
-            if not op.stdout:
-                (outputfn, ext) = os.path.splitext(inputfn)
-                if not op.output:
-                    outputfn = outputfn + os.extsep + outputfmt.extension
-                elif os.path.isdir(op.output):
-                    outputfn = realpath(op.output, os.path.basename(outputfn) + os.extsep + outputfmt.extension)
-                elif len(op.filenames) > 1:
-                    outputfn = op.output + os.extsep + outputfmt.extension
+            if op.stdout:
+                ### Ensure binary data to stdout works
+                ### http://stackoverflow.com/questions/2374427/python-2-x-write-binary-output-to-stdout
+                if sys.platform == "win32":
+                    import msvcrt
+                    msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+                outputurl = "private:stream"
+            else:
+                if os.path.exists(inputfn):
+                    (inbase, ext) = os.path.splitext(inputfn)
                 else:
-                    outputfn = op.output
+                    (inbase, ext) = os.path.splitext(os.path.basename(inputfn))
+                if op.output:
+                    (outbase, ext) = os.path.splitext(op.output)
+                    if len(op.filenames) > 1:
+                        outputfn = realpath(outbase, os.path.basename(inbase) + os.extsep + outputfmt.extension)
+                    else:
+                        outputfn = realpath(outbase + os.extsep + outputfmt.extension)
+                else:
+                    outputfn = realpath(inbase + os.extsep + outputfmt.extension)
 
                 outputurl = unohelper.absolutize( self.cwd, unohelper.systemPathToFileUrl(outputfn) )
-                info(1, "Output file: %s" % outputfn)
-            else:
-                outputurl = "private:stream"
+
+            info(1, "Output file: %s" % outputurl)
 
             try:
                 document.storeToURL(outputurl, tuple(outputprops) )
@@ -932,6 +1052,8 @@ class Convertor:
             phase = "dispose"
             document.dispose()
             document.close(True)
+            if not op.stdout and op.preserve:
+                self.preserve(inputfn, outputfn)
 
         except SystemError as e:
             error("unoconv: SystemError during %s phase:\n%s" % (phase, e))
@@ -1077,7 +1199,11 @@ def main():
         if op.listener:
             listener = Listener()
 
-        if op.filenames:
+        if op.stdin:
+            inputfn = sys.stdin.read()
+            convertor = Convertor()
+            convertor.convert(inputfn)
+        elif op.filenames:
             convertor = Convertor()
             for inputfn in op.filenames:
                 convertor.convert(inputfn)
@@ -1141,7 +1267,10 @@ if __name__ == '__main__':
             self.closed = 1
 
         def writeBytes( self, seq ):
-            sys.stdout.write( seq.value )
+            try:
+                sys.stdout.buffer.write( seq.value )
+            except AttributeError:
+                sys.stdout.write( seq.value )
 
         def flush( self ):
             pass
