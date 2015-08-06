@@ -1,12 +1,14 @@
 <?php
 namespace CB\Objects;
 
+use CB\Cache;
 use CB\Config;
 use CB\DB;
 use CB\Util;
 use CB\L;
 use CB\Log;
 use CB\Security;
+use CB\User;
 
 /**
  * class for generic casebox objects
@@ -207,15 +209,7 @@ class Object
         //fire create event
         \CB\fireEvent('nodeDbCreate', $this);
 
-        // log the action
-        $logParams = array(
-            'type' => 'create'
-            ,'new' => $this
-        );
-
-        if (!\CB\Cache::get('disable_logs', false)) {
-            Log::add($logParams);
-        }
+        $this->logAction('create');
 
         return $this->id;
     }
@@ -468,18 +462,11 @@ class Object
         $this->updateCustomData();
 
         // set/update this object to cache
-        \CB\Cache::set('Objects[' . $this->id . ']', $this);
+        Cache::set('Objects[' . $this->id . ']', $this);
 
         \CB\fireEvent('nodeDbUpdate', $this);
 
-        // log the action
-        $logParams = array(
-            'type' => 'update'
-            ,'old' => $this->oldObject
-            ,'new' => $this
-        );
-
-        Log::add($logParams);
+        $this->logAction('update', array('old' => $this->oldObject));
 
         return true;
     }
@@ -889,15 +876,9 @@ class Object
 
         \CB\fireEvent('nodeDbDelete', $this);
 
-        // log the action
-        $logParams = array(
-            'type' => 'delete'
-            ,'old' => $this
-        );
-
         //dont add log action if permanently deleted
         if (!$permanent) {
-            Log::add($logParams);
+            $this->logAction('delete', array('old' => &$this));
         }
     }
 
@@ -943,14 +924,7 @@ class Object
             $this->load();
         }
 
-        // log the action
-        $logParams = array(
-            'type' => 'restore'
-            ,'new' => $this
-        );
-
-        Log::add($logParams);
-
+        $this->logAction('restore');
     }
 
     /**
@@ -1045,7 +1019,7 @@ class Object
             $rez = $this->data['sys_data']['solr'];
         }
 
-        return $this->data;
+        return $rez;
     }
 
     /**
@@ -1575,14 +1549,7 @@ class Object
 
         $this->load();
 
-        // log the action
-        $logParams = array(
-            'type' => 'move'
-            ,'old' => $this->oldObject
-            ,'new' => $this
-        );
-
-        Log::add($logParams);
+        $this->logAction('move', array('old' => $this->oldObject));
 
         return $this->id;
     }
@@ -1810,6 +1777,171 @@ class Object
         $eventParams['result'] = &$rez;
 
         \CB\fireEvent('generatePreview', $eventParams);
+
+        return $rez;
+    }
+
+    /**
+     * add action to log
+     * @param  varchar $type
+     * @param  array   $params
+     * @return void
+     */
+    protected function logAction($type, $params = array())
+    {
+        if (!Cache::get('disable_logs', false) &&
+            !Config::getFlag('disableActivityLog')
+        ) {
+            $params['type'] = $type;
+
+            $obj = &$this;
+
+            if (empty($params['new'])) {
+                $params['new'] = &$this;
+
+            } else {
+                $obj = &$params['new'];
+            }
+
+            $logActionId = Log::add($params);
+
+            $uid = User::getId();
+
+            //add action to object sys_data
+            $data = $obj->getData();
+
+            $lastAction = $obj->getLastActionData();
+
+            if ($lastAction['type'] != $type) {
+                $lastAction = array(
+                    'type' => $type
+                    ,'time' => Util\dateMysqlToISO('now')
+                    ,'users' => array()
+                );
+            }
+
+            /*$sysData = empty($data['sys_data'])
+                ? $this->getSysData()
+                : $data['sys_data'];
+
+            $lastAction = array(
+                'type' => $type
+                ,'time' => Util\dateMysqlToISO('now')
+                ,'users' => array()
+            );
+
+            if (!empty($sysData['lastAction']) &&
+                ($sysData['lastAction']['type'] == $type)
+            ) {
+                $lastAction['users'] = $sysData['lastAction']['users'];
+            } /**/
+
+            unset($lastAction['users'][$uid]);
+
+            $lastAction['users'][$uid] = $logActionId;
+
+            $obj->setSysDataProperty('lastAction', $lastAction);
+        }
+    }
+
+    public function getLastActionData()
+    {
+        $data = $this->getData();
+
+        $sysData = empty($data['sys_data'])
+            ? $this->getSysData()
+            : $data['sys_data'];
+
+        $rez = array();
+
+        if (!empty($sysData['lastAction'])) {
+            $rez = $sysData['lastAction'];
+
+        } else {
+            if (!empty($sysData['lastComment'])) {
+                $rez = array(
+                    'type' => 'comment'
+                    ,'time' => $sysData['lastComment']['date']
+                    ,'users' => array(
+                        $sysData['lastComment']['user_id'] => 0
+                    )
+                );
+            }
+
+            if (!empty($data['udate']) && (empty($rez['time']) || ($data['udate'] > $rez['time']))) {
+                $rez = array(
+                    'type' => 'update'
+                    ,'time' => Util\dateMysqlToISO($data['udate'])
+                    ,'users' => array(
+                        $data['uid'] => 0
+                    )
+                );
+            }
+
+            if (empty($rez['time'])) {
+                $date = Util\dateMysqlToISO(
+                    empty($data['cdate'])
+                    ? 'now'
+                    : $data['cdate']
+                );
+
+                $rez = array(
+                    'type' => 'create'
+                    ,'time' => $date
+                    ,'users' => array(
+                        $data['cid'] => 0
+                    )
+                );
+            }
+        }
+
+        return $rez;
+    }
+
+    /**
+     * get diff html for given log record data
+     * @param  array $logData
+     * @return array
+     */
+    public function getDiff($logData)
+    {
+        $old = empty($logData['old'])
+            ? array()
+            : $logData['old'];
+        $new = empty($logData['new'])
+            ? array()
+            : $logData['new'];
+
+        $rez = array();
+
+        $template = $this->getTemplate();
+        $ld = $this->getLinearData(true);
+
+        foreach ($ld as $f) {
+            $ov = empty($old[$f['name']])
+                ? ''
+                : $old[$f['name']][0];
+
+            $nv = empty($new[$f['name']])
+                ? ''
+                : $new[$f['name']][0];
+
+            if ($ov != $nv) {
+                $field = $template->getField($f['name']);
+                // var_export($field);
+                $title = Util\coalesce($field['title'], $field['name']);
+
+                $value = empty($ov)
+                    ? ''
+                    : ('<div class="old-value">' . $template->formatValueForDisplay($field, $ov) . '</div>');
+                // var_export($nv);
+                $value .= empty($nv)
+                    ? ''
+                    : ('<div class="new-value">' . $template->formatValueForDisplay($field, $nv) . '</div>');
+
+                $rez[$title] = $value;
+            }
+        }
 
         return $rez;
     }

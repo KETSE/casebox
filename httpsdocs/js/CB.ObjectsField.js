@@ -26,6 +26,7 @@ CB.ObjectsFieldCommonFunctions = {
                     ,restful: false
                     ,remoteSort: true
                     ,model: 'FieldObjects'
+                    ,pageSize: Ext.valueFrom(this.cfg.rows, 50)
                     ,proxy: {
                         type: 'direct'
                         ,paramsAsHash: true

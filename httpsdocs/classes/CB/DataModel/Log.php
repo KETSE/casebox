@@ -2,6 +2,9 @@
 
 namespace CB\DataModel;
 
+use CB\DB;
+use CB\Util;
+
 class Log extends Base
 {
     /**
@@ -29,6 +32,29 @@ class Log extends Base
         ,'activity_data_db' => 'text'
         ,'activity_data_solr' => 'text'
     );
+
+    /**
+     * update a record
+     * @param  array   $p array with properties
+     * @return boolean
+     */
+    public static function getRecords($ids)
+    {
+        $rez = array();
+        $ids = Util\toNumericArray($ids);
+
+        $res = DB\dbQuery(
+            'SELECT *
+            FROM `' . static::getTableName() . '`
+            WHERE id in (' . implode(',', $ids). ')'
+        ) or die(DB\dbQueryError());
+        while ($r = $res->fetch_assoc()) {
+            $rez[] = $r;
+        }
+        $res->close();
+
+        return $rez;
+    }
 
     /**
      * update a record

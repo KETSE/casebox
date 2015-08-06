@@ -271,11 +271,13 @@ class Security
         $lid =  Config::get('user_language_index', 1);
         $res = DB\dbQuery(
             'SELECT DISTINCT u.id
-                    , u.l'.$lid.' `name`
-                    , u.`system`
-                    , u.`enabled`
-                    , u.`type`
-                    , u.`sex`
+                    ,u.`name`
+                    ,u.`first_name`
+                    ,u.`last_name`
+                    ,u.`system`
+                    ,u.`enabled`
+                    ,u.`type`
+                    ,u.`sex`
                 FROM tree_acl a
                 JOIN users_groups u ON a.user_group_id = u.id
                 WHERE a.node_id '.(
@@ -288,6 +290,7 @@ class Security
 
         while ($r = $res->fetch_assoc()) {
             $r['user_group_id'] = $r['id'];
+            $r['name'] = User::getDisplayName($r);
             $r['iconCls'] = ($r['type'] == 1) ? 'icon-users' : 'icon-user-'.$r['sex'];
 
             unset($r['sex']);

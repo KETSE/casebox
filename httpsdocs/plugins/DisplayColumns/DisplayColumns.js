@@ -12,7 +12,7 @@ Ext.onReady(function(){
 Ext.define('CB.plugin.DisplayColumns', {
     extend: 'Ext.util.Observable'
     ,alias: 'plugin.CBPluginDisplayColumns'
-    ,lastColumns: ''
+    ,lastState: ''
 
     ,init: function(owner) {
         this.owner = owner;
@@ -25,8 +25,18 @@ Ext.define('CB.plugin.DisplayColumns', {
         this.defaultFieldNames = this.extractFieldNames(this.model.fields);
         this.proxy = this.store.proxy;
 
+        this.owner.on('activate', this.onActivateView, this);
         this.store.on('load', this.onStoreLoad, this);
+        this.store.on('clear', this.onStoreClear, this);
         this.store.on('load', this.clearDisableStateSaveFlag, this, {defer: 1000});
+    }
+
+    ,onActivateView: function(view) {
+        this.lastState = '';
+    }
+
+    ,onStoreClear: function(store) {
+        this.grid.disableStateSave = true;
     }
 
     ,onStoreLoad: function(store, records, successful, eOpts) {//proxy, obj, options
@@ -52,11 +62,15 @@ Ext.define('CB.plugin.DisplayColumns', {
         //add corresponding metadata to obj.result if DisplayColumns changed
         this.currentColumns = rez.DC || [];
 
-        if(this.lastColumns !== Ext.util.JSON.encode(this.currentColumns)) {
+        var currentState = (rez.view ? rez.view.type : '') +
+            Ext.util.JSON.encode(this.currentColumns) +
+            (rez.sort ? Ext.util.JSON.encode(rez.sort) : '');
+
+        if(this.lastState !== currentState) {
             var storeFields = this.getNewMetadata();
             store.setFields(storeFields);
 
-            this.lastColumns = Ext.util.JSON.encode(this.currentColumns);
+            this.lastState = currentState;
 
             var nc = this.getNewColumns();
             this.grid.reconfigure(null, nc);

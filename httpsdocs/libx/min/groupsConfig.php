@@ -22,6 +22,7 @@ return array_merge(
             ,'//css/common.css'
             ,'//css/facets.css'
             ,'//css/obj_plugins.css'
+            ,'//css/activity-stream-view.css'
 
             ,'//css/extensible-all.css'
             ,'//css/calendar.css'
@@ -89,6 +90,7 @@ return array_merge(
             ,'//js/browser/ViewContainer.js'
             ,'//js/browser/view/Interface.js'
             ,'//js/browser/view/Grid.js'
+            ,'//js/browser/view/ActivityStream.js'
             ,'//js/browser/view/grid/toolbar/Paging.js'
             ,'//js/browser/view/grid/feature/Grouping.js'
             ,'//js/browser/view/Calendar.js'

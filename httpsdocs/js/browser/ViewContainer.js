@@ -451,6 +451,13 @@ Ext.define('CB.browser.ViewContainer', {
                     ,store: this.store
                     ,getProperty: getPropertyHandler
                 })
+                ,new CB.browser.view.ActivityStream({
+                    border: false
+                    ,refOwner: this
+                    ,store: this.store
+                    ,showObjectPropertiesPanel: true
+                    ,getProperty: getPropertyHandler
+                })
             ]
             ,listeners: {
                 scope: this
@@ -644,6 +651,7 @@ Ext.define('CB.browser.ViewContainer', {
         //set a flag that user have set the view and dont change the view on store load
         this.userViewSet = true;
 
+        this.store.clearing = true;
         this.store.removeAll();
 
         this.onReloadClick();
@@ -726,7 +734,7 @@ Ext.define('CB.browser.ViewContainer', {
             delete this.isRequestFromObjectChange;
         }
 
-        this.descendantsCheckItem.setChecked(ep.descendants === true);
+        this.descendantsCheckItem.setChecked(ep.descendants === true, true);
 
         /* change view if set in params */
         if(!this.userViewSet) {
@@ -822,6 +830,8 @@ Ext.define('CB.browser.ViewContainer', {
 
     ,onStoreLoad: function(store, recs, options) {
         this.getEl().unmask();
+
+        delete store.clearing;
 
         delete this.params.setMaxRows;
 
@@ -1141,6 +1151,7 @@ Ext.define('CB.browser.ViewContainer', {
             path += '/';
         }
         path += data.nid;
+
         this.changeSomeParams({
             path: path
             ,query: null
@@ -1202,7 +1213,7 @@ Ext.define('CB.browser.ViewContainer', {
 
         var data = Ext.clone(selection[0]);
         data.id = data.nid;
-        clog('opening', data);
+
         App.openObjectWindow(data);
     }
 

@@ -673,7 +673,7 @@ Ext.define('CB.VerticalEditGrid', {
 
         if(context.field == 'value'){
             /* post process value */
-            if(!Ext.isEmpty(context.value)) {
+            if(!Ext.isEmpty(context.value) && context.fieldRecord) {
                 switch(context.fieldRecord.get('type')) {
                     case 'time':
                         if(Ext.isPrimitive(context.value)) {
