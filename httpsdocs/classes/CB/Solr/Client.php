@@ -143,6 +143,19 @@ class Client extends Service
             }
         }
 
+        //add last_action_tdt field
+        $la = empty($r['udate'])
+            ? $r['cdate']
+            : $r['udate'];
+        if (!empty($r['sys_data']['lastAction'])) {
+            $la = $r['sys_data']['lastAction']['time'];
+        } elseif (!empty($r['sys_data']['lastComment']) &&
+            ($r['sys_data']['lastComment'] > $la)
+        ) {
+            $la = $r['sys_data']['lastComment']['date'];
+        }
+        $r['last_action_tdt'] = $la;
+
         $this->filterSolrFields($r);
     }
 

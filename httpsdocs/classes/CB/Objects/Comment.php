@@ -41,14 +41,13 @@ class Comment extends Object
 
         $this->updateParentFollowers();
 
-        // log the action
-        $logParams = array(
-            'type' => 'comment'
-            ,'new' => $this->parentObj
-            ,'comment' => $p['data']['_title']
+        $this->logAction(
+            'comment',
+            array(
+                'new' => $this->parentObj
+                ,'comment' => $p['data']['_title']
+            )
         );
-
-        Log::add($logParams);
 
         return $rez;
     }
@@ -70,14 +69,13 @@ class Comment extends Object
 
         $p = &$this->data;
 
-        // log the action
-        $logParams = array(
-            'type' => 'comment_update'
-            ,'new' => Objects::getCachedObject($p['pid'])
-            ,'comment' => $p['data']['_title']
+        $this->logAction(
+            'comment_update',
+            array(
+                'new' => Objects::getCachedObject($p['pid'])
+                ,'comment' => $p['data']['_title']
+            )
         );
-
-        Log::add($logParams);
 
         return $rez;
 

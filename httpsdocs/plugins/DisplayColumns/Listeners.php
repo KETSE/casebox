@@ -18,6 +18,10 @@ class Listeners
                 $class= new Grid();
                 break;
 
+            case 'activityStream':
+                $class= new ActivityStream();
+                break;
+
             case 'formEditor':
                 $class= new FormEditor();
                 break;
@@ -49,6 +53,10 @@ class Listeners
                 $class= new Grid();
                 break;
 
+            case 'activityStream':
+                $class= new ActivityStream();
+                break;
+
             case 'formEditor':
                 $class= new FormEditor();
                 break;
@@ -72,6 +80,10 @@ class Listeners
         switch (@$ip['view']['type']) {
             case 'grid':
                 $class= new Grid();
+                break;
+
+            case 'activityStream':
+                $class= new ActivityStream();
                 break;
 
             case 'formEditor':

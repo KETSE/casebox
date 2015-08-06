@@ -436,10 +436,12 @@ class Objects
 
                 $o = static::getCustomClassByType($tc->getType($objData['template_id']));
 
-                $o->setData($objData);
+                if (!empty($o)) {
+                    $o->setData($objData);
 
-                \CB\Cache::set($var_name, $o);
-                $rez[$objData['id']] = $o;
+                    \CB\Cache::set($var_name, $o);
+                    $rez[$objData['id']] = $o;
+                }
             }
         }
 

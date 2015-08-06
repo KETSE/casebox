@@ -37,19 +37,15 @@ class File extends Object
 
         $this->updateParentFollowers();
 
-        // log the action
-        $logParams = array(
-            'type' => 'file_upload'
-            , 'new' => $this->parentObj
-            , 'file' => array(
-                'id' => $p['id'],
-                'name' => $p['name']
+        $this->logAction(
+            'file_upload',
+            array(
+                'file' => array(
+                    'id' => $p['id'],
+                    'name' => $p['name']
+                )
             )
         );
-
-        if (!\CB\Cache::get('disable_logs', false)) {
-            Log::add($logParams);
-        }
 
         return $rez;
     }
@@ -159,17 +155,15 @@ class File extends Object
 
         $p = &$this->data;
 
-        // log the action
-        $logParams = array(
-            'type' => 'file_update'
-            ,'new' => Objects::getCachedObject($p['pid'])
-            ,'file' => array(
-                'id' => $p['id'],
-                'name' => $p['name']
+        $this->logAction(
+            'file_update',
+            array(
+                'file' => array(
+                    'id' => $p['id'],
+                    'name' => $p['name']
+                )
             )
         );
-
-        Log::add($logParams);
 
         return $rez;
 

@@ -15,6 +15,7 @@ class Log
      *       ,object "old" - old object
      *       ,object "new" - new object
      *     )
+     * @return int logged action id
      */
     public static function add(&$p)
     {
@@ -56,6 +57,8 @@ class Log
         static::addNotificationRecords($params);
 
         fireEvent('logadd', $p);
+
+        return $p['action_id'];
     }
 
     /**

@@ -41,7 +41,9 @@ Ext.override(Ext.Ajax,{
         //check active requests
         for (id in requests) {
             if (requests.hasOwnProperty(id)) {
-                if(Ext.isEmpty(requests[id].timedout)) {
+                if(Ext.isEmpty(requests[id].timedout) &&
+                    ((time - requests[id].startTime) < 6000) //skip failed requests
+                ) {
                     empty = false;
                     if(time - requests[id].startTime > this.displayMsgTimeout) {
                         displayMsg = true;

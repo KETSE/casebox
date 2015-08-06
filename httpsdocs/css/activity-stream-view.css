@@ -1,0 +1,33 @@
+@charset "utf-8";
+.activity-stream {
+    width: 100%;
+    border-collapse: collapse;
+}
+.as-record > .as-item {
+    border-bottom: 1px solid #eaeaea;
+    padding: 5px;
+}
+
+.as-record-over{
+    background-color: #efefef;
+}
+
+.activity-stream .x-item-selected {
+    background-color: #dfe8f6;
+}
+
+.as-ago-time {
+    color: #aeaeae;
+}
+
+.as-diff th{
+    font-weight: normal;
+    text-align: left;
+}
+.as-diff .new-value{
+    color: #73ae42
+}
+.as-diff .old-value{
+    color: #8f8f8f;
+    text-decoration: line-through;
+}

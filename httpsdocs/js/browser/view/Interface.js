@@ -6,6 +6,8 @@ Ext.define('CB.browser.view.Interface', {
 
     ,xtype: 'CBBrowserViewInterface'
 
+    ,viewName: 'none'
+
     ,initComponent: function(){
         CB.browser.view.Interface.superclass.initComponent.apply(this, arguments);
 
@@ -22,7 +24,11 @@ Ext.define('CB.browser.view.Interface', {
      * @return object
      */
     ,getViewParams: function() {
-        return {};
+        var rez = {
+            from: this.viewName
+        };
+
+        return rez;
     }
 
     /**

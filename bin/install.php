@@ -230,9 +230,10 @@ echo "\nCasebox was successfully configured on your system\n" .
 if (confirm('create_basic_core')) {
     $l = readParam('core_name');
     if (!empty($l)) {
+        $ds = DIRECTORY_SEPARATOR;
         $options = array(
             'core' => $l
-            ,'sql' => \CB\APP_DIR . 'install/mysql/bare_bone_core.sql'
+            ,'sql' => \CB\APP_DIR . "install${ds}mysql${ds}bare_bone_core.sql"
         );
 
         include $binDirectorty . 'core_create.php';

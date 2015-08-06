@@ -38,7 +38,8 @@ $sqlFile = empty($options['s'])
     : $options['s'];
 
 if (empty($sqlFile)) {
-    $sqlFile = $cbHome . 'install/mysql/bare_bone_core.sql';
+    $ds = DIRECTORY_SEPARATOR;
+    $sqlFile = $cbHome . "install${ds}mysql${ds}bare_bone_core.sql";
 }
 
 /*if (!defined('CB\INTERACTIVE_MODE')) {
@@ -90,8 +91,7 @@ if (\CB\DB\dbQuery('use `' . $dbName . '`')) {
 }
 
 if ($applyDump) {
-    echo 'Applying dump .. ';
-    shell_exec('mysql --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' < ' . $sqlFile);
+    shell_exec('mysql --host=' . $cfg['db_host'] . ' --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' < ' . $sqlFile);
     showMessage();
 }
 

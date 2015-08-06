@@ -648,7 +648,9 @@ Ext.define('CB.browser.view.Grid', {
     }
 
     ,saveGridState: function() {
-        if(this.grid.disableStateSave && Ext.isEmpty(this.store.proxy.extraParams.userGroup)) {
+        if(this.store.clearing ||
+            (this.grid.disableStateSave && Ext.isEmpty(this.store.proxy.extraParams.userGroup))
+        ) {
             return false;
         }
 
@@ -672,9 +674,7 @@ Ext.define('CB.browser.view.Grid', {
     }
 
     ,getViewParams: function() {
-        var rez = {
-            from: this.viewName
-        };
+        var rez = this.callParent(arguments);
 
         if(this.grid.userSort) {
             rez.userSort = 1;

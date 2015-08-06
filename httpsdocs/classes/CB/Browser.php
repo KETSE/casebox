@@ -474,6 +474,18 @@ class Browser
 
         //increase number of returned items
         if (empty($p['rows'])) {
+            if (empty($p['limit'])) {
+                if (empty($p['pageSize'])) {
+                    $p['rows'] = 50;
+                } else {
+                    $p['rows'] = $p['pageSize'];
+                }
+            } else {
+                $p['rows'] = $p['limit'];
+            }
+        }
+
+        if (!is_numeric($p['rows'])) {
             $p['rows'] = 50;
         }
 
