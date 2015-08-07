@@ -1,3 +1,8 @@
+CaseBox 1.9.502 (2015-08-07)
+==============================
+- #7772 Implement Activity Stream UI powered by core solr data based on last_action_dttm
+  Added comments in Activity Stream
+
 CaseBox 1.9.501 (2015-08-06)
 ==============================
 - #7772 Implement Activity Stream UI powered by core solr data based on last_action_dttm

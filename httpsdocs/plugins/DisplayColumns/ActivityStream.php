@@ -29,6 +29,8 @@ class ActivityStream extends Base
         $data = &$result['data'];
         $actionLogIds = array();
 
+        $comments = new Objects\Plugins\Comments();
+
         //format ago date and collect log action ids
         foreach ($data as &$doc) {
             $la = Objects::getCachedObject($doc['id'])->getLastActionData();
@@ -37,6 +39,8 @@ class ActivityStream extends Base
             $doc['lastAction'] = $la;
 
             $actionLogId = $la['users'][$la['uids'][sizeof($la['uids']) - 1]];
+
+            $doc['comments'] = $comments->getData($doc['id']);
 
             $actionLogIds[$actionLogId] = &$doc;
         }

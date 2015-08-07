@@ -11,7 +11,6 @@ Ext.override(Ext.Ajax,{
         );
         this.loadingMsgDiv = App.getNotificationDiv();
         this.loadingMsgDiv.update('<div class="content">' +  Ext.LoadMask.prototype.msg + '</div>');
-        this.loadingMsgDiv.getEl().on('show', function() {clog('tipa show', this, arguments);}, this);
     }
 
     ,request: function(options) {

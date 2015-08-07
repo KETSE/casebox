@@ -33,7 +33,7 @@ Ext.define('CB.browser.view.ActivityStream',{
             ,'            </td>'
             ,'          </tr>'
             ,'        </table>'
-            ,'        <div class="action-comments as-record-{nid}">'
+            ,'        <div class="action-comments" id="as-record-{nid}">'
             // ,'          <tr><td class="action-comment">Comment</td></tr>'
             // ,'          <tr><td class="action-comment">Add comment</td></tr>'
             ,'        </div>'
@@ -61,7 +61,7 @@ Ext.define('CB.browser.view.ActivityStream',{
                     for (var i = 0; i < la.uids.length; i++) {
                         users.push(' <b>' + us.getName(la.uids[i]) + '</b> ');
                     }
-                    clog(users, users.length);
+
                     switch(users.length) {
                         case 0:
                             break;
@@ -114,7 +114,6 @@ Ext.define('CB.browser.view.ActivityStream',{
             ,scrollable: true
             ,listeners: {
                 scope: this
-                ,itemclick: this.onItemClick
                 ,selectionchange: this.onSelectionChange
             }
         });
@@ -127,6 +126,8 @@ Ext.define('CB.browser.view.ActivityStream',{
                 this.dataView
             ]
         });
+
+        this.store.on('load', this.onStoreLoad, this);
 
         this.callParent(arguments);
     }
@@ -150,16 +151,29 @@ Ext.define('CB.browser.view.ActivityStream',{
         );
     }
 
-    ,onItemClick: function() {
-        clog('itemclick', arguments);
-    }
-
     ,onSelectionChange: function(view, selected, eOpts) {
         var recs = [];
-        clog('selectionchange', arguments);
+
         for (var i = 0; i < selected.length; i++) {
             recs.push(selected[i].data);
         }
         this.fireEvent('selectionchange', recs);
+    }
+
+    ,onStoreLoad: function(store, records, successful, eOpts) {
+        if (this.getEl().isVisible(true)) {
+            for (var i = 0; i < records.length; i++) {
+                var id = records[i].get('nid')
+                    ,c = Ext.create(
+                        'CBObjectPluginComments'
+                        ,{
+                            params: {id: id}
+                            ,header: false
+                            ,renderTo: 'as-record-' + id
+                        }
+                    );
+                c.onLoadData(records[i].data.comments);
+            }
+        }
     }
 });

@@ -4,7 +4,7 @@ Ext.define('CB.object.plugin.Comments', {
     extend: 'CB.object.plugin.Base'
     ,alias: 'CBObjectPluginComments'
 
-    ,initComponent: function(){
+    ,initComponent: function(config){
 
         this.actions = {
             edit: new Ext.Action({
@@ -72,7 +72,7 @@ Ext.define('CB.object.plugin.Comments', {
             ,listeners: {
                 scope: this
                 ,itemclick: this.onItemClick
-                ,containerclick: this.onContainerClick
+                // ,containerclick: this.onContainerClick
                 ,resize: this.onDataViewResize
             }
         });
@@ -223,6 +223,14 @@ Ext.define('CB.object.plugin.Comments', {
         }
 
         this.dataView.store.loadData(r.data);
+
+        var el  = this.getEl();
+        if(el) {
+            lm = el.down('div.load-more');
+            if(lm) {
+                lm.on('click', this.onLoadMoreClick, this);
+            }
+        }
 
         Ext.defer(this.onDataViewResize, 1500, this);
     }
@@ -471,15 +479,15 @@ Ext.define('CB.object.plugin.Comments', {
 
     }
 
-    ,onContainerClick: function(view, e, eOpts) {
-        var el = e.getTarget('.load-more');
+    // ,onContainerClick: function(view, e, eOpts) {
+    //     var el = e.getTarget('.load-more');
 
-        if(el) {
-            e.stopEvent();
-            this.onLoadMoreClick(e);
-            return;
-        }
-    }
+    //     if(el) {
+    //         e.stopEvent();
+    //         this.onLoadMoreClick(e);
+    //         return;
+    //     }
+    // }
 
     ,showActionsMenu: function(e) {
         if(!this.actionsMenu) {

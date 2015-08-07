@@ -484,15 +484,6 @@ Ext.define('CB.object.field.editor.Form', {
             sorter.store.loadData(data);
 
             sorter.show();
-
-            clog(
-                'sorting value'
-                ,data
-                ,this.data
-                ,this.cfg
-                ,this.value
-                ,this.selectedRecordsData
-            );
         }
     }
 

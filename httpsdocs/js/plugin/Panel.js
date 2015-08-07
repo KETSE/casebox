@@ -13,6 +13,7 @@ Ext.define('CB.plugin.Panel', {
 
     ,autoHeight: true
     ,scrollable: true
+    ,cls: 'plugins-panel'
     ,padding:0
 
     ,initComponent: function(){
