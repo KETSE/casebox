@@ -1,3 +1,10 @@
+CaseBox 1.9.503 (2015-08-08)
+==============================
+Fixed Bugs:
+----------
+- issue #19 - Installed on CentOS 7 but can't create core's db tables
+- issue #11 - Selection of multiValued form editor disappears upon scroll
+
 CaseBox 1.9.502 (2015-08-07)
 ==============================
 - #7772 Implement Activity Stream UI powered by core solr data based on last_action_dttm
