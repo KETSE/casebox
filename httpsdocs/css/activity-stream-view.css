@@ -5,6 +5,9 @@
 }
 .as-record > .as-item {
     border-bottom: 1px solid #eaeaea;
+}
+
+.as-record > .as-item .action{
     padding: 5px;
 }
 

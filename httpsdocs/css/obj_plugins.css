@@ -190,6 +190,15 @@ cursor: hand;
     border-top: 2px solid #CCC;
     margin-bottom: 30px;
 }
+.action-comments .block-plugin-comments > .x-panel-body-default {
+    border-top: 1px solid #CCC;
+}
+.action-comments .block-plugin-comments > .x-toolbar {
+    display: none;
+}
+.action-comments .block-plugin-comments > .x-panel-body {
+    top: 0 !important;
+}
 
 .obj-plugin-h .x-toolbar-left{
     vertical-align: bottom;
@@ -274,6 +283,8 @@ textarea {
 }
 .obj-plugin {
     background-color: #fff;
+}
+.plugins-panel .block-plugin-comments {
     margin-bottom: 20px;
 }
 

@@ -610,6 +610,7 @@ function putIniFile ($file, $array, $i = 0)
             $str .= str_repeat(" ", $i*2) . "[$k]" . PHP_EOL;
             $str .= putIniFile("", $v, $i+1);
         } else {
+            $v = '"' . str_replace('"', '\\"', $v).  '"';
             $str .= str_repeat(" ", $i*2) . "$k = $v" . PHP_EOL;
         }
     }

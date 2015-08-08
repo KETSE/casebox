@@ -178,8 +178,13 @@ Ext.define('CB.browser.view.Grid', {
                 ,listeners: {
                     scope: this
                     ,containermousedown: function(view, e, eOpts) {
-                        //deselect all selected records when clicking on empty area of the grid
-                        this.grid.getSelectionModel().deselectAll();
+                        var g = this.grid
+                            ,sm = g.getSelectionModel();
+
+                        if(sm.selType != 'checkboxmodel') {
+                            //deselect all selected records when clicking on empty area of the grid
+                            this.grid.getSelectionModel().deselectAll();
+                        }
                     }
                 }
                 ,plugins: [{
