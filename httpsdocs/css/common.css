@@ -290,6 +290,7 @@ a.file{min-height: 16px; display: inline-block}
 .icon-none{background: none !important}
 .i16{width: 16px; height: 16px}
 .i16u{width: 16px; height: 16px; background-image:url(/css/i/ext/.png)}
+.i24{width: 24px; height: 24px}
 .i32{width: 32px; height: 32px}
 .bgs32{background-size: 32px 32px}
 .wsNW {white-space: nowrap}

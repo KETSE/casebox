@@ -45,14 +45,6 @@ Ext.define('CB.file.edit.Window', {
                 ,scope: this
                 ,handler: this.onWebDAVLinkClick
             })
-
-            ,permalink: new Ext.Action({
-                text: L.Permalink
-                ,itemId: 'permalink'
-                ,scope: this
-                ,handler: this.onPermalinkClick
-            })
-
         });
     }
 
@@ -448,12 +440,4 @@ Ext.define('CB.file.edit.Window', {
     ,onWebDAVLinkClick: function(b, e) {
         App.openWebdavDocument(this.data ,false);
     }
-
-    ,onPermalinkClick: function(b, e) {
-        window.prompt(
-            'Copy to clipboard: Ctrl+C, Enter'
-            , window.location.origin + '/' + App.config.coreName + '/view/' + this.data.id + '/'
-        );
-    }
-
 });

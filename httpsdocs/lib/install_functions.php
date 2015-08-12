@@ -466,7 +466,7 @@ function createMainDatabase($cfg)
         if (confirm('overwrite__casebox_db')) {
             if (!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == false)) {
                 echo 'Backuping .. ';
-                if (backupDB($cbDb, $dbUser, $dbPass)) {
+                if (backupDB($cbDb, $dbUser, $dbPass, $cfg['db_host'])) {
                     showMessage();
                 } else {
                     showError('FALSE');
@@ -474,13 +474,13 @@ function createMainDatabase($cfg)
             }
 
             echo 'Applying dump .. ';
-            echo shell_exec('mysql --user=' . $dbUser . ( $dbPass ? ' --password=' . $dbPass : '' ) . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
+            echo shell_exec('mysql --host=' . $cfg['db_host'] . ' --user=' . $dbUser . ( $dbPass ? ' --password=' . $dbPass : '' ) . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
             showMessage();
         }
     } else {
         if (confirm('create__casebox_from_dump')) {
             if (\CB\DB\dbQuery('CREATE DATABASE IF NOT EXISTS `' . $cbDb . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
-                echo shell_exec('mysql --user=' . $dbUser . ( $dbPass ? ' --password=' . $dbPass : '' )  . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
+                echo shell_exec('mysql --host=' . $cfg['db_host'] . ' --user=' . $dbUser . ( $dbPass ? ' --password=' . $dbPass : '' )  . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
             } else {
                 $rez = false;
                 showError('Cant create database "' . $cbDb . '".');
@@ -666,11 +666,11 @@ function backupFile($fileName)
  * @param  varchar $dbName
  * @return boolean
  */
-function backupDB($dbName, $dbUser, $dbPass)
+function backupDB($dbName, $dbUser, $dbPass, $dbHost)
 {
     $fileName = \CB\Cache::get('RUN_INSTALL_BACKUP_DIR') . date('Ymd_His_') . $dbName . '.sql';
 
-    shell_exec('mysqldump --routines --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' > ' . $fileName);
+    shell_exec('mysqldump --host=' . $dbHost . ' --routines --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' > ' . $fileName);
 
     return true;
 }

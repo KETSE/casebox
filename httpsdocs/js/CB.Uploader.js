@@ -245,6 +245,7 @@ Ext.define('CB.Uploader', {
     ,progressChange: function(){
         this.fireEvent('progresschange', this, this.status, this.stats);
     }
+
     ,addFiles: function(FilesList, options){
         if(this.config.autoShowWindow) {
             //this.showUploadWindow();
@@ -321,36 +322,61 @@ Ext.define('CB.Uploader', {
     ,checkExistentContents: function(){
         md5array={};
         i = 0;
-        this.store.each(function(r){
-            if(Ext.isEmpty(r.get('md5'))){
-                r.set('md5_verified', 1);
-            } else if(r.get('md5_verified') == 0){
-                md5array[r.get('id')] = r.get('md5')+'s'+r.get('size');
-                i++;
+        this.store.each(
+            function(r){
+                if(Ext.isEmpty(r.get('md5'))){
+                    r.set('md5_verified', 1);
+                } else if(r.get('md5_verified') == 0){
+                    md5array[r.get('id')] = r.get('md5') + 's' + r.get('size');
+                    i++;
+                }
             }
-        }, this);
+            ,this
+        );
+
         if(i > 0){
-            CB_Files.checkExistentContents(md5array, this.processCheckExistentContents, this);
-        }else if(this.config.autoStart) this.start();
+            CB_Files.checkExistentContents(
+                md5array
+                ,this.processCheckExistentContents
+                ,this
+            );
+
+        } else if(this.config.autoStart) {
+            this.start();
+        }
     }
 
     ,processCheckExistentContents: function(r, e){
-        if(r.success !== true) return;
-        Ext.iterate(r.data, function(k, v, o){
-            idx = this.store.findExact('id', k);
-            if(idx>=0){
-                r = this.store.getAt(idx);
-                r.set('md5_verified', 1);
-                r.set('content_id', v);
+        if(r.success !== true) {
+            return;
+        }
+
+        Ext.iterate(
+            r.data
+            ,function(k, v, o){
+                var idx = this.store.findExact('id', k);
+                if(idx >= 0){
+                    r = this.store.getAt(idx);
+                    r.set('md5_verified', 1);
+                    r.set('content_id', v);
+                }
             }
-        }, this);
-        if(this.config.autoStart) this.start();
+            ,this
+        );
+
+        if(this.config.autoStart) {
+            this.start();
+        }
     }
 
     ,start: function(){
-        if(this.status == 1) return; //alreaty uploading
-        idx = this.store.findExact('status', 0);
-        if(idx < 0) return; // no files to upload
+        if(this.status == 1) {
+            return; //alreaty uploading
+        }
+        var idx = this.store.findExact('status', 0);
+        if(idx < 0) {
+            return; // no files to upload
+        }
         this.status = 1;
         this.updatedPids = [];
         this.uploadNextFile();
@@ -379,6 +405,7 @@ Ext.define('CB.Uploader', {
             if(!Ext.isEmpty(this.updatedPids)) {
                 App.fireEvent('filesuploaded', this.updatedPids);
             }
+
             return;
         }
 
@@ -389,7 +416,7 @@ Ext.define('CB.Uploader', {
         this.stats.currentLoaded = 0;
         this.targetStatus = 5; //DONE
 
-        params = {
+        var params = {
             name: encodeURIComponent(r.get('name'))
             ,type: r.get('type')
             ,size: r.get('size')
@@ -403,19 +430,32 @@ Ext.define('CB.Uploader', {
         this.xhr.open("POST", 'upload/', true);
 
         this.xhr.setRequestHeader("X-FILE-OPTIONS", Ext.util.JSON.encode(params));
-        if(r.get('content_id') > 0) this.xhr.send('');
-        else this.xhr.send(r.get('file'));
+        if(r.get('content_id') > 0) {
+            this.xhr.send('');
+        } else {
+            this.xhr.send(r.get('file'));
+        }
+
         this.progressChange();
     }
 
     ,abort: function(){
-        if(this.status != 1) return;
+        if(this.status != 1) {
+            return;
+        }
+
         this.status = 3; //upload canceled
-        if(this.xhr.upload) this.xhr.upload.abort();
+
+        if(this.xhr.upload) {
+            this.xhr.upload.abort();
+        }
     }
 
     ,showUploadWindow: function(){
-        if(this.uploadWindow && !this.uploadWindow.isDestroyed) return this.uploadWindow.show();
+        if(this.uploadWindow && !this.uploadWindow.isDestroyed) {
+            return this.uploadWindow.show();
+        }
+
         this.uploadWindow = new CB.UploadWindow({uploader: this});
         this.uploadWindow.show();
     }
@@ -711,9 +751,21 @@ Ext.define('CB.UploadWindow', {
                 if(stats.currentLoaded < 0){//unable to compute
 
                 } else{
-                    percent = stats.totalLoadedSize + stats.currentLoaded;
-                    if(percent > 0) percent = Math.round(percent * 100 / stats.totalSize);
-                    this.statusLabel.setValue( Ext.String.format( Ext.valueFrom(L.UploadCompleted, 'Uploading {0}% ({1} out of {2})'), percent, (stats.totalLoadedCount + 1), stats.totalCount) );
+                    var percent = stats.totalLoadedSize + stats.currentLoaded;
+                    if(percent > 0) {
+                        percent = Math.round(percent * 100 / stats.totalSize);
+                    }
+                    this.statusLabel.setValue(
+                        Ext.String.format(
+                            Ext.valueFrom(
+                                L.UploadCompleted
+                                ,'Uploading {0}% ({1} out of {2})'
+                            )
+                            ,percent
+                            ,(stats.totalLoadedCount + 1)
+                            ,stats.totalCount
+                        )
+                    );
                 }
                 break;
             case 2:
@@ -745,7 +797,13 @@ Ext.define('CB.UploadWindow', {
     }
 
     ,onClearClick: function(b, e){
-        this.uploader.store.each(function(r){if(r.get('status') > 1) this.store.remove(r);});
+        this.uploader.store.each(
+            function(r){
+                if(r.get('status') > 1) {
+                    this.store.remove(r);
+                }
+            }
+        );
     }
 
     ,onChangeViewClick: function(b, e){
@@ -758,11 +816,20 @@ Ext.define('CB.UploadWindow', {
     }
 
     ,filterView: function(filterIndex){
-        if(!Ext.isNumber(filterIndex)) filterIndex = undefined;
-        if(filterIndex !== undefined) this.filterIndex = filterIndex;
-        else if(!Ext.isDefined(this.filterIndex)) this.filterIndex = -1;
-        if(this.filterIndex < 0) this.uploader.store.clearFilter();
-        else this.uploader.store.filterBy(this.storeFilters[this.filterIndex]);
+        if(!Ext.isNumber(filterIndex)) {
+            filterIndex = undefined;
+        }
+        if(filterIndex !== undefined) {
+            this.filterIndex = filterIndex;
+        } else if(!Ext.isDefined(this.filterIndex)) {
+            this.filterIndex = -1;
+        }
+
+        if(this.filterIndex < 0) {
+            this.uploader.store.clearFilter();
+        } else {
+            this.uploader.store.filterBy(this.storeFilters[this.filterIndex]);
+        }
     }
 
     ,onOptionsClick: function(b, e){
@@ -811,8 +878,8 @@ Ext.define('CB.UploadWindowButton', {
                 this.setText(L.UploadQueue);
                 break;
             case 1:
-                this.setText( L.Uploading + ' ' + stats.totalLoadedCount+ ' ' + L.outOf + ' ' + stats.totalCount );
-                pc = Math.round( (stats.totalLoadedSize * 100) / stats.totalSize);
+                this.setText(L.Uploading + ' ' + stats.totalLoadedCount+ ' ' + L.outOf + ' ' + stats.totalCount);
+                pc = Math.round((stats.totalLoadedSize * 100) / stats.totalSize);
                 this.getEl().applyStyles('background-size: '+pc+'% 100%');
                 break;
             case 2: this.setText(L.UploadComplete);

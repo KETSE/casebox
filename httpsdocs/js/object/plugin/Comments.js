@@ -4,6 +4,10 @@ Ext.define('CB.object.plugin.Comments', {
     extend: 'CB.object.plugin.Base'
     ,alias: 'CBObjectPluginComments'
 
+    ,commentFieldConfig: {
+        xtype: 'CBFieldComment'
+    }
+
     ,initComponent: function(config){
 
         this.actions = {
@@ -72,121 +76,23 @@ Ext.define('CB.object.plugin.Comments', {
             ,listeners: {
                 scope: this
                 ,itemclick: this.onItemClick
-                // ,containerclick: this.onContainerClick
+                ,containerclick: this.onContainerClick
                 ,resize: this.onDataViewResize
             }
         });
 
-        this.messageField = new Ext.form.TextArea({
-            emptyText: L.WriteComment + '...'
-            ,anchor: '100%'
-            ,grow: true
-            ,growMin: 10
-            ,enableKeyEvents: true
-            ,cls: "comment-input"
-            ,style: 'margin-top: 5px; font-family: arial,sans-serif; font-size: 12px'
+        var cfg = Ext.apply(
+            this.commentFieldConfig
+            ,{
+                params: this.params
 
-            ,plugins: [
-                {
-                    ptype: 'CBPluginFieldDropDownList'
-                }
-            ]
-
-            ,listeners: {
-                scope: this
-                ,keypress: this.onMessageBoxKeyPress
-                ,autosize: this.onMessageBoxAutoSize
-                ,focus: function(field) {
-                    field.focused = true;
-                }
-                ,blur: function(field) {
-                    delete field.focused;
+                ,listeners: {
+                    scope: this
+                    ,addcomment: this.onAddCommentClick
                 }
             }
-        });
-
-        this.attachFileButton = new Ext.form.field.File({
-            qtip: L.AttachFile
-            ,buttonOnly: true
-            ,buttonText: ''
-            ,buttonConfig: {
-                iconCls: 'i-attach'
-            }
-            ,hidden: (Ext.isEmpty(this.params) || Ext.isEmpty(this.params.id))
-            ,width: 24
-            ,listeners: {
-                scope: this
-                ,change: this.onAttachFile
-                ,render: function (ed) {
-                    ed.fileInputEl.set({ multiple: true });
-                }
-            }
-        });
-
-        this.filesLabel = new Ext.form.field.Display({
-            cls: 'click'
-        });
-
-        this.messageToolbar = new Ext.Toolbar({
-            hidden: false
-            ,style: 'padding: 0; border: 0; background-color:  #f1f1f1;' // background-color: transparent;
-            ,items: [
-                this.attachFileButton
-                ,this.filesLabel
-                ,'->'
-                ,{
-                    text: L.Reply
-                    ,scope: this
-                    ,handler: this.onAddCommentClick
-                }
-            ]
-        });
-
-        this.addCommentPanel = new Ext.Panel({
-            layout: {
-                type: 'hbox'
-                ,align: 'stretch'
-            }
-
-            ,autoHeight: true
-            ,border: false
-            ,items: [
-                {
-                    xtype: 'label'
-                    ,width: 50
-                    ,html: '<img class="i32" src="/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg?32=' + CB.DB.usersStore.getPhotoParam(App.loginData.id) + '" title="' + getUserDisplayName(true) + '">'
-                }
-                ,{
-                    xtype: 'panel'
-                    ,flex: 1
-                    ,layout: 'anchor'
-                    ,padding: '0px 3px 5px 5px'
-                    ,autoHeight: true
-                    ,boder: false
-                    ,bodyCls: 'x-panel-white'
-                    ,bodyStyle: 'border: 0'
-                    ,items: [
-                        this.messageField
-                        ,this.messageToolbar
-                    ]
-                }
-            ]
-            ,listeners: {
-                scope: this
-
-                ,afterrender: function(cmp) {
-                    var el = cmp.getEl();
-                    el.on('mouseenter', this.onCommentPanelMouseEnter, this);
-                    el.on('mouseleave', this.onCommentPanelMouseLeave, this);
-                }
-
-                ,beforedestroy: function(cmp) {
-                    var el = cmp.getEl();
-                    el.un('mouseenter', this.onCommentPanelMouseEnter, this);
-                    el.un('mouseleave', this.onCommentPanelMouseLeave, this);
-                }
-            }
-        });
+        );
+        this.addCommentField = Ext.create(cfg);
 
         Ext.apply(this, {
             title: L.Comments
@@ -196,21 +102,13 @@ Ext.define('CB.object.plugin.Comments', {
             ,border: false
             ,items: [
                 this.dataView
-                ,this.addCommentPanel
+                ,this.addCommentField
             ]
-            ,listeners: {
-                scope: this
-                ,beforedestroy: this.onBeforeDestroy
-            }
         });
 
         this.callParent(arguments);
 
         this.enableBubble(['getdraftid']);
-    }
-
-    ,onBeforeDestroy: function (cmp, eOpts) {
-        this.removeUploaderListeners();
     }
 
     ,onLoadData: function(r, e) {
@@ -224,15 +122,21 @@ Ext.define('CB.object.plugin.Comments', {
 
         this.dataView.store.loadData(r.data);
 
+        this.attachElementsEvents();
+
+        Ext.defer(this.onDataViewResize, 1500, this);
+    }
+
+    ,attachElementsEvents: function() {
         var el  = this.getEl();
+
         if(el) {
             lm = el.down('div.load-more');
-            if(lm) {
+
+            if(lm && !lm.hasListener('click')) {
                 lm.on('click', this.onLoadMoreClick, this);
             }
         }
-
-        Ext.defer(this.onDataViewResize, 1500, this);
     }
 
     /**
@@ -281,18 +185,6 @@ Ext.define('CB.object.plugin.Comments', {
         this.onLoadData(this.loadedData, e);
     }
 
-    ,onMessageBoxKeyPress: function(tf, e) {
-        if ( ([10, 13].indexOf(e.getKey()) >= 0) && e.ctrlKey) {
-            this.onAddCommentClick();
-        }
-    }
-
-    ,onMessageBoxAutoSize: function(field, width) {
-        if(!field.isVisible()) {
-            return;
-        }
-    }
-
     ,onGetDraftIdCallback: function(draftId) {
         if(isNaN(draftId)) {
             return;
@@ -303,80 +195,8 @@ Ext.define('CB.object.plugin.Comments', {
         this.onAddCommentClick();
     }
 
-    ,onAttachFile: function(field, value, oldValue, eOpts) {
-        if(Ext.isEmpty(this.draftCommentId)) {
-            this.draftCommentId = Ext.id();
-        }
-
-        App.addFilesToUploadQueue(
-            field.fileInputEl.dom.files
-            ,{
-                pid: this.params.id
-                ,draftPid: this.draftCommentId
-                ,response: 'autorename'
-            }
-        );
-
-        this.addUploaderListeners();
-
-        this.updateFilesLabel();
-    }
-
-    ,addUploaderListeners: function() {
-        var fu = App.getFileUploader();
-        if(fu) {
-            fu.on(
-                'fileuploadend'
-                ,this.updateFilesLabel
-                ,this
-            );
-        }
-    }
-
-    ,removeUploaderListeners: function() {
-        var fu = App.getFileUploader();
-        if(fu) {
-            fu.un(
-                'fileuploadend'
-                ,this.updateFilesLabel
-                ,this
-            );
-        }
-    }
-
-    ,updateFilesLabel: function() {
-        var fu = App.getFileUploader()
-            ,label = this.filesLabel;
-
-        if(Ext.isEmpty(this.draftCommentId) || Ext.isEmpty(fu)) {
-            label.setValue('');
-            return;
-        }
-
-        var t = ''
-            ,store = fu.store
-            ,stats = fu.getStatsForPid(this.draftCommentId);
-
-        if(stats.pending > 0) {
-            t = Ext.String.uncapitalize(L.Uploading) + ' <span style="color: #555">' +
-                Ext.String.repeat('●', stats.total - stats.pending) +
-                Ext.String.repeat('○', stats.pending) +
-                '</span>';
-
-            label.setValue(t);
-        } else {
-            if(stats.total > 0) {
-                t = stats.total + ' ' + Ext.String.uncapitalize(L.Files);
-                label.setValue(t);
-            } else {
-                label.setValue('');
-            }
-
-            this.removeUploaderListeners();
-        }
-    }
-
-    ,onAddCommentClick: function(b, e) {
+    ,onAddCommentClick: function(comment, e) {
+        clog('got it', this.params);
         if(isNaN(this.params.id)) {
             this.fireEvent(
                 'getdraftid'
@@ -386,21 +206,21 @@ Ext.define('CB.object.plugin.Comments', {
             return ;
         }
 
-        var msg = this.messageField.getValue().trim();
+        var msg = this.addCommentField.getValue().trim();
 
         if(Ext.isEmpty(msg)) {
             return;
         }
 
-        this.addCommentPanel.disable();
+        this.addCommentField.disable();
 
         var p = {
             id: this.params.id
             ,msg: msg
         };
 
-        if(this.draftCommentId) {
-            p.draftId = this.draftCommentId;
+        if(this.addCommentField.draftCommentId) {
+            p.draftId = this.addCommentField.draftCommentId;
         }
 
         CB_Objects.addComment(
@@ -411,7 +231,7 @@ Ext.define('CB.object.plugin.Comments', {
     }
 
     ,onAddCommentProcess: function(r, e) {
-        this.addCommentPanel.enable();
+        this.addCommentField.enable();
 
         if(r.success !== true) {
             // show error
@@ -419,33 +239,15 @@ Ext.define('CB.object.plugin.Comments', {
 
             return;
         } else {
-            this.messageField.reset();
-            this.messageField.autoSize();
-            // this.messageField.show();
-        }
 
-        if(Ext.isEmpty(this.loadedData.data)) {
-            this.loadedData.data = [];
-        }
-        this.loadedData.data.push(r.data);
-        this.onLoadData(this.loadedData);
-        this.messageField.focus();
+            if(Ext.isEmpty(this.loadedData.data)) {
+                this.loadedData.data = [];
+            }
 
-        delete this.draftCommentId;
+            this.loadedData.data.push(r.data);
+            this.onLoadData(this.loadedData);
 
-        this.attachFileButton.reset();
-
-        this.updateFilesLabel();
-    }
-
-    ,onCommentPanelMouseEnter: function(e, el, o) {
-        this.mouseOver = true;
-    }
-
-    ,onCommentPanelMouseLeave: function(e, el, o) {
-        delete this.mouseOver;
-        if(this.messageField.focused !== true) {
-            // this.messageToolbar.hide();
+            this.addCommentField.reset();
         }
     }
 
@@ -479,15 +281,15 @@ Ext.define('CB.object.plugin.Comments', {
 
     }
 
-    // ,onContainerClick: function(view, e, eOpts) {
-    //     var el = e.getTarget('.load-more');
+    ,onContainerClick: function(view, e, eOpts) {
+        var el = e.getTarget('.load-more');
 
-    //     if(el) {
-    //         e.stopEvent();
-    //         this.onLoadMoreClick(e);
-    //         return;
-    //     }
-    // }
+        if(el) {
+            e.stopEvent();
+            this.onLoadMoreClick(e);
+            return;
+        }
+    }
 
     ,showActionsMenu: function(e) {
         if(!this.actionsMenu) {

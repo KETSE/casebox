@@ -220,8 +220,8 @@ Ext.define('CB.object.plugin.Files', {
                         ,handler: this.onDeleteItemClick
                     }
                     ,this.actions.rename
-                    ,this.actions.webdavlink
                     ,this.actions.permalink
+                    ,this.actions.webdavlink
                 ]
             });
         }
