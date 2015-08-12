@@ -167,6 +167,9 @@ return array_merge(
 
             ,'//js/state/DBProvider.js'
 
+            ,'//js/field/Comment.js'
+            ,'//js/field/CommentLight.js'
+
             ,'//js/widget/Breadcrumb.js'
             ,'//js/widget/DataSorter.js'
             ,'//js/widget/TaskBar.js'

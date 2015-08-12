@@ -158,6 +158,13 @@ Ext.define('CB.object.edit.Window', {
                 ,scope: this
                 ,handler: this.onShowInfoPanelClick
             })
+
+            ,permalink: new Ext.Action({
+                text: L.Permalink
+                ,itemId: 'permalink'
+                ,scope: this
+                ,handler: this.onPermalinkClick
+            })
         };
     }
 
@@ -180,6 +187,7 @@ Ext.define('CB.object.edit.Window', {
                 ,menu: [
                     this.actions['delete']
                     ,this.actions.rename
+                    ,this.actions.permalink
                 ]
             })
             ,this.actions.showInfoPanel
@@ -1113,5 +1121,12 @@ Ext.define('CB.object.edit.Window', {
             };
 
         App.promptRename(data);
+    }
+
+    ,onPermalinkClick: function(b, e) {
+        window.prompt(
+            'Copy to clipboard: Ctrl+C, Enter'
+            , window.location.origin + '/' + App.config.coreName + '/view/' + this.data.id + '/'
+        );
     }
 });

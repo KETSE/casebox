@@ -617,6 +617,8 @@ Ext.define('CB.object.ViewContainer', {
             }
             ,this
         );
+
+        this.updateCreateMenu();
     }
 
     /**
@@ -637,6 +639,7 @@ Ext.define('CB.object.ViewContainer', {
                 ,this.onCreateObjectClick
                 ,this
             );
+
             nmb.setDisabled(nmb.menu.items.getCount() < 1);
         }
     }

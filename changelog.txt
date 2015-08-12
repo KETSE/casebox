@@ -1,3 +1,12 @@
+CaseBox 1.9.504 (2015-08-12)
+==============================
+- #7772 Implement Activity Stream UI powered by core solr data based on last_action_dttm
+- #7504 Menu/PopupMenu cleanup
+
+Fixed Bugs:
+----------
+- issue #19 - Installed on CentOS 7 but can't create core's db tables
+
 CaseBox 1.9.503 (2015-08-08)
 ==============================
 Fixed Bugs:

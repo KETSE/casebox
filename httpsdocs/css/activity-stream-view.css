@@ -19,6 +19,10 @@
     background-color: #dfe8f6;
 }
 
+.activity-stream .action-comments .x-item-selected {
+    background-color: inherit;
+}
+
 .as-ago-time {
     color: #aeaeae;
 }
@@ -33,4 +37,24 @@
 .as-diff .old-value{
     color: #8f8f8f;
     text-decoration: line-through;
+}
+
+.as-item .comment-input .x-form-trigger{
+    width: 24px;
+    background-position: 50% calc(100% - 10px);
+    background-repeat: no-repeat;
+    opacity: 0.4;
+    border: 0;
+}
+.as-item .comment-input .x-form-trigger-over{
+    opacity: inherit;
+    background-position: 50% calc(100% - 12px);
+}
+
+.comment-trigger-attach{
+    background: url(default/s/ic_attach_file_black_18dp.png);
+}
+
+.comment-trigger-reply{
+    background: url(default/s/ic_check_black_18dp.png);
 }

@@ -7,7 +7,7 @@ Ext.define('CB.browser.view.ActivityStream',{
 
     ,border: false
     ,tbarCssClass: 'x-panel-white'
-    ,layout: 'fit'
+    // ,layout: 'fit'
 
     // ,scrollable: true
 
@@ -110,7 +110,9 @@ Ext.define('CB.browser.view.ActivityStream',{
             ,store: this.store
             ,deferInitialRefresh: true
             ,itemSelector:'tr.as-record'
-            ,overItemCls:'as-record-over'
+            // ,overItemCls:'as-record-over'
+            ,width: 500
+            ,height: '100%'
             ,scrollable: true
             ,listeners: {
                 scope: this
@@ -170,6 +172,9 @@ Ext.define('CB.browser.view.ActivityStream',{
                             params: {id: id}
                             ,header: false
                             ,renderTo: 'as-record-' + id
+                            ,commentFieldConfig: {
+                                xtype: 'CBFieldCommentLight'
+                            }
                         }
                     );
                 c.onLoadData(records[i].data.comments);

@@ -73,7 +73,7 @@ if (\CB\DB\dbQuery('use `' . $dbName . '`')) {
     if (confirm('overwrite_existing_core_db')) {
         if (\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') !== false) {
             echo 'Backuping .. ';
-            backupDB($dbName, $dbUser, $dbPass);
+            backupDB($dbName, $dbUser, $dbPass, $cfg['db_host']);
             showMessage();
         }
     } else {

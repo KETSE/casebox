@@ -1057,3 +1057,7 @@ border-top: 0;
   background-color: #f9edbe;
   max-width: 800px;
 }
+
+.comment-input textarea {
+  overflow: hidden
+}
