@@ -189,6 +189,15 @@ Ext.define('CB.browser.NotificationsView', {
     }
 
     ,onRowClick: function(grid, record, tr, rowIndex, e, eOpts) {
+        var el = e.getTarget('.obj-ref');
+        if(el) {
+            App.openObjectWindow({
+                id: el.getAttribute('itemid')
+                ,template_id: el.getAttribute('templateid')
+                ,name: el.getAttribute('title')
+            });
+        }
+
         if(this.lastSelectedRecord == record) {
             this.onSelectionChange(grid, [record], eOpts);
         }

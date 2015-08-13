@@ -7,9 +7,6 @@ Ext.define('CB.browser.view.ActivityStream',{
 
     ,border: false
     ,tbarCssClass: 'x-panel-white'
-    // ,layout: 'fit'
-
-    // ,scrollable: true
 
     ,initComponent: function(){
 
@@ -112,7 +109,7 @@ Ext.define('CB.browser.view.ActivityStream',{
             ,itemSelector:'tr.as-record'
             // ,overItemCls:'as-record-over'
             ,width: 500
-            ,height: '100%'
+            ,flex: 1
             ,scrollable: true
             ,listeners: {
                 scope: this
@@ -124,6 +121,10 @@ Ext.define('CB.browser.view.ActivityStream',{
             title: L.ActivityStream
             ,viewName: 'activityStream'
             ,header: false
+            ,layout: {
+                type: 'vbox'
+                ,align: 'center'
+            }
             ,items: [
                 this.dataView
             ]

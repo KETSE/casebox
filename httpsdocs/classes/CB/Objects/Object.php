@@ -274,8 +274,13 @@ class Object
             'SELECT id
             FROM tree
             WHERE draft = 1
-                AND draft_pid = $1',
-            $this->data['draftId']
+                AND draft_pid = $1
+                AND cid = $2
+                AND (cdate > (CURRENT_TIMESTAMP - INTERVAL 1 HOUR))',
+            array(
+                $this->data['draftId']
+                ,User::getId()
+            )
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {

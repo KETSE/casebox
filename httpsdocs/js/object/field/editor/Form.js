@@ -377,23 +377,30 @@ Ext.define('CB.object.field.editor.Form', {
         }
 
         params.from = 'formEditor';
+
+        var resetPage = (this.store.proxy.extraParams.query !== params.query);
+
         this.store.proxy.extraParams = params;
-        this.store.reload(params);
+        if(resetPage) {
+            this.store.loadPage(1, params);
+        } else {
+            this.store.reload(params);
+        }
     }
 
     ,getSearchParams: function(){
-        result = Ext.apply({}, this.cfg);
-        result.query = this.triggerField.getValue();
-        result.value = this.getValue();
+        var rez = Ext.apply({}, this.cfg);
+        rez.query = this.triggerField.getValue();
+        rez.value = this.getValue();
 
         if(!Ext.isEmpty(this.data.objectId)) {
-            result.objectId = this.data.objectId;
+            rez.objectId = this.data.objectId;
         }
         if(!Ext.isEmpty(this.data.path)) {
-            result.path = this.data.path;
+            rez.path = this.data.path;
         }
 
-        return result;
+        return rez;
     }
 
     /**

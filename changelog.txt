@@ -1,3 +1,15 @@
+CaseBox 1.9.505 (2015-08-13)
+==============================
+- #7339 Notifications sent if @user is used in Task.description ?
+- clicking object links in notification view will open object window
+
+Fixed Bugs:
+----------
+- #5777 popup submenu on tree is empty
+- #7119 BUG: node search when paginated
+- #7546 Error when switching from File1 to File2 when rightPanel is in previewMode
+- #7568 Order of fields in Preview not same as in Edit mode
+
 CaseBox 1.9.504 (2015-08-12)
 ==============================
 - #7772 Implement Activity Stream UI powered by core solr data based on last_action_dttm

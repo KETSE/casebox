@@ -147,7 +147,6 @@ Ext.define('CB.field.Comment', {
      * @return void
      */
     ,onAddCommentClick: function(b, e) {
-        clog('firing event', this);
         this.fireEvent('addcomment', this.getValue(), e);
     }
 
@@ -210,7 +209,7 @@ Ext.define('CB.field.Comment', {
 
     ,removeUploaderListeners: function() {
         var fu = App.getFileUploader();
-        clog('removing listeners');
+
         if(fu) {
             fu.un(
                 'fileuploadend'
@@ -229,7 +228,6 @@ Ext.define('CB.field.Comment', {
         var fu = App.getFileUploader()
             ,label = this.filesLabel;
 
-        clog('updateFilesLabel', this.draftCommentId, fu)
         if(Ext.isEmpty(this.draftCommentId) || Ext.isEmpty(fu)) {
             label.setValue('');
             return;
@@ -238,7 +236,7 @@ Ext.define('CB.field.Comment', {
         var t = ''
             ,store = fu.store
             ,stats = fu.getStatsForPid(this.draftCommentId);
-        clog('stats', stats);
+
         if(stats.pending > 0) {
             t = Ext.String.uncapitalize(L.Uploading) + ' <span style="color: #555">' +
                 Ext.String.repeat('●', stats.total - stats.pending) +

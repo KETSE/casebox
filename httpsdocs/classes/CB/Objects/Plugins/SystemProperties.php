@@ -38,6 +38,7 @@ class SystemProperties extends Base
                 ,'udate' => 1
                 ,'dstatus' => 1
                 ,'did' => 1
+                ,'ddate' => 1
                 ,'size' => 1
             )
         );

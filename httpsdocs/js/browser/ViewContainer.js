@@ -393,7 +393,7 @@ Ext.define('CB.browser.ViewContainer', {
 
                 store.currentPage = page;
 
-                // Clon options
+                // Clone options
                 options = Ext.apply({
                     page: page,
                     start: (page - 1) * size,

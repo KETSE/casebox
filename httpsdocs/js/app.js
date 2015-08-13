@@ -1066,7 +1066,11 @@ function initApp() {
                 return new Ext.form.TextArea({
                     enableKeyEvents: true
                     ,height: height
+                    ,plugins: [{
+                        ptype: 'CBPluginFieldDropDownList'
+                    }]
                 });
+
             case 'text':
                 e.cancel = true;
                 w = App.getTextEditWindow({
