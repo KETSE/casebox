@@ -226,6 +226,7 @@ Ext.define('CB.browser.view.Grid', {
                     this.saveGridState();
                 }
                 ,itemcontextmenu: this.onItemContextMenu
+                ,containercontextmenu: this.onContainerContextMenu
             }
             ,keys: [{
                     key: Ext.event.Event.DOWN //down arrow (select forst row in the grid if no row already selected)  - does not work
@@ -689,6 +690,10 @@ Ext.define('CB.browser.view.Grid', {
     }
 
     ,onItemContextMenu: function(grid, record, item, index, e, eOpts) {
+        this.fireEvent('itemcontextmenu', e);
+    }
+
+    ,onContainerContextMenu: function(grid, e, eOpts) {
         this.fireEvent('itemcontextmenu', e);
     }
 });

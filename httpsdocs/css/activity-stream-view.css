@@ -1,21 +1,42 @@
 @charset "utf-8";
 .activity-stream {
-    width: 100%;
+    width: 500px;
+    margin: auto;
+    text-align: left;
     border-collapse: collapse;
 }
-.as-record > .as-item {
-    border-bottom: 1px solid #eaeaea;
+
+.activity-stream .x-view-item-focused{
+    outline: inherit !important;
 }
 
-.as-record > .as-item .action{
+.as-record > td {
+    padding: 5px 0;
+}
+
+.as-record .as-item {
+    border: 1px solid;
+    border-color: #e5e6e9 #dfe0e4 #d0d1d5;
+    border-radius: 3px;
+    background-color: #fff
+}
+
+.as-record .as-item .action{
     padding: 5px;
 }
-
+.as-record .as-item .action-title{
+    padding: 0;
+    padding-left: 5px;
+}
+.as-record .as-item .action-title-text{
+    font-size: 14px;
+    margin-bottom: 4px;
+}
 .as-record-over{
     background-color: #efefef;
 }
 
-.activity-stream .x-item-selected {
+.activity-stream .x-item-selected .as-item{
     background-color: #dfe8f6;
 }
 
@@ -30,6 +51,7 @@
 .as-diff th{
     font-weight: normal;
     text-align: left;
+    vertical-align: top;
 }
 .as-diff .new-value{
     color: #73ae42
@@ -48,7 +70,6 @@
 }
 .as-item .comment-input .x-form-trigger-over{
     opacity: inherit;
-    background-position: 50% calc(100% - 12px);
 }
 
 .comment-trigger-attach{

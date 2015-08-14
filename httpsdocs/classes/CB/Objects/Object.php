@@ -274,8 +274,13 @@ class Object
             'SELECT id
             FROM tree
             WHERE draft = 1
-                AND draft_pid = $1',
-            $this->data['draftId']
+                AND draft_pid = $1
+                AND cid = $2
+                AND (cdate > (CURRENT_TIMESTAMP - INTERVAL 1 HOUR))',
+            array(
+                $this->data['draftId']
+                ,User::getId()
+            )
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
@@ -556,6 +561,8 @@ class Object
         if ($sysData !== false) {
             $d['sys_data'] = Util\toJSONArray($sysData);
         }
+
+        $d['sys_data']['lastAction'] = $this->getLastActionData();
 
         $this->collectSolrData();
 
@@ -1819,22 +1826,6 @@ class Object
                     ,'users' => array()
                 );
             }
-
-            /*$sysData = empty($data['sys_data'])
-                ? $this->getSysData()
-                : $data['sys_data'];
-
-            $lastAction = array(
-                'type' => $type
-                ,'time' => Util\dateMysqlToISO('now')
-                ,'users' => array()
-            );
-
-            if (!empty($sysData['lastAction']) &&
-                ($sysData['lastAction']['type'] == $type)
-            ) {
-                $lastAction['users'] = $sysData['lastAction']['users'];
-            } /**/
 
             unset($lastAction['users'][$uid]);
 

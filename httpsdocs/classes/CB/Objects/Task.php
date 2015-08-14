@@ -43,16 +43,7 @@ class Task extends Object
      */
     protected function createCustomData()
     {
-        $p = &$this->data;
-
-        $p['sys_data'] = Util\toJSONArray(@$p['sys_data']);
-
-        $sd = &$p['sys_data'];
-
-        //add assigned users as followers by default
-        if (empty($sd['fu'])) {
-            $sd['fu'] = Util\toNumericArray(@$this->getFieldValue('assigned', 0)['value']);
-        }
+        $this->setFollowers();
 
         parent::createCustomData();
     }
@@ -101,6 +92,17 @@ class Task extends Object
      */
     protected function updateCustomData()
     {
+        $this->setFollowers();
+
+        //call parent class to do the rest
+        parent::updateCustomData();
+    }
+
+    /**
+     * analize object data and set 'fu' property in sys_data
+     */
+    protected function setFollowers()
+    {
         $d = &$this->data;
         $sd = &$d['sys_data'];
 
@@ -115,10 +117,16 @@ class Task extends Object
             ? array()
             : $sd['fu'];
 
-        $sd['fu'] = array_unique(array_merge($fu, $diff));
+        $fu = array_merge($fu, $diff);
 
-        //call parent class to do the rest
-        parent::updateCustomData();
+        //analize referenced users from description
+        if (!empty($d['data']['description'])) {
+            $uids = Util\getReferencedUsers($d['data']['description']);
+            if (!empty($uids)) {
+                $fu = array_merge($fu, $uids);
+            }
+        }
+        $sd['fu'] = array_unique($fu);
     }
 
     /**

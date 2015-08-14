@@ -3,6 +3,7 @@ namespace CB\Util;
 
 use CB\L;
 use CB\data;
+use CB\DataModel as DM;
 
 function getIP()
 {
@@ -817,4 +818,30 @@ function getOS()
         default:
             return 'UNKNOWN';
     }
+}
+
+
+/**
+ * get referenced user ids inside a given text
+ * @param  varchar $text
+ * @return array()
+ */
+function getReferencedUsers($text)
+{
+    $rez = array();
+
+    if (!empty($text) && preg_match_all('/@([^@\s,!\?]+)/', $text, $matches, PREG_SET_ORDER)) {
+        $names = array();
+        foreach ($matches as $match) {
+            if (!isset($names[$match[1]])) {
+                $names[$match[1]] = DM\User::getIdByName($match[1]);
+
+                if (is_numeric($names[$match[1]])) {
+                    $rez[] = intval($names[$match[1]]);
+                }
+            }
+        }
+    }
+
+    return $rez;
 }

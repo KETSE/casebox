@@ -12,7 +12,7 @@ class ActivityStream extends Base
 
     public function onBeforeSolrQuery(&$p)
     {
-        $p['rows'] = 1000;
+        $p['rows'] = 15;
         $p['params']['fl'] = array(
             'id', 'pid', 'name', 'template_type', 'target_id', 'oid',
             'cid', 'cdate', 'uid', 'udate', 'comment_user_id', 'comment_date',

@@ -54,9 +54,12 @@ Ext.define('CB.object.view.Preview', {
     }
 
     ,reload: function(){
-        if(Ext.isEmpty(this.newId) || isNaN(this.newId) || !this.getEl().isVisible(true)) {
+        var el = this.getEl();
+
+        if(Ext.isEmpty(this.newId) || isNaN(this.newId) || !el || !el.isVisible(true)) {
             return this.clear();
         }
+
         this.doLoad(this.newId, this.newVersionId);
     }
 

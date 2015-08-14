@@ -196,7 +196,6 @@ Ext.define('CB.object.plugin.Comments', {
     }
 
     ,onAddCommentClick: function(comment, e) {
-        clog('got it', this.params);
         if(isNaN(this.params.id)) {
             this.fireEvent(
                 'getdraftid'

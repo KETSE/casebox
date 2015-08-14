@@ -393,7 +393,7 @@ Ext.define('CB.browser.ViewContainer', {
 
                 store.currentPage = page;
 
-                // Clon options
+                // Clone options
                 options = Ext.apply({
                     page: page,
                     start: (page - 1) * size,
@@ -717,7 +717,7 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,processLoadedParams: function () {
-        var result = this.store.proxy.reader.rawData;
+        var result = Ext.valueFrom(this.store.proxy.reader.rawData, {});
         var ep = this.store.proxy.extraParams;
 
         this.path = ep.path;
@@ -1060,9 +1060,6 @@ Ext.define('CB.browser.ViewContainer', {
 
             this.actions.webdavlink.setDisabled(firstObjType != 'file');
             this.actions.webdavlink.setHidden(firstObjType != 'file' || (firstFileEditor != 'webdav'));
-
-            this.actions.permalink.setDisabled(firstObjType != 'file');
-            this.actions.permalink.setHidden(firstObjType != 'file');
 
             if(!inRecycleBin && inGridView) {
                 this.actions['delete'].show();
@@ -1411,6 +1408,8 @@ Ext.define('CB.browser.ViewContainer', {
                 ,menu:[]
             });
 
+            this.createItemSeparator = new Ext.menu.Separator();
+
             this.contextMenu = new Ext.menu.Menu({
                 items: [
                     this.actions.edit
@@ -1429,19 +1428,27 @@ Ext.define('CB.browser.ViewContainer', {
                     ,this.actions.permalink
                     ,'-'
                     ,this.createItem
-                    ,'-'
+                    ,this.createItemSeparator
                     ,this.actions.permissions
                 ]
             });
         }
 
-        updateMenu(
-            this.createItem
-            ,this.folderProperties.menu
-            ,this.onCreateObjectClick
-            ,this
-        );
-        this.createItem.setDisabled(this.createItem.menu.items.getCount() < 1);
+        var visible = Ext.isEmpty(this.getSelection());
+
+        this.createItem.setHidden(!visible);
+        this.createItemSeparator.setHidden(!visible);
+
+        if(visible) {
+            updateMenu(
+                this.createItem
+                ,this.folderProperties.menu
+                ,this.onCreateObjectClick
+                ,this
+            );
+
+            this.createItem.setDisabled(this.createItem.menu.items.getCount() < 1);
+        }
 
         this.contextMenu.showAt(e.getXY());
     }

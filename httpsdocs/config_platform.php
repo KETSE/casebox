@@ -124,6 +124,7 @@ function detectCore()
 
     if (isset($_GET['core'])) {
         $rez = preg_replace('/[^\w]\-_/i', '', $_GET['core']);
+
     } else {
         $arr = explode('.', $_SERVER['SERVER_NAME']);
         // remove www, ww2 and take the next parameter as the $coreName
@@ -131,13 +132,12 @@ function detectCore()
             array_shift($arr);
         }
         $arr = explode('-', $arr[0]);
+
         if (in_array($arr[sizeof($arr)-1], array('local', 'd'))) {
             array_pop($arr);
         }
-        $arr = implode('-', $arr);
-        $arr = explode('_', $arr);
 
-        $rez = $arr[0];
+        $rez = implode('-', $arr);
     }
 
     return $rez;

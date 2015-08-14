@@ -109,6 +109,13 @@ Ext.define('CB.browser.Tree', {
 
         };
 
+        //context menu item for create new items menu
+        this.createItem = new Ext.menu.Item({
+            text: L.Create
+            ,hideOnClick: false
+            ,menu:[]
+        });
+
         this.editor = new Ext.Editor({
             field: {
                 xtype: 'textfield'
@@ -428,11 +435,6 @@ Ext.define('CB.browser.Tree', {
 
     ,onContextMenu: function (tree, record, item, index, e, eOpts) {
         if(Ext.isEmpty(this.contextMenu)){/* create context menu if not aleready created */
-            this.createItem = new Ext.menu.Item({
-                text: L.Create
-                ,hideOnClick: false
-                ,menu:[]
-            });
             this.contextMenu = new Ext.menu.Menu({
                 items: [
                 this.actions.edit
