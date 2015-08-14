@@ -562,6 +562,8 @@ class Object
             $d['sys_data'] = Util\toJSONArray($sysData);
         }
 
+        $d['sys_data']['lastAction'] = $this->getLastActionData();
+
         $this->collectSolrData();
 
         @DB\dbQuery(
@@ -1824,22 +1826,6 @@ class Object
                     ,'users' => array()
                 );
             }
-
-            /*$sysData = empty($data['sys_data'])
-                ? $this->getSysData()
-                : $data['sys_data'];
-
-            $lastAction = array(
-                'type' => $type
-                ,'time' => Util\dateMysqlToISO('now')
-                ,'users' => array()
-            );
-
-            if (!empty($sysData['lastAction']) &&
-                ($sysData['lastAction']['type'] == $type)
-            ) {
-                $lastAction['users'] = $sysData['lastAction']['users'];
-            } /**/
 
             unset($lastAction['users'][$uid]);
 

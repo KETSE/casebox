@@ -1,3 +1,13 @@
+CaseBox 1.9.505 (2015-08-14)
+==============================
+- #5002 popup menu for objects
+- #7772 Implement Activity Stream UI powered by core solr data based on last_action_dttm
+
+Fixed Bugs:
+----------
+- issue #23 - PreviewExtractor with a snake case core name does not work.
+- commenting didnt update last action date for parent object
+
 CaseBox 1.9.505 (2015-08-13)
 ==============================
 - #7339 Notifications sent if @user is used in Task.description ?

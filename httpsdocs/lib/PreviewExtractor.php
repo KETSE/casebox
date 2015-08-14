@@ -24,8 +24,7 @@ class PreviewExtractor
                 die('no core passed');
             }
 
-            $t = explode('_', $core);
-            $_SERVER['SERVER_NAME'] = array_pop($t).'.dummy.com';
+            $_SERVER['SERVER_NAME'] = $core . '.dummy.com';
             $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         }
 

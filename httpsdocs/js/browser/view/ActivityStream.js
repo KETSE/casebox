@@ -11,10 +11,11 @@ Ext.define('CB.browser.view.ActivityStream',{
     ,initComponent: function(){
 
         var tpl = new Ext.XTemplate(
-            '<table class="activity-stream" style="margin:0">'
+            '<div class="taC"><table class="activity-stream">'
             ,'<tpl for=".">'
             ,'<tr class="as-record">'
-            ,'    <td class="as-item">'
+            ,'    <td>'
+            ,'      <div class="as-item">'
             ,'        <table class="action">'
             ,'          <tr>'
             ,'            <td class="action-icon">{[this.getTitleIcon(values)]}</td>'
@@ -34,15 +35,16 @@ Ext.define('CB.browser.view.ActivityStream',{
             // ,'          <tr><td class="action-comment">Comment</td></tr>'
             // ,'          <tr><td class="action-comment">Add comment</td></tr>'
             ,'        </div>'
+            ,'      </div>'
             ,'    </td>'
             ,'</tr>'
             ,'</tpl>'
-            ,'</table>'
+            ,'</table></div>'
             ,{
                 getTitleIcon: function(r){
                     var uid = r.lastAction.uids[0]
                         ,us = CB.DB.usersStore
-                        ,rez = '<img class="i32" src="/' +
+                        ,rez = '<img class="i40" src="/' +
                             App.config.coreName + '/photo/' + uid + '.jpg?32=' +
                             us.getPhotoParam(uid)  + '" title="' +
                             us.getName(uid)
@@ -51,7 +53,7 @@ Ext.define('CB.browser.view.ActivityStream',{
                 }
 
                 ,getTitle: function(r){
-                    var rez = ''
+                    var rez = '<div class="action-title-text">'
                         ,la = r.lastAction
                         ,us = CB.DB.usersStore
                         ,users = [];
@@ -88,7 +90,7 @@ Ext.define('CB.browser.view.ActivityStream',{
                             rez += ' ' + Ext.valueFrom(L[la.type + 'd'], la.type);
                     }
 
-                    rez += ' <a class="click open-obj" nid="' + r.nid + '">' + r.name + '</a>';
+                    rez += ' <a class="click open-obj" nid="' + r.nid + '">' + r.name + '</a></div>';
 
                     rez += ' <div class="as-ago-time">' + la.agoText + '</div>';
 
@@ -108,8 +110,7 @@ Ext.define('CB.browser.view.ActivityStream',{
             ,deferInitialRefresh: true
             ,itemSelector:'tr.as-record'
             // ,overItemCls:'as-record-over'
-            ,width: 500
-            ,flex: 1
+            ,focusCls: ''
             ,scrollable: true
             ,listeners: {
                 scope: this
@@ -121,10 +122,8 @@ Ext.define('CB.browser.view.ActivityStream',{
             title: L.ActivityStream
             ,viewName: 'activityStream'
             ,header: false
-            ,layout: {
-                type: 'vbox'
-                ,align: 'center'
-            }
+            ,layout: 'fit'
+            ,style: 'background-color: #e9eaed'
             ,items: [
                 this.dataView
             ]
