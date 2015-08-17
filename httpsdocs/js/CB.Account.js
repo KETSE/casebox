@@ -506,7 +506,7 @@ Ext.define('CB.SecurityForm', {
                     },{
                         xtype: 'displayfield'
                         ,frame: false
-                        ,value: '<a href="#">'+L.ChangePassword+'</a>'
+                        ,value: '<a>'+L.ChangePassword+'</a>'
                         ,listeners: {
                             scope: this
                             ,afterrender: function(cmp, eOpts) {

@@ -47,7 +47,7 @@ Ext.define('CB.field.Comment', {
 
         this.messageToolbar = new Ext.Toolbar({
             hidden: false
-            ,style: 'padding: 0; border: 0; background-color:  #f1f1f1;' // background-color: transparent;
+            ,style: 'padding: 0; border: 0; background-color:  transparent;' // background-color: transparent;
             ,items: [
                 this.attachFileButton
                 ,this.filesLabel

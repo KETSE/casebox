@@ -196,10 +196,6 @@ cursor: hand;
 .action-comments .block-plugin-comments > .x-toolbar {
     display: none;
 }
-.action-comments .block-plugin-comments > .x-panel-body {
-    top: 0 !important;
-}
-
 .obj-plugin-h .x-toolbar-left{
     vertical-align: bottom;
 }

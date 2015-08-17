@@ -13,6 +13,7 @@ Ext.define('CB.browser.view.ActivityStream',{
         var tpl = new Ext.XTemplate(
             '<div class="taC"><table class="activity-stream">'
             ,'<tpl for=".">'
+            ,'<tpl if="lastAction">'
             ,'<tr class="as-record">'
             ,'    <td>'
             ,'      <div class="as-item">'
@@ -38,6 +39,7 @@ Ext.define('CB.browser.view.ActivityStream',{
             ,'      </div>'
             ,'    </td>'
             ,'</tr>'
+            ,'</tpl>'
             ,'</tpl>'
             ,'</table></div>'
             ,{
@@ -165,8 +167,10 @@ Ext.define('CB.browser.view.ActivityStream',{
     ,onStoreLoad: function(store, records, successful, eOpts) {
         if (this.getEl().isVisible(true)) {
             for (var i = 0; i < records.length; i++) {
-                var id = records[i].get('nid')
-                    ,c = Ext.create(
+                var id = records[i].get('nid');
+
+                if(records[i].data.lastAction && !Ext.isEmpty(Ext.get('as-record-' + id))) {
+                    var c = Ext.create(
                         'CBObjectPluginComments'
                         ,{
                             params: {id: id}
@@ -177,7 +181,8 @@ Ext.define('CB.browser.view.ActivityStream',{
                             }
                         }
                     );
-                c.onLoadData(records[i].data.comments);
+                    c.onLoadData(records[i].data.comments);
+                }
             }
         }
     }

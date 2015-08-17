@@ -1,4 +1,13 @@
-CaseBox 1.9.505 (2015-08-14)
+CaseBox 1.9.507 (2015-08-17)
+==============================
+- #7772 Implement Activity Stream UI powered by core solr data based on last_action_dttm
+
+Fixed Bugs:
+----------
+- #7895 Time fields displayed as Int in DC if solr_column_name is used
+- #7876 clicking on password change link displays leaving page message
+
+CaseBox 1.9.506 (2015-08-14)
 ==============================
 - #5002 popup menu for objects
 - #7772 Implement Activity Stream UI powered by core solr data based on last_action_dttm

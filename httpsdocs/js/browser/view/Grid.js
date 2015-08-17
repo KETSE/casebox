@@ -45,10 +45,8 @@ Ext.define('CB.browser.view.Grid', {
 
                     return rez;
                 }
-                // ,scope: this
                 ,editor: editor
                 ,sort: this.columnSortOverride
-                ,groupable: false
             },{
                 header: L.Path
                 ,width: 150
