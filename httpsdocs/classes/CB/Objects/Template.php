@@ -692,10 +692,31 @@ class Template extends Object
                         ? 'H:i'
                         : $field['format'];
 
-                    $date = \DateTime::createFromFormat('H:i:s', $value);
+                    if (is_numeric($value)) {
+                        $s = $value % 60;
+                        $value = floor($value / 60);
+                        $m = $value % 60;
+                        $value = floor($value / 60);
+                        if (strlen($value) < 2) {
+                            $value = '0' . $value;
+                        }
+                        if (strlen($m) < 2) {
+                            $m = '0' . $m;
+                        }
+                        $value .= ':' . $m;
+                        if (!empty($s)) {
+                            if (strlen($s) < 2) {
+                                $s = '0' . $s;
+                            }
+                            $value .= ':' . $s;
+                        }
 
-                    if (is_object($date)) {
-                        $value = $date->format($format);
+                    } else {
+                        $date = \DateTime::createFromFormat($format, $value);
+
+                        if (is_object($date)) {
+                            $value = $date->format($format);
+                        }
                     }
 
                     break;

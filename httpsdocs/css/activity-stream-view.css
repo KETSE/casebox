@@ -52,6 +52,7 @@
     font-weight: normal;
     text-align: left;
     vertical-align: top;
+    padding-right: 5px
 }
 .as-diff .new-value{
     color: #73ae42

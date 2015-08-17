@@ -1822,10 +1822,11 @@ class Object
             if ($lastAction['type'] != $type) {
                 $lastAction = array(
                     'type' => $type
-                    ,'time' => Util\dateMysqlToISO('now')
                     ,'users' => array()
                 );
             }
+
+            $lastAction['time'] = Util\dateMysqlToISO('now');
 
             unset($lastAction['users'][$uid]);
 
@@ -1919,16 +1920,28 @@ class Object
 
             if ($ov != $nv) {
                 $field = $template->getField($f['name']);
-                // var_export($field);
+
+                if ($field['type'] == '_objects') {
+                    $a = Util\toNumericArray($ov['value']);
+                    $b = Util\toNumericArray($nv['value']);
+                    $c = array_intersect($a, $b);
+                    if (!empty($c)) {
+                        $a = array_diff($a, $c);
+                        $b = array_diff($b, $c);
+                        $ov['value'] = implode(',', $a);
+                        $nv['value'] = implode(',', $b);
+                    }
+                }
+
                 $title = Util\coalesce($field['title'], $field['name']);
 
                 $value = empty($ov)
                     ? ''
-                    : ('<div class="old-value">' . $template->formatValueForDisplay($field, $ov) . '</div>');
-                // var_export($nv);
+                    : ('<div class="old-value">' . $template->formatValueForDisplay($field, $ov, false) . '</div>');
+
                 $value .= empty($nv)
                     ? ''
-                    : ('<div class="new-value">' . $template->formatValueForDisplay($field, $nv) . '</div>');
+                    : ('<div class="new-value">' . $template->formatValueForDisplay($field, $nv, false) . '</div>');
 
                 $rez[$title] = $value;
             }

@@ -94,12 +94,16 @@ Ext.define('CB.object.plugin.Comments', {
         );
         this.addCommentField = Ext.create(cfg);
 
+        if(this.initialConfig.header !== false) {
+            this.title = L.Comments;
+        }
+
         Ext.apply(this, {
-            title: L.Comments
-            ,cls: 'obj-plugin block-plugin-comments'
+            cls: 'obj-plugin block-plugin-comments'
             ,autoHeight: true
             ,anchor: '100%'
             ,border: false
+            ,bodyStyle: 'padding-top: 3px'
             ,items: [
                 this.dataView
                 ,this.addCommentField
