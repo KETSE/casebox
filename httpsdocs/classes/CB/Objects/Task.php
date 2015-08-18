@@ -273,6 +273,8 @@ class Task extends Object
         unset($this->data['sys_data']['task_u_done']);
 
         $this->update();
+
+        $this->logAction('reopen', array('old' => &$this));
     }
 
     /**
@@ -300,7 +302,8 @@ class Task extends Object
 
         $this->markClosed();
 
-        $this->updateSysData();
+        $this->logAction('close', array('old' => &$this));
+        // $this->updateSysData();
     }
 
     /**
@@ -447,9 +450,9 @@ class Task extends Object
         $sd = &$d['sys_data'];
 
         if (empty($sd['task_u_ongoing'])) {
-            $this->markClosed();
+            $this->setClosed();
         } else {
-            $this->markActive();
+            $this->setActive();
         }
     }
 

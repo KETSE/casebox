@@ -166,6 +166,8 @@ Ext.define('CB.browser.view.ActivityStream',{
 
     ,onStoreLoad: function(store, records, successful, eOpts) {
         if (this.getEl().isVisible(true)) {
+            this.dataView.scrollTo(0, 0, false);
+
             for (var i = 0; i < records.length; i++) {
                 var id = records[i].get('nid');
 

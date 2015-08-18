@@ -54,7 +54,6 @@ Ext.define('CB.object.ViewContainer', {
                         scope: this
 
                         ,openpreview: this.onOpenPreviewEvent
-                        ,openproperties: this.onOpenPreviewEvent
 
                         ,editobject: this.onEditObjectEvent
                         ,editmeta: this.onEditObjectEvent

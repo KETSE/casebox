@@ -97,7 +97,7 @@ class Tasks
         }
 
         $obj->setUserStatus(Objects\Task::$USERSTATUS_DONE);
-        $obj->updateSysData();
+        // $obj->updateSysData();
 
         $this->afterUpdate($p['id']);
 
