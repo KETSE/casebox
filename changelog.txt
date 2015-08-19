@@ -1,3 +1,10 @@
+CaseBox 1.9.510 (2015-08-19)
+==============================
+Fixed Bugs:
+----------
+- #7987 Order of fields not correct in object preview
+- #798 Can't open searchTemplate
+
 CaseBox 1.9.509 (2015-08-19)
 ==============================
 Fixed Bugs:
