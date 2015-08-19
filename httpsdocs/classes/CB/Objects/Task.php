@@ -132,7 +132,7 @@ class Task extends Object
     /**
      * method to collect solr data from object data
      * according to template fields configuration
-     * and store it in sys_data onder "solr" property
+     * and store it in sys_data under "solr" property
      * @return void
      */
     protected function collectSolrData()
@@ -303,7 +303,6 @@ class Task extends Object
         $this->markClosed();
 
         $this->logAction('close', array('old' => &$this));
-        // $this->updateSysData();
     }
 
     /**
@@ -407,8 +406,11 @@ class Task extends Object
     public function setUserStatus($status, $userId = false)
     {
         $rez = false;
+        $action = '';
+        $currentUserId = User::getId();
+
         if ($userId == false) {
-            $userId = $_SESSION['user']['id'];
+            $userId = $currentUserId;
         }
 
         $d = &$this->data;
@@ -420,22 +422,34 @@ class Task extends Object
                     $sd['task_u_done'] = array_diff($sd['task_u_done'], array($userId));
                     $sd['task_u_ongoing'][] = $userId;
                     unset($sd['task_u_d_closed'][$userId]);
+
                     $rez = true;
+
+                    $action = ($currentUserId == $userId)
+                        ? 'reopen'
+                        : 'completion_decline';
                 }
                 break;
-
             case static::$USERSTATUS_DONE:
                 if (in_array($userId, $sd['task_u_ongoing'])) {
                     $sd['task_u_ongoing'] = array_diff($sd['task_u_ongoing'], array($userId));
                     $sd['task_u_done'][] = $userId;
                     $sd['task_u_d_closed'][$userId] = date(DATE_ISO8601);
+
                     $rez = true;
+
+                    $action = ($currentUserId == $userId)
+                        ? 'complete'
+                        : 'completion_on_behalf';
                 }
                 break;
         }
 
         if ($rez) {
             $this->checkAutoclose();
+
+            $this->logAction($action, array('old' => &$this, 'forUserId' => $userId));
+            // $this->updateSysData();
         }
 
         return $rez;
@@ -450,9 +464,9 @@ class Task extends Object
         $sd = &$d['sys_data'];
 
         if (empty($sd['task_u_ongoing'])) {
-            $this->setClosed();
+            $this->markClosed();
         } else {
-            $this->setActive();
+            $this->markActive();
         }
     }
 

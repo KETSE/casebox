@@ -130,6 +130,13 @@ class Log
                 $rez['file'] = $p['file'];
                 break;
 
+            case 'completion_decline':
+            case 'completion_on_behalf':
+                if (!empty($p['forUserId'])) {
+                    $rez['forUserId'] = $p['forUserId'];
+                }
+                break;
+
             default:
                 // setting old and new properties of linear custom data
                 if (!empty($p['old'])) {

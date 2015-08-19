@@ -344,8 +344,7 @@ Ext.define('CB.object.ViewContainer', {
         if(currentItemIndex == index) {
             return;
         }
-        // this.loadedData = {};
-        // this.getLayout().activeItem.clear();
+
         this.clear();
 
         this.getLayout().setActiveItem(index);
@@ -375,6 +374,7 @@ Ext.define('CB.object.ViewContainer', {
         this.delayedLoadTask.cancel();
         delete this.locked;
         delete this.requestedLoadData;
+        this.previousLoadedData = Ext.clone(this.loadedData);
         this.loadedData = {};
         this.getLayout().activeItem.clear();
         this.updateToolbarAndMenuItems();
@@ -450,8 +450,9 @@ Ext.define('CB.object.ViewContainer', {
         this.requestedLoadData = Ext.apply({}, objectData);
 
         //automatic switch to plugins panel if different object types
-        if(CB.DB.templates.getType(this.requestedLoadData.template_id) !=
-            CB.DB.templates.getType(this.loadedData.template_id)
+        if(this.previousLoadedData &&
+            (CB.DB.templates.getType(this.requestedLoadData.template_id) !=
+            CB.DB.templates.getType(this.previousLoadedData.template_id))
         ) {
             this.setActiveView(0);
         }

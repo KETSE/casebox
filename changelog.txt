@@ -1,3 +1,11 @@
+CaseBox 1.9.509 (2015-08-19)
+==============================
+Fixed Bugs:
+----------
+- #7546 Error when switching from File1 to File2 when rightPanel is in previewMode
+- #7950 Breadcrumb not correct when double clicking record in search results
+- #7972 Can't close task, buttons in Task preview doesn't work
+
 CaseBox 1.9.508 (2015-08-18)
 ==============================
 - #7924 Closing a task event doesn't show in Activity Stream

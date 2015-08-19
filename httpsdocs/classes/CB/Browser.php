@@ -40,7 +40,8 @@ class Browser
             }
             $a = explode('/', $path);
             if (!empty($a) && is_numeric($a[sizeof($a)-1])) {
-                $p['path'] = @Path::getPath(array_pop($a))['path'];
+                $path = @Path::getPath(array_pop($a))['path'];
+                $p['path'] = $path;
             }
         }
 
