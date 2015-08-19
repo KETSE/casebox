@@ -264,11 +264,18 @@ Ext.define('CB.object.plugin.Comments', {
         }
 
         el = e.getTarget('.obj-ref');
+
         if(el) {
             e.stopEvent();
+
+            var name = el.attributes.title
+                ? el.attributes.title.value
+                : el.innerText;
+
             this.openObjectProperties({
                 id: el.attributes.itemid.value
                 ,template_id: el.attributes.templateid.value
+                ,name: name
             });
 
             return;

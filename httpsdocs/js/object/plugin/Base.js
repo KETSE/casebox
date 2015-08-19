@@ -90,6 +90,6 @@ Ext.define('CB.object.plugin.Base', {
      * @return void
      */
     ,openObjectProperties: function(data) {
-        this.fireEvent('openproperties', data);
+        App.openObjectWindow(data);
     }
 });

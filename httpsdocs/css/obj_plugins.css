@@ -8,6 +8,10 @@
     /*margin-bottom: 30px;*/
 }
 
+.block-plugin .x-view-item-focused{
+    outline: inherit !important;
+}
+
 .block-plugin a {
     text-decoration: none;
     /*color: #333;*/

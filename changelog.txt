@@ -1,3 +1,30 @@
+CaseBox 1.9.510 (2015-08-19)
+==============================
+Fixed Bugs:
+----------
+- #7987 Order of fields not correct in object preview
+- #798 Can't open searchTemplate
+
+CaseBox 1.9.509 (2015-08-19)
+==============================
+Fixed Bugs:
+----------
+- #7546 Error when switching from File1 to File2 when rightPanel is in previewMode
+- #7950 Breadcrumb not correct when double clicking record in search results
+- #7972 Can't close task, buttons in Task preview doesn't work
+
+CaseBox 1.9.508 (2015-08-18)
+==============================
+- #7924 Closing a task event doesn't show in Activity Stream
+- #7932 Removed focused effect for Files, Content, Comments object plugins
+- #7933 Activity stream should be scrolled to Top after Refresh is clicked
+- #7868 duplicate consultations button for stratelit
+
+Fixed Bugs:
+----------
+- #7931 Can't set a new user avatar after 1st change
+- #7927 Activity Stream: clicking attached picture in comments doesn't open it
+
 CaseBox 1.9.507 (2015-08-17)
 ==============================
 - #7772 Implement Activity Stream UI powered by core solr data based on last_action_dttm

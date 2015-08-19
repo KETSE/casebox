@@ -2,6 +2,7 @@
 namespace CB;
 
 use CB\L;
+use CB\User;
 
 class Tasks
 {
@@ -54,7 +55,7 @@ class Tasks
         $obj = Objects::getCachedObject($p['id']);
         $data = $obj->getData();
 
-        if (($_SESSION['user']['id'] != $data['cid']) && !Security::isAdmin()) {
+        if ((User::getId() != $data['cid']) && !Security::isAdmin()) {
             throw new \Exception(L\get('Access_denied'));
         }
 
@@ -67,7 +68,7 @@ class Tasks
                 : Objects\Task::$USERSTATUS_ONGOING;
 
         $obj->setUserStatus($status, $p['user_id']);
-        $obj->updateSysData();
+        // $obj->updateSysData();
 
         $this->afterUpdate($p['id']);
 
@@ -97,7 +98,7 @@ class Tasks
         }
 
         $obj->setUserStatus(Objects\Task::$USERSTATUS_DONE);
-        $obj->updateSysData();
+        // $obj->updateSysData();
 
         $this->afterUpdate($p['id']);
 

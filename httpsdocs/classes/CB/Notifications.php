@@ -131,13 +131,24 @@ class Notifications
             }
             $r = current($users);
 
+            $forUserId = '';
+            if (!empty($r['data']['forUserId']) &&
+                    ($r['from_user_id'] != $r['data']['forUserId'])
+            ) {
+                $arr = array(
+                    $r['data']['forUserId'] => 1
+                );
+                $forUserId = ' ' . $this->getUsersString($arr) . ' ' . L\get('in') . ' ';
+
+            }
+
             $record = array(
                 'ids' => implode(',', $ids)
                 ,'read' => $r['read']
                 ,'user_id' => $r['from_user_id']
                 ,'object_id' => $r['object_id']
                 ,'text' => $this->getUsersString($users) . ' ' .
-                        $this->getActionDeclination($r['action_type']) . ' ' .
+                        $this->getActionDeclination($r['action_type']) . $forUserId . ' ' .
                         $this->getObjectName($r['data'])  . //with icon
                         '<div class="cG">' . Util\formatAgoTime($r['action_time']). '</div>'
 
@@ -226,11 +237,18 @@ class Notifications
                 $rez = L\get($actionType . 'd_in', $lang);
                 break;
 
+            case 'completion_decline':
+                $rez = L\get('completionDeclinedFor', $lang);
+                break;
+
+            case 'completion_on_behalf':
+                $rez = L\get('completedOnBehalf', $lang);
+                break;
+
             default:
                 $rez = $actionType;
                 //to review and discuss
-                /*'completion_decline'
-                'completion_on_behalf'
+                /*
                 'overdue'
                 'password_change'
                 'permissions'

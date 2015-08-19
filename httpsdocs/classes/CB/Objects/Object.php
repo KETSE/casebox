@@ -1922,9 +1922,15 @@ class Object
                 $field = $template->getField($f['name']);
 
                 if ($field['type'] == '_objects') {
-                    $a = Util\toNumericArray($ov['value']);
-                    $b = Util\toNumericArray($nv['value']);
+                    $a = empty($ov['value'])
+                        ? array()
+                        : Util\toNumericArray($ov['value']);
+                    $b = empty($nv['value'])
+                        ? array()
+                        : Util\toNumericArray($nv['value']);
+
                     $c = array_intersect($a, $b);
+
                     if (!empty($c)) {
                         $a = array_diff($a, $c);
                         $b = array_diff($b, $c);

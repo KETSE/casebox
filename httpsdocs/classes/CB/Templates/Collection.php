@@ -35,7 +35,9 @@ class Collection
 
         $this->reset();
         /* collecting template_fields */
-        $template_fields = array();
+        $templateFields = array();
+        $templateFieldsByIndex = array();
+
         $res = DB\dbQuery(
             'SELECT
                 ts.id
@@ -48,14 +50,17 @@ class Collection
                 ,ts.order
                 ,ts.solr_column_name
             FROM templates_structure ts
-            JOIN tree t on ts.id = t.id AND t.dstatus = 0'
+            JOIN tree t on ts.id = t.id AND t.dstatus = 0
+            ORDER BY ts.`order`'
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
             $template_id = $r['template_id'];
             unset($r['template_id']);
             $r['cfg'] = Util\toJSONArray($r['cfg']);
-            $template_fields[$template_id][$r['id']] = $r;
+            $templateFields[$template_id][$r['id']] = &$r;
+            $templateFieldsByIndex[$template_id][] = &$r;
+            unset($r);
         }
         $res->close();
 
@@ -84,9 +89,12 @@ class Collection
             $r['cfg'] = Util\toJSONArray($r['cfg']);
             $r['data'] = Util\toJSONArray($r['data']);
 
-            $r['fields'] = empty($template_fields[$r['id']])
+            $r['fields'] = empty($templateFields[$r['id']])
                 ? array()
-                : $template_fields[$r['id']];
+                : $templateFields[$r['id']];
+            $r['fieldsByIndex'] = empty($templateFieldsByIndex[$r['id']])
+                ? array()
+                : $templateFieldsByIndex[$r['id']];
 
             /* store template in collection */
             $this->templates[$r['id']] = new \CB\Objects\Template($r['id'], false);

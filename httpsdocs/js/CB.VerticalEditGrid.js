@@ -437,7 +437,7 @@ Ext.define('CB.VerticalEditGrid', {
                 //apply state to columns
                 if(this.stateful) {
                     var state = Ext.state.Manager.get(this.stateId);
-                    if(state.columns) {
+                    if(state && state.columns) {
                         Ext.iterate(
                             newConfig,
                             function(c) {

@@ -189,6 +189,7 @@ class Template extends Object
 
         /* loading template fields */
         $this->data['fields'] = array();
+        $this->data['fieldsByIndex'] = array();
         $this->fieldsOrder = array();
 
         $res = DB\dbQuery(
@@ -215,9 +216,11 @@ class Template extends Object
 
         while ($r = $res->fetch_assoc()) {
             $r['cfg'] = Util\toJSONArray($r['cfg']);
-            $this->data['fields'][$r['id']] = $r;
+            $this->data['fields'][$r['id']] = &$r;
+            $this->data['fieldsByIndex'][] = &$r;
 
             $this->fieldsOrder[$r['name']] = intval($r['order']);
+            unset($r);
         }
         $res->close();
     }
@@ -466,6 +469,7 @@ class Template extends Object
         if (empty($field)) {
             return $rez;
         }
+
         $rez = $this->getField($field['pid']);
         if (!empty($rez) && ($rez['type'] == 'H')) {
             return $rez;
@@ -473,7 +477,7 @@ class Template extends Object
 
         // get closest top header
         $rez = null;
-        foreach ($this->data['fields'] as $fid => $fv) {
+        foreach ($this->data['fieldsByIndex'] as $fv) {
             if (($fv['id'] == $field['id'])) {
                 return $rez;
             }

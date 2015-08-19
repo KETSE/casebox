@@ -158,7 +158,7 @@ Ext.define('CB.ProfileForm', {
             tpl: ['<tpl for="."><div>'
                 ,'<img width="70" height="70" class="user-photo-field2 click icon-user70-{sex}" src="/' + App.config.coreName + '/photo/{id}.png?{[ Ext.Date.format(new Date(), "His") ]}">'
                 ,'</div>'
-                ,'<div><a href="#" name="change" class="click">'+L.Change+'</a> &nbsp; <a href="#" name="remove" class="click">'+L.Delete+'</a></div>'
+                ,'<div><a name="change" class="click">'+L.Change+'</a> &nbsp; <a name="remove" class="click">'+L.Delete+'</a></div>'
                 ,'</tpl>'
             ]
             ,data: [{}]
@@ -419,6 +419,8 @@ Ext.define('CB.ProfileForm', {
                 }
             ,scope: this
             ,success: function(form, action) {
+                this.photoField.reset();
+                this.photoField.button.fileInputEl.on('change', this.onPhotoChanged, this);
                 this.photoView.update([{id: this.data.id }]);
             }
             ,failure: App.formSubmitFailure
