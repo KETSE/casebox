@@ -125,10 +125,14 @@ Ext.define('CB.controller.History', {
                 'path': Ext.valueFrom(ep.path, ep.id)
                 ,'page': Ext.valueFrom(ep.page, 1)
                 ,'query': ep.query
+                ,'descendants': ep.descendants
             };
 
             if(Ext.isEmpty(p.query)) {
                 delete p.query;
+            }
+            if(p.descendants !== true) {
+                delete p.descendants;
             }
 
             this.settingHash = true;

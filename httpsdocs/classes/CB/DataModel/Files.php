@@ -65,4 +65,26 @@ class Files //extends Base
 
         return $rez;
     }
+
+    /**
+     * get file ids that reffer to a given contentId
+     * @return array
+     */
+    public static function getContentIdReferences($contentId)
+    {
+        $rez = array();
+
+        $sql = 'SELECT id
+            FROM files
+            WHERE content_id = $1
+            ORDER BY id';
+
+        $res = DB\dbQuery($sql, $contentId) or die(DB\dbQueryError());
+        while ($r = $res->fetch_assoc()) {
+            $rez[] = $r['id'];
+        }
+        $res->close();
+
+        return $rez;
+    }
 }

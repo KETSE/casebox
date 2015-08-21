@@ -840,7 +840,7 @@ function initApp() {
 
                         ed.getValue = function() {
                             var value = this._getValue();
-                            value = Ext.util.Format.trim(String(value).replace(/[\n\r]/g, ' '));
+                            value = Ext.util.Format.trim(String(value).replace(/[\n\r,]/g, ' '));
 
                             if(Ext.isEmpty(value)) {
                                 return '';

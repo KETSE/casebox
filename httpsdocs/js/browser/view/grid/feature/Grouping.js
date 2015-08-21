@@ -31,11 +31,13 @@ Ext.define('CB.browser.view.grid.feature.Grouping', {
         var me = this
             ,menu = menuItem.parentMenu
             ,hdr  = menu.activeHeader
-            ,sgf = hdr.dataIndex
+            ,sgf
             ,view = me.view
             ,store = view.store;
 
-        if(store.remoteSort) {
+        if(hdr && store.remoteSort) {
+            sgf = hdr.dataIndex;
+
             this.storeExtraParams = {
                 userGroup: 1
                 ,sourceGroupField: sgf
@@ -46,7 +48,9 @@ Ext.define('CB.browser.view.grid.feature.Grouping', {
 
         this.callParent(arguments);
 
-        hdr.dataIndex = sgf;
+        if(hdr) {
+            hdr.dataIndex = sgf;
+        }
     }
 
     ,getGroupedHeader: function(groupField) {

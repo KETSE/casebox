@@ -273,9 +273,9 @@ Ext.define('CB.plugin.field.DropDownList', {
         for (var i = 0; i < this.commands.length; i++) {
             var cmd = this.commands[i];
 
-            //transform enters to spaces for "space" prefix
+            //transform enters and comma's to spaces for "space" prefix
             if(cmd.prefix == ' ') {
-                parts[0] = parts[0].replace(/[\n\r]/g, ' ');
+                parts[0] = parts[0].replace(/[\n\r,]/g, ' ');
             }
 
             //split left part by command prefix

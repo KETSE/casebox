@@ -160,11 +160,15 @@ class System
      */
     public static function sendMail($email, $subject, $body)
     {
+        $coreName = Config::get('core_name');
+        $sender = Config::get('sender_email');
+        $sender = "$sender ($coreName) <$sender>";
+
         return mail(
             $email,
             $subject,
             $body,
-            "Content-type: text/html; charset=utf-8\r\nFrom: " . Config::get('sender_email') . "\r\n"
+            "Content-type: text/html; charset=utf-8\r\nFrom: " . $sender . "\r\n"
         );
     }
 }

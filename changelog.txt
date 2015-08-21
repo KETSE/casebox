@@ -1,3 +1,10 @@
+CaseBox 1.9.512 (2015-08-21)
+==============================
+- #7007 Do not process files with Tika that can't be extracted and report by email
+- #7988 Back button doesn't work for search
+- #8014 Allow comma separator in Assigned task field
+- #7479 TWEAK: Notifications show in title bar
+
 CaseBox 1.9.511 (2015-08-20)
 ==============================
 - #6765 Create basic CB customization script based on specs for Templates, Fields, Thesauri
