@@ -230,15 +230,16 @@ function notifyAdminAboutContent($contentId)
     $fileInfo = '';
     if (!empty($fileIds)) {
         $p = new Objects\Plugins\SystemProperties();
-        $data = $p->getData(array_pop($fileIds));
+        $fileId = array_pop($fileIds);
+        $data = $p->getData($fileId);
 
         $d = &$data['data'];
 
         $fileInfo = '<table border="0">' .
-            '<tr><td>ID</td><td>' . $d['id'] . '</td></tr>' .
-            '<tr><td>Name</td><td>' . Objects::getName($fileId) . '</td></tr>' .
-            '<tr><td>Path</td><td>' . $d['path'] . '</td></tr>' .
-            '<tr><td>Creator</td><td>' . $d['cid_text'] . '</td></tr>' .
+            '<tr><td>ID:</td><td>' . $d['id'] . '</td></tr>' .
+            '<tr><td>Name:</td><td>' . Objects::getName($fileId) . '</td></tr>' .
+            '<tr><td>Path:</td><td>' . $d['path'] . '</td></tr>' .
+            '<tr><td>Creator: </td><td>' . $d['cid_text'] . '</td></tr>' .
             '</table>';
     }
 

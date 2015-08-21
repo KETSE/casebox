@@ -162,7 +162,7 @@ class System
     {
         $coreName = Config::get('core_name');
         $sender = Config::get('sender_email');
-        $sender = "$sender ($coreName) <$sender>";
+        $sender = "\"$sender ($coreName)\" <$sender>";
 
         return mail(
             $email,

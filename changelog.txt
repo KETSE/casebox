@@ -1,3 +1,7 @@
+CaseBox 1.9.513 (2015-08-21)
+==============================
+- #7007 Sent mail adjustments
+
 CaseBox 1.9.512 (2015-08-21)
 ==============================
 - #7007 Do not process files with Tika that can't be extracted and report by email
