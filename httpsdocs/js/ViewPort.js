@@ -277,7 +277,7 @@ Ext.define('CB.ViewPort', {
             ,this
         );
 
-        App.on('notificationsUpdated', this.updateNotificationButton, this);
+        App.on('notificationsUpdated', this.updateNotificationsCount, this);
 
         return this.actions;
     }
@@ -298,13 +298,23 @@ Ext.define('CB.ViewPort', {
         );
     }
 
-    ,updateNotificationButton: function(counts) {
+    ,updateNotificationsCount: function(counts) {
         var text = (counts.unread > 0)
             ? counts.unread
 
             : '';
 
         this.buttons.toggleNotificationsView.setText(text);
+
+        if(!this.originalDocTitle) {
+            this.originalDocTitle = document.title;
+        }
+
+        document.title = (
+            Ext.isEmpty(text)
+                ? ''
+                : '(' + text + ') '
+            ) + this.originalDocTitle;
     }
 
     ,onToggleNotificationsViewClick: function(b, e) {

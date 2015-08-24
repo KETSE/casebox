@@ -363,16 +363,32 @@ class VanillaModel extends Base
      */
     protected function updateCreateMenus()
     {
-        //add case template at the begining of default menu
-        DB\dbQuery(
-            'UPDATE menu
-            SET menu = CONCAT($1, menu)
-            WHERE node_ids IS NULL
-                AND node_template_ids IS NULL',
-            $this->templateIds['Case'] . ',\'-\',' .
-            $this->templateIds['Contact'] . ',' .
-            $this->templateIds['Organization'] . ',\'-\','
-        ) or die(DB\dbQueryError());
+        $rootId = \CB\Browser::getRootFolderId();
 
+        $pid = Objects::getChildId($rootId, 'System');
+
+        if (!empty($pid)) {
+            $pid = Objects::getChildId($pid, 'Menus');
+            if (!empty($pid)) {
+                $res = DB\dbQuery(
+                    'SELECT id
+                    FROM tree
+                    WHERE pid = $1
+                        AND dstatus = 0',
+                    $pid
+                ) or die(DB\dbQueryError());
+                if ($r = $res->fetch_assoc()) {
+                    $o = Objects::getCachedObject($r['id']);
+                    $d = $o->getData();
+                    $d['data']['menu'] =
+                            $this->templateIds['Case'] . ',' .
+                            $this->templateIds['Contact'] . ',' .
+                            $this->templateIds['Organization'] . ',' .
+                            $d['data']['menu'];
+                    $o->update($d);
+                }
+                $res->close();
+            }
+        }
     }
 }

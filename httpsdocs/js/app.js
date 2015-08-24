@@ -835,12 +835,12 @@ function initApp() {
                                 v[i] = CB.DB.usersStore.getUserById(v[i]);
                             }
 
-                            this._setValue(v.join(' '));
+                            this._setValue(v.join(', '));
                         };
 
                         ed.getValue = function() {
                             var value = this._getValue();
-                            value = Ext.util.Format.trim(String(value).replace(/[\n\r]/g, ' '));
+                            value = Ext.util.Format.trim(String(value).replace(/[\n\r,]/g, ' '));
 
                             if(Ext.isEmpty(value)) {
                                 return '';

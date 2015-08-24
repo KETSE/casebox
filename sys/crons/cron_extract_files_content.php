@@ -52,6 +52,7 @@ $sql = 'SELECT id
     ,pages
 FROM files_content
 WHERE '.$where;
+
 $res = DB\dbQuery($sql) or die(DB\dbQueryError()); //and name like \'%.pdf\'
 
 while ($r = $res->fetch_assoc()) {
@@ -84,6 +85,7 @@ while ($r = $res->fetch_assoc()) {
                         file_put_contents($filename.'.gz', $text);
                     } else {
                         $skip_parsing = 1;
+                        notifyAdminAboutContent($r['id']);
                     }
 
                     $meta = getZipFileContent($filename.'.zip', '__METADATA__');
@@ -112,7 +114,7 @@ while ($r = $res->fetch_assoc()) {
                 ,$pages
                 ,$skip_parsing
             )
-        ) or die('error2');
+        );// or die('error2');
 
         $rez['Processed'] = $rez['Processed'] +1;
         $rez['Processed List'][] =  $filename;
@@ -199,19 +201,59 @@ function getTikaResult($filename)
 function onScriptShutdown ()
 {
     Cache::remove('memory');
+
     if ((!is_null($err = error_get_last())) && (!in_array($err['type'], array (E_NOTICE, E_WARNING)))) {
         //mark last processed file to be skipped parsing
+
         $id = Cache::get('lastRecId', false);
+
         if (!empty($id)) {
+            notifyAdminAboutContent($id);
+
+            //update db status
             DB\dbQuery(
                 'UPDATE files_content
                 SET skip_parsing = 1
                 WHERE id = $1',
                 $id
             ) or die(DB\dbQueryError());
+
         }
     }
 };
+
+//notify admin about content processing failure
+function notifyAdminAboutContent($contentId)
+{
+    //select latest file with that content
+    $fileIds = DataModel\Files::getContentIdReferences($contentId);
+    $fileInfo = '';
+    if (!empty($fileIds)) {
+        $p = new Objects\Plugins\SystemProperties();
+        $fileId = array_pop($fileIds);
+        $data = $p->getData($fileId);
+
+        $d = &$data['data'];
+
+        $fileInfo = '<table border="0">' .
+            '<tr><td>ID:</td><td>' . $d['id'] . '</td></tr>' .
+            '<tr><td>Name:</td><td>' . Objects::getName($fileId) . '</td></tr>' .
+            '<tr><td>Path:</td><td>' . $d['path'] . '</td></tr>' .
+            '<tr><td>Creator: </td><td>' . $d['cid_text'] . '</td></tr>' .
+            '</table>';
+    }
+
+    $err = error_get_last();
+
+    if (!is_null($err) && (!in_array($err['type'], array (E_NOTICE, E_WARNING)))) {
+        $fileInfo .= "\n\r<hr />\n\r" . $err['message'];
+    }
+
+    System::notifyAdmin(
+        'Casebox error extracting file content #' . $contentId,
+        $fileInfo
+    );
+}
 
 function getZipFileContent ($zip_file, $filename)
 {

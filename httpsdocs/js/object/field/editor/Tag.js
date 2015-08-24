@@ -54,6 +54,7 @@ Ext.define('CB.object.field.editor.Tag', {
                     ,restful: false
                     ,remoteSort: true
                     ,model: 'FieldObjects'
+                    ,pageSize: 200
                     ,proxy: {
                         type: 'direct'
                         ,paramsAsHash: true
