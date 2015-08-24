@@ -6,7 +6,6 @@ namespace CB;
  *
  */
 
-use CB\Cache;
 use CB\Util;
 use CB\User;
 
@@ -785,59 +784,27 @@ class Search extends Solr\Client
         if (!empty($ids)) {
             $chunks = array_chunk($ids, 200);
 
-            //connect or get solr service connection
-            $conn = Cache::get('solr_service');
-
-            if (empty($conn)) {
-                $conn = new Solr\Service();
-
-                Cache::set('solr_service', $conn);
-            }
-
             //execute search
             try {
                 foreach ($chunks as $chunk) {
                     $params = array(
-                        'defType' => 'dismax'
-                        ,'q.alt' => '*:*'
-                        ,'fl' => $fieldList
+                        'fl' => $fieldList
+                        ,'facet' => false
+                        ,'skipSecurity' => true
                         ,'fq' => array(
                             'id:(' . implode(' OR ', $chunk). ')'
                         )
                     );
 
-                    $inputParams = array(
-                        'ids' => $chunk
-                    );
+                    $search = new Search();
+                    $sr = $search->query($params);
 
-                    $eventParams = array(
-                        'params' => &$params
-                        ,'inputParams' => &$inputParams
-                    );
-
-                    \CB\fireEvent('beforeSolrQuery', $eventParams);
-
-                    $searchRez = $conn->search(
-                        '',
-                        0,
-                        200,
-                        $params
-                    );
-
-                    if (!empty($searchRez->response->docs)) {
-                        foreach ($searchRez->response->docs as $d) {
-                            $rd = array();
-                            foreach ($d as $fn => $fv) {
-                                $rd[$fn] = $fv;
-                            }
-                            $rez[$d->id] = $rd;
+                    if (!empty($sr['data'])) {
+                        foreach ($sr['data'] as &$d) {
+                            $rez[$d['id']] = $d;
                         }
                     }
 
-                    $eventParams['result'] = array(
-                        'data' => &$rez
-                    );
-                    \CB\fireEvent('solrQuery', $eventParams);
                 }
             } catch ( \Exception $e ) {
                 throw new \Exception("An error occured in getObjects: \n\n {$e->__toString()}");

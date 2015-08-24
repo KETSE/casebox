@@ -835,7 +835,7 @@ function initApp() {
                                 v[i] = CB.DB.usersStore.getUserById(v[i]);
                             }
 
-                            this._setValue(v.join(' '));
+                            this._setValue(v.join(', '));
                         };
 
                         ed.getValue = function() {

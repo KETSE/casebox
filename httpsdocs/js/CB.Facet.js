@@ -20,6 +20,11 @@ Ext.define('CB.Facet', {
                 var a = o1.name
                     ,b = o2.name;
 
+                if(Ext.isNumeric(a) && Ext.isNumeric(b)) {
+                    a = parseFloat(a);
+                    b = parseFloat(b);
+                }
+
                 if(a < b) {
                     return -1;
                 }
@@ -34,6 +39,11 @@ Ext.define('CB.Facet', {
             ,desc: function(o1, o2) {
                 var a = o1.name
                     ,b = o2.name;
+
+                if(Ext.isNumeric(a) && Ext.isNumeric(b)) {
+                    a = parseFloat(a);
+                    b = parseFloat(b);
+                }
 
                 if(a < b) {
                     return 1;

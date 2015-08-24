@@ -177,11 +177,18 @@ Ext.define('CB.browser.view.Grid', {
                     scope: this
                     ,containermousedown: function(view, e, eOpts) {
                         var g = this.grid
-                            ,sm = g.getSelectionModel();
+                            ,sm = g.getSelectionModel()
+                            ,t = e.getTarget();
 
-                        if(sm.selType != 'checkboxmodel') {
+                        if((sm.selType != 'checkboxmodel') && t) {
+                            t = Ext.get(t);
+                            var s = t.getViewSize();
+
                             //deselect all selected records when clicking on empty area of the grid
-                            this.grid.getSelectionModel().deselectAll();
+                            //except the scroller
+                            if ((e.pageX < t.getLeft() + s.width) && (e.pageY < t.getTop() + s.height)){
+                                this.grid.getSelectionModel().deselectAll();
+                            }
                         }
                     }
                 }
