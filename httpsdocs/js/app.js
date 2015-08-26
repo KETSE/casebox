@@ -558,16 +558,6 @@ function initApp() {
         return c;
     };
 
-    App.getTextEditWindow = function(config){
-        if(!App.textEditWindow) {
-            App.textEditWindow = new CB.TextEditWindow();
-        }
-
-        App.textEditWindow = Ext.apply(App.textEditWindow, config);
-
-        return App.textEditWindow;
-    };
-
     App.getHtmlEditWindow = function(config){
         if(!App.htmlEditWindow) App.htmlEditWindow = new CB.HtmlEditWindow();
         App.htmlEditWindow = Ext.apply(App.htmlEditWindow, config);
@@ -1073,8 +1063,10 @@ function initApp() {
 
             case 'text':
                 e.cancel = true;
-                w = App.getTextEditWindow({
+                w = new CB.TextEditWindow({
                     title: tr.get('title')
+                    ,editor: tr.get('cfg').editor
+                    ,mode: tr.get('cfg').mode
                     ,data: {
                         value: e.record.get('value')
                         ,scope: e
@@ -1088,7 +1080,7 @@ function initApp() {
                         }
                     }
                 });
-                w.on('hide', e.grid.gainFocus, e.grid);
+                w.on('destory', e.grid.gainFocus, e.grid);
                 w.show();
                 break;
 

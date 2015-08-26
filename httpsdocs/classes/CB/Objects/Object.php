@@ -401,7 +401,7 @@ class Object
 
         //load current object from db into a variable to be passed to log and events
         $this->oldObject = clone $this;
-        $this->oldObject->load($this->id);
+        $od = $this->oldObject->load($this->id);
 
         \CB\fireEvent('beforeNodeDbUpdate', $this);
 
@@ -896,7 +896,7 @@ class Object
      * when there is need to delete custom data on object delete
      * @return coid
      */
-    protected function deleteCustomData()
+    protected function deleteCustomData($permanent)
     {
 
     }

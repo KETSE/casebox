@@ -488,6 +488,9 @@ class Objects
             case 'comment':
                 return new Objects\Comment($objectId);
                 break;
+            case 'config':
+                return new Objects\Config($objectId);
+                break;
             case 'shortcut':
                 return new Objects\Shortcut($objectId);
                 break;

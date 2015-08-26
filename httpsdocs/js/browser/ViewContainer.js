@@ -1251,7 +1251,7 @@ Ext.define('CB.browser.ViewContainer', {
         }
 
         for (var i = 0; i < s.length; i++) {
-            ids.push(Ext.valueFrom(s[i].id, s[i].nid));
+            ids.push(Ext.valueFrom(s[i].nid, s[i].id));
         }
 
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');

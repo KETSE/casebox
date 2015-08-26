@@ -1,3 +1,11 @@
+CaseBox 1.9.515 (2015-08-26)
+==============================
+- #7977 mysql.config table: controlled from CB UI via 'config' content type records
+
+Notes:
+----------
+- use bin/core_update_config_model.php to move config into tree
+
 CaseBox 1.9.514 (2015-08-24)
 ==============================
 - #8107 Sorting by value in Filter.Facet & Chart view should be asInt if facet.type == int
