@@ -180,9 +180,16 @@ border-color: transparent;
   /*line-height: 16px !important*/
 }
 
+/*
 .x-form-text-default {
   font: normal 13px/17px arial,verdana,sans-serif;
 }
+
+.x-form-text-default {
+  font: normal 12px/16px arial,verdana,sans-serif;
+}
+*/
+
 
 .x-grid-cell-inner pre {
   font: normal 13px arial, verdana, sans-serif;
@@ -258,10 +265,6 @@ font-size: 13px;
   /*line-height: 16px !important*/
 }
 
-
-.x-form-text-default {
-  font: normal 12px/16px arial,verdana,sans-serif;
-}
 
 .x-grid-cell-inner pre {
   font: normal 12px arial, verdana, sans-serif;

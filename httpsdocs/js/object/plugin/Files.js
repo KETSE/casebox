@@ -7,7 +7,8 @@ Ext.define('CB.object.plugin.Files', {
     ,xtype: 'CBObjectPluginFiles'
     ,cls: 'obj-plugin'
 
-    ,bodyStyle: 'min-height: 50px; margin-bottom:0; padding-bottom:30px'
+    // ,bodyStyle: 'min-height: 50px; margin-bottom:0; padding-bottom:30px'
+    // ,bodyStyle: 'margin-bottom:0;'
 
     ,initComponent: function(){
 
