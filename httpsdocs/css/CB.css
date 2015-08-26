@@ -395,6 +395,7 @@ a:hover{ text-decoration: underline }
 }
 
 .icon-merge {background-image: url(i/ico/vbox.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.icon-user-account{ background-image: url(i/ico/account.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-user-m{ background-image: url(i/ico/user.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-user-f { background-image: url(i/ico/user-female.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-user-plus { background-image: url(i/ico/user--plus.png) !important; background-position: 0 50%; background-repeat: no-repeat}
