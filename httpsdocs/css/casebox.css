@@ -634,9 +634,9 @@ background-color: #FFF;
 table.obj-preview  {
     border-collapse: separate;
     width: 100%;
-    border: 1px solid #DDD;
-    /* border-left: 0; */
-    border-top: 0;
+    /* border: 1px solid #DDD;
+    border-top: 0;*/
+    border: 0;
     border-spacing: 0;
     /*font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;*/
 }
