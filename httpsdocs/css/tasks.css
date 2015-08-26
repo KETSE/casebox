@@ -82,9 +82,13 @@ a.btn-task-complete { font-size: 12px; color: white; font-weight: bold}
     border-spacing: 0;
 }
 
+.people td {vertical-align: top; padding: 5px 5px 5px 0px; }
+.people td.user {width: 1% !important; padding-right: 5px; }
+
 .taskview .people td {vertical-align: top; padding: 5px 5px 5px 0px; }
 .taskview .people .user {width: 1% !important; padding-right: 5px; }
 .taskview .people tr a.bt{display: none; margin-left: 5px; } .taskview .people tr:hover a.bt{display: inline; }
+
 ul.reminders a {text-decoration: none; color: #333; }
 ul.task_files a {text-decoration: underline; color: #15C; }
 ul.reminders li span, ul.task_files li .actions {cursor: hand; display: none }

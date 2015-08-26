@@ -62,7 +62,9 @@ Ext.onReady(function(){
         App.sid = '&qq=' + Date.parse(new Date());
         App.config = r.config;
         App.loginData = r.user;
-        App.loginData.iconCls = 'icon-user-' + Ext.valueFrom(r.user.sex, '');
+
+        // App.loginData.iconCls = 'icon-user-' + Ext.valueFrom(r.user.sex, '');
+        App.loginData.iconCls = 'icon-user-account';
 
         if(App.loginData.cfg.short_date_format) {
             App.dateFormat = App.loginData.cfg.short_date_format;
