@@ -176,11 +176,11 @@ Ext.define('CB.browser.NotificationsView', {
     ,actionRenderer: function(v, m, r, ri, ci, s){
         var uid = r.get('user_id')
             ,rez = '<table cellpadding="0" cellspacing="0" border="0">' +
-                '<tr><td><img class="i32" src="/' +
+                '<tr><td style="padding: 3px"><img class="i32" src="/' +
             App.config.coreName +
             '/photo/' + uid + '.jpg?32=' +
             CB.DB.usersStore.getPhotoParam(uid) +
-            '"></td><td class="pl10 vaT">' + v + '</td></tr></table>'
+            '"></td><td style="padding-top: 3px" class="pl7 vaT notif">' + v + '</td></tr></table>'
             ;
 
         m.tdCls = r.get('read') ? '': 'notification-record-unread';
