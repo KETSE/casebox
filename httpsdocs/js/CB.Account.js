@@ -1190,7 +1190,6 @@ Ext.define('CB.TSVsmsForm', {
     ,prepareInterface: function(data){
         this.getForm().setValues(data);
         // this.syncSize();
-        App.focusFirstField(this);
     }
     ,onVerifyPhoneClick: function(){
         if(this.form.getForm().isValid()){
@@ -1287,7 +1286,6 @@ Ext.define('CB.TSVybkForm', {
     }
     ,prepareInterface: function(data){
         this.getForm().setValues(data);
-        App.focusFirstField(this);
     }
     ,onSaveClick: function(){
         this.fireEvent('verifyandsave', this.getForm().getValues());

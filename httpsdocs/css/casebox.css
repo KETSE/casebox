@@ -639,6 +639,7 @@ table.obj-preview  {
     border-top: 0;
     border-spacing: 0;
     /*font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;*/
+    margin-bottom: 20px;
 }
 
 table.obj-preview > tbody > tr > td, table.obj-preview > tbody > tr > th {vertical-align: top; padding: 6px 7px; border-top: 1px solid #DDD}

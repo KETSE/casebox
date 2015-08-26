@@ -861,6 +861,7 @@ function initApp() {
                             ,typeAhead: true
                             ,queryMode: 'remote'
                             ,autoLoadOnValue: true
+                            ,autoSelect: false
                             ,multiSelect: true
                             ,minChars: 2
                             // ,stacked: true
@@ -1053,13 +1054,19 @@ function initApp() {
                         }
                     }
                 }
-                return new Ext.form.TextArea({
+
+                var edConfig = {
                     enableKeyEvents: true
                     ,height: height
-                    ,plugins: [{
+                };
+                if(cfg.suggestUsers) {
+                    edConfig.plugins = [{
                         ptype: 'CBPluginFieldDropDownList'
-                    }]
-                });
+                    }];
+
+                }
+
+                return new Ext.form.TextArea(edConfig);
 
             case 'text':
                 e.cancel = true;
@@ -1104,40 +1111,12 @@ function initApp() {
                 w.show();
                 return w;
                 break;
+
             default:
                 return new Ext.form.TextField({
                     enableKeyEvents: true
                 });
         }
-    };
-
-    App.focusFirstField = function(scope){
-        return;
-        scope = Ext.valueFrom(scope, this);
-        f = function(){
-            var a = [];
-
-            if(scope.find) {
-                a = scope.find('isFormField', true);
-            }
-
-            if(a.length < 1) {
-                return;
-            }
-
-            var found = false;
-            var i = 0;
-            while( !found && (i<a.length) ){
-                found = ( !Ext.isEmpty(a[i]) && !Ext.isEmpty(a[i].isXType) && !a[i].isXType('radiogroup') && !a[i].isXType('displayfield') && (a[i].hidden !== true) );
-                i++;
-            }
-            if(!found) return;
-            c = a[i-1];
-            if(c.isXType('fieldcontainer'))  c = c.items.first();
-            c.focus();
-        };
-
-        Ext.Function.defer(f, 500, scope);
     };
 
     App.successResponse = function(r){

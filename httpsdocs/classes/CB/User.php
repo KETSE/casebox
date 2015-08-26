@@ -760,12 +760,12 @@ class User
      */
     public function setLanguage($id)
     {
-        $coreLanguages = Config::get('languages');
+        $coreUILanguages = Config::get('languagesUI');
 
-        if (isset($coreLanguages[$id -1])) {
+        if (isset($coreUILanguages[$id -1])) {
             $_SESSION['user']['language_id'] = $id;
-            $_SESSION['user']['language'] = $coreLanguages[$id -1];
-            setcookie('L', $coreLanguages[$id -1]);
+            $_SESSION['user']['language'] = $coreUILanguages[$id -1];
+            setcookie('L', $coreUILanguages[$id -1]);
         } else {
             return array('success' => false);
         }

@@ -1,3 +1,17 @@
+CaseBox 1.9.516 (2015-08-26)
+==============================
+- #8165 tagField not using keyboard properly.
+- #8183 Space between object plugins if Preview has txt field
+- #8128 Reset pageNr in grid when search is performed
+- #8057 Need help enabling MultiLanguage support
+  Added config option "languagesUI"
+- #7339 Notifications sent if @user is used in Task.description ?
+  Added boolean config option "suggestUsers" for memo field types.
+
+Notes:
+----------
+- updated translations and rtl languages in _casebox.sql dump
+
 CaseBox 1.9.515 (2015-08-26)
 ==============================
 - #7977 mysql.config table: controlled from CB UI via 'config' content type records

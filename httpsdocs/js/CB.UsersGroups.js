@@ -162,7 +162,6 @@ Ext.define('CB.AddUserForm', {
         });
         this.callParent(arguments);
 
-        this.on('show', App.focusFirstField, this);
         this.on('close', function(){CB.DB.roles.clearFilter();}, this);
     }
 
@@ -1554,7 +1553,7 @@ Ext.define('CB.ChangePasswordWindow', {
             ,listeners: {
                 afterrender: function(){
                     f = this.down('form');
-                    App.focusFirstField(f);
+                    // App.focusFirstField(f);
                 }
             }
         });

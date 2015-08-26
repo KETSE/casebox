@@ -426,6 +426,10 @@ class Config extends Singleton
                 : $config['default_language'];
         }
 
+        $rez['languagesUI'] = empty($config['languagesUI'])
+            ? $rez['languages']
+            : Util\toTrimmedArray($config['languagesUI']);
+
         // Default row count limit used for solr results
 
         $rez['max_rows'] = empty($config['max_rows'])
@@ -538,7 +542,7 @@ class Config extends Singleton
         }
 
         // add available languages of the core to the minify groups
-        $languages = Config::get('languages', array('en'));
+        $languages = Config::get('languagesUI', array('en'));
 
         if (!in_array('en', $languages)) {
             $languages[] = 'en';
@@ -547,13 +551,16 @@ class Config extends Singleton
         foreach ($languages as $l) {
             $k = mb_strtolower(trim($l));
 
-            $cf = DOC_ROOT . 'js' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR . $coreName . '_' . $l . '.js';
+            $dir = DOC_ROOT . 'js' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR;
+
+            $cf = $dir . $coreName . '_' . $l . '.js';
             if (file_exists($cf)) { //include core's custom translation file if present
                 $rez['lang-'.$l] = array('//js/locale/' . $coreName . '_' . $l . '.js');
-            } else {
+            } elseif (file_exists($dir . "$l.js")) {
                 $rez['lang-'.$l] = array('//js/locale/' . $l . '.js');
+            } else {
+                $rez['lang-'.$l] = array('//js/locale/en.js');
             }
-
         }
 
         return $rez;

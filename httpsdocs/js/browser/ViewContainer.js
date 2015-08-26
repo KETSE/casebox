@@ -824,8 +824,12 @@ Ext.define('CB.browser.ViewContainer', {
             options.userViewChange = true;
         }
 
+        var page = Ext.valueFrom(options.page, 1);
+        store.currentPage = page;
+        options.page = page;
+        options.start = (page -1) * store.pageSize;
+
         store.proxy.extraParams = options;
-        store.currentPage = Ext.valueFrom(options.page, 1);
     }
 
     ,onStoreLoad: function(store, recs, options) {

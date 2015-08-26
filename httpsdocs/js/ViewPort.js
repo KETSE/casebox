@@ -702,7 +702,7 @@ Ext.define('CB.ViewPort', {
             App.confirmLeave = false;
             document.location.reload();
         } else {
-            Ext.Msg.Alert(L.Error, L.ErrorOccured);
+            Ext.Msg.alert(L.Error, L.ErrorOccured);
         }
     }
 

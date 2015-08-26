@@ -146,14 +146,17 @@ function setOwnershipForApacheUser(&$cfg)
         return ;
     }
 
-    $cmdSet = [
-        'chown -R ' . $cfg['apache_user'].' "' . \CB\LOGS_DIR . '"',
-        'chown -R ' . $cfg['apache_user'].' "' . \CB\DATA_DIR . '"',
-        'chown -R ' . $cfg['apache_user'].' "' . \CB\DOC_ROOT . 'config.ini"'
-    ];
+    $files = array(
+        \CB\LOGS_DIR,
+        \CB\DATA_DIR,
+        \CB\DOC_ROOT . 'config.ini'
+    );
 
-    foreach ($cmdSet as $shell_cmd) {
-        shell_exec($shell_cmd);
+    foreach ($files as $file) {
+        $cmd = 'chown -R ' . $cfg['apache_user'].' "' . $file . '"';
+        if (file_exists($file)) {
+            shell_exec($shell_cmd);
+        }
     };
 
 }
