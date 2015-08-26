@@ -48,14 +48,18 @@
     color: #aeaeae;
 }
 
-.as-diff th{
+
+.as-diff th {
     font-weight: normal;
     text-align: left;
     vertical-align: top;
-    padding-right: 5px
+    /*padding-right: 5px*/
+    color: #666;
+    padding: 2px 10px 2px 5px;
 }
+
 .as-diff .new-value{
-    color: #73ae42
+    color: #008C00;
 }
 .as-diff .old-value{
     color: #8f8f8f;
