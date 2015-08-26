@@ -1038,7 +1038,7 @@ border-top: 0;
   bottom: 2px;
   right: 3px;
   max-width: 100%;
-  border-radius: 50%;
+  border-radius: 2px;
   color: #fff;
   font-size: 10px;
   font-family: helvetica;
