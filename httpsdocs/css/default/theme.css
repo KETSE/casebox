@@ -99,6 +99,7 @@
 .x-menu-item .ib-task-new{background-image: url(s/task.png); background-position: 0 50%; background-repeat: no-repeat}
 
 
+.i-arrow-right {background-image: url(s/ic_keyboard_arrow_right_black_18dp.png); background-position: 0 50%; background-repeat: no-repeat; min-height: 18px;}
 .i-attach {background-image: url(s/ic_attach_file_black_18dp.png); background-position: 0 50%; background-repeat: no-repeat; min-height: 18px;}
 .i-refresh {background-image: url(s/refresh.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-points, .x-tool-points {background-image: url(s/points-gray.png); background-position: 0 50%; background-repeat: no-repeat}

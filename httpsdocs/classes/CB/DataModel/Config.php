@@ -20,6 +20,7 @@ class Config extends Base
      */
     protected static $tableFields = array(
         'id' => 'int'
+        ,'pid' => 'int'
         ,'param' => 'varchar'
         ,'value' => 'text'
     );

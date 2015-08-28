@@ -827,7 +827,9 @@ Ext.define('CB.browser.ViewContainer', {
         var page = Ext.valueFrom(options.page, 1);
         store.currentPage = page;
         options.page = page;
-        options.start = (page -1) * store.pageSize;
+        if(!Ext.isDefined(options.start)) {
+            options.start = (page - 1) * store.pageSize;
+        }
 
         store.proxy.extraParams = options;
     }

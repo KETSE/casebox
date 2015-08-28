@@ -15,11 +15,15 @@ class Config extends Object
     {
         parent::createCustomData();
 
-        $d = &$this->data['data'];
+        $d = &$this->data;
+        $dd = &$d['data'];
 
         $p = array(
-            'param' => $d['_title']
-            ,'value' => $d['value']
+            'pid' => empty($d['pid'])
+                ? null
+                : $this->getDMPid($d['pid'])
+            ,'param' => $dd['_title']
+            ,'value' => $dd['value']
         );
 
         DM\Config::create($p);
@@ -37,12 +41,16 @@ class Config extends Object
         // var_export($od);
         $id = DM\Config::toId($od['data']['_title'], 'param');
         // var_export($id);
-        $d = &$this->data['data'];
+        $d = &$this->data;
+        $dd = &$d['data'];
 
         $p = array(
             'id' => $id
-            ,'param' => $d['_title']
-            ,'value' => $d['value']
+            ,'pid' => empty($d['pid'])
+                ? null
+                : $this->getDMPid($d['pid'])
+            ,'param' => $dd['_title']
+            ,'value' => $dd['value']
         );
 
         DM\Config::update($p);
@@ -63,5 +71,18 @@ class Config extends Object
         }
 
         parent::deleteCustomData($permanent);
+    }
+
+    /**
+     * get data model pid that is different from tree one
+     * @param  [type] $pid [description]
+     * @return [type] [description]
+     */
+    protected function getDMPid($pid)
+    {
+        $name = Objects::getName($pid);
+        $rez = DM\Config::toId($name, 'param');
+
+        return $rez;
     }
 }

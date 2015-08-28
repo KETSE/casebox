@@ -171,14 +171,28 @@ class Config extends Singleton
     private static function getCoreDBConfig()
     {
         $rez = array();
+        $ref = array();
         $res = DB\dbQuery(
-            'SELECT param
+            'SELECT id
+                ,pid
+                ,param
                 ,`value`
-            FROM config'
-        ) or die( DB\dbQueryError() );
+            FROM config
+            ORDER BY pid'
+        ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
-            $rez[$r['param']] = $r['value'];
+            $ref[$r['id']] = $r['param'];
+
+            if (empty($r['pid'])) {
+                $rez[$r['param']] = $r['value'];
+            } else {
+                $parent = &$rez[$ref[$r['pid']]];
+                if (!is_array($parent)) {
+                    $rez[$ref[$r['pid']]] = Util\toJSONArray($parent);
+                }
+                $rez[$ref[$r['pid']]][$r['param']] = Util\toJSONArray($r['value']);
+            }
         }
         $res->close();
 

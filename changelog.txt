@@ -1,3 +1,14 @@
+CaseBox 1.9.517 (2015-08-28)
+==============================
+- #8203 Adding a "Next >" bottom div in activity stream instead of pagination/infinite scrolling
+- #7977 mysql.config table: controlled from CB UI via 'config' content type records
+  splitted treeNode configs in subrecords
+
+Fixed Bugs:
+----------
+- #8214 Pivot table not generated, JS error
+
+
 CaseBox 1.9.516 (2015-08-26)
 ==============================
 - #8165 tagField not using keyboard properly.

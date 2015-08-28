@@ -2,6 +2,7 @@ Ext.namespace('Ext.util');
 
 //improve stripTags function
 Ext.util.Format.stripTags = function (str, allow) {
+    str = String(str);
     // making sure the allow arg is a string containing only tags in lowercase (<a><b><c>)
     allow = (((allow || "") + "").toLowerCase().match(/<[a-z][a-z0-9]*>/g) || []).join('');
 

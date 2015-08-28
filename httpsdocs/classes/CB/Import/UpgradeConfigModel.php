@@ -4,9 +4,11 @@ namespace CB\Import;
 
 use CB\Config;
 use CB\DB;
+use CB\DataModel as DM;
 use CB\Templates;
 use CB\Browser;
 use CB\Objects;
+use CB\Util;
 use CB\Import\BareBoneModel as BBM;
 
 class UpgradeConfigModel extends Base
@@ -188,6 +190,7 @@ class UpgradeConfigModel extends Base
     protected function syncConfigToTree()
     {
         $o = new \CB\Objects\Object();
+        $co = new \CB\Objects\Config();
 
         $res = DB\dbQuery('SELECT * FROM config') or die(DB\dbQueryError());
 
@@ -244,7 +247,21 @@ class UpgradeConfigModel extends Base
                 continue;
             }
 
-            $o->create(
+            $childs = array();
+
+            if ($r['param'] == 'folder_templates') {
+                $r['value'] .= ',' . $this->templateIds["Config json option"];
+                DM\Config::update($r);
+            }
+
+            if ($r['param'] == 'treeNodes') {
+                $childs = Util\toJSONArray($r['value']);
+                $r['value'] = '';
+
+                DM\Config::update($r);
+            }
+
+            $pid = $o->create(
                 array(
                     'id' => null
                     ,'pid' => $this->cfg['configFolderId']
@@ -256,6 +273,21 @@ class UpgradeConfigModel extends Base
                     )
                 )
             );
+
+            foreach ($childs as $k => $v) {
+                $co->create(
+                    array(
+                        'id' => null
+                        ,'pid' => $pid
+                        ,'template_id' => $this->templateIds["Config $type option"]
+                        ,'name' => $k
+                        ,'data' => array(
+                            '_title'  => $k,
+                            'value' => json_encode($v)
+                        )
+                    )
+                );
+            }
         }
 
         $res->close();

@@ -84,3 +84,15 @@
 .comment-trigger-reply{
     background: url(default/s/ic_check_black_18dp.png);
 }
+
+.asNext {
+    margin: 10px auto;
+    padding: 10px;
+    background-color: white;
+    width: 500px;
+    border-radius: 7px;
+    vertical-align: top;
+}
+.asNext:hover {
+    text-decoration: none;
+}
