@@ -7,11 +7,12 @@
     "require" : {
         "php"          : ">=5.4",
         "ext-mbstring" : "*",
-        "sabre/event"  : ">=1.0.0,<3.0.0"
+        "sabre/event"  : ">=1.0.0,<3.0.0",
+        "sabre/uri"    : "~1.0"
     },
     "require-dev" : {
-        "phpunit/phpunit" : "*",
-        "squizlabs/php_codesniffer": "~1.5.3"
+        "phpunit/phpunit" : "~4.3",
+        "sabre/cs" : "~0.0.1"
     },
     "suggest" : {
         "ext-curl" : " to make http requests with the Client class"
@@ -29,6 +30,9 @@
         "source" : "https://github.com/fruux/sabre-http"
     },
     "autoload" : {
+        "files" : [
+            "lib/functions.php"
+        ],
         "psr-4" : {
             "Sabre\\HTTP\\" : "lib/"
         }

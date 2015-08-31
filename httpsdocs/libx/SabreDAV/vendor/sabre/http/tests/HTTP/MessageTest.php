@@ -93,7 +93,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($headers, $message->getHeaders());
 
         $message->setHeaders([
-            'X-Foo' => ['3','4'],
+            'X-Foo' => ['3', '4'],
             'X-Bar' => '5',
         ]);
 
@@ -119,7 +119,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($headers, $message->getHeaders());
 
         $message->addHeaders([
-            'X-Foo' => ['3','4'],
+            'X-Foo' => ['3', '4'],
             'X-Bar' => '5',
         ]);
 
@@ -140,8 +140,8 @@ class MessageTest extends \PHPUnit_Framework_TestCase {
         $message->setBody('foo');
 
         // Stream
-        $h = fopen('php://memory','r+');
-        fwrite($h,'bar');
+        $h = fopen('php://memory', 'r+');
+        fwrite($h, 'bar');
         rewind($h);
         $message->setBody($h);
 
@@ -168,11 +168,11 @@ class MessageTest extends \PHPUnit_Framework_TestCase {
         );
 
         $this->assertEquals(
-            ['1','2'],
+            ['1', '2'],
             $message->getHeaderAsArray('a')
         );
         $this->assertEquals(
-            ['1','2'],
+            ['1', '2'],
             $message->getHeaderAsArray('A')
         );
         $this->assertEquals(

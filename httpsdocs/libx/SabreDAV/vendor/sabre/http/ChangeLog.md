@@ -1,6 +1,48 @@
 ChangeLog
 =========
 
+4.0.0 (2015-05-20)
+------------------
+
+* Deprecated: All static functions from `Sabre\HTTP\URLUtil` and
+  `Sabre\HTTP\Util` moved to a separate `functions.php`, which is also
+  autoloaded. The old functions are still there, but will be removed in a
+  future version. (#49)
+
+
+4.0.0-alpha3 (2015-05-19)
+-------------------------
+
+* Added a parser for the HTTP `Prefer` header, as defined in [RFC7240][rfc7240].
+* Deprecated `Sabre\HTTP\Util::parseHTTPDate`, use `Sabre\HTTP\parseDate()`.
+* Deprecated `Sabre\HTTP\Util::toHTTPDate` use `Sabre\HTTP\toDate()`.
+
+
+4.0.0-alpha2 (2015-05-18)
+-------------------------
+
+* #45: Don't send more data than what is promised in the HTTP content-length.
+  (@dratini0).
+* #43: `getCredentials` returns null if incomplete. (@Hywan)
+* #48: Now using php-cs-fixer to make our CS consistent (yay!)
+* This includes fixes released in version 3.0.5.
+
+
+4.0.0-alpha1 (2015-02-25)
+-------------------------
+
+* #41: Fixing bugs related to comparing URLs in `Request::getPath()`.
+* #41: This library now uses the `sabre/uri` package for uri handling.
+* Added `421 Misdirected Request` from the HTTP/2.0 spec.
+
+
+3.0.5 (2015-05-11)
+------------------
+
+* #47 #35: When re-using the client and doing any request after a `HEAD`
+  request, the client discards the body.
+
+
 3.0.4 (2014-12-10)
 ------------------
 
@@ -182,3 +224,4 @@ Before 2.0.0, this package was built-into SabreDAV, where it first appeared in
 January 2009.
 
 [psr-http]: https://github.com/php-fig/fig-standards/blob/master/proposed/http-message.md
+[rfc-7240]: http://tools.ietf.org/html/rfc7240

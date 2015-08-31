@@ -28,7 +28,7 @@ class ResponseDecoratorTest extends \PHPUnit_Framework_TestCase {
 
         $this->inner->setStatus(201);
         $this->inner->setBody('foo');
-        $this->inner->setHeader('foo','bar');
+        $this->inner->setHeader('foo', 'bar');
 
         $this->assertEquals((string)$this->inner, (string)$this->outer);
 

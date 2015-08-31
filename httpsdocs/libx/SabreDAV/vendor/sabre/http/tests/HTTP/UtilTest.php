@@ -6,15 +6,15 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
 
     function testParseHTTPDate() {
 
-        $times = array(
+        $times = [
             'Wed, 13 Oct 2010 10:26:00 GMT',
             'Wednesday, 13-Oct-10 10:26:00 GMT',
             'Wed Oct 13 10:26:00 2010',
-        );
+        ];
 
         $expected = 1286965560;
 
-        foreach($times as $time) {
+        foreach ($times as $time) {
             $result = Util::parseHTTPDate($time);
             $this->assertEquals($expected, $result->format('U'));
         }
@@ -26,7 +26,7 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
 
     function testParseHTTPDateFail() {
 
-        $times = array(
+        $times = [
             //random string
             'NOW',
             // not-GMT timezone
@@ -43,9 +43,9 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
             'Wed, 13 Oct 2010 24:26:00 GMT',
             'Wednesday, 13-Oct-10 24:26:00 GMT',
             'Wed Oct 13 24:26:00 2010',
-        );
+        ];
 
-        foreach($times as $time) {
+        foreach ($times as $time) {
             $this->assertFalse(Util::parseHTTPDate($time), 'We used the string: ' . $time);
         }
 
@@ -70,19 +70,6 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
             'Sat, 10 Dec 2011 10:00:00 GMT',
             Util::toHTTPDate($dt)
         );
-
-    }
-
-    function testStrtotimeFail() {
-
-        // Strtotime may return -1 when the date cannot be parsed.
-        // We are simulating this situation by testing a date that actually
-        // results in -1. (because I have found no other way to break this
-        // code)
-
-        $time = 'Wed, 13 Oct 1960 10:26:00 GMT';
-
-        $this->assertNull(Util::parseHTTPDate($time));
 
     }
 
