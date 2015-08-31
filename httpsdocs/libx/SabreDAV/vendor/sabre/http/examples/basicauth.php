@@ -3,21 +3,18 @@
 /**
  * This example shows how to do Basic authentication.
  * *
- * @copyright Copyright (C) 2009-2014 fruux GmbH. All rights reserved.
+ * @copyright Copyright (C) 2009-2015 fruux GmbH (https://fruux.com/).
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-
 $userList = [
     "user1" => "password",
     "user2" => "password",
 ];
 
-use
-    Sabre\HTTP\Sapi,
-    Sabre\HTTP\Response,
-    Sabre\HTTP\Auth;
-
+use Sabre\HTTP\Sapi;
+use Sabre\HTTP\Response;
+use Sabre\HTTP\Auth;
 
 // Find the autoloader
 $paths = [
@@ -27,7 +24,7 @@ $paths = [
 
 ];
 
-foreach($paths as $path) {
+foreach ($paths as $path) {
     if (file_exists($path)) {
         include $path;
         break;
@@ -45,7 +42,7 @@ if (!$userPass = $basicAuth->getCredentials()) {
 
 } elseif (!isset($userList[$userPass[0]]) || $userList[$userPass[0]] !== $userPass[1]) {
 
-    // Username or password are incorrect 
+    // Username or password are incorrect
     $basicAuth->requireLogin();
 } else {
 
@@ -56,4 +53,3 @@ if (!$userPass = $basicAuth->getCredentials()) {
 
 // Sending the response
 Sapi::sendResponse($response);
-

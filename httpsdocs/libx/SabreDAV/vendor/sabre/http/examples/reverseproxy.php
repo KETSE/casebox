@@ -11,9 +11,8 @@ $remoteUrl = 'http://example.org/';
 $myBaseUrl = '/reverseproxy.php';
 // $myBaseUrl = '/~evert/sabre/http/examples/reverseproxy.php/';
 
-use
-    Sabre\HTTP\Sapi,
-    Sabre\HTTP\Client;
+use Sabre\HTTP\Sapi;
+use Sabre\HTTP\Client;
 
 // Find the autoloader
 $paths = [
@@ -23,7 +22,7 @@ $paths = [
 
 ];
 
-foreach($paths as $path) {
+foreach ($paths as $path) {
     if (file_exists($path)) {
         include $path;
         break;

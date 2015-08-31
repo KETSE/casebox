@@ -1,6 +1,39 @@
 ChangeLog
 =========
 
+3.4.6 (2015-08-06)
+------------------
+
+* #250: Recurring all-day events are incorrectly included in time range
+  requests when not using UTC in the time range. (@armin-hackmann)
+
+
+3.4.5 (2015-06-02)
+------------------
+
+* #229: Converting vcards from 3.0 to 4.0 that contained a `LANG` property
+  would throw an error.
+
+
+3.4.4 (2015-05-27)
+------------------
+
+* #228: Fixed a 'party crasher' bug in the iTip broker. This would break
+  scheduling in some cases.
+
+
+3.4.3 (2015-05-19)
+------------------
+
+* #219: Corrected validation of `EXDATE` properties with more than one value.
+* #212: `BYSETPOS` with values below `-1` was broken and could cause infinite
+  loops.
+* #211: Fix `BYDAY=-5TH` in recurrence iterator. (@lindquist)
+* #216: `ENCODING` parameter is now validated for all document types.
+* #217: Initializing vCard `DATE` objects with a PHP DateTime object will now
+  work correctly. (@thomascube)
+
+
 3.4.2 (2015-02-25)
 ------------------
 

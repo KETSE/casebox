@@ -2,9 +2,8 @@
 
 namespace Sabre\DAV\FS;
 
-use
-    Sabre\DAV,
-    Sabre\HTTP\URLUtil;
+use Sabre\DAV;
+use Sabre\HTTP\URLUtil;
 
 /**
  * Base node-class
@@ -61,13 +60,11 @@ abstract class Node implements DAV\INode {
         list(, $newName) = URLUtil::splitPath($name);
 
         $newPath = $parentPath . '/' . $newName;
-        rename($this->path,$newPath);
+        rename($this->path, $newPath);
 
         $this->path = $newPath;
 
     }
-
-
 
     /**
      * Returns the last modification time, as a unix timestamp
@@ -81,4 +78,3 @@ abstract class Node implements DAV\INode {
     }
 
 }
-
