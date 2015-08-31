@@ -1,5 +1,7 @@
-CaseBox - Content Management Platform
-=======
+CaseBox
+======================================================
 
-CaseBox is a platform to build a content management system for managing records, tasks and files.   
-[How to install CaseBox](https://www.casebox.org/dev/install/).   
+Casebox is a Content Management Platform for record, file and task management.
+
+Full documentation can be found on the website:
+https://www.casebox.org/docs/
