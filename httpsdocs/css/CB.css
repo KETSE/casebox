@@ -304,6 +304,20 @@ font-size: 12px;
 
 
 
+/*  Grouping ---------------------------- */
+.x-grid-group-hd {
+    border-width: 0px 0 2px 0;
+    border-style: solid;
+    border-color: #ccc;
+    padding: 7px 4px 7px 4px;
+    background: white;
+    cursor: pointer;
+    background-color: #F9F7ED;
+}
+
+
+/*  END of grouping -------------------------------------*/
+
 
 
 
