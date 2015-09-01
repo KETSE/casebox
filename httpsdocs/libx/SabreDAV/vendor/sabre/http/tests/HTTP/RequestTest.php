@@ -6,14 +6,14 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
 
     function testConstruct() {
 
-        $request = new Request('GET', '/foo', array(
+        $request = new Request('GET', '/foo', [
             'User-Agent' => 'Evert',
-        ));
+        ]);
         $this->assertEquals('GET', $request->getMethod());
         $this->assertEquals('/foo', $request->getUrl());
-        $this->assertEquals(array(
+        $this->assertEquals([
             'User-Agent' => ['Evert'],
-        ), $request->getHeaders());
+        ], $request->getHeaders());
 
     }
 
@@ -50,7 +50,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
     function testGetAbsoluteUrl() {
 
         $s = [
-            'HTTP_HOST' => 'sabredav.org',
+            'HTTP_HOST'   => 'sabredav.org',
             'REQUEST_URI' => '/foo'
         ];
 
@@ -160,7 +160,7 @@ HI;
      */
     function testConstructorWithArray() {
 
-        $request = new Request(array());
+        $request = new Request([]);
 
     }
 

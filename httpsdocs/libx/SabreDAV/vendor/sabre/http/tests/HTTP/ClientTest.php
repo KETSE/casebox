@@ -11,22 +11,23 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         $client = new ClientMock();
         $client->addCurlSetting(CURLOPT_POSTREDIR, 0);
 
-        $request = new Request('GET','http://example.org/', ['X-Foo' => 'bar']);
+        $request = new Request('GET', 'http://example.org/', ['X-Foo' => 'bar']);
 
         $settings = [
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER => true,
-                CURLOPT_POSTREDIR => 0,
-                CURLOPT_HTTPHEADER => ['X-Foo: bar'],
-                CURLOPT_URL => 'http://example.org/',
-                CURLOPT_CUSTOMREQUEST => 'GET',
-                CURLOPT_POSTFIELDS => null,
-                CURLOPT_PUT => false,
+                CURLOPT_HEADER         => true,
+                CURLOPT_POSTREDIR      => 0,
+                CURLOPT_HTTPHEADER     => ['X-Foo: bar'],
+                CURLOPT_NOBODY         => false,
+                CURLOPT_URL            => 'http://example.org/',
+                CURLOPT_CUSTOMREQUEST  => 'GET',
+                CURLOPT_POSTFIELDS     => null,
+                CURLOPT_PUT            => false,
             ];
 
         // FIXME: CURLOPT_PROTOCOLS and CURLOPT_REDIR_PROTOCOLS are currently unsupported by HHVM
         // at least if this unit test fails in the future we know it is :)
-        if(defined('HHVM_VERSION') === false) {
+        if (defined('HHVM_VERSION') === false) {
             $settings[CURLOPT_PROTOCOLS] = CURLPROTO_HTTP | CURLPROTO_HTTPS;
             $settings[CURLOPT_REDIR_PROTOCOLS] = CURLPROTO_HTTP | CURLPROTO_HTTPS;
         }
@@ -39,23 +40,58 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
     function testCreateCurlSettingsArrayHEAD() {
 
         $client = new ClientMock();
-        $request = new Request('HEAD','http://example.org/', ['X-Foo' => 'bar']);
+        $request = new Request('HEAD', 'http://example.org/', ['X-Foo' => 'bar']);
 
 
         $settings = [
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER => true,
-                CURLOPT_NOBODY => true,
-                CURLOPT_CUSTOMREQUEST => 'HEAD',
-                CURLOPT_HTTPHEADER => ['X-Foo: bar'],
-                CURLOPT_URL => 'http://example.org/',
-                CURLOPT_POSTFIELDS => null,
-                CURLOPT_PUT => false,
+                CURLOPT_HEADER         => true,
+                CURLOPT_NOBODY         => true,
+                CURLOPT_CUSTOMREQUEST  => 'HEAD',
+                CURLOPT_HTTPHEADER     => ['X-Foo: bar'],
+                CURLOPT_URL            => 'http://example.org/',
+                CURLOPT_POSTFIELDS     => '',
+                CURLOPT_PUT            => false,
             ];
 
         // FIXME: CURLOPT_PROTOCOLS and CURLOPT_REDIR_PROTOCOLS are currently unsupported by HHVM
         // at least if this unit test fails in the future we know it is :)
-        if(defined('HHVM_VERSION') === false) {
+        if (defined('HHVM_VERSION') === false) {
+            $settings[CURLOPT_PROTOCOLS] = CURLPROTO_HTTP | CURLPROTO_HTTPS;
+            $settings[CURLOPT_REDIR_PROTOCOLS] = CURLPROTO_HTTP | CURLPROTO_HTTPS;
+        }
+
+        $this->assertEquals($settings, $client->createCurlSettingsArray($request));
+
+    }
+
+    function testCreateCurlSettingsArrayGETAfterHEAD() {
+
+        $client = new ClientMock();
+        $request = new Request('HEAD', 'http://example.org/', ['X-Foo' => 'bar']);
+
+        // Parsing the settings for this method, and discarding the result.
+        // This will cause the client to automatically persist previous
+        // settings and will help us detect problems.
+        $client->createCurlSettingsArray($request);
+
+        // This is the real request.
+        $request = new Request('GET', 'http://example.org/', ['X-Foo' => 'bar']);
+
+        $settings = [
+                CURLOPT_CUSTOMREQUEST  => 'GET',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HEADER         => true,
+                CURLOPT_HTTPHEADER     => ['X-Foo: bar'],
+                CURLOPT_NOBODY         => false,
+                CURLOPT_URL            => 'http://example.org/',
+                CURLOPT_POSTFIELDS     => '',
+                CURLOPT_PUT            => false,
+            ];
+
+        // FIXME: CURLOPT_PROTOCOLS and CURLOPT_REDIR_PROTOCOLS are currently unsupported by HHVM
+        // at least if this unit test fails in the future we know it is :)
+        if (defined('HHVM_VERSION') === false) {
             $settings[CURLOPT_PROTOCOLS] = CURLPROTO_HTTP | CURLPROTO_HTTPS;
             $settings[CURLOPT_REDIR_PROTOCOLS] = CURLPROTO_HTTP | CURLPROTO_HTTPS;
         }
@@ -70,21 +106,22 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
 
         $h = fopen('php://memory', 'r+');
         fwrite($h, 'booh');
-        $request = new Request('PUT','http://example.org/', ['X-Foo' => 'bar'], $h);
+        $request = new Request('PUT', 'http://example.org/', ['X-Foo' => 'bar'], $h);
 
         $settings = [
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER => true,
-                CURLOPT_PUT => true,
-                CURLOPT_INFILE => $h,
-                CURLOPT_CUSTOMREQUEST => 'PUT',
-                CURLOPT_HTTPHEADER => ['X-Foo: bar'],
-                CURLOPT_URL => 'http://example.org/',
+                CURLOPT_HEADER         => true,
+                CURLOPT_PUT            => true,
+                CURLOPT_INFILE         => $h,
+                CURLOPT_NOBODY         => false,
+                CURLOPT_CUSTOMREQUEST  => 'PUT',
+                CURLOPT_HTTPHEADER     => ['X-Foo: bar'],
+                CURLOPT_URL            => 'http://example.org/',
             ];
 
         // FIXME: CURLOPT_PROTOCOLS and CURLOPT_REDIR_PROTOCOLS are currently unsupported by HHVM
         // at least if this unit test fails in the future we know it is :)
-        if(defined('HHVM_VERSION') === false) {
+        if (defined('HHVM_VERSION') === false) {
             $settings[CURLOPT_PROTOCOLS] = CURLPROTO_HTTP | CURLPROTO_HTTPS;
             $settings[CURLOPT_REDIR_PROTOCOLS] = CURLPROTO_HTTP | CURLPROTO_HTTPS;
         }
@@ -96,20 +133,21 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
     function testCreateCurlSettingsArrayPUTString() {
 
         $client = new ClientMock();
-        $request = new Request('PUT','http://example.org/', ['X-Foo' => 'bar'], 'boo');
+        $request = new Request('PUT', 'http://example.org/', ['X-Foo' => 'bar'], 'boo');
 
         $settings = [
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER => true,
-                CURLOPT_POSTFIELDS => 'boo',
-                CURLOPT_CUSTOMREQUEST => 'PUT',
-                CURLOPT_HTTPHEADER => ['X-Foo: bar'],
-                CURLOPT_URL => 'http://example.org/',
+                CURLOPT_HEADER         => true,
+                CURLOPT_NOBODY         => false,
+                CURLOPT_POSTFIELDS     => 'boo',
+                CURLOPT_CUSTOMREQUEST  => 'PUT',
+                CURLOPT_HTTPHEADER     => ['X-Foo: bar'],
+                CURLOPT_URL            => 'http://example.org/',
             ];
 
         // FIXME: CURLOPT_PROTOCOLS and CURLOPT_REDIR_PROTOCOLS are currently unsupported by HHVM
         // at least if this unit test fails in the future we know it is :)
-        if(defined('HHVM_VERSION') === false) {
+        if (defined('HHVM_VERSION') === false) {
             $settings[CURLOPT_PROTOCOLS] = CURLPROTO_HTTP | CURLPROTO_HTTPS;
             $settings[CURLOPT_REDIR_PROTOCOLS] = CURLPROTO_HTTP | CURLPROTO_HTTPS;
         }
@@ -139,7 +177,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         $request = new Request('GET', 'http://example.org/');
 
         $client->on('doRequest', function($request, &$response) {
-            throw new ClientException('aaah',1);
+            throw new ClientException('aaah', 1);
         });
         $called = false;
         $client->on('exception', function() use (&$called) {
@@ -173,7 +211,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         });
 
         $client->send($request);
-        $this->assertEquals(2,$called);
+        $this->assertEquals(2, $called);
 
     }
 
@@ -201,8 +239,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         });
 
         $response = $client->send($request);
-        $this->assertEquals(3,$called);
-        $this->assertEquals(2,$errorCalled);
+        $this->assertEquals(3, $called);
+        $this->assertEquals(2, $errorCalled);
         $this->assertEquals(200, $response->getStatus());
 
     }
@@ -235,7 +273,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
             $return = [
                 [
                     'header_size' => 33,
-                    'http_code' => 200,
+                    'http_code'   => 200,
                 ],
                 0,
                 '',
@@ -290,7 +328,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
             $return = [
                 [
                     'header_size' => 33,
-                    'http_code' => 200,
+                    'http_code'   => 200,
                 ],
                 0,
                 '',
@@ -337,18 +375,30 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
 
 class ClientMock extends Client {
 
+    protected $persistedSettings = [];
+
     /**
      * Making this method public.
+     *
+     * We are also going to persist all settings this method generates. While
+     * the underlying object doesn't behave exactly the same, it helps us
+     * simulate what curl does internally, and helps us identify problems with
+     * settings that are set by _some_ methods and not correctly reset by other
+     * methods after subsequent use.
+     * forces
      */
-    public function createCurlSettingsArray(RequestInterface $request) {
+    function createCurlSettingsArray(RequestInterface $request) {
 
-        return parent::createCurlSettingsArray($request);
+        $settings = parent::createCurlSettingsArray($request);
+        $settings = $settings + $this->persistedSettings;
+        $this->persistedSettings = $settings;
+        return $settings;
 
     }
     /**
      * Making this method public.
      */
-    public function parseCurlResult($response, $curlHandle) {
+    function parseCurlResult($response, $curlHandle) {
 
         return parent::parseCurlResult($response, $curlHandle);
 
@@ -360,7 +410,7 @@ class ClientMock extends Client {
      * @param RequestInterface $request
      * @return ResponseInterface
      */
-    public function doRequest(RequestInterface $request) {
+    function doRequest(RequestInterface $request) {
 
         $response = null;
         $this->emit('doRequest', [$request, &$response]);
