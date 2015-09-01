@@ -8,6 +8,9 @@ Ext.define('CB.object.TitleView', {
             '<tpl for=".">'
             ,'<div class="obj-header"><span class="{titleCls}">{[ Ext.valueFrom(values.name, \'\') ]}</span> &nbsp;'
                 ,'{[ this.getStatusInfo(values) ]}'
+                ,'<div class="path fs12">'
+                    ,'{[ this.getPath(values) ]}'
+                ,'</div>'
                 ,'<div class="info">'
                     ,'{[ this.getTitleInfo(values) ]}'
                 ,'</div>'
@@ -15,6 +18,7 @@ Ext.define('CB.object.TitleView', {
             ,'</tpl>'
             ,{
                 getStatusInfo: this.getStatusInfo
+                ,getPath: this.getPath
                 ,getTitleInfo: this.getTitleInfo
             }
         );
@@ -22,9 +26,12 @@ Ext.define('CB.object.TitleView', {
         Ext.apply(this, {
             autoHeight: true
             ,cls: 'obj-plugin-title'
-            ,itemSelector: 'div'
+            ,itemSelector: '.none'
             ,data: Ext.valueFrom(this.config.data, {})
-
+            ,listeners: {
+                scope: this
+                ,containerclick: this.onContainerClick
+            }
         });
 
         this.callParent(arguments);
@@ -46,6 +53,21 @@ Ext.define('CB.object.TitleView', {
     }
 
     /**
+     * get path
+     * @return string
+     */
+    ,getPath: function (values) {
+        if(Ext.isEmpty(values.path)) {
+            return '';
+        }
+
+        var rez = '<a class="click" title="' + values.path + '">' +
+            App.shortenStringLeft(values.path, 20) + '</a>';
+
+        return rez;
+    }
+
+    /**
      * get info displayed under the title
      * Ex: TemplateType &#8226; #{id} &#8226; Ubdate by <a href="#">user name</a> time ago
      * @return string
@@ -62,11 +84,21 @@ Ext.define('CB.object.TitleView', {
         if(values.uid) {
             rez.push(
                 L.UpdatedBy +
-                ' <a href="#">' + CB.DB.usersStore.getName(values.uid) + '</a> ' +
+                ' <a class="click">' + CB.DB.usersStore.getName(values.uid) + '</a> ' +
                 Ext.valueFrom(values.udate_ago_text, '')
             );
         }
 
         return rez.join(' &#8226; ');
+    }
+
+    ,onContainerClick: function(view, e, eOpts) {
+        if(e) {
+            var el = e.getTarget('.path');
+            if(el) {
+                App.openPath(this.data.pids);
+            }
+
+        }
     }
 });

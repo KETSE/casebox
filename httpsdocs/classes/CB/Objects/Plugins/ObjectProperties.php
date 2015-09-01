@@ -4,6 +4,7 @@ namespace CB\Objects\Plugins;
 
 use CB\Objects;
 use CB\Util;
+use CB\Search;
 
 class ObjectProperties extends Base
 {
@@ -33,7 +34,10 @@ class ObjectProperties extends Base
             if (!empty($data['pids'])) {
                 $path = explode(',', $data['pids']);
                 array_pop($path);
-                $rez['data']['path'] = implode('/', $path);
+                $rez['data']['pids'] = $rez['data']['path'] = implode('/', $path);
+
+                $arr = array(&$rez['data']);
+                Search::setPaths($arr);
             }
 
             foreach ($data as $k => $v) {

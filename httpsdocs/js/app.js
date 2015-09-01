@@ -107,9 +107,21 @@ function initApp() {
     App.timeFormat = 'H:i';
 
     App.shortenString = function (st, maxLen) {
-        if(Ext.isEmpty(st)) return '';
+        if(Ext.isEmpty(st)) {
+            return '';
+        }
         st = Ext.util.Format.stripTags(st);
         return Ext.util.Format.ellipsis(st, maxLen);
+    };
+
+    App.shortenStringLeft = function (st, maxLen) {
+        if(Ext.isEmpty(st)) {
+            return '';
+        }
+        st = Ext.util.Format.stripTags(st);
+        st = st.split('').reverse().join('');
+        st = Ext.util.Format.ellipsis(st, maxLen);
+        return st.split('').reverse().join('');
     };
 
     App.PromtLogin = function (e){

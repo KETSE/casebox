@@ -46,7 +46,7 @@ class SystemProperties extends Base
 
         $pids = Util\toNumericArray($data['pids']);
         array_pop($pids);
-        $d['path'] = implode('/', $pids);
+        $d['pids'] = $d['path'] = implode('/', $pids);
 
         $arr = array(&$d);
         Search::setPaths($arr);

@@ -91,7 +91,7 @@ class Base
      * init cb with created core
      * @return void
      */
-    protected function initTargetCore()
+    public function initTargetCore()
     {
         $cfg = $this->cfg;
 

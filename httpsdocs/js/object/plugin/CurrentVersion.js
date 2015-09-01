@@ -20,15 +20,26 @@ Ext.define('CB.object.plugin.CurrentVersion', {
             ,'<tpl for=".">'
             ,'<tr class="{cls}">'
             ,'    <td class="obj">'
-            ,'        <div><img class="i32" src="/' + App.config.coreName + '/photo/{cid}.jpg?32={[ CB.DB.usersStore.getPhotoParam(values.cid) ]}" title="{user}"></div>'
+            ,'        <div><img class="i32" src="/' + App.config.coreName + '/photo/{[this.getUserId(values)]}.jpg?32={[this.getUserName(values)]}" title="{user}"></div>'
             ,'    </td>'
             ,'    <td>'
             ,'        <span class="click">{name}</span><br />'
-            ,'        <span class="gr" title="{[ displayDateTime(values.cdate) ]}">{[ App.customRenderers.filesize(values.size) ]}, {ago_text}</span>'
+            ,'        <span class="gr" title="{[this.getDate(values)]}">{[ App.customRenderers.filesize(values.size) ]}, {ago_text}</span>'
             ,'    </td>'
             ,'</tr>'
             ,'</tpl>'
             ,'</table>'
+            ,{
+                getUserId: function(values){
+                    return Ext.valueFrom(values.uid, values.cid);
+                }
+                ,getUserName: function(values){
+                    return CB.DB.usersStore.getPhotoParam(this.getUserId(values));
+                }
+                ,getDate: function(values){
+                    return Ext.valueFrom(values.udate, values.cdate);
+                }
+            }
         );
     }
 

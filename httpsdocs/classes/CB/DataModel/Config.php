@@ -23,5 +23,6 @@ class Config extends Base
         ,'pid' => 'int'
         ,'param' => 'varchar'
         ,'value' => 'text'
+        ,'order' => 'int'
     );
 }

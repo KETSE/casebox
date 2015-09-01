@@ -70,7 +70,7 @@ ini_set('memory_limit', '400M');
 $sessionLifetime = (
     IS_DEBUG_HOST
         ? 0
-        : Config::get('session.lifetime', 180)
+        : Config::get('session.lifetime', 4320)
 ) * 60;
 
 ini_set("session.gc_maxlifetime", $sessionLifetime);

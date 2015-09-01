@@ -34,7 +34,7 @@ function getDefaultConfigValues()
         ,'solr_host' => '127.0.0.1'
         ,'solr_port' => '8983'
 
-        ,'session.lifetime' => '180'
+        ,'session.lifetime' => '4320'
 
         //;ADMIN_EMAIL: email adress used to notify admin on any casebox problems
         ,'admin_email' => 'your.email@server.com'

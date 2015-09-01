@@ -74,6 +74,14 @@ class UpgradeConfigModel extends Base
                             ,"validator" => "json"
                         )
                     )
+                    ,'order' => array(
+                        'en' => 'Order'
+                        ,'type' => 'int'
+                        ,'cfg' => array(
+                            "indexed" => true
+                        )
+                        ,'solr_column_name' => 'order'
+                    )
                 )
             )
         )
@@ -274,6 +282,7 @@ class UpgradeConfigModel extends Base
                 )
             );
 
+            $i = 1;
             foreach ($childs as $k => $v) {
                 $co->create(
                     array(
@@ -283,7 +292,8 @@ class UpgradeConfigModel extends Base
                         ,'name' => $k
                         ,'data' => array(
                             '_title'  => $k,
-                            'value' => json_encode($v)
+                            'value' => json_encode($v, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+                            'order' => $i++
                         )
                     )
                 );

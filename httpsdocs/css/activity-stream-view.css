@@ -93,6 +93,11 @@
     border-radius: 7px;
     vertical-align: top;
 }
+.asNext span {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: normal
+}
 .asNext:hover {
     text-decoration: none;
 }

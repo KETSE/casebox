@@ -105,15 +105,9 @@ Ext.define('CB.browser.view.ActivityStream',{
 
                 ,getNextButton: Ext.bind(
                     function() {
-                        var s = this.store
-                            ,p = s.proxy
-                            ,start = Ext.valueFrom(p.extraParams.start, 0)
-                            ,total = p.reader.rawData.total
-                            ,rez = '';
-
-                        if ((total > 0) && (start + s.getCount() < total)) {
-                            rez = '<div class="asNext click">' + L.Next + ' <span class="dIB i16 i-arrow-right"></span></div>';
-                        }
+                        rez = '<div class="asNext click" style="display:none"><span>' +
+                            L.Next +
+                            ' </span><span class="dIB i16 i-arrow-right"></span></div>';
 
                         return rez;
                     }
@@ -203,6 +197,17 @@ Ext.define('CB.browser.view.ActivityStream',{
                     );
                     c.onLoadData(records[i].data.comments);
                 }
+            }
+
+            var el = this.dataView.getEl().down('.asNext')
+                ,s = this.store
+                ,p = s.proxy
+                ,start = Ext.valueFrom(p.extraParams.start, 0)
+                ,total = p.reader.rawData.total
+                ,rez = '';
+
+            if ((total > 0) && (start + s.getCount() < total)) {
+                el.setStyle('display', 'inherit');
             }
         }
     }

@@ -1,3 +1,20 @@
+CaseBox 1.9.518 (2015-09-01)
+==============================
+- #8350 How to set the order of TreeNodes class loading?
+- #7959 Everyday, the demo instance (demo = vanilla + sample dataset) should be wiped at 00:00 UTC
+- #8305 Show the link with last 20 chars of the full_path of the record below record title in Preview Panel & Record Window
+- #8309 Versioning object plugin not correctly showing fileVersion owner & css
+- #8313 defaults for global cb__casebox & ini files
+- #8224 Casebox Barebone missing 'Link' object
+- #8312 bare_bone.sql should have DBNode as root (id=1) instead of a virtual node
+- #7977 mysql.config table: controlled from CB UI via 'config' content type records, split treeNodes config
+
+Fixed Bugs:
+----------
+- #8308 Sorting by ID doesn't work in Grid
+- #8315 get js error when editing a comment
+- #8349 Saving config of #8282 gives Server 500 Error
+
 CaseBox 1.9.517 (2015-08-28)
 ==============================
 - #8203 Adding a "Next >" bottom div in activity stream instead of pagination/infinite scrolling

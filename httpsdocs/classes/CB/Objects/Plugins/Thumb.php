@@ -19,8 +19,8 @@ class Thumb extends Base
         }
         $data = $o->getData();
 
-        //dont display thumb for images less then 30kb
-        $maxDisplaySize = Util\coalesce(Config::get('images_display_size'), 30 *1024);
+        //dont display thumb for images less then 1MB
+        $maxDisplaySize = Util\coalesce(Config::get('images_display_size'), 1024 * 1024);
 
         if ((substr($data['content_type'], 0, 5) == 'image') && ($data['size'] < $maxDisplaySize)) {
             $preview = Files::generatePreview($data['id']);

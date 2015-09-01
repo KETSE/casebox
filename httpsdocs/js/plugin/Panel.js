@@ -91,6 +91,7 @@ Ext.define('CB.plugin.Panel', {
                 ,function(k, v, o) {
                     var cl = Ext.util.Format.capitalize(k.substr(0,1)) + k.substr(1);
                     cl = 'CBObjectPlugin' + cl;
+
                     var c = Ext.create(
                         cl
                         ,{
@@ -105,6 +106,7 @@ Ext.define('CB.plugin.Panel', {
                     if(!Ext.isDefined(v.data)) {
                         c.setVisible(false);
                     } else {
+                        Ext.copyToIf(params, v.data, 'pids,path');
                         c.onLoadData(v);
                     }
                 }
@@ -120,7 +122,6 @@ Ext.define('CB.plugin.Panel', {
              * because objectProperties plugin applies loaded data (including object name)
              * to the params
              */
-
             if(params &&
                 // (CB.DB.templates.getType(params.template_id) != 'task') &&
                 (params.from !== 'window') &&
@@ -129,7 +130,7 @@ Ext.define('CB.plugin.Panel', {
                 var data = Ext.copyTo(
                     {}
                     ,params
-                    ,'id,name,template_id,status,statusCls,uid,udate_ago_text'
+                    ,'id,pids,path,name,template_id,status,statusCls,uid,udate_ago_text'
                 );
                 data.name = Ext.String.htmlEncode(data.name);
 

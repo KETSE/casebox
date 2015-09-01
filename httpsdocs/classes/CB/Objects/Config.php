@@ -26,6 +26,10 @@ class Config extends Object
             ,'value' => $dd['value']
         );
 
+        if (isset($dd['order'])) {
+            $p['order'] = $dd['order'];
+        }
+
         DM\Config::create($p);
     }
 
@@ -53,6 +57,10 @@ class Config extends Object
             ,'value' => $dd['value']
         );
 
+        if (isset($dd['order'])) {
+            $p['order'] = $dd['order'];
+        }
+
         DM\Config::update($p);
     }
 
@@ -75,13 +83,18 @@ class Config extends Object
 
     /**
      * get data model pid that is different from tree one
-     * @param  [type] $pid [description]
-     * @return [type] [description]
+     * @param  int $pid
+     * @return int
      */
     protected function getDMPid($pid)
     {
+        $rez = null;
         $name = Objects::getName($pid);
-        $rez = DM\Config::toId($name, 'param');
+        $id = DM\Config::toId($name, 'param');
+
+        if (is_numeric($id)) {
+            $rez = $id;
+        }
 
         return $rez;
     }

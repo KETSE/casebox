@@ -947,6 +947,22 @@ class Object
     }
 
     /**
+     * get parent object
+     * @return object | null
+     */
+    protected function getParentObject()
+    {
+        if (empty($this->parentObj)) {
+            $this->parentObj = null;
+            if (!empty($this->data['pid'])) {
+                $this->parentObj = \CB\Objects::getCachedObject($this->data['pid']);
+            }
+        }
+
+        return $this->parentObj;
+    }
+
+    /**
      * return the owner of the object
      * @param int $userId
      */

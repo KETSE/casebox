@@ -130,7 +130,7 @@ class File extends Object
             FROM files_versions v
                 LEFT JOIN files_content fc on fc.id = v.content_id
             WHERE v.file_id = $1
-            ORDER BY v.cdate DESC',
+            ORDER BY COALESCE(v.udate, v.cdate) DESC',
             $this->id
         ) or die(DB\dbQueryError());
         while ($r = $res->fetch_assoc()) {
