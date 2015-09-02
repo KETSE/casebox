@@ -686,6 +686,10 @@ Ext.define('CB.object.ViewContainer', {
                 break;
 
             default:
+                p.comment = this.getCommentValue();
+
+                this.setCommentValue('');
+
                 this.edit(p, e);
                 break;
         }
@@ -799,6 +803,11 @@ Ext.define('CB.object.ViewContainer', {
      */
     ,onOpenExternalClick: function(b, e) {
         var d = Ext.apply({}, this.loadedData);
+
+        d.comment = this.getCommentValue();
+
+        this.setCommentValue('');
+
         this.openObjectWindow(d);
     }
 
@@ -1051,4 +1060,12 @@ Ext.define('CB.object.ViewContainer', {
         this.collapse();
     }
 }
+);
+
+CB.object.ViewContainer.borrow(
+    CB.object.view.Properties
+    ,[
+        'getCommentValue'
+        ,'setCommentValue'
+    ]
 );

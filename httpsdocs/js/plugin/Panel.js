@@ -106,7 +106,7 @@ Ext.define('CB.plugin.Panel', {
                     if(!Ext.isDefined(v.data)) {
                         c.setVisible(false);
                     } else {
-                        Ext.copyToIf(params, v.data, 'pids,path');
+                        Ext.copyToIf(params, v.data, 'pids,path,name,template_id,status,statusCls,cid,cdate_ago_text,uid,udate_ago_text');
                         c.onLoadData(v);
                     }
                 }
@@ -130,7 +130,7 @@ Ext.define('CB.plugin.Panel', {
                 var data = Ext.copyTo(
                     {}
                     ,params
-                    ,'id,pids,path,name,template_id,status,statusCls,uid,udate_ago_text'
+                    ,'id,pids,path,name,template_id,status,statusCls,cid,cdate_ago_text,uid,udate_ago_text'
                 );
                 data.name = Ext.String.htmlEncode(data.name);
 

@@ -1172,9 +1172,17 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onCreateObjectClick: function(b, e) {
-        var ep = this.store.proxy.extraParams;
+        var ep = this.store.proxy.extraParams
+            ,fp = Ext.valueFrom(this.folderProperties, {});
 
-        Ext.copyTo(b.config.data, this.folderProperties, 'pid,path');
+        Ext.apply(
+            b.config.data
+            ,{
+                pid: fp.id
+                ,pids: fp.path
+                ,path: fp.pathtext
+            }
+        );
 
         //add search param if creating over search result
         if(ep.search) {

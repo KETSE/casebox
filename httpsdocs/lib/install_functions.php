@@ -155,7 +155,7 @@ function setOwnershipForApacheUser(&$cfg)
     foreach ($files as $file) {
         $cmd = 'chown -R ' . $cfg['apache_user'].' "' . $file . '"';
         if (file_exists($file)) {
-            shell_exec($shell_cmd);
+            shell_exec($cmd);
         }
     };
 

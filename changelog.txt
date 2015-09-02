@@ -1,3 +1,19 @@
+CaseBox 1.9.519 (2015-09-02)
+==============================
+- #8011 The comment should be transferred into the object window when opening it
+- #7339 Notifications sent if @user is used in Task.description ?
+- #8227 Root needs to be able to reset password without sending email
+- #7118 Create simpler names for templates template/fields template
+- #8125 Rename Menu titles in Vanilla/Demo/Installation
+- #8195 Restore Tree.state correctly (expanded treeNodes)
+- #8305 Show the link with last 20 chars of the full_path of the record below record title in Preview Panel & Record Window
+- #8350 How to set the order of TreeNodes class loading?
+- #8398 Extra space in Activity Stream
+
+Fixed Bugs:
+----------
+- #8416 Warnings in install.php
+
 CaseBox 1.9.518 (2015-09-01)
 ==============================
 - #8350 How to set the order of TreeNodes class loading?

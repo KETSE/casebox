@@ -119,8 +119,9 @@ class CreateMenu
 
         $sr = $s->query(
             array(
-            'fl' => 'id',
-            'template_types' => 'menu'
+                'fl' => 'id',
+                'template_types' => 'menu',
+                'skipSecurity' => true
             )
         );
 

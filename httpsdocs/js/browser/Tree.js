@@ -595,32 +595,37 @@ Ext.define('CB.browser.Tree', {
 
         rez.width = this.getWidth();
 
-        var s = this.getSelectionModel().getSelection();
-        var n = Ext.isEmpty(s)
-            ? this.lastFocusedRecord
-            : s[0];
+        var p, ok
+            ,s = this.getSelectionModel().getSelection()
+            ,n = Ext.isEmpty(s)
+                ? this.lastFocusedRecord
+                : s[0];
 
-        if(!Ext.isEmpty(n)) {
+        if(!Ext.isEmpty(n) && this.allParentsExpanded(n)) {
             rez.selected = n.getPath('nid');
         }
 
         this.getRootNode().cascadeBy({
             before: function(n){
-                if(n.isExpanded()) {
-                    //check if all parents are expanded
-                    var ok = true;
-                    var p = n.parentNode;
-                    while(!Ext.isEmpty(p) && ok) {
-                        ok = p.isExpanded();
-                        p = p.parentNode;
-                    }
-                    if(ok) {
-                        rez.paths.push(n.getPath('nid'));
-                    }
+                if(n.isExpanded() && this.allParentsExpanded(n)) {
+                    rez.paths.push(n.getPath('nid'));
                 }
             }
             ,scope: this
         });
+
+        return rez;
+    }
+
+    //check if all parents are expanded
+    ,allParentsExpanded: function(node) {
+        var rez = true
+            ,p = node.parentNode;
+
+        while(!Ext.isEmpty(p) && rez) {
+            rez = p.isExpanded();
+            p = p.parentNode;
+        }
 
         return rez;
     }
@@ -706,15 +711,16 @@ Ext.define('CB.browser.Tree', {
                 ,this.recursiveExpandIds
                 ,this
             );
+        } else {
+            this.recursiveExpandIds();
         }
     }
 
     ,enableStateSave: function() {
         this.stateful = true;
-
         this.addStateEvents([
-            'itemexpand'
-            ,'itemcollapse'
+            'afteritemexpand'
+            ,'afteritemcollapse'
             ,'beforedestroy'
             ,'selectionchange'
             ,'savestate'

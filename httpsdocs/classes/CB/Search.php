@@ -291,7 +291,8 @@ class Search extends Solr\Client
             } else {
                 //for created users that doesnt belong to any group
                 //and dont have any security sets associated
-                $rez = '!security_set_id:[* TO *]';
+                // $rez = '!security_set_id:[* TO *]';
+                $rez = 'oid:' . User::getId();
             }
 
         }

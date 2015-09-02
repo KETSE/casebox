@@ -1073,7 +1073,7 @@ function initApp() {
                     enableKeyEvents: true
                     ,height: height
                 };
-                if(cfg.suggestUsers) {
+                if(cfg.mentionUsers) {
                     edConfig.plugins = [{
                         ptype: 'CBPluginFieldDropDownList'
                     }];

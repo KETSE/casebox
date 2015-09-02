@@ -38,17 +38,6 @@ class Task extends Object
     }
 
     /**
-     * function used by create method for creating custom data
-     * @return void
-     */
-    protected function createCustomData()
-    {
-        $this->setFollowers();
-
-        parent::createCustomData();
-    }
-
-    /**
      * load custom data for tasks
      * Note: should be removed after tasks upgraded and custom task tables removed
      */
@@ -87,22 +76,12 @@ class Task extends Object
     }
 
     /**
-     * update objects custom data
-     * @return boolean
-     */
-    protected function updateCustomData()
-    {
-        $this->setFollowers();
-
-        //call parent class to do the rest
-        parent::updateCustomData();
-    }
-
-    /**
      * analize object data and set 'fu' property in sys_data
      */
     protected function setFollowers()
     {
+        parent::setFollowers();
+
         $d = &$this->data;
         $sd = &$d['sys_data'];
 

@@ -81,6 +81,14 @@ Ext.define('CB.object.TitleView', {
             rez.push('#' + values.id);
         }
 
+        if(values.cid) {
+            rez.push(
+                L.CreatedBy +
+                ' <a class="click">' + CB.DB.usersStore.getName(values.cid) + '</a> ' +
+                Ext.valueFrom(values.cdate_ago_text, '')
+            );
+        }
+
         if(values.uid) {
             rez.push(
                 L.UpdatedBy +

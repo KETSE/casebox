@@ -243,6 +243,12 @@ Ext.define('CB.object.edit.Window', {
             ,border: false
             ,autoHeight: true
             ,scrollable: false
+            ,listeners: {
+                scope: this
+                ,loaded: function() {
+                    this.pluginsContainer.setCommentValue(this.initialConfig.data.comment);
+                }
+            }
         });
     }
 

@@ -60,7 +60,7 @@ class ObjectProperties extends Base
                     $rez['data'][$k] = $v;
 
                     //add ago udate text
-                    if ($k == 'udate') {
+                    if (in_array($k, array('cdate', 'udate'))) {
                         $rez['data'][$k . '_ago_text'] = Util\formatAgoTime($v);
                     }
 

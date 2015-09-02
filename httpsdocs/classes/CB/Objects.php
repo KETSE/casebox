@@ -67,17 +67,19 @@ class Objects
 
         $pids = explode(',', $resultData['pids']);
         array_pop($pids);
-        $resultData['path'] = implode('/', $pids);
+        $resultData['pids'] = $resultData['path'] = implode('/', $pids);
 
         Search::setPaths($arr);
-        $resultData['pathtext'] = $resultData['path'];
+        // $resultData['pathtext'] = $resultData['path'];
 
-        $resultData['path'] = str_replace(',', '/', $resultData['pids']);
+        // $resultData['path'] = str_replace(',', '/', $resultData['pids']);
 
-        unset($resultData['pids']);
+        // unset($resultData['pids']);
+        $resultData['cdate_ago_text'] = Util\formatAgoTime($objectData['cdate']);
+        $resultData['udate_ago_text'] = Util\formatAgoTime($objectData['udate']);
 
         // set type property from template
-        $objectData['type'] = $templateData['type'];
+        $resultData['type'] = $templateData['type'];
 
         return array(
             'success' => true
