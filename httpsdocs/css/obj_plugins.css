@@ -38,12 +38,10 @@
     width: 100%;
     /*background-color: #EEE;*/
 }
+
 .block-plugin td.obj {
-    /*border-bottom: 1px solid #EEE;*/
-    /*background-color: #EEE;*/
-    padding: 5px 0;
-    width: 42px;
-    /*height: 32px;*/
+    padding-left: 9px;
+    width: 44px;
     text-align: center;
 }
 
