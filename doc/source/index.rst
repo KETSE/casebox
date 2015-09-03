@@ -7,9 +7,9 @@ The code is open source, and `available on github`_.
 
 The main documentation is organized into a three sections:
 
-* :ref:`user-docs`
-* :ref:`admin-docs`
-* :ref:`dev-docs`
+* :doc:`User Manual <user/index>`
+* :doc:`Administration Manual <admin/index>`
+* :doc:`Developer Manual <dev/index>`
 
 
 
@@ -20,16 +20,27 @@ The main documentation is organized into a three sections:
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: User Documentation
+   :caption: User Manual
 
+   user/index
    user/getting_started
 
 
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: Developer Documentation
+   :caption: Administrator Manual
 
+   admin/index
+
+
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Developer Manual
+
+   dev/index
    dev/install
 
 
