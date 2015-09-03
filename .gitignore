@@ -45,3 +45,5 @@ apigen.neon
 /tests/tmp/**
 /tests/reports/**
 _rest_managed.json
+
+/doc/build/
