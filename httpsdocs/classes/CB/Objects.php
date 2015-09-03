@@ -751,6 +751,7 @@ class Objects
             'success' => false
             ,'data' => array()
         );
+
         if ((empty($id) && empty($templateId)) ||
             (!is_numeric($id) && !is_numeric($templateId))
         ) {
@@ -829,6 +830,12 @@ class Objects
             $prez = $pClass->getData();
 
             $rez['data'][$pluginName] = $prez;
+        }
+
+        //set system properties to common if SystemProperties plugin is not required
+        if (empty($rez['data']['systemProperties'])) {
+            $class = new Plugins\SystemProperties($id);
+            $rez['common'] = $class->getData();
         }
 
         return $rez;

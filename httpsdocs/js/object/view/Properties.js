@@ -113,8 +113,12 @@ Ext.define('CB.object.view.Properties', {
         this.update('<div class="x-preview-mask">' + L.SelectPreviewItem + '</div>');
     }
 
+    ,getCommentComponent: function() {
+        return this.down('textarea[cls=comment-input]');
+    }
+
     ,getCommentValue: function() {
-        var ci = this.down('textarea[cls=comment-input]');
+        var ci = this.getCommentComponent();
 
         if(Ext.isEmpty(ci)) {
             return '';
@@ -124,8 +128,7 @@ Ext.define('CB.object.view.Properties', {
     }
 
     ,setCommentValue: function(value) {
-        var ci = this.down('textarea[cls=comment-input]');
-        clog('setting comment for ', ci, value);
+        var ci = this.getCommentComponent();
 
         if(!Ext.isEmpty(ci)) {
             ci.setValue(value);

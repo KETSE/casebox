@@ -127,7 +127,7 @@ class Object
         }
 
         if (empty($p['cid'])) {
-            $p['cid'] = $_SESSION['user']['id'];
+            $p['cid'] = User::getId();
         }
         if (empty($p['oid'])) {
             $p['oid'] = $p['cid'];

@@ -1,3 +1,12 @@
+CaseBox 1.9.520 (2015-09-03)
+==============================
+- #7881 onClick actions for object fields in Record preview grid
+- #8471 Reopening a task should cancel completion for Assignee
+- #8011 The comment should be transferred into the object window when opening it
+- #8483 New number for consultation when duplicating
+- #8341 Can't follow a task if it's opened in a pop up window
+- #8352 "sort" has no effect in treeNode config  закрыта
+
 CaseBox 1.9.519 (2015-09-02)
 ==============================
 - #8011 The comment should be transferred into the object window when opening it

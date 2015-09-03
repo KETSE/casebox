@@ -37,18 +37,25 @@ Ext.define('CB.object.plugin.ObjectProperties', {
     }
 
     ,attachEvents: function(){
-        a = this.getEl().query('a.locate');
+        a = this.getEl().query('a.click');
         Ext.each(
             a
             ,function(t){
                 Ext.get(t).addListener(
                     'click'
                     ,function(ev, el){
-                        this.fireEvent('openproperties', {
-                            id: el.attributes.getNamedItem('nid').value
-                            ,template_id: el.attributes.getNamedItem('template_id').value
-                            ,path: el.attributes.getNamedItem('path').value
-                        });
+
+                        el = Ext.get(el);
+                        if(el) {
+                            if(el.hasCls('link-type-grid')) {
+                                App.openPath(el.getAttribute('path'));
+                            }
+                        }
+                        // this.fireEvent('openproperties', {
+                        //     id: el.attributes.getNamedItem('nid').value
+                        //     ,template_id: el.attributes.getNamedItem('template_id').value
+                        //     ,path: el.attributes.getNamedItem('path').value
+                        // });
                     }
                     ,this
                 );

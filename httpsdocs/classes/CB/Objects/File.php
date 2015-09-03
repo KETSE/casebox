@@ -2,7 +2,6 @@
 namespace CB\Objects;
 
 use CB\DB;
-use CB\Config;
 use CB\Objects;
 use CB\User;
 use CB\Util;
@@ -25,11 +24,11 @@ class File extends Object
 
         $disableActivityLogStatus = \CB\Config::getFlag('disableActivityLog');
 
-        Config::setFlag('disableActivityLog', true);
+        \CB\Config::setFlag('disableActivityLog', true);
 
         $rez = parent::create($p);
 
-        Config::setFlag('disableActivityLog', $disableActivityLogStatus);
+        \CB\Config::setFlag('disableActivityLog', $disableActivityLogStatus);
 
         $p = &$this->data;
 
@@ -147,11 +146,11 @@ class File extends Object
     public function update($p = false)
     {
         //disable default log from parent Object class
-        Config::setFlag('disableActivityLog', true);
+        \CB\Config::setFlag('disableActivityLog', true);
 
         $rez = parent::update($p);
 
-        Config::setFlag('disableActivityLog', false);
+        \CB\Config::setFlag('disableActivityLog', false);
 
         $p = &$this->data;
 

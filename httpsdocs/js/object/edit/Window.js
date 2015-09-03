@@ -173,11 +173,40 @@ Ext.define('CB.object.edit.Window', {
      * @return array
      */
     ,getToolbarButtons: function() {
+        this.subscriptionButton = new Ext.Button({
+            itemId: 'subscription'
+            ,arrowVisible: false
+            ,iconCls: 'i-follow'
+            // ,scale: 'medium'
+            ,menu: [
+                {
+                    text: L.FollowText
+                    ,iconCls: 'i-follow'
+                    ,itemId: 'follow'
+                    ,scope: this
+                    ,handler: this.onSubscriptionButtonClick
+                }, {
+                    text: L.WatchText
+                    ,iconCls: 'i-watch'
+                    ,itemId: 'watch'
+                    ,scope: this
+                    ,handler: this.onSubscriptionButtonClick
+                }, {
+                    text: L.IgnoreText
+                    ,iconCls: 'i-ignore'
+                    ,itemId: 'ignore'
+                    ,scope: this
+                    ,handler: this.onSubscriptionButtonClick
+                }
+            ]
+        });
+
         return [
             this.actions.edit
             ,this.actions.save
             ,this.actions.cancel
             ,'->'
+            ,this.subscriptionButton
             ,this.actions.refresh
             ,new Ext.Button({
                 qtip: L.More
@@ -245,9 +274,7 @@ Ext.define('CB.object.edit.Window', {
             ,scrollable: false
             ,listeners: {
                 scope: this
-                ,loaded: function() {
-                    this.pluginsContainer.setCommentValue(this.initialConfig.data.comment);
-                }
+                ,loaded: this.onPluginsContainerLoaded
             }
         });
     }
@@ -528,7 +555,11 @@ Ext.define('CB.object.edit.Window', {
             ,data: r.data.data
         };
 
-        this.startEditAfterObjectsStoreLoadIfNewObject = true;
+        //focus default grid cell if no comment given that should be scrolled and focused
+        if(Ext.isEmpty(this.initialConfig.data.comment)) {
+            this.startEditAfterObjectsStoreLoadIfNewObject = true;
+        }
+
         this.objectsStore.reload();
 
         /* detect template type of the opened object and create needed grid */
@@ -722,6 +753,49 @@ Ext.define('CB.object.edit.Window', {
         this.setTitle(Ext.util.Format.htmlEncode(title));
         this.setIconCls(getItemIcon(editForm.data));
         this.updateLayout();
+    }
+
+    ,onPluginsContainerLoaded: function(cmp, commonParams) {
+        var icd = this.initialConfig.data;
+
+        if(!Ext.isEmpty(icd.comment)) {
+            cmp.setCommentValue(icd.comment);
+
+            //scroll it into view
+            var cc = cmp.getCommentComponent();
+            if(cc) {
+                var i = this.items.getAt(0);
+                if(!i.scrollable) {
+                    i = this.items.getAt(1);
+                }
+                cc.getEl().scrollIntoView(i.body, false, false, true);
+
+                i.body.scrollBy(0, 40, false);
+
+                cc.focus(false, 100);
+            }
+
+        }
+
+        var subscription = Ext.valueFrom(commonParams.subscription, 'ignore');
+        this.subscriptionButton.setIconCls('im-' + subscription);
+    }
+
+    ,onSubscriptionButtonClick: function(b, e) {
+        CB_Objects.setSubscription(
+            {
+                objectId: this.data.id
+                ,type: b.itemId
+            }
+            ,function(r, e) {
+                if(r.success !== true) {
+                    return;
+                }
+
+                this.subscriptionButton.setIconCls('im-' + b.itemId);
+            }
+            ,this
+        );
     }
 
     ,onSaveObjectEvent: function(objComp, ev) {

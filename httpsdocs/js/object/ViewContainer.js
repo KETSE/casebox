@@ -1065,7 +1065,8 @@ Ext.define('CB.object.ViewContainer', {
 CB.object.ViewContainer.borrow(
     CB.object.view.Properties
     ,[
-        'getCommentValue'
+        'getCommentComponent'
+        ,'getCommentValue'
         ,'setCommentValue'
     ]
 );
