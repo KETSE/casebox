@@ -2,6 +2,7 @@
 
 namespace CB;
 
+use CB\User;
 use CB\DataModel as DM;
 
 class UsersGroups
@@ -170,7 +171,7 @@ class UsersGroups
             array(
                 $user_id
                 ,$group_id
-                ,$_SESSION['user']['id']
+                ,User::getId()
             )
         ) or die(DB\dbQueryError());
 
@@ -246,7 +247,10 @@ class UsersGroups
         $p['name'] = strip_tags($p['name']);
         $p['name'] = trim($p['name']);
 
-        if (empty($p['name'])) {
+        $p1 = empty($p['password']) ? '' : $p['password'];
+        $p2 = empty($p['confirm_password']) ? '' : $p['confirm_password'];
+
+        if (empty($p['name']) || ($p1 != $p2)) {
             return $rez;
         }
 
@@ -279,86 +283,46 @@ class UsersGroups
             throw new \Exception(L\get('UserEmailExists'));
         }
 
-        $user_id = 0;
         /*check user existance, if user already exists but is deleted
         then its record will be used for new user */
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM users_groups
-            WHERE name = $1
-                AND did IS NULL',
-            $p['name']
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
+        $user_id = DM\User::getIdByName($p['name']);
+        if (!empty($user_id)) {
             throw new \Exception(L\get('User_exists'));
         }
-        $res->close();
-        /*end of check user existance */
 
-        DB\dbQuery(
-            'INSERT INTO users_groups (
-                `name`
-                ,first_name
-                ,last_name
-                ,`cid`
-                ,language_id
-                ,cdate
-                ,uid
-                ,email)
-            VALUES($1
-                ,$2
-                ,$3
-                ,$4
-                ,$5
-                ,CURRENT_TIMESTAMP
-                ,$4
-                ,$6)
-            ON DUPLICATE KEY
-            UPDATE id = last_insert_id(id)
-                ,`name` = $1
-                ,`first_name` = $2
-                ,`last_name` = $3
-                ,`cid` = $4
-                ,last_login = NULL
-                ,login_successful = NULL
-                ,login_from_ip = NULL
-                ,last_logout = NULL
-                ,last_action_time = NULL
-                ,enabled = 1
-                ,cdate = CURRENT_TIMESTAMP
-                ,did = NULL
-                ,ddate = NULL
-                ,`password` = NULL
-                ,`password_change` = NULL
-                ,`recover_hash` = NULL
-                ,language_id = $5
-                ,`cfg` = NULL
-                ,`data` = NULL
-                ,email = $6
-                ,uid = $4
-                ,cdate = CURRENT_TIMESTAMP',
-            array(
-                $p['name']
-                ,$p['first_name']
-                ,$p['last_name']
-                ,$_SESSION['user']['id']
-                ,Config::get('language_index')
-                ,$p['email']
-            )
-        ) or die(DB\dbQueryError());
-        if ($user_id = DB\dbLastInsertId()) {
-            $rez = array(
-                'success' => true
-                ,'data' => array('id' => $user_id)
-            );
-            $p['id'] = $user_id;
+        $params = array(
+            'name' => $p['name']
+            ,'first_name' => $p['first_name']
+            ,'last_name' => $p['last_name']
+            ,'cid' => User::getId()
+            ,'language_id' => Config::get('language_index')
+            ,'email' => $p['email']
+        );
+
+        if (!empty($p['password'])) {
+            $params['password'] = $p['password'];
         }
 
-        /* in case it was a deleted user we delete all old acceses */
-        DB\dbQuery('DELETE FROM users_groups_association WHERE user_id = $1', $user_id) or die(DB\dbQueryError());
-        DB\dbQuery('DELETE FROM tree_acl WHERE user_group_id = $1', $rez['data']['id']) or die(DB\dbQueryError());
-        /* end of in case it was a deleted user we delete all old acceses */
+        $user_id = DM\User::getIdByName($p['name'], false);
+        if (!empty($user_id)) {
+            //update
+            $params['id'] = $user_id;
+            DM\User::update($params);
+
+            /* in case it was a deleted user we delete all old acceses */
+            DB\dbQuery('DELETE FROM users_groups_association WHERE user_id = $1', $user_id) or die(DB\dbQueryError());
+            DB\dbQuery('DELETE FROM tree_acl WHERE user_group_id = $1', $rez['data']['id']) or die(DB\dbQueryError());
+            /* end of in case it was a deleted user we delete all old acceses */
+        } else {
+            //create
+            $user_id = DM\User::create($params);
+        }
+
+        $rez = array(
+            'success' => true
+            ,'data' => array('id' => $user_id)
+        );
+        $p['id'] = $user_id;
 
         // associating user to group if group was specified
         if (isset($p['group_id']) && is_numeric($p['group_id'])) {
@@ -370,7 +334,7 @@ class UsersGroups
                 array(
                     $user_id
                     ,$p['group_id']
-                    ,$_SESSION['user']['id']
+                    ,User::getId()
                 )
             ) or die(DB\dbQueryError());
             $rez['data']['group_id'] = $p['group_id'];
@@ -409,14 +373,14 @@ class UsersGroups
             WHERE id = $1',
             array(
                 $user_id
-                ,$_SESSION['user']['id']
+                ,User::getId()
             )
         ) or die(DB\dbQueryError());
 
         //TODO: destroy user session if loged in
         return array(
             'success' => DB\dbAffectedRows() ? true : false,
-            'data' => array($user_id, $_SESSION['user']['id'])
+            'data' => array($user_id, User::getId())
         );
     }
 
@@ -451,7 +415,7 @@ class UsersGroups
             return array('success' => false, 'verify' => true);
         }
 
-        if (($_SESSION['user']['id'] != $p['data']['id']) && !Security::canManage()) {
+        if ((User::getId() != $p['data']['id']) && !Security::canManage()) {
             throw new \Exception(L\get('Access_denied'));
         }
         $user_id = $p['data']['id'];
@@ -597,7 +561,7 @@ class UsersGroups
                 array(
                     $user_id
                     ,$group_id
-                    ,$_SESSION['user']['id']
+                    ,User::getId()
                 )
             ) or die(DB\dbQueryError());
         }
@@ -627,7 +591,7 @@ class UsersGroups
     public static function getGroupIdsForUser($user_id = false)
     {
         if ($user_id === false) {
-            $user_id = $_SESSION['user']['id'];
+            $user_id = User::getId();
         }
 
         $groups = array();
@@ -662,7 +626,7 @@ class UsersGroups
         $user_id = $this->extractId($p['id']);
 
         /* check for old password if users changes password for himself */
-        if ($_SESSION['user']['id'] == $user_id) {
+        if (User::getId() == $user_id) {
             $res = DB\dbQuery(
                 'SELECT id
                 FROM users_groups
@@ -692,7 +656,7 @@ class UsersGroups
             array(
                 $user_id
                 ,$p['password']
-                ,$_SESSION['user']['id']
+                ,User::getId()
             )
         ) or die(DB\dbQueryError());
 
@@ -839,7 +803,7 @@ class UsersGroups
             array(
                 $user_id
                 ,$name
-                ,$_SESSION['user']['id']
+                ,User::getId()
             )
         ) or die(DB\dbQueryError());
 
@@ -895,7 +859,7 @@ class UsersGroups
             array(
                 $id
                 ,$title
-                ,$_SESSION['user']['id']
+                ,User::getId()
             )
         ) or die(DB\dbQueryError());
 

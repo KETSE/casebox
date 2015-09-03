@@ -67,17 +67,19 @@ class Objects
 
         $pids = explode(',', $resultData['pids']);
         array_pop($pids);
-        $resultData['path'] = implode('/', $pids);
+        $resultData['pids'] = $resultData['path'] = implode('/', $pids);
 
         Search::setPaths($arr);
-        $resultData['pathtext'] = $resultData['path'];
+        // $resultData['pathtext'] = $resultData['path'];
 
-        $resultData['path'] = str_replace(',', '/', $resultData['pids']);
+        // $resultData['path'] = str_replace(',', '/', $resultData['pids']);
 
-        unset($resultData['pids']);
+        // unset($resultData['pids']);
+        $resultData['cdate_ago_text'] = Util\formatAgoTime($objectData['cdate']);
+        $resultData['udate_ago_text'] = Util\formatAgoTime($objectData['udate']);
 
         // set type property from template
-        $objectData['type'] = $templateData['type'];
+        $resultData['type'] = $templateData['type'];
 
         return array(
             'success' => true
@@ -488,6 +490,9 @@ class Objects
             case 'comment':
                 return new Objects\Comment($objectId);
                 break;
+            case 'config':
+                return new Objects\Config($objectId);
+                break;
             case 'shortcut':
                 return new Objects\Shortcut($objectId);
                 break;
@@ -746,6 +751,7 @@ class Objects
             'success' => false
             ,'data' => array()
         );
+
         if ((empty($id) && empty($templateId)) ||
             (!is_numeric($id) && !is_numeric($templateId))
         ) {
@@ -824,6 +830,12 @@ class Objects
             $prez = $pClass->getData();
 
             $rez['data'][$pluginName] = $prez;
+        }
+
+        //set system properties to common if SystemProperties plugin is not required
+        if (empty($rez['data']['systemProperties'])) {
+            $class = new Plugins\SystemProperties($id);
+            $rez['common'] = $class->getData();
         }
 
         return $rez;

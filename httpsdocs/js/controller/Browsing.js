@@ -515,18 +515,9 @@ Ext.define('CB.controller.Browsing', {
      * @return Boolean
      */
     ,isCommentInputEmpty: function(){
-        var ci = this.OP.down('textarea[cls=comment-input]');
-        if(Ext.isEmpty(ci)) {
-            return true;
-        }
+        var cv = this.OP.getCommentValue();
 
-        var v = Ext.valueFrom(ci.getValue(), '');
-
-        if(Ext.isEmpty(v)) {
-            return true;
-        }
-
-        return false;
+        return Ext.isEmpty(cv);
     }
 
     /**

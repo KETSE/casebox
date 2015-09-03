@@ -329,7 +329,7 @@ Ext.define('CB.SecurityWindow', {
     ,onAclStoreLoad: function(store, records, options){
         this.getEl().unmask();
 
-        var rawData = store.proxy.reader.rawData;
+        var rawData = Ext.valueFrom(store.proxy.reader.rawData, {});
 
         this.objectLabel.setValue('Object name: ' + Ext.valueFrom(rawData.path, '') + rawData.name);
         this.setTitle(rawData.name);

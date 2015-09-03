@@ -150,7 +150,7 @@ class Notifications
                 ,'text' => $this->getUsersString($users) . ' ' .
                         $this->getActionDeclination($r['action_type']) . $forUserId . ' ' .
                         $this->getObjectName($r['data'])  . //with icon
-                        '<div class="cG">' . Util\formatAgoTime($r['action_time']). '</div>'
+                        '<div class="cG" style="padding-top: 2px">' . Util\formatAgoTime($r['action_time']). '</div>'
 
             );
 
@@ -174,7 +174,8 @@ class Notifications
         $users = array();
 
         foreach ($userIds as $id) {
-            $users[] = '<a>' . User::getDisplayName($id) . '</a>';
+            // onClick will show popup user profile
+            $users[] = '<a class="user" href="#">' . User::getDisplayName($id) . '</a>';
         }
 
         switch ($usersCount) {

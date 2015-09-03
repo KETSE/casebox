@@ -127,7 +127,7 @@ class Object
         }
 
         if (empty($p['cid'])) {
-            $p['cid'] = $_SESSION['user']['id'];
+            $p['cid'] = User::getId();
         }
         if (empty($p['oid'])) {
             $p['oid'] = $p['cid'];
@@ -226,19 +226,10 @@ class Object
         $p['sys_data'] = Util\toJSONArray(@$p['sys_data']);
         $sd = &$p['sys_data'];
 
-        //add creator as follower by default, but not for folder template
-        if (empty($sd['fu'])) {
-            $sd['fu'] = [];
-        }
-
-        if ($p['template_id'] != Config::get('default_folder_template')) {
-            if (!in_array($p['cid'], $sd['fu'])) {
-                $sd['fu'][] = intval($p['cid']);
-            }
-        }
-
         //filter fields
         $this->filterHTMLFields($p['data']);
+
+        $this->setFollowers();
 
         $this->collectSolrData();
 
@@ -254,6 +245,48 @@ class Object
             )
         ) or die(DB\dbQueryError());
 
+    }
+
+    /**
+     * analize object data and set 'fu' property in sys_data
+     */
+    protected function setFollowers()
+    {
+        $d = &$this->data;
+        $sd = &$d['sys_data'];
+        $tpl = $this->getTemplate();
+
+        //add creator as follower by default, but not for folder template
+        if (empty($sd['fu'])) {
+            $sd['fu'] = array();
+        }
+
+        if ($d['template_id'] != Config::get('default_folder_template')) {
+            if (!in_array($d['cid'], $sd['fu'])) {
+                $sd['fu'][] = intval($d['cid']);
+            }
+        }
+
+        if (!empty($tpl)) {
+            $fields = $tpl->getFields();
+
+            foreach ($fields as $f) {
+                if (!empty($f['cfg']['mentionUsers'])) {
+                    $values = $this->getFieldValue($f['name']);
+                    foreach ($values as $v) {
+                        if (!empty($v['value'])) {
+                            $uids = Util\getReferencedUsers($v['value']);
+                            if (!empty($uids)) {
+                                $sd['fu'] = array_merge($sd['fu'], $uids);
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+        $sd['fu'] = array_unique($sd['fu']);
     }
 
     /**
@@ -401,7 +434,7 @@ class Object
 
         //load current object from db into a variable to be passed to log and events
         $this->oldObject = clone $this;
-        $this->oldObject->load($this->id);
+        $od = $this->oldObject->load($this->id);
 
         \CB\fireEvent('beforeNodeDbUpdate', $this);
 
@@ -496,6 +529,8 @@ class Object
         }
 
         $this->filterHTMLFields($d['data']);
+
+        $this->setFollowers();
 
         $this->collectSolrData();
 
@@ -896,7 +931,7 @@ class Object
      * when there is need to delete custom data on object delete
      * @return coid
      */
-    protected function deleteCustomData()
+    protected function deleteCustomData($permanent)
     {
 
     }
@@ -944,6 +979,22 @@ class Object
     protected function restoreCustomData()
     {
 
+    }
+
+    /**
+     * get parent object
+     * @return object | null
+     */
+    protected function getParentObject()
+    {
+        if (empty($this->parentObj)) {
+            $this->parentObj = null;
+            if (!empty($this->data['pid'])) {
+                $this->parentObj = \CB\Objects::getCachedObject($this->data['pid']);
+            }
+        }
+
+        return $this->parentObj;
     }
 
     /**

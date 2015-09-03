@@ -38,7 +38,7 @@ CB.DB.templateTypes = new Ext.data.ArrayStore({
     idIndex: 0
     ,model: 'Generic2'
     //,fields: ['id', 'name']
-    ,data:  [[null, '-'], ['case', 'case'], ['comment', 'comment'], ['email', 'email'], ['field', 'field'], ['file', 'file'], ['menu', 'menu'], ['object', 'object'], ['search', 'search'], ['shortcut', 'shortcut'], ['task', 'task'], ['template', 'template'], ['user', 'user']]
+    ,data:  [[null, '-'], ['case', 'case'], ['comment', 'comment'], ['config', 'config'], ['email', 'email'], ['field', 'field'], ['file', 'file'], ['menu', 'menu'], ['object', 'object'], ['search', 'search'], ['shortcut', 'shortcut'], ['task', 'task'], ['template', 'template'], ['user', 'user']]
     ,getName: getStoreNames
 });
 <?php
@@ -129,13 +129,26 @@ echo 'CB.DB.templatesIconSet = new Ext.data.ArrayStore({
     ,data: '. Util\jsonEncode($data).'});';
 
 /* languages */
-$coreLanguages = Config::get('languages');
-$languageSettings = Config::get('language_settings');
+$coreLanguage = \CB\Config::get('language');
+$coreLanguages = Config::get('languagesUI');
+
+$ls = Config::get('language_settings');
 
 $arr = array();
 for ($i=0; $i < sizeof($coreLanguages); $i++) {
-    $lang = $languageSettings[$coreLanguages[$i]];
-    $lp = array($i+1, $coreLanguages[$i], $lang['name'], $lang['long_date_format'], $lang['short_date_format'], $lang['time_format'] );
+    $lang = empty($ls[$coreLanguages[$i]])
+        ? $ls[$coreLanguage]
+        : $ls[$coreLanguages[$i]];
+
+    $lp = array(
+        $i+1
+        ,$coreLanguages[$i]
+        ,$lang['name']
+        ,$lang['long_date_format']
+        ,$lang['short_date_format']
+        ,$lang['time_format']
+    );
+
     for ($j=0; $j < sizeof($lp); $j++) {
         $lp[$j] = str_replace(array('%', '\/'), array('', '/'), $lp[$j]);
     }

@@ -62,7 +62,9 @@ Ext.onReady(function(){
         App.sid = '&qq=' + Date.parse(new Date());
         App.config = r.config;
         App.loginData = r.user;
-        App.loginData.iconCls = 'icon-user-' + Ext.valueFrom(r.user.sex, '');
+
+        // App.loginData.iconCls = 'icon-user-' + Ext.valueFrom(r.user.sex, '');
+        App.loginData.iconCls = 'icon-user-account';
 
         if(App.loginData.cfg.short_date_format) {
             App.dateFormat = App.loginData.cfg.short_date_format;
@@ -105,9 +107,21 @@ function initApp() {
     App.timeFormat = 'H:i';
 
     App.shortenString = function (st, maxLen) {
-        if(Ext.isEmpty(st)) return '';
+        if(Ext.isEmpty(st)) {
+            return '';
+        }
         st = Ext.util.Format.stripTags(st);
         return Ext.util.Format.ellipsis(st, maxLen);
+    };
+
+    App.shortenStringLeft = function (st, maxLen) {
+        if(Ext.isEmpty(st)) {
+            return '';
+        }
+        st = Ext.util.Format.stripTags(st);
+        st = st.split('').reverse().join('');
+        st = Ext.util.Format.ellipsis(st, maxLen);
+        return st.split('').reverse().join('');
     };
 
     App.PromtLogin = function (e){
@@ -558,16 +572,6 @@ function initApp() {
         return c;
     };
 
-    App.getTextEditWindow = function(config){
-        if(!App.textEditWindow) {
-            App.textEditWindow = new CB.TextEditWindow();
-        }
-
-        App.textEditWindow = Ext.apply(App.textEditWindow, config);
-
-        return App.textEditWindow;
-    };
-
     App.getHtmlEditWindow = function(config){
         if(!App.htmlEditWindow) App.htmlEditWindow = new CB.HtmlEditWindow();
         App.htmlEditWindow = Ext.apply(App.htmlEditWindow, config);
@@ -871,6 +875,7 @@ function initApp() {
                             ,typeAhead: true
                             ,queryMode: 'remote'
                             ,autoLoadOnValue: true
+                            ,autoSelect: false
                             ,multiSelect: true
                             ,minChars: 2
                             // ,stacked: true
@@ -1063,18 +1068,26 @@ function initApp() {
                         }
                     }
                 }
-                return new Ext.form.TextArea({
+
+                var edConfig = {
                     enableKeyEvents: true
                     ,height: height
-                    ,plugins: [{
+                };
+                if(cfg.mentionUsers) {
+                    edConfig.plugins = [{
                         ptype: 'CBPluginFieldDropDownList'
-                    }]
-                });
+                    }];
+
+                }
+
+                return new Ext.form.TextArea(edConfig);
 
             case 'text':
                 e.cancel = true;
-                w = App.getTextEditWindow({
+                w = new CB.TextEditWindow({
                     title: tr.get('title')
+                    ,editor: tr.get('cfg').editor
+                    ,mode: tr.get('cfg').mode
                     ,data: {
                         value: e.record.get('value')
                         ,scope: e
@@ -1088,7 +1101,7 @@ function initApp() {
                         }
                     }
                 });
-                w.on('hide', e.grid.gainFocus, e.grid);
+                w.on('destory', e.grid.gainFocus, e.grid);
                 w.show();
                 break;
 
@@ -1112,40 +1125,12 @@ function initApp() {
                 w.show();
                 return w;
                 break;
+
             default:
                 return new Ext.form.TextField({
                     enableKeyEvents: true
                 });
         }
-    };
-
-    App.focusFirstField = function(scope){
-        return;
-        scope = Ext.valueFrom(scope, this);
-        f = function(){
-            var a = [];
-
-            if(scope.find) {
-                a = scope.find('isFormField', true);
-            }
-
-            if(a.length < 1) {
-                return;
-            }
-
-            var found = false;
-            var i = 0;
-            while( !found && (i<a.length) ){
-                found = ( !Ext.isEmpty(a[i]) && !Ext.isEmpty(a[i].isXType) && !a[i].isXType('radiogroup') && !a[i].isXType('displayfield') && (a[i].hidden !== true) );
-                i++;
-            }
-            if(!found) return;
-            c = a[i-1];
-            if(c.isXType('fieldcontainer'))  c = c.items.first();
-            c.focus();
-        };
-
-        Ext.Function.defer(f, 500, scope);
     };
 
     App.successResponse = function(r){

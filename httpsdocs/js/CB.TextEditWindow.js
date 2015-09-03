@@ -5,7 +5,7 @@ Ext.define('CB.TextEditWindow', {
     ,border: false
     ,bodyBorder: false
     ,closable: true
-    ,closeAction: 'hide'
+    ,closeAction: 'destroy'
     ,hideCollapseTool: true
     ,layout: 'fit'
     ,maximizable: false
@@ -21,9 +21,17 @@ Ext.define('CB.TextEditWindow', {
     ,initComponent: function() {
         this.data = this.config.data;
 
-        this.editor = new Ext.form.TextArea({
-            border: false
-        });
+        switch(this.config.editor) {
+            case 'ace':
+                this.editor = new Ext.ux.AceEditor({
+                    border: false
+
+                });
+                break;
+
+            default:
+                this.editor = new Ext.form.TextArea({border: false});
+        }
 
         Ext.apply(this, {
             layout: 'fit'
@@ -60,21 +68,36 @@ Ext.define('CB.TextEditWindow', {
         this.setTitle(title);
         this.getHeader().setTitle(title);
 
-        this.editor.setValue(Ext.valueFrom(this.data.value, ''));
+        this.editor.setValue(
+            Ext.valueFrom(this.data.value, '')
+
+            /* need to clarify why json mode is not present in current ace distribution
+
+             ,{
+                mode: this.config.mode //set mode for qace editor
+            }/**/
+        );
         this.editor.focus(false, 350);
     }
 
     ,doSubmit: function(){
-        var f = Ext.Function.bind(
-            this.data.callback
-            ,Ext.valueFrom(this.data.scope, this)
-            ,[this, this.editor.getValue()]
-        );
-        f();
-        this.doClose();
-    }
+        var ed = this.editor.editor
+                ? this.editor.editor
+                : this.editor
+            ,session = ed.getSession
+                ? ed.getSession()
+                : null
+            ,value = session
+                ? session.getValue()
+                : ed.getValue()
+            ,f = Ext.Function.bind(
+                this.data.callback
+                ,Ext.valueFrom(this.data.scope, this)
+                ,[this, value]
+            );
 
-    ,doClose: function(){
-        this.hide();
+        f();
+
+        this.close();
     }
 });

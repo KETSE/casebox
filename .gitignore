@@ -32,6 +32,8 @@ notes/
 docs/
 phpdoc.dist.xml
 bin/recreate_docs.bat
+bin/reset_demo_core.php
+bin/reset_demo_core_users.php
 
 apigen.neon
 

@@ -200,7 +200,7 @@ class Base
     {
         $rez = false;
         try {
-            $rez = static::read($name);
+            $rez = static::read(static::toId($idOrName));
         } catch (\Exception $e) {
 
         }
@@ -213,14 +213,14 @@ class Base
      * @param  varchar $idOrName
      * @return int     | null
      */
-    public static function toId($idOrName)
+    public static function toId($idOrName, $nameField = 'name')
     {
         if (!is_numeric($idOrName)) {
 
             $res = DB\dbQuery(
                 'SELECT id
                 FROM ' . static::getTableName() .
-                ' WHERE name = $1',
+                ' WHERE ' . $nameField . ' = $1',
                 $idOrName
             ) or die(DB\dbQueryError());
 
@@ -273,7 +273,7 @@ class Base
                 case 'enum':
                 case 'varchar':
                 case 'text':
-                    $valid = is_string($p[$fn]);
+                    $valid = is_scalar($p[$fn]);
 
                     break;
 

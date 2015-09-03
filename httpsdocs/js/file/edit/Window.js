@@ -53,7 +53,11 @@ Ext.define('CB.file.edit.Window', {
      * @return array
      */
     ,getToolbarButtons: function() {
+        //call parent to let it define other buttons required like follow
+        this.callParent(arguments);
+
         this.downloadSeparator = Ext.create({xtype: 'tbseparator'});
+
         return [
             this.actions.edit
             ,this.actions.restoreVersion
@@ -62,6 +66,7 @@ Ext.define('CB.file.edit.Window', {
             ,this.downloadSeparator
             ,this.actions.download
             ,'->'
+            ,this.subscriptionButton
             ,this.actions.refresh
             ,new Ext.Button({
                 qtip: L.More

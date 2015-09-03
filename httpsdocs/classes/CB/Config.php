@@ -120,7 +120,7 @@ class Config extends Singleton
                 ,`value`
             FROM ' . PREFIX . '_casebox.config
             WHERE pid IS NOT NULL'
-        ) or die( DB\dbQueryError() );
+        ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
             $rez[$r['param']] = $r['value'];
@@ -171,14 +171,31 @@ class Config extends Singleton
     private static function getCoreDBConfig()
     {
         $rez = array();
-        $res = DB\dbQuery(
-            'SELECT param
-                ,`value`
-            FROM config'
-        ) or die( DB\dbQueryError() );
+        $ref = array();
+
+        $sql = 'SELECT *
+            FROM config
+            ORDER BY pid';
+
+        $res = DB\dbQuery($sql . ', `order`'); //order by 'order' field also
+
+        //backward compatibility
+        if (empty($res)) {
+            $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+        }
 
         while ($r = $res->fetch_assoc()) {
-            $rez[$r['param']] = $r['value'];
+            $ref[$r['id']] = $r['param'];
+
+            if (empty($r['pid'])) {
+                $rez[$r['param']] = $r['value'];
+            } else {
+                $parent = &$rez[$ref[$r['pid']]];
+                if (!is_array($parent)) {
+                    $rez[$ref[$r['pid']]] = Util\toJSONArray($parent);
+                }
+                $rez[$ref[$r['pid']]][$r['param']] = Util\toJSONArray($r['value']);
+            }
         }
         $res->close();
 
@@ -426,6 +443,10 @@ class Config extends Singleton
                 : $config['default_language'];
         }
 
+        $rez['languagesUI'] = empty($config['languagesUI'])
+            ? $rez['languages']
+            : Util\toTrimmedArray($config['languagesUI']);
+
         // Default row count limit used for solr results
 
         $rez['max_rows'] = empty($config['max_rows'])
@@ -538,7 +559,7 @@ class Config extends Singleton
         }
 
         // add available languages of the core to the minify groups
-        $languages = Config::get('languages', array('en'));
+        $languages = Config::get('languagesUI', array('en'));
 
         if (!in_array('en', $languages)) {
             $languages[] = 'en';
@@ -547,13 +568,16 @@ class Config extends Singleton
         foreach ($languages as $l) {
             $k = mb_strtolower(trim($l));
 
-            $cf = DOC_ROOT . 'js' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR . $coreName . '_' . $l . '.js';
+            $dir = DOC_ROOT . 'js' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR;
+
+            $cf = $dir . $coreName . '_' . $l . '.js';
             if (file_exists($cf)) { //include core's custom translation file if present
                 $rez['lang-'.$l] = array('//js/locale/' . $coreName . '_' . $l . '.js');
-            } else {
+            } elseif (file_exists($dir . "$l.js")) {
                 $rez['lang-'.$l] = array('//js/locale/' . $l . '.js');
+            } else {
+                $rez['lang-'.$l] = array('//js/locale/en.js');
             }
-
         }
 
         return $rez;

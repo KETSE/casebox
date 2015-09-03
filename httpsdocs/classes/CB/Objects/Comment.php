@@ -37,14 +37,12 @@ class Comment extends Object
 
         Config::setFlag('disableActivityLog', false);
 
-        $this->parentObj = Objects::getCachedObject($p['pid']);
-
         $this->updateParentFollowers();
 
         $this->logAction(
             'comment',
             array(
-                'new' => $this->parentObj
+                'new' => $this->getParentObject()
                 ,'comment' => $p['data']['_title']
             )
         );
@@ -112,7 +110,7 @@ class Comment extends Object
     {
         $p = &$this->data;
 
-        $posd = $this->parentObj->getSysData();
+        $posd = $this->getParentObject()->getSysData();
 
         $newUserIds = array();
 
@@ -148,7 +146,7 @@ class Comment extends Object
         }
 
         //always update sys_data to change lastComment date
-        $this->parentObj->updateSysData($posd);
+        $this->getParentObject()->updateSysData($posd);
 
     }
 

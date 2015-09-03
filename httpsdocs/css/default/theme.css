@@ -71,8 +71,8 @@
 .im-fit{background-image: url(m/ic_open_with_black_24dp.png); min-width: 24px}
 .im-filter{background-image: url(m/ic_filter_list_black_24dp.png); min-width: 24px}
 .im-filter-negative{background-image: url(m/ic_filter_list_black_24dp_negative.png); min-width: 24px}
-.im-follow{background-image: url(m/follow_24.png); min-width: 24px}
-.im-ignore{background-image: url(m/ignore_24.png); min-width: 24px}
+.im-follow, .i-follow{background-image: url(m/ic_email_black_18dp.png); min-width: 24px}
+.im-ignore, .i-ignore{background-image: url(m/ic_notifications_none_black_18dp.png); min-width: 24px}
 .im-menu{background-image: url(m/ic_menu_black_24dp.png); min-width: 24px}
 .im-menu-negative{background-image: url(m/ic_menu_black_24dp_negative.png); min-width: 24px}
 .im-notifications{background-image: url(m/ic_notifications_black_24dp.png); min-width: 24px}
@@ -85,12 +85,12 @@
 .im-search{background-image: url(m/ic_search_black_24dp.png); min-width: 24px}
 .im-save, .im-task-complete{background-image: url(m/ic_done_black_24dp.png); min-width: 24px}
 .im-settings{background-image: url(m/ic_settings_applications_black_24dp.png); min-width: 24px}
-.im-settings-negative{background-image: url(m/ic_settings_applications_black_24dp_negative.png); min-width: 24px}
+.im-settings-negative{background-image: url(m/ic_settings_white_24dp.png); min-width: 24px}
 .im-sort{background-image: url(m/ic_sort_black_24dp.png); min-width: 24px}
 .im-tune{background-image: url(m/ic_tune_black_24dp.png); min-width: 24px}
 .im-upload{background-image: url(m/ic_file_upload_black_24dp.png); min-width: 24px}
 .im-trash{background-image: url(m/ic_delete_black_24dp.png); min-width: 24px}
-.im-watch{background-image: url(m/watch_24.png); min-width: 24px}
+.im-watch, .i-watch{background-image: url(m/ic_notifications_active_black_18dp.png); min-width: 24px}
 
 .x-menu-item .ib-browse{background-image: url(s/folder-horizontal-open.png); background-position: 0 50%; background-repeat: no-repeat}
 .x-menu-item .ib-del{background-image: url(s/cross-script.png); background-position: 0 50%; background-repeat: no-repeat}
@@ -99,6 +99,7 @@
 .x-menu-item .ib-task-new{background-image: url(s/task.png); background-position: 0 50%; background-repeat: no-repeat}
 
 
+.i-arrow-right {background-image: url(s/ic_keyboard_arrow_right_black_18dp.png); background-position: 0 50%; background-repeat: no-repeat; min-height: 18px;}
 .i-attach {background-image: url(s/ic_attach_file_black_18dp.png); background-position: 0 50%; background-repeat: no-repeat; min-height: 18px;}
 .i-refresh {background-image: url(s/refresh.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-points, .x-tool-points {background-image: url(s/points-gray.png); background-position: 0 50%; background-repeat: no-repeat}
@@ -219,8 +220,22 @@ span.order-arrows b.arrow-down {
 
 /* notifications view */
 .notification-record-unread {
-  background-color: #e7e7e7;
+  background-color: rgba(237,239,245,.98);
+  /*border-bottom: 1px solid #CCC;*/
+
 }
 .x-grid-item-over .notification-record-unread{
-  background-color: inherit;
+  background-color: rgba(227,229,235,.98);;
+}
+
+.notif {
+  color: #9197a3;
+}
+
+.notif a {
+  color: #3b5998;
+}
+
+.notif a.user {
+  font-weight: bold;
 }

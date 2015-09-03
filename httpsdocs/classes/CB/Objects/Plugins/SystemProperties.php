@@ -46,7 +46,7 @@ class SystemProperties extends Base
 
         $pids = Util\toNumericArray($data['pids']);
         array_pop($pids);
-        $d['path'] = implode('/', $pids);
+        $d['pids'] = $d['path'] = implode('/', $pids);
 
         $arr = array(&$d);
         Search::setPaths($arr);
@@ -65,12 +65,12 @@ class SystemProperties extends Base
 
         $d['cid_text'] = User::getDisplayName($d['cid']);
 
-        $d['cdate_text'] = Util\formatAgoTime($d['cdate']);
+        $d['cdate_ago_text'] = Util\formatAgoTime($d['cdate']);
         $d['cdate'] = Util\dateMysqlToISO($d['cdate']);
         $d['udate'] = Util\dateMysqlToISO($d['udate']);
 
         $d['uid_text'] = User::getDisplayName($d['uid']);
-        $d['udate_text'] = Util\formatAgoTime($d['udate']);
+        $d['udate_ago_text'] = Util\formatAgoTime($d['udate']);
 
         if (!empty($d['dstatus'])) {
             $d['did_text'] = User::getDisplayName($d['did']);

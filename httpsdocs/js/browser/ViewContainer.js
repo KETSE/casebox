@@ -824,8 +824,14 @@ Ext.define('CB.browser.ViewContainer', {
             options.userViewChange = true;
         }
 
+        var page = Ext.valueFrom(options.page, 1);
+        store.currentPage = page;
+        options.page = page;
+        if(!Ext.isDefined(options.start)) {
+            options.start = (page - 1) * store.pageSize;
+        }
+
         store.proxy.extraParams = options;
-        store.currentPage = Ext.valueFrom(options.page, 1);
     }
 
     ,onStoreLoad: function(store, recs, options) {
@@ -1166,9 +1172,17 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onCreateObjectClick: function(b, e) {
-        var ep = this.store.proxy.extraParams;
+        var ep = this.store.proxy.extraParams
+            ,fp = Ext.valueFrom(this.folderProperties, {});
 
-        Ext.copyTo(b.config.data, this.folderProperties, 'pid,path');
+        Ext.apply(
+            b.config.data
+            ,{
+                pid: fp.id
+                ,pids: fp.path
+                ,path: fp.pathtext
+            }
+        );
 
         //add search param if creating over search result
         if(ep.search) {
@@ -1251,7 +1265,7 @@ Ext.define('CB.browser.ViewContainer', {
         }
 
         for (var i = 0; i < s.length; i++) {
-            ids.push(Ext.valueFrom(s[i].id, s[i].nid));
+            ids.push(Ext.valueFrom(s[i].nid, s[i].id));
         }
 
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');

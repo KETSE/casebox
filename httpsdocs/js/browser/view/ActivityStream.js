@@ -41,7 +41,7 @@ Ext.define('CB.browser.view.ActivityStream',{
             ,'</tr>'
             ,'</tpl>'
             ,'</tpl>'
-            ,'</table></div>'
+            ,'</table>{[this.getNextButton(this, values)]}</div>'
             ,{
                 getTitleIcon: function(r){
                     var uid = r.lastAction.uids[0]
@@ -103,6 +103,17 @@ Ext.define('CB.browser.view.ActivityStream',{
                    return r['diff'];
                 }
 
+                ,getNextButton: Ext.bind(
+                    function() {
+                        rez = '<div class="asNext click" style="display:none"><span>' +
+                            L.Next +
+                            ' </span><span class="dIB i16 i-arrow-right"></span></div>';
+
+                        return rez;
+                    }
+                    ,this
+                )
+
             }
         );
 
@@ -117,6 +128,7 @@ Ext.define('CB.browser.view.ActivityStream',{
             ,listeners: {
                 scope: this
                 ,selectionchange: this.onSelectionChange
+                ,containerclick: this.onContainerClick
             }
         });
 
@@ -186,6 +198,30 @@ Ext.define('CB.browser.view.ActivityStream',{
                     c.onLoadData(records[i].data.comments);
                 }
             }
+
+            var el = this.dataView.getEl().down('.asNext')
+                ,s = this.store
+                ,p = s.proxy
+                ,start = Ext.valueFrom(p.extraParams.start, 0)
+                ,total = p.reader.rawData.total
+                ,rez = '';
+
+            if ((total > 0) && (start + s.getCount() < total)) {
+                el.setStyle('display', 'inherit');
+            }
+        }
+    }
+
+    ,onContainerClick: function(view, e, eOpts) {
+        var el = e.getTarget('.asNext');
+
+        if(el) {
+            this.fireEvent(
+                'changeparams'
+                ,{
+                    start: Ext.valueFrom(this.store.proxy.extraParams.start, 0) + this.store.getCount()
+                }
+            );
         }
     }
 });

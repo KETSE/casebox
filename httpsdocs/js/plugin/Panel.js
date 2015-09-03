@@ -82,7 +82,14 @@ Ext.define('CB.plugin.Panel', {
         //check if object was found (success = true)
         if(r.success !== true) {
             this.update('<div class="x-preview-mask">' + L.RecordIdNotFound.replace('{id}', '#' + params.id) + '</div>');
+
         } else {
+            var commonInfo = r.common
+                ? r.common
+                : r.data.systemProperties.data;
+
+            Ext.apply(params, commonInfo);
+
             this.removeAll(true);
 
             this.createMenu = r.menu;
@@ -91,6 +98,7 @@ Ext.define('CB.plugin.Panel', {
                 ,function(k, v, o) {
                     var cl = Ext.util.Format.capitalize(k.substr(0,1)) + k.substr(1);
                     cl = 'CBObjectPlugin' + cl;
+
                     var c = Ext.create(
                         cl
                         ,{
@@ -120,7 +128,6 @@ Ext.define('CB.plugin.Panel', {
              * because objectProperties plugin applies loaded data (including object name)
              * to the params
              */
-
             if(params &&
                 // (CB.DB.templates.getType(params.template_id) != 'task') &&
                 (params.from !== 'window') &&
@@ -129,7 +136,7 @@ Ext.define('CB.plugin.Panel', {
                 var data = Ext.copyTo(
                     {}
                     ,params
-                    ,'id,name,template_id,status,statusCls,uid,udate_ago_text'
+                    ,'id,pids,path,name,template_id,status,statusCls,cid,cdate_ago_text,uid,udate_ago_text'
                 );
                 data.name = Ext.String.htmlEncode(data.name);
 
@@ -146,7 +153,7 @@ Ext.define('CB.plugin.Panel', {
             this.doLayout(true, true);
         }
 
-        this.fireEvent('loaded', this);
+        this.fireEvent('loaded', this, params);
     }
 
     ,clear: function() {

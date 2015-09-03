@@ -340,7 +340,7 @@ Ext.define('CB.object.plugin.Comments', {
 
         this.editingCommentId = r.data.id;
 
-        var ed = App.getTextEditWindow({
+        var ed = new CB.TextEditWindow({
             data: {
                 value: value
                 ,callback: this.onSubmitEditedComment

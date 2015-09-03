@@ -34,16 +34,14 @@
     vertical-align: top;
     border-top: 1px solid #EEE;
     border-bottom: 1px solid #EEE;
-    padding: 4px 10px 4px 10px;
+    padding: 4px 10px 4px 5px;
     width: 100%;
     /*background-color: #EEE;*/
 }
+
 .block-plugin td.obj {
-    /*border-bottom: 1px solid #EEE;*/
-    /*background-color: #EEE;*/
-    padding: 5px 0 5px 10px;
-    width: 42px;
-    /*height: 32px;*/
+    padding-left: 9px;
+    width: 44px;
     text-align: center;
 }
 
@@ -192,8 +190,14 @@ cursor: hand;
 }
 .obj-plugin > .x-panel-body-default {
     border-top: 2px solid #CCC;
+    /* margin-bottom: 40px; */
+}
+
+.plugins-panel .obj-plugin {
     margin-bottom: 30px;
 }
+
+
 .action-comments .block-plugin-comments > .x-panel-body-default {
     border-top: 1px solid #CCC;
 }
@@ -217,10 +221,11 @@ cursor: hand;
     display: block; /* table-cell; */
 }
 
-textarea {
+/*textarea {
     padding: 3px 4px !important;
     font: normal 12px/16px arial, verdana, sans-serif !important;
 }
+*/
 
 .obj-plugin-h .x-toolbar-right {
     visibility: hidden;
@@ -260,8 +265,8 @@ textarea {
 .block-plugin td.obj div {
     display: inline-block;
     margin: auto;
-    width: 16px;
-    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
 }
 .files-drop {
     display: block;

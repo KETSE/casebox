@@ -87,7 +87,7 @@ Ext.define('CB.AddUserForm', {
                 ,inputValue: 1
                 ,name: 'send_invite'
             }
-            /*,{
+            ,{
                 xtype: 'textfield'
                 ,allowBlank: false
                 ,fieldLabel: L.Password
@@ -98,7 +98,7 @@ Ext.define('CB.AddUserForm', {
                 ,fieldLabel: L.PasswordConfirmation
                 ,inputType: 'password'
                 ,name: 'confirm_password'
-            },/**/
+            },
 
             ,{
                 xtype: 'combo'
@@ -162,23 +162,33 @@ Ext.define('CB.AddUserForm', {
         });
         this.callParent(arguments);
 
-        this.on('show', App.focusFirstField, this);
         this.on('close', function(){CB.DB.roles.clearFilter();}, this);
     }
 
     ,setDirty: function(value){
         this._isDirty = value;
-        required = true;
-        var a = this.query('[isFormField=true]');
-        Ext.each(a, function(i){
-            if(!i.allowBlank) {
-                required = required && !Ext.isEmpty(i.getValue());
-                return required;
-            }
-        }, this);
+        var required = true
+            ,a = this.query('[isFormField=true]');
 
-        msg = required ? '' : L.EmptyRequiredFields;
-        this.down('[name="E"]').setText(msg);
+        Ext.each(
+            a
+            ,function(i){
+                if(!i.allowBlank) {
+                    required = required && !Ext.isEmpty(i.getValue());
+                    return required;
+                }
+            }
+            ,this
+        );
+
+        var p = this.down('[name="password"]')
+            ,pc = this.down('[name="confirm_password"]')
+            ,pm = (p.getValue() != pc.getValue())
+            ,msg = required
+                ? ''
+                : L.EmptyRequiredFields;
+
+        this.down('[name="E"]').setText( pm ? L.PasswordMissmatch : msg);
 
         this.dockedItems.getAt(1).items.getAt(0).setDisabled(!value || !required);
     }
@@ -187,7 +197,13 @@ Ext.define('CB.AddUserForm', {
         var params = {};
         var a = this.query('[isFormField=true]');
 
-        Ext.each(a, function(i){params[i.name] = i.getValue();}, this);
+        Ext.each(
+            a
+            ,function(i){
+                params[i.name] = i.getValue();
+            }
+            ,this
+        );
 
         if(this.config.data.callback) {
             this.config.data.callback(params, this.config.ownerCt);
@@ -875,6 +891,7 @@ Ext.define('CB.UsersGroupsForm', {
                     ,hidden: true
                     ,menu: [
                         {text: L.SendResetPassMail, iconCls: 'icon-key', handler: this.onSendResetPassMailClick, scope: this}
+                        ,{text: L.ChangePassword, iconCls: 'icon-key', handler: this.onEditUserPasswordClick, scope: this}
                         ,'-'
                         ,{text: L.ChangeUsername, iconCls: 'icon-pencil', handler: this.onEditUsernameClick, scope: this}
                         ,'-'
@@ -1019,15 +1036,18 @@ Ext.define('CB.UsersGroupsForm', {
             this.grid.setDisabled(response.data.id == App.loginData.id);//disable editing access for self
 
             accessData = [];
-            CB.DB.groupsStore.each( function(r){
-                if(parseInt(r.get('system'), 10) === 0) {
-                    accessData.push({
-                        id: r.get('id')
-                        ,'name': r.get('title')
-                        ,'active': (response.data.groups.indexOf(String(r.get('id') ) ) >=0 ) ? 1: 0
-                    });
+            CB.DB.groupsStore.each(
+                function(r){
+                    if(parseInt(r.get('system'), 10) === 0) {
+                        accessData.push({
+                            id: r.get('id')
+                            ,'name': r.get('title')
+                            ,'active': (response.data.groups.indexOf(String(r.get('id') ) ) >=0 ) ? 1: 0
+                        });
+                    }
                 }
-            }, this);
+                ,this
+            );
 
             this.grid.getStore().loadData(accessData, false);
 
@@ -1036,10 +1056,12 @@ Ext.define('CB.UsersGroupsForm', {
                 (response.data.cid == App.loginData.id) ||
                 (response.data.id == App.loginData.id)
             );
+
             var ttb = this.dockedItems.getAt(0)
                 ,eb = ttb.down('[iconCls="im-edit-obj"]')
                 ,idx = ttb.items.indexOf(eb)
                 ,enabled = (response.data.enabled == 1);
+
             eb.setVisible(this.canEditUserData); // edit button
             ttb.items.getAt(idx -1).setVisible(this.canEditUserData);// divider for edit button
 
@@ -1163,10 +1185,10 @@ Ext.define('CB.UsersGroupsForm', {
         );
     }
 
-    // ,onEditUserPasswordClick: function(){
-    //     w = new CB.ChangePasswordWindow({data: this.data});
-    //     w.show();
-    // }
+    ,onEditUserPasswordClick: function(){
+        w = new CB.ChangePasswordWindow({data: this.data});
+        w.show();
+    }
 
     ,onDisableTSVClick: function(){
         Ext.Msg.confirm(
@@ -1554,7 +1576,7 @@ Ext.define('CB.ChangePasswordWindow', {
             ,listeners: {
                 afterrender: function(){
                     f = this.down('form');
-                    App.focusFirstField(f);
+                    // App.focusFirstField(f);
                 }
             }
         });

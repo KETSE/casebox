@@ -2,7 +2,8 @@ Ext.namespace('CB.Validators');
 
 CB.Validators.json = function (jsonString){
     try {
-        var o = Ext.decode(jsonString);
+        // var o = Ext.decode(jsonString);
+        var o = JSON.parse(jsonString);
 
         // Handle non-exception-throwing cases:
         // Neither JSON.parse(false) or JSON.parse(1234) throw errors, hence the type-checking,

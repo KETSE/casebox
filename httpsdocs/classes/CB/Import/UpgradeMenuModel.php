@@ -9,12 +9,6 @@ use CB\Browser;
 use CB\Objects;
 use CB\Import\BareBoneModel as BBM;
 
-/**
- * Vanilla model script
- * designed to be applied on cores
- * instantiated from bare bone core
- */
-
 class UpgradeMenuModel extends Base
 {
 

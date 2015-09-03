@@ -180,9 +180,16 @@ border-color: transparent;
   /*line-height: 16px !important*/
 }
 
+/*
 .x-form-text-default {
   font: normal 13px/17px arial,verdana,sans-serif;
 }
+
+.x-form-text-default {
+  font: normal 12px/16px arial,verdana,sans-serif;
+}
+*/
+
 
 .x-grid-cell-inner pre {
   font: normal 13px arial, verdana, sans-serif;
@@ -259,10 +266,6 @@ font-size: 13px;
 }
 
 
-.x-form-text-default {
-  font: normal 12px/16px arial,verdana,sans-serif;
-}
-
 .x-grid-cell-inner pre {
   font: normal 12px arial, verdana, sans-serif;
   margin: 0;
@@ -300,6 +303,20 @@ font-size: 12px;
 /* end of COMPACT GRID --------------------------------------------------------------------------------------------  */
 
 
+
+/*  Grouping ---------------------------- */
+.x-grid-group-hd {
+    border-width: 0px 0 2px 0;
+    border-style: solid;
+    border-color: #ccc;
+    padding: 7px 4px 7px 4px;
+    background: white;
+    cursor: pointer;
+    background-color: #F9F7ED;
+}
+
+
+/*  END of grouping -------------------------------------*/
 
 
 
@@ -392,6 +409,7 @@ a:hover{ text-decoration: underline }
 }
 
 .icon-merge {background-image: url(i/ico/vbox.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.icon-user-account{ background-image: url(i/ico/account.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-user-m{ background-image: url(i/ico/user.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-user-f { background-image: url(i/ico/user-female.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-user-plus { background-image: url(i/ico/user--plus.png) !important; background-position: 0 50%; background-repeat: no-repeat}
@@ -1035,7 +1053,7 @@ border-top: 0;
   bottom: 2px;
   right: 3px;
   max-width: 100%;
-  border-radius: 50%;
+  border-radius: 2px;
   color: #fff;
   font-size: 10px;
   font-family: helvetica;

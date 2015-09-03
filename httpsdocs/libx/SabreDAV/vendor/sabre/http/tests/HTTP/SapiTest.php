@@ -6,22 +6,22 @@ class SapiTest extends \PHPUnit_Framework_TestCase {
 
     function testConstructFromServerArray() {
 
-        $request = Sapi::createFromServerArray(array(
+        $request = Sapi::createFromServerArray([
             'REQUEST_URI'     => '/foo',
             'REQUEST_METHOD'  => 'GET',
             'HTTP_USER_AGENT' => 'Evert',
             'CONTENT_TYPE'    => 'text/xml',
             'CONTENT_LENGTH'  => '400',
             'SERVER_PROTOCOL' => 'HTTP/1.0',
-        ));
+        ]);
 
         $this->assertEquals('GET', $request->getMethod());
         $this->assertEquals('/foo', $request->getUrl());
-        $this->assertEquals(array(
-            'User-Agent' => ['Evert'],
-            'Content-Type' => ['text/xml'],
+        $this->assertEquals([
+            'User-Agent'     => ['Evert'],
+            'Content-Type'   => ['text/xml'],
             'Content-Length' => ['400'],
-        ), $request->getHeaders());
+        ], $request->getHeaders());
 
         $this->assertEquals('1.0', $request->getHttpVersion());
 
@@ -32,50 +32,50 @@ class SapiTest extends \PHPUnit_Framework_TestCase {
 
     function testConstructPHPAuth() {
 
-        $request = Sapi::createFromServerArray(array(
+        $request = Sapi::createFromServerArray([
             'REQUEST_URI'     => '/foo',
             'REQUEST_METHOD'  => 'GET',
             'PHP_AUTH_USER'   => 'user',
             'PHP_AUTH_PW'     => 'pass',
-        ));
+        ]);
 
         $this->assertEquals('GET', $request->getMethod());
         $this->assertEquals('/foo', $request->getUrl());
-        $this->assertEquals(array(
+        $this->assertEquals([
             'Authorization' => ['Basic ' . base64_encode('user:pass')],
-        ), $request->getHeaders());
+        ], $request->getHeaders());
 
     }
 
     function testConstructPHPAuthDigest() {
 
-        $request = Sapi::createFromServerArray(array(
+        $request = Sapi::createFromServerArray([
             'REQUEST_URI'     => '/foo',
             'REQUEST_METHOD'  => 'GET',
             'PHP_AUTH_DIGEST' => 'blabla',
-        ));
+        ]);
 
         $this->assertEquals('GET', $request->getMethod());
         $this->assertEquals('/foo', $request->getUrl());
-        $this->assertEquals(array(
+        $this->assertEquals([
             'Authorization' => ['Digest blabla'],
-        ), $request->getHeaders());
+        ], $request->getHeaders());
 
     }
 
     function testConstructRedirectAuth() {
 
-        $request = Sapi::createFromServerArray(array(
+        $request = Sapi::createFromServerArray([
             'REQUEST_URI'                 => '/foo',
             'REQUEST_METHOD'              => 'GET',
             'REDIRECT_HTTP_AUTHORIZATION' => 'Basic bla',
-        ));
+        ]);
 
         $this->assertEquals('GET', $request->getMethod());
         $this->assertEquals('/foo', $request->getUrl());
-        $this->assertEquals(array(
+        $this->assertEquals([
             'Authorization' => ['Basic bla'],
-        ), $request->getHeaders());
+        ], $request->getHeaders());
 
     }
 
@@ -114,6 +114,53 @@ class SapiTest extends \PHPUnit_Framework_TestCase {
         );
 
         $this->assertEquals('foo', $result);
+
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @depends testSend
+     */
+    function testSendLimitedByContentLengthString() {
+
+        $response = new Response(200);
+
+        $response->addHeader('Content-Length', 19);
+        $response->setBody('Send this sentence. Ignore this one.');
+
+        ob_start();
+
+        Sapi::sendResponse($response);
+
+        $result = ob_get_clean();
+        header_remove();
+
+        $this->assertEquals('Send this sentence.', $result);
+
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @depends testSend
+     */
+    function testSendLimitedByContentLengthStream() {
+
+        $response = new Response(200, ['Content-Length' => 19]);
+
+        $body = fopen('php://memory', 'w');
+        fwrite($body, 'Ignore this. Send this sentence. Ignore this too.');
+        rewind($body);
+        fread($body, 13);
+        $response->setBody($body);
+
+        ob_start();
+
+        Sapi::sendResponse($response);
+
+        $result = ob_get_clean();
+        header_remove();
+
+        $this->assertEquals('Send this sentence.', $result);
 
     }
 

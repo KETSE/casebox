@@ -6,15 +6,12 @@
  *
  * This is mainly useful for debugging purposes.
  *
- * @copyright Copyright (C) 2009-2014 fruux GmbH. All rights reserved.
+ * @copyright Copyright (C) 2009-2015 fruux GmbH (https://fruux.com/).
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-
-use
-    Sabre\HTTP\Request,
-    Sabre\HTTP\Response;
-
+use Sabre\HTTP\Request;
+use Sabre\HTTP\Response;
 
 // Find the autoloader
 $paths = [
@@ -23,7 +20,7 @@ $paths = [
     __DIR__ . '/vendor/autoload.php',
 
 ];
-foreach($paths as $path) {
+foreach ($paths as $path) {
     if (file_exists($path)) {
         include $path;
         break;
@@ -32,7 +29,7 @@ foreach($paths as $path) {
 
 $request = new Request('POST', '/foo');
 $request->setHeaders([
-    'Host' => 'example.org',
+    'Host'         => 'example.org',
     'Content-Type' => 'application/json'
     ]);
 
@@ -44,7 +41,7 @@ echo "\r\n\r\n";
 $response = new Response(424);
 $response->setHeaders([
     'Content-Type' => 'text/plain',
-    'Connection' => 'close',
+    'Connection'   => 'close',
     ]);
 
 $response->setBody("ABORT! ABORT!");

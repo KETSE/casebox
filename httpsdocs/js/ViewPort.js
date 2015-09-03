@@ -390,7 +390,8 @@ Ext.define('CB.ViewPort', {
         um.menu.add(
             {
                 text: L.Account
-                ,iconCls: 'icon-user-' + App.loginData.sex
+                // ,iconCls: 'icon-user-' + App.loginData.sex
+                ,iconCls: 'icon-user-account'
                 ,handler: function(){
                     App.openWindow({
                         xtype: 'CBAccount'
@@ -405,7 +406,7 @@ Ext.define('CB.ViewPort', {
             }
             ,{
                 text: L.Language
-                ,iconCls: 'icon-language'
+                // ,iconCls: 'icon-language'
                 ,hideOnClick: false
                 ,menu: langs
             }
@@ -702,7 +703,7 @@ Ext.define('CB.ViewPort', {
             App.confirmLeave = false;
             document.location.reload();
         } else {
-            Ext.Msg.Alert(L.Error, L.ErrorOccured);
+            Ext.Msg.alert(L.Error, L.ErrorOccured);
         }
     }
 

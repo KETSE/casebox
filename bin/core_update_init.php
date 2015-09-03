@@ -62,7 +62,10 @@ require_once $cbHome . 'httpsdocs/config_platform.php';
 if ($importSql) {
     require_once LIB_DIR . 'install_functions.php';
 
-    Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
+    //disable only if not set in config
+    if (!isset($cfg['su_db_pass'])) {
+        Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
+    }
 
     if (empty($cfg['su_db_user'])) {
         $cfg['su_db_user'] = 'root';

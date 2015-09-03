@@ -23,8 +23,8 @@ class CurrentVersion extends Base
 
         //show current version only if have more other versions
         if (!empty($data['versions'])) {
-            $data['ago_text'] = Util\formatAgoTime($data['cdate']);
-            $data['user'] = User::getDisplayName($data['oid'], true);
+            $data['ago_text'] = Util\formatAgoTime(Util\coalesce($data['udate'], $data['cdate']));
+            $data['user'] = User::getDisplayName(Util\coalesce($data['uid'], $data['oid'], $data['cid']), true);
             $data['cls'] = 'sel';
 
             $rez['data'] = array($data);
