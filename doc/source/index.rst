@@ -41,7 +41,21 @@ The main documentation is organized into a three sections:
    :caption: Developer Manual
 
    dev/index
-   dev/install
+   dev/config
+   dev/core-management
+   dev/templates
+   dev/fields
+   dev/tree
+   dev/grid
+   dev/filter
+   dev/search
+   dev/files
+   dev/server-side-events
+   dev/multilingual
+   dev/admin-tasks
+   dev/doc-edit
+   dev/faq
+
 
 
 Indices and tables
