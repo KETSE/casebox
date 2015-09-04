@@ -20,6 +20,14 @@ If you deploy Casebox on a freshly installed server, here are the instruction ho
 * :doc:`install_centos7`
 * :doc:`install_ubuntu`
 
+.. toctree::
+   :hidden:
+
+   install_centos6
+   install_centos7
+
+
+
 Download and Install
 ********************
 
@@ -33,13 +41,6 @@ Git is the recommended way to install Casebox: with a ``git pull`` you can upgra
 We use ``/var/www/casebox/``.
 The ``/CB/`` notation is used to denote the folder where Casebox is extracted. In our example ``/CB/install/`` translates to ``/var/www/casebox/install/``
 
-
-
-.. toctree::
-   :hidden:
-
-   install_centos6
-   install_centos7
 
 
 .. _SOLR: http://lucene.apache.org/solr/
