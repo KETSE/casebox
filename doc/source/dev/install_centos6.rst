@@ -1,5 +1,5 @@
-Installing on bare-bone CentOS 6
-================================
+CentOS 6
+==========
 
 .. code-block:: bash
 
@@ -50,7 +50,6 @@ Installing on bare-bone CentOS 6
     > chown apache:apache logs
     > mkdir data
     > chown apache:apache data
-
 
 
     #---- MySql 5.6  -------------------------------------------------

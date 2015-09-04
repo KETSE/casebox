@@ -1,13 +1,14 @@
-Installing on bare-bone CentOS 7.1
-==================================
+CentOS 7.1
+===========
 
 .. note::
 
         After a minimal CentOS7.1 install in VMWare, the network is not accessible.
         See these articles:
+
         * http://ask.xmodulo.com/configure-static-ip-address-centos7.html
         * https://geekflare.com/no-internet-connection-from-vmware-with-centos-7/
-        I've added ``ONBOOT=yes`` to ``/etc/sysconfig/network-scripts/ifcfg-eno16777736`` and rebooted server.
+          I've added ``ONBOOT=yes`` to ``/etc/sysconfig/network-scripts/ifcfg-eno16777736`` and rebooted server.
 
         To get the IP of the server, run: ``ip add``
 
@@ -32,9 +33,7 @@ Installing on bare-bone CentOS 7.1
     # set  SELINUX=disabled
 
 
-
     ------ Install EPEL, REMI, Webtatic repos ------------------------
-
     # EPEL
     > rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
@@ -107,7 +106,6 @@ Installing on bare-bone CentOS 7.1
     > date.timezone = Europe/Zurich
 
 
-
     ----- Apache 2.4 -------------------------------------------------
     # CentOS 7.1 comes with Apache 2.4.6 preinstalled and running.
     # enable http/https in firewall
@@ -137,8 +135,7 @@ Installing on bare-bone CentOS 7.1
     > alternatives --config java
 
 
-
-    -------- ImageMagick -----------------------------------------------
+    -------- ImageMagick ---------------------------------------------
     # From REMI
     > yum install ImageMagick-last ImageMagick-last-devel
     > pecl install imagick
@@ -148,8 +145,7 @@ Installing on bare-bone CentOS 7.1
     > php --ri imagick
 
 
-
-    ---- SOLR ---------------------------------------------------------------------------------------------------------------
+    ---- SOLR --------------------------------------------------------
     Download SOLR5 in /tmp/
 
     # extracts the install_solr_service.sh script from the archive into the current directory.
@@ -164,7 +160,6 @@ Installing on bare-bone CentOS 7.1
 
     # Opening port 8983 for SOLR. NOTICE: you should allow access to this port only for admin IPs
     > firewall-cmd --add-port=8983/tcp --permanent
-
 
 
     ---- Casebox -----------------------------------------------------
