@@ -27,8 +27,8 @@ Git is the recommended way to install Casebox: with a ``git pull`` you can upgra
 
 .. code-block:: bash
 
-    > cd /var/www/
-    > git clone https://github.com/KETSE/casebox.git
+    $ cd /var/www/
+    $ git clone https://github.com/KETSE/casebox.git
 
 We use ``/var/www/casebox/``.
 The ``/CB/`` notation is used to denote the folder where Casebox is extracted. In our example ``/CB/install/`` translates to ``/var/www/casebox/install/``
