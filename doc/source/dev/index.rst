@@ -11,20 +11,6 @@ Latest development version is under ``devel`` branch.
    :maxdepth: 2
 
    install
-   config
-   core-management
-   templates
-   fields
-   tree
-   grid
-   filter
-   search
-   files
-   server-side-events
-   multilingual
-   admin-tasks
-   doc-edit
-   faq
 
 .. _ExtJS5: https://www.sencha.com/products/extjs/
 .. _SOLR: http://lucene.apache.org/solr/
