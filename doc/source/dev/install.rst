@@ -25,6 +25,13 @@ Download and Install
 
 Git is the recommended way to install Casebox: with a ``git pull`` you can upgrade easily (you may need to run some cleanup/upgrade scripts, but it's another topic). You can download a .zip `archive`_ and install
 
+.. code-block:: bash
+
+    > cd /var/www/
+    > git clone https://github.com/KETSE/casebox.git
+
+We use ``/var/www/casebox/``.
+The ``/CB/`` notation is used to denote the folder where Casebox is extracted. In our example ``/CB/install/`` translates to ``/var/www/casebox/install/``
 
 
 
