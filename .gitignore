@@ -45,3 +45,7 @@ apigen.neon
 /tests/tmp/**
 /tests/reports/**
 _rest_managed.json
+
+
+# eclude ReadTheDocs built files
+/doc/build
