@@ -51,7 +51,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Casebox'
-copyright = '2015, KETSE'
+copyright = '2015, KETSE & HURIDOCS'
 author = 'KETSE'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -113,6 +113,12 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 # html_theme = 'alabaster'
+import sphinx_rtd_theme
+
+html_theme = "sphinx_rtd_theme"
+
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -271,8 +277,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   (master_doc, 'Casebox', 'Casebox Documentation',
-   author, 'Casebox', 'One line description of project.',
-   'Miscellaneous'),
+   author, 'Casebox', 'Secure all your information and team communication in one place',
+   'CMS'),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -286,3 +292,7 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+
+def setup(app):
+  app.add_stylesheet( "css/casebox.css" )

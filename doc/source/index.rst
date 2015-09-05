@@ -7,10 +7,9 @@ The code is open source, and `available on github`_.
 
 The main documentation is organized into a three sections:
 
-* :ref:`user-docs`
-* :ref:`admin-docs`
-* :ref:`dev-docs`
-
+* :doc:`User Manual <user/index>`
+* :doc:`Administration Manual <admin/index>`
+* :doc:`Developer Manual <dev/index>`
 
 
 
@@ -18,10 +17,47 @@ The main documentation is organized into a three sections:
 .. _available on github: https://github.com/KETSE/casebox
 
 
-Contents:
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: User Manual
+
+   user/index
+   user/two-step-verification
+
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
+   :caption: Administrator Manual
+
+   admin/index
+   admin/templates
+   admin/fields
+
+
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Developer Manual
+
+   dev/index
+   dev/install
+   dev/config
+   dev/core-management
+   dev/templates
+   dev/fields
+   dev/tree
+   dev/grid
+   dev/filter
+   dev/search
+   dev/files
+   dev/server-side-events
+   dev/multilingual
+   dev/admin-tasks
+   dev/doc-edit
+   dev/faq
 
 
 
