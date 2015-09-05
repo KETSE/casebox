@@ -1,3 +1,13 @@
+CaseBox 1.9.521 (2015-09-05)
+==============================
+- #8006 Grid DC config management
+- #7501 Not all notifications come by email
+- #8528 UI broken after using grouping in Grid
+
+Fixed Bugs:
+----------
+- #8166 Notifications not properly updated
+
 CaseBox 1.9.520 (2015-09-03)
 ==============================
 - #7881 onClick actions for object fields in Record preview grid
@@ -5,7 +15,7 @@ CaseBox 1.9.520 (2015-09-03)
 - #8011 The comment should be transferred into the object window when opening it
 - #8483 New number for consultation when duplicating
 - #8341 Can't follow a task if it's opened in a pop up window
-- #8352 "sort" has no effect in treeNode config  закрыта
+- #8352 "sort" has no effect in treeNode config
 
 CaseBox 1.9.519 (2015-09-02)
 ==============================

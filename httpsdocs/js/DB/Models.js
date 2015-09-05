@@ -54,6 +54,7 @@ Ext.define('Notification', {
         {name: 'ids', type: 'string'}
         ,{name: 'user_id', type: 'int'}
         ,{name: 'object_id', type: 'int'}
+        ,{name: 'action_id', type: 'int'}
         ,{name: 'text',  type: 'string'}
         ,{name: 'date_text',  type: 'string'}
         ,{name: 'read',  type: 'bool'}

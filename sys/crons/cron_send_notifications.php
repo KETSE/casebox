@@ -74,27 +74,62 @@ foreach ($users as $u) {
                 echo 'Devel skip: '.$u['email'] . ': ' . $subject . "\n";
 
             } else {
+                $markNotificationAsSent = true;
+
                 echo $u['email'].': ' . $subject  . "\n";
 
-                $message = Notifications::getMailBodyForAction($action, $u);
                 $sender = Notifications::getSender($action['from_user_id']);
 
-                // file_put_contents(TEMP_DIR . $action['id'].'.html', "$sender<br />\n<h1>$subject<h1>" . $message);
-                //  COMMENTED FOR TEST
-                if (!mail(
-                    $u['email'],
-                    $subject,
-                    $message,
-                    "Content-type: text/html; charset=utf-8\r\nFrom: ". $sender . "\r\n"
-                )) {
-                    $markNotificationAsSent = false;
+                $actionIds = Util\toNumericArray($action['action_ids']);
 
-                    System::notifyAdmin(
-                        'CaseBox cron notification: Cant send notification (' . $notificationId . ') mail to "'. $u['email'] . '"',
-                        $message
-                    );
+                $actions = array();
+                $actions[sizeof($actionIds) - 1] = $action;
 
-                } else {
+                //remove last action id (already loaded)
+                array_shift($actionIds);
+
+                //add all actions if multiple
+                if (!empty($actionIds)) {
+                    $actionIds = array_reverse($actionIds);
+
+                    $recs = DM\Log::getRecords($actionIds);
+                    $actionIds = array_flip($actionIds);
+
+                    foreach ($recs as $r) {
+                        $action['object_pid'] = $r['object_pid'];
+                        $action['action_time'] = $r['action_time'];
+                        $action['data'] = Util\jsonDecode($r['data']);
+                        $action['activity_data_db'] = Util\jsonDecode($r['activity_data_db']);
+
+                        $actions[$actionIds[$r['id']]] = $action;
+                    }
+                }
+
+                for ($i=0; $i < sizeof($actions); $i++) {
+                    $a = $actions[$i];
+
+                    $message = Notifications::getMailBodyForAction($a, $u);
+
+                    // file_put_contents(TEMP_DIR . $a['id'].'.html', "$sender<br />\n<h1>$subject<h1>" . $message);
+                    //  COMMENTED FOR TEST
+                    // echo $u['email'], "\n" . $subject . "\n$message\n\n";
+                    if (!mail(
+                        $u['email'],
+                        $subject,
+                        $message,
+                        "Content-type: text/html; charset=utf-8\r\nFrom: ". $sender . "\r\n"
+                    )) {
+                        $markNotificationAsSent = false;
+
+                        System::notifyAdmin(
+                            'CaseBox cron notification: Cant send notification (' . $notificationId . ') mail to "'. $u['email'] . '"',
+                            $message
+                        );
+
+                    }
+                }
+
+                if ($markNotificationAsSent) {
                     DB\dbQuery(
                         'UPDATE notifications
                         SET email_sent = 1

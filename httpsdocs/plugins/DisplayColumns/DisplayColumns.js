@@ -93,7 +93,9 @@ Ext.define('CB.plugin.DisplayColumns', {
                     menuItem.parentMenu.activeHeader = this.grid.getVisibleColumnManager().getHeaderByDataIndex(rez.group.property);
                 }
 
-                groupFeature.onGroupMenuItemClick(menuItem, eOpts);
+                if(!Ext.isEmpty(menuItem.parentMenu.activeHeader)) {
+                    groupFeature.onGroupMenuItemClick(menuItem, eOpts);
+                }
             }
 
             var groupDir = Ext.valueFrom(rez.group.direction, 'ASC');

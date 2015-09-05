@@ -433,6 +433,26 @@ class Base implements \CB\Interfaces\TreeNode
     }
 
     /**
+     * get displaycolumns config
+     * @return json
+     */
+    public function getDC()
+    {
+        $rez = $this->getNodeParam('DC');
+
+        //its a config reference, get it from config
+        if (is_scalar($rez['data'])) {
+            $conf = \CB\Config::get('DCConfigs');
+
+            $rez['data'] = empty($conf[$rez['data']])
+                ? array()
+                : $conf[$rez['data']];
+        }
+
+        return $rez;
+    }
+
+    /**
      * get params for parent nodes (not last node in active path)
      *
      * Generally this method should work as getNodeParam but for

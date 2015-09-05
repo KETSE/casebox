@@ -528,7 +528,7 @@ class Base
 
         if (!empty($path)) {
             $node = $path[sizeof($path)-1];
-            $rez = $node->getNodeParam('DC');
+            $rez = $node->getDC();
         }
 
         //apply properties for default casebox columns

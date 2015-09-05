@@ -2,6 +2,7 @@
 namespace CB;
 
 use CB\Util;
+use CB\Objects\Plugins;
 
 class Objects
 {

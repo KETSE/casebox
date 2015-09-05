@@ -100,7 +100,7 @@ class DBProvider
                 if (!empty($nodesPath)) {
                     $lastNode = array_pop($nodesPath);
 
-                    $DCConfig = $lastNode->getNodeParam('DC');
+                    $DCConfig = $lastNode->getDC();
 
                     $guid = empty($DCConfig['from'])
                         ? 'default'

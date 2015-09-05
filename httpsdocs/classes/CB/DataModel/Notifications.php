@@ -105,6 +105,7 @@ class Notifications extends Base
             n.id
             ,l.object_id
             ,l.action_type
+            ,n.action_id
             ,n.read
             ,n.from_user_id
             ,n.user_id
@@ -114,7 +115,7 @@ class Notifications extends Base
         JOIN action_log l
             ON n.action_id = l.id
         WHERE n.user_id = $1 '.
-        (empty($fromId) ? '' : ' AND n.id > $2 ') .
+        (empty($fromId) ? '' : ' AND n.action_id > $2 ') .
         'ORDER BY l.action_time DESC, id DESC
         LIMIT ' . $limit;
 
@@ -153,6 +154,7 @@ class Notifications extends Base
         $sql = 'SELECT
             n.id
             ,n.object_id
+            ,n.action_ids
             ,n.action_type
             ,n.user_id `to_user_id`
             ,n.`from_user_id`
@@ -206,7 +208,7 @@ class Notifications extends Base
 
         $sql = 'SELECT count(*) `count`
         FROM `' . static::getTableName() . '`
-        WHERE user_id = $1 AND id > $2';
+        WHERE user_id = $1 AND action_id > $2';
 
         $res = DB\dbQuery(
             $sql,

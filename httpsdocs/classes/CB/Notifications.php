@@ -145,6 +145,7 @@ class Notifications
             $record = array(
                 'ids' => implode(',', $ids)
                 ,'read' => $r['read']
+                ,'action_id' => $r['action_id']
                 ,'user_id' => $r['from_user_id']
                 ,'object_id' => $r['object_id']
                 ,'text' => $this->getUsersString($users) . ' ' .

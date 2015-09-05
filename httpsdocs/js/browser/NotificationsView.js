@@ -286,7 +286,7 @@ Ext.define('CB.browser.NotificationsView', {
         var rec = this.store.first()
             ,params= {};
         if(rec) {
-            params.fromId = rec.get('ids');
+            params.fromId = rec.get('action_id');
         }
 
         CB_Notifications.getNewCount(

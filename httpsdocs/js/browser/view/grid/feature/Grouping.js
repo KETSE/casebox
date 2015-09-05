@@ -38,6 +38,8 @@ Ext.define('CB.browser.view.grid.feature.Grouping', {
         if(hdr && store.remoteSort) {
             sgf = hdr.dataIndex;
 
+            this.groupTitle = hdr.text;
+
             this.storeExtraParams = {
                 userGroup: 1
                 ,sourceGroupField: sgf
@@ -53,8 +55,20 @@ Ext.define('CB.browser.view.grid.feature.Grouping', {
         }
     }
 
+    ,setupRowData: function(record, idx, rowValues) {
+        this.callParent(arguments);
+        if(rowValues.isFirstRow) {
+            if(this.refreshData.header) {
+                this.lastColumnTitle = this.refreshData.header.text;
+            }
+            rowValues.groupInfo.columnName = this.lastColumnTitle;
+        }
+    }
+
     ,getGroupedHeader: function(groupField) {
-        return this.callParent([Ext.valueFrom(this.storeExtraParams.sourceGroupField, groupField)]);
+        var rez = this.callParent([Ext.valueFrom(this.storeExtraParams.sourceGroupField, groupField)]);
+
+        return rez;
     }
 
     ,disable: function() {
