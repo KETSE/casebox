@@ -8,9 +8,10 @@ CentOS 7.1
 
         * http://ask.xmodulo.com/configure-static-ip-address-centos7.html
         * https://geekflare.com/no-internet-connection-from-vmware-with-centos-7/
-          I've added ``ONBOOT=yes`` to ``/etc/sysconfig/network-scripts/ifcfg-eno16777736`` and rebooted server.
 
-        To get the IP of the server, run: ``ip add``
+        I've added ``ONBOOT=yes`` to ``/etc/sysconfig/network-scripts/ifcfg-eno16777736`` and rebooted server.
+
+        To get the IP of the server, run: ``> ip add``
 
 
 .. code-block:: bash

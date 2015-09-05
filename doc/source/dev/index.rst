@@ -7,11 +7,10 @@ Casebox is hosted at `GitHub`_. For production, use the ``master`` branch.
 
 Latest development version is under ``devel`` branch.
 
-.. toctree::
-   :maxdepth: 2
 
-   install
+
 
 .. _ExtJS5: https://www.sencha.com/products/extjs/
 .. _SOLR: http://lucene.apache.org/solr/
 .. _GitHub: https://github.com/KETSE/casebox
+

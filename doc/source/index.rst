@@ -23,7 +23,7 @@ The main documentation is organized into a three sections:
    :caption: User Manual
 
    user/index
-   user/getting_started
+   user/two-step-verification
 
 
 .. toctree::
@@ -32,6 +32,8 @@ The main documentation is organized into a three sections:
    :caption: Administrator Manual
 
    admin/index
+   admin/templates
+   admin/fields
 
 
 
@@ -41,6 +43,7 @@ The main documentation is organized into a three sections:
    :caption: Developer Manual
 
    dev/index
+   dev/install
    dev/config
    dev/core-management
    dev/templates
