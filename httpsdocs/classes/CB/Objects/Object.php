@@ -1191,7 +1191,7 @@ class Object
      *
      * @param array $data template properties
      */
-    public function setData($data)
+    public function setData($data, $filterHtmlValues = true)
     {
         $this->data = $data;
         unset($this->linearData);
@@ -1201,7 +1201,7 @@ class Object
             $this->loaded = true;
         }
 
-        if (!empty($this->data['data'])) {
+        if ($filterHtmlValues && !empty($this->data['data'])) {
             $this->filterHTMLFields($this->data['data']);
         }
     }

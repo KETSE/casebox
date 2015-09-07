@@ -440,7 +440,7 @@ class Objects
                 $o = static::getCustomClassByType($tc->getType($objData['template_id']));
 
                 if (!empty($o)) {
-                    $o->setData($objData);
+                    $o->setData($objData, false);
 
                     \CB\Cache::set($var_name, $o);
                     $rez[$objData['id']] = $o;

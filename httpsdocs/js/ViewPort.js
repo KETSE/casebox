@@ -59,39 +59,58 @@ Ext.define('CB.ViewPort', {
 
         this.initButtons();
 
+        var items = [ {
+                xtype: 'panel'
+                ,border: false
+                ,style: 'border-bottom: 1px solid #5f5f5f'
+                ,bodyStyle: 'background: transparent'
+                ,height: 49
+                ,items: [
+                    this.buttons.toggleLeftRegion
+                ]
+            }
+            ,this.buttons.create
+            ,this.buttons.toggleFilterPanel
+            ,this.buttons.toggleNotificationsView
+        ];
+
+        //add config buttons if present
+        if(Ext.isObject(App.config.leftRibbonButtons)) {
+            Ext.iterate(
+                App.config.leftRibbonButtons
+                ,function(k, cfg) {
+                    cfg.scale = 'large';
+                    cfg.scope = this;
+                    cfg.handler = this.onLeftRibbonButtonClick;
+                    items.push(cfg);
+                }
+                ,this
+            );
+        }
+
+        //add rest buttons
+        items.push(
+            '->'
+            ,{
+                scale: 'large'
+                ,arrowVisible: false
+                ,cls: 'user-menu-button'
+                ,iconCls: 'bgs32'
+                ,menu: []
+                ,name: 'userMenu'
+            }
+            ,{
+                text: '<span style="margin-right: 10px">&nbsp;</span>'
+                ,xtype: 'tbtext'
+            }
+        );
+
         //application main left bar (left docked)
         App.mainLBar = new Ext.Toolbar({
             cls: 'ribbon-black'
             ,autoWidth: true
             ,dock: 'left'
-            ,items: [ {
-                    xtype: 'panel'
-                    ,border: false
-                    ,style: 'border-bottom: 1px solid #5f5f5f'
-                    ,bodyStyle: 'background: transparent'
-                    ,height: 49
-                    ,items: [
-                        this.buttons.toggleLeftRegion
-                    ]
-                }
-                ,this.buttons.create
-                ,this.buttons.toggleFilterPanel
-                ,this.buttons.toggleNotificationsView
-                ,'->'
-                ,{
-                    scale: 'large'
-                    ,arrowVisible: false
-                    ,cls: 'user-menu-button'
-                    ,iconCls: 'bgs32'
-                    ,menu: []
-                    ,name: 'userMenu'
-                }
-                ,{
-                    text: '<span style="margin-right: 10px">&nbsp;</span>'
-                    ,xtype: 'tbtext'
-                }
-
-            ]
+            ,items: items
             ,plugins: [{
                 ptype: 'CBPluginSearchButton'
             }]
@@ -517,6 +536,10 @@ Ext.define('CB.ViewPort', {
             // App.locateObject(locateId);
             App.controller.openObjectWindowById(locateId);
         }
+    }
+
+    ,onLeftRibbonButtonClick: function(b, e) {
+        App.openPath(b.path);
     }
 
     ,logout: function(){

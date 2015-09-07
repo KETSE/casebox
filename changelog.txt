@@ -1,3 +1,9 @@
+CaseBox 1.9.522 (2015-09-07)
+==============================
+- #8407 Buttons in LeftRibbon
+- #8608 High CPU usage when browsing HandHelp
+- #7118 Create simpler names for templates template/fields template
+
 CaseBox 1.9.521 (2015-09-05)
 ==============================
 - #8006 Grid DC config management

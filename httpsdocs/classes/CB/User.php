@@ -282,6 +282,7 @@ class User
                 ,'default_event_template' => Config::get('default_event_template')
                 ,'files.edit' => $filesEdit
                 ,'template_info_column' => Config::get('template_info_column')
+                ,'leftRibbonButtons' => Config::get('leftRibbonButtons')
             )
             ,'user' => $_SESSION['user']
         );

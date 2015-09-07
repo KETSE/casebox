@@ -23,7 +23,9 @@ class Config extends Object
                 ? null
                 : $this->getDMPid($d['pid'])
             ,'param' => $dd['_title']
-            ,'value' => $dd['value']
+            ,'value' => empty($dd['value'])
+                ? ''
+                : $dd['value']
         );
 
         if (isset($dd['order'])) {
@@ -54,7 +56,9 @@ class Config extends Object
                 ? null
                 : $this->getDMPid($d['pid'])
             ,'param' => $dd['_title']
-            ,'value' => $dd['value']
+            ,'value' => empty($dd['value'])
+                ? ''
+                : $dd['value']
         );
 
         if (isset($dd['order'])) {

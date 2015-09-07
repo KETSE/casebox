@@ -386,7 +386,7 @@ Ext.define('CB.file.edit.Window', {
 
     /**
      * event handler for content editors change
-     * @param  component ed [description]
+     * @param  component ed
      * @return void
      */
     ,onEditorChangeEvent: function(ed) {
