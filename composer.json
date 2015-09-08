@@ -10,7 +10,8 @@
 
     ,"require-dev": {
         "phpunit/phpunit": "4.6.*",
-        "phpunit/phpunit-story": ">=1.0"
+        "phpunit/phpunit-story": ">=1.0",
+        "satooshi/php-coveralls": "~0.6@stable"
     }
 
     ,"require": {
@@ -19,8 +20,4 @@
         "satooshi/php-coveralls": "^0.6.1"
     }
     
-    ,"require-dev": {
-    "satooshi/php-coveralls": "dev-master"
-    }
-
 }

@@ -2,9 +2,13 @@ language: php
 php:
   - 5.6
 
+addons:
+  hosts:
+    - test.casebox.org
+
 before_script:
- - wget http://getcomposer.org/composer.phar
- - php composer.phar install --dev --no-interaction
+ - curl -sS https://getcomposer.org/installer | php
+ - php composer.phar install --no-interaction
 
 script:
  - mkdir -p build/logs
