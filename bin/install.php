@@ -44,7 +44,7 @@ switch (CB\Util\getOS()) {
 
         if (!in_array($currentUser, array('root'))) {
             echo "\033[31mThis script should be run under \"root\" \033[0m\n";
-            die("try command #sudo php install.php\n");
+         //   die("try command #sudo php install.php\n");
         }
 
         break;

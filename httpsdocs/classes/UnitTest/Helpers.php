@@ -108,7 +108,7 @@ class Helpers
                 Install\putIniFile($config_filename, $test_cfg);
 
                 if (!\CB\IS_WINDOWS) {
-                    shell_exec('chown ' . $test_cfg['apache_user'].' "' . $config_filename . '"');
+               //     shell_exec('chown ' . $test_cfg['apache_user'].' "' . $config_filename . '"');
                 }
 
 
