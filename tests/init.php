@@ -25,7 +25,10 @@ if (!file_exists(TEST_PATH_TEMP)) {
     mkdir(TEST_PATH_TEMP, 0755, true);
 }
 
-include TEST_PATH . 'vendor/autoload.php';
+
+include TEST_PATH . '../vendor/autoload.php';
+
+include CB_DOC_ROOT . 'classes/UnitTest/Helpers.php';
 
 UnitTest\Helpers::prepareInstance();
 

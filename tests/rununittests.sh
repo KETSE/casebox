@@ -20,7 +20,7 @@ showHelp () {
 }
 
 # first check if you have composer installed
-if [ ! -f $DIR/composer.phar ]; then
+if [ ! -f $DIR/../composer.phar ]; then
     echo "error: first install Composer the Dependency Manager for PHP "
     echo "#curl -sS https://getcomposer.org/installer | php"
     echo "#wget https://getcomposer.org/composer.phar"
@@ -29,7 +29,7 @@ if [ ! -f $DIR/composer.phar ]; then
 fi
 
 # check if you have PHPunit package
-if [ ! -f $DIR/vendor/bin/phpunit ]; then
+if [ ! -f $DIR/../vendor/bin/phpunit ]; then
     echo "error: phpunit not found, install phpunit from Composer Dependency Manager "
     echo "#php composer.phar install"
     exit
@@ -43,7 +43,12 @@ while getopts "c:d:h?" opt; do
     case $opt in
         c) 
             coverage="--coverage-$OPTARG"
+            if [ "$OPTARG"=="clover.xml" ]; then 
+            OUTFILE="clover.xml"
+            else
             OUTFILE="coverage.$OPTARG"
+            fi
+
             continue
         ;;
         d)
@@ -58,8 +63,10 @@ while getopts "c:d:h?" opt; do
 done
 if [ $coverage ];
     then
-        $DIR/vendor/bin/phpunit $coverage $DEST$OUTFILE --configuration $DIR/phpunit.xml --verbose --bootstrap init.php $DIR/test
+#        $DIR/../vendor/bin/phpunit $coverage $DEST$OUTFILE --configuration $DIR/phpunit.xml --verbose --bootstrap $DIR/init.php $DIR/../httpsdocs/classes/UnitTest
+        $DIR/../vendor/bin/phpunit $coverage $DEST$OUTFILE --configuration $DIR/phpunit.xml $DIR/Test.php
         exit
     fi
 
-$DIR/vendor/bin/phpunit --colors --verbose --debug --bootstrap init.php $DIR/test
+#$DIR/../vendor/bin/phpunit --colors --verbose --debug --bootstrap $DIR/init.php $DIR/../httpsdocs/classes/UnitTest
+#$DIR/../vendor/bin/phpunit --colors --verbose --debug --bootstrap $DIR/init.php $DIR/../httpsdocs/classes/UnitTest

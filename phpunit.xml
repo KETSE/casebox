@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<phpunit bootstrap="tests/init.php">
+     <!-- Add files not covered with tests into Code Coverage Analysis -->
+    <filter>
+        <whitelist addUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">httpsdocs/classes/CB/</directory>
+            <directory suffix=".php">httpsdocs/lib/</directory>
+            <directory suffix=".php">bin/</directory>
+        </whitelist>
+        
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">httpsdocs/classes/CB/</directory>
+            <directory suffix=".php">httpsdocs/lib/</directory>
+            <directory suffix=".php">bin/</directory>
+        </whitelist>
+    </filter>
+    
+    <logging>
+        <log type="coverage-clover" target="build/logs/clover.xml"/>
+    </logging>
+        
+</phpunit>
