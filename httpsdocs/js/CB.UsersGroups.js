@@ -82,21 +82,42 @@ Ext.define('CB.AddUserForm', {
             }
 
             ,{
-                xtype: 'checkbox'
-                ,fieldLabel: L.SendEmailInvite
-                ,inputValue: 1
-                ,name: 'send_invite'
+                xtype: 'radiogroup'
+                ,fieldLabel: L.PasswordSetup
+                ,columns: 2
+                ,vertical: true
+                ,name: 'psw_setup'
+                ,items: [
+                    {
+                        boxLabel: L.EmailInvite
+                        ,name: 'ps'
+                        ,inputValue: '1'
+                        ,checked: true
+                    }
+                    ,{
+                        boxLabel: L.Manual
+                        ,name: 'ps'
+                        ,inputValue: '2'
+                    }
+                ]
+                ,listeners: {
+                    scope: this
+                    ,change: this.onPasswordSetupChange
+                }
             }
+
             ,{
                 xtype: 'textfield'
-                ,allowBlank: false
+                ,allowBlank: true
                 ,fieldLabel: L.Password
                 ,inputType: 'password'
+                ,hidden: true
                 ,name: 'password'
             },{ xtype: 'textfield'
-                ,allowBlank: false
+                ,allowBlank: true
                 ,fieldLabel: L.PasswordConfirmation
                 ,inputType: 'password'
+                ,hidden: true
                 ,name: 'confirm_password'
             },
 
@@ -173,6 +194,7 @@ Ext.define('CB.AddUserForm', {
         Ext.each(
             a
             ,function(i){
+                required = required && i.isValid();
                 if(!i.allowBlank) {
                     required = required && !Ext.isEmpty(i.getValue());
                     return required;
@@ -191,6 +213,14 @@ Ext.define('CB.AddUserForm', {
         this.down('[name="E"]').setText( pm ? L.PasswordMissmatch : msg);
 
         this.dockedItems.getAt(1).items.getAt(0).setDisabled(!value || !required);
+    }
+
+    ,onPasswordSetupChange: function(rg, nv, ov, eOpts) {
+        var p = this.down('[name="password"]')
+            ,pc = this.down('[name="confirm_password"]');
+
+        p.setHidden(nv.ps == 1);
+        pc.setHidden(nv.ps == 1);
     }
 
     ,saveData: function(){

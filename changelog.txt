@@ -1,3 +1,10 @@
+CaseBox 1.9.523 (2015-09-08)
+==============================
+- #8656 Unresponsive script on Firefox
+- #8586 UI frozen, unresponsive script in firefox browser reported
+- #8562 Notifications improvements
+- #8652 Creating new users from root - should be either set pw or email invite
+
 CaseBox 1.9.522 (2015-09-07)
 ==============================
 - #8407 Buttons in LeftRibbon

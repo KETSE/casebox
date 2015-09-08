@@ -336,8 +336,8 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         $api = new \CB\Api\Notifications;
 
         //check if counts are not empty
-        $countResult = $api->getNewCount(array());
-        if (($countResult['success'] !== true) || empty($countResult['count'])) {
+        $countResult = $api->getNew(array());
+        if (($countResult['success'] !== true) || empty($countResult['data'])) {
             return $rez;
         }
 

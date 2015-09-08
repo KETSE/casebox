@@ -318,8 +318,8 @@ Ext.define('CB.ViewPort', {
     }
 
     ,updateNotificationsCount: function(counts) {
-        var text = (counts.unread > 0)
-            ? counts.unread
+        var text = (counts.unseen > 0)
+            ? counts.unseen
 
             : '';
 

@@ -1511,27 +1511,27 @@ class User
     }
 
     /**
-     * get interface state array of the current user
+     * get users config param (ex. state array of the current user)
      * @return array
      */
-    public static function getUserState()
+    public static function getUserConfigParam($name, $default = null)
     {
         $cfg = static::getUserConfig();
 
-        return empty($cfg['state'])
-            ? array()
-            : $cfg['state'];
+        return empty($cfg[$name])
+            ? $default
+            : $cfg[$name];
     }
 
     /**
-     * set user state array
+     * set users config param
      * @param array $state
      */
-    public static function setUserState($state)
+    public static function setUserConfigParam($name, $value)
     {
         $cfg = static::getUserConfig();
 
-        $cfg['state'] = $state;
+        $cfg[$name] = $value;
 
         static::setUserConfig($cfg);
     }

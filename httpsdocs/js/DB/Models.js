@@ -58,6 +58,7 @@ Ext.define('Notification', {
         ,{name: 'text',  type: 'string'}
         ,{name: 'date_text',  type: 'string'}
         ,{name: 'read',  type: 'bool'}
+        ,{name: 'seen',  type: 'bool'}
         ,'data'
     ]
 });
