@@ -13,7 +13,7 @@ before_script:
  - mysql -u root -e "CREATE USER 'local'@'localhost' IDENTIFIED BY 'h0st'"
  - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'local'@'%'"
  - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'local'@'localhost'"
- - curl -O http://archive.apache.org/dist/lucene/solr/5.3.0/solr-5.3.0.zip
+ - curl -O http://archive.apache.org/dist/lucene/solr/5.3.0/solr-5.3.0.tgz solr-5.3.0.tgz
  - tar xzf solr-5.3.0.tgz solr-5.3.0/bin/install_solr_service.sh --strip-components=2
  - sh ./install_solr_service.sh solr-5.3.0.tgz
 
