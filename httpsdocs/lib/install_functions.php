@@ -146,6 +146,8 @@ function setOwnershipForApacheUser(&$cfg)
         return ;
     }
 
+    return ;
+    
     $files = array(
         \CB\LOGS_DIR,
         \CB\DATA_DIR,
