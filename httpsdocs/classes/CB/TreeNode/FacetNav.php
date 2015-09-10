@@ -42,8 +42,7 @@ class FacetNav extends Query
     protected function getRootNode()
     {
         $rez = parent::getRootNode();
-
-        $rez['has_childs'] = (!empty($this->config['level_fields']) || !empty($this->config['show_in_tree']));
+        $rez['data'][0]['has_childs'] = (!empty($this->config['level_fields']) || !empty($this->config['show_in_tree']));
 
         return $rez;
     }
