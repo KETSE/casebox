@@ -1,3 +1,9 @@
+CaseBox 1.9.524 (2015-09-10)
+==============================
+- #8726 JS small fixed to improve EditGrid rendering&speed, improve UX
+- #8621 Adding new treeNode class: vNode. acts like FacetNav but no faceting
+- #8620 Upgrading Cfg for facetedNav & adding a new view: 'stream'
+
 CaseBox 1.9.523 (2015-09-08)
 ==============================
 - #8656 Unresponsive script on Firefox

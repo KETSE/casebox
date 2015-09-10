@@ -1,6 +1,7 @@
 <?php
 namespace CB\TreeNode;
 
+use CB\Config;
 use CB\Util;
 
 class Base implements \CB\Interfaces\TreeNode
@@ -94,10 +95,27 @@ class Base implements \CB\Interfaces\TreeNode
      */
     public function getName($id = false)
     {
-        $t = @$this->config['text'] ? @$this->config['text']
-                                    : 'Unamed';
+        $rez = 'Unnamed';
+        $cfg = &$this->config;
+        $l = Config::get('user_language');
 
-        return $t;
+        if (empty($cfg['title_'.$l])) {
+            $l = Config::get('language');
+            if (empty($cfg['title_'.$l])) {
+                if (!empty($cfg['title'])) {
+                    $rez = $cfg['title'];
+
+                } elseif (!empty($cfg['text'])) {
+                    $rez = $cfg['text'];
+                }
+            } else {
+                $rez = $cfg['title_' . $l];
+            }
+        } else {
+            $rez = $cfg['title_' . $l];
+        }
+
+        return $rez;
     }
 
     /**
@@ -134,30 +152,36 @@ class Base implements \CB\Interfaces\TreeNode
 
         $cfg = &$this->config;
 
-        $view = array();
-
         if (!empty($cfg['view'])) {
-            $view = is_scalar($cfg['view'])
+            $rez = is_scalar($cfg['view'])
                 ? array(
                     'type' => $cfg['view']
                 )
                 : $cfg['view'];
         }
 
-        if (empty($view['type'])) {
-            $view['type'] = 'grid';
+        if (empty($rez['type'])) {
+            $rez['type'] = 'grid';
+        } elseif ($rez['type'] == 'stream') {
+            $rez['type'] = 'activityStream';
         }
 
         if (!empty($rp['userViewChange'])) {
-            $view['type']  = empty($rp['view'])
+            $rez['type']  = empty($rp['view'])
                 ? $rp['from']
                 : $rp['view'];
         }
 
-        if (!empty($view)) {
-            $rez['view'] = $view;
+        if (!empty($rez)) {
+            if (!empty($cfg['views'][$rez['type']])) {
+                $rez = array_merge($rez, $cfg['views'][$rez['type']]);
 
-            switch ($view['type']) {
+            } elseif (($rez['type'] == 'activityStream') && !empty($cfg['views']['stream'])) {
+                $rez = array_merge($rez, $cfg['views']['stream']);
+            }
+
+            //backward compatibility check
+            switch ($rez['type']) {
                 case 'pivot':
                 case 'charts':
                     if (!empty($cfg['stats'])) {
@@ -394,6 +418,7 @@ class Base implements \CB\Interfaces\TreeNode
             }
 
             //add grouping param for DC
+            //This block remains as backward compatible, but will be removed in future commits
             if (($param == 'DC')) {
                 if (!empty($this->config['view']['group'])) {
                     $rez['group'] = $this->config['view']['group'];
@@ -467,5 +492,18 @@ class Base implements \CB\Interfaces\TreeNode
             : $this->parent->getNodeParam($param);
 
         return $rez;
+    }
+
+    /**
+     * replace possible variables in a filter array for solr query
+     * @param  array reference &$filterArray
+     * @return void
+     */
+    protected function replaceFilterVars(&$filterArray)
+    {
+        //
+        foreach ($filterArray as $key => $value) {
+            $filterArray[$key] = str_replace('$activeUserId', $_SESSION['user']['id'], $value);
+        }
     }
 }

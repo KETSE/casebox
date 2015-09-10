@@ -122,8 +122,8 @@ class Browser
 
         //get view config and apply to request params and for result
         $viewConfig = $this->detectViewConfig();
-        $this->requestParams = array_merge($this->requestParams, $viewConfig);
-        $this->result = array_merge($this->result, $viewConfig);
+        $this->requestParams['view'] = $viewConfig;
+        $this->result['view'] = $viewConfig;
 
         $this->requestParams['facets'] = $this->detectFacets();
 
@@ -251,13 +251,17 @@ class Browser
                     $rez['DC'][] = $r['DC'];
                 }
 
-                if (isset($r['sort'])) {
-                    $rez['sort'] = $r['sort'];
+                if (isset($r['view'])) {
+                    $rez['view'] = array_merge($rez['view'], $r['view']);
                 }
 
-                if (isset($r['group'])) {
-                    $rez['group'] = $r['group'];
-                }
+                // if (isset($r['sort'])) {
+                //     $rez['view']['sort'] = $r['sort'];
+                // }
+
+                // if (isset($r['group'])) {
+                //     $rez['view']['group'] = $r['group'];
+                // }
             }
 
             $params = array(

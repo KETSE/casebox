@@ -678,6 +678,7 @@ Ext.define('CB.browser.ViewContainer', {
             rez = this.cardContainer.items.getAt(indexOrName);
         } else {
             var viewName = 'CBBrowserView' + Ext.util.Format.capitalize(indexOrName);
+
             this.cardContainer.items.each(
                 function(i, idx) {
                     if(i.getXType() == viewName) {
