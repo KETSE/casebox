@@ -71,6 +71,9 @@ try {
 }
 
 // detect working mode (interactive or not)
+
+print_r($options);
+
 if (empty($options)) {
     $options = getopt('f:', array('file:'));
 }
@@ -78,6 +81,8 @@ if (empty($options)) {
 $configFile = empty($options['f'])
     ? @$options['file']
     : $options['f'];
+
+echo '$configFile = '.$configFile.PHP_EOL;
 
 if (!empty($configFile) && file_exists($configFile)) {
     $options['config'] = \CB\Config::loadConfigFile($configFile);
