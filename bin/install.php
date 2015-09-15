@@ -213,12 +213,14 @@ foreach ($requiredDirs as $dir) {
     }
 }
 
+
+if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE'))
 //---------- create solr symlinks for casebox config sets
-if (createSolrConfigsetsSymlinks($cfg) && \CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
-    echo "Solr configsets symlinks created sucessfully.\n\r";
-} else {
-    echo "Error creating symlinks to solr configsets.\n\r";
-}
+        if (createSolrConfigsetsSymlinks($cfg)) {
+        echo "Solr configsets symlinks created sucessfully.\n\r";
+    } else {
+        echo "Error creating symlinks to solr configsets.\n\r";
+    }
 
 //try to create log core
 if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {

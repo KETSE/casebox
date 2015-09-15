@@ -27,11 +27,17 @@ $cfg['core_name'] = detectCore() or die('Cannot detect core');
 //set default database name
 $cfg['db_name'] = PREFIX . $cfg['core_name'];
 
-//loading core defined params
+    //loading core defined params
 try {
     $cfg = array_merge($cfg, Config::getPlatformConfigForCore($cfg['core_name']));
 } catch (\Exception $e) { //return http "not found" if cant load core config
-    header(@$_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
+    if (Util\is_cli()) {
+        trigger_error("ERROR: Config::getPlatformConfigForCore(".$cfg['core_name'].")", E_USER_ERROR);
+    } else {
+
+        header(@$_SERVER["SERVER_PROTOCOL"].' 404 Not Found');
+    }
+
     exit();
 }
 
