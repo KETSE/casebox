@@ -71,6 +71,11 @@ if (file_exists(DOC_ROOT.'config.ini')) {
         //conect to db using global params from config.ini
         DB\connect($cfg);
     }
+
+    print_r($cfg);
+
+} else {
+    trigger_error("WARNING: file not exists ".DOC_ROOT.'config.ini', E_USER_WARNING);
 }
 
 //define global prefix used
