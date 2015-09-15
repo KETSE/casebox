@@ -225,7 +225,7 @@ function createSolrConfigsetsSymlinks(&$cfg)
             $r = $r && symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $logLinkName);
         }
 
-        if (\CB\Util\getOS() == "LINUX") {
+        if (\CB\Util\getOS() == "LINUX" && \CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') ) {
                 shell_exec("chown -R ".fileowner($CBCSPath).":".filegroup($CBCSPath)." ".$CBCSPath);
         }
 
@@ -237,7 +237,7 @@ function createSolrConfigsetsSymlinks(&$cfg)
             // symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR. 'conf', $logCore . DIRECTORY_SEPARATOR . 'conf' );
         }
 
-        if (\CB\Util\getOS() == "LINUX") {
+        if (\CB\Util\getOS() == "LINUX" && \CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') ) {
                 // set owner of core folder for solr
                 shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$logCore);
         }

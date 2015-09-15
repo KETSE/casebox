@@ -111,10 +111,12 @@ $defaultValues = getDefaultConfigValues();
 
 $cfg = $cfg + $defaultValues;
 
-if (\CB\Util\getOS()!="WIN") {
+if (\CB\Util\getOS() != "WIN") {
     //ask for apache user and set ownership for some folders
     $cfg['apache_user'] = readParam('apache_user', $cfg['apache_user']);
-    setOwnershipForApacheUser($cfg);
+    if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+        setOwnershipForApacheUser($cfg);
+    }
 }
 
 //init prefix
