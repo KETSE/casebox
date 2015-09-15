@@ -214,15 +214,16 @@ foreach ($requiredDirs as $dir) {
 }
 
 //---------- create solr symlinks for casebox config sets
-if (createSolrConfigsetsSymlinks($cfg)) {
+if (createSolrConfigsetsSymlinks($cfg) && \CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
     echo "Solr configsets symlinks created sucessfully.\n\r";
 } else {
     echo "Error creating symlinks to solr configsets.\n\r";
 }
 
 //try to create log core
-
-createSolrCore($cfg, 'log', 'log_');
+if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+    createSolrCore($cfg, 'log', 'log_');
+}
 
 //create default database (<prefix>__casebox)
 createMainDatabase($cfg);
