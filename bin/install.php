@@ -72,8 +72,6 @@ try {
 
 // detect working mode (interactive or not)
 
-print_r($options);
-
 if (empty($options)) {
     $options = getopt('f:', array('file:'));
 }
@@ -82,7 +80,6 @@ $configFile = empty($options['f'])
     ? @$options['file']
     : $options['f'];
 
-echo '$configFile = '.$configFile.PHP_EOL;
 
 if (!empty($configFile) && file_exists($configFile)) {
     $options['config'] = \CB\Config::loadConfigFile($configFile);
@@ -100,7 +97,7 @@ if (!empty($configFile) && file_exists($configFile)) {
 if (!empty($options['config'])) {
     // define('CB\\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')', false);
     \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
-    // $cfg = $options['config'];
+    $cfg = $options['config'];
 
 } else {
     \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
