@@ -36,5 +36,8 @@ do
    export CMD="${SOLR_DIR}/bin/solr create_core -c ${CORENAME} -n ${SOLR_CONFIGSET}"
      echo "Configuring Core named ${CORENAME}"
     exec $CMD
+
+    curl -o /dev/null "http://localhost:${SOLR_PORT}/solr/admin/cores?action=CREATE&name=${CORENAME}&instanceDir=${CORENAME}" > /dev/null 2>&1
+
 done
 fi
