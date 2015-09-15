@@ -40,6 +40,8 @@ before_script:
    - export SOLR_CORENAME="cbtest_test"
    - export SOLR_CONFIGSET="default"
    - bash tests/server/solr/solr5-addcore.sh
+  # autoinstall CASEBOX
+   - php tests/auto_install.php
 
 script:
  - php vendor/bin/phpunit -c tests/phpunit-travis.xml httpsdocs/classes/UnitTest/Tests/
