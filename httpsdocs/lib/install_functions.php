@@ -50,6 +50,7 @@ function getDefaultConfigValues()
 
         ,'PYTHON' => 'python'
         ,'backup_dir' => \CB\APP_DIR . 'backup' . DIRECTORY_SEPARATOR
+        ,'solr_create_cores' => 'y'
     );
 }
 
@@ -112,6 +113,7 @@ function getParamPhrase($paramName)
         ,'core_solr_reindex' => 'Reindex core [Y/n]: '
 
         ,'overwrite_existing_core_db' => "Core database exists. Would you like to backup it and overwrite with dump from current installation [Y/n]: "
+        ,'solr_create_cores' => "solr aucreate cores ?"
     );
 
     return empty($phrases[$paramName])

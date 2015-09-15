@@ -140,8 +140,10 @@ if (!empty($l)) {
     $cfg['server_name'] = $l;
 }
 
+if (confirm('solr_create_cores')) {
 //init solr connection
-initSolrConfig($cfg);
+    initSolrConfig($cfg);
+}
 
 $cfg['admin_email'] = readParam('admin_email', $cfg['admin_email']);
 $cfg['sender_email'] = readParam('sender_email', $cfg['sender_email']);
