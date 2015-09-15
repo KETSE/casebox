@@ -142,7 +142,9 @@ $languages = readParam('core_languages', $language);
 
 DB\dbQuery($sql, array('languages', $languages)) or die(DB\dbQueryError());
 
-createSolrCore($cfg, $coreName);
+if (confirm('solr_create_cores')) {
+    createSolrCore($cfg, $coreName);
+}
 
 echo 'Creating language files .. ';
 exec('php "' . $binDirectorty . 'languages_update_js_files.php"');
