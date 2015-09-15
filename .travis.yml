@@ -17,7 +17,7 @@ addons:
 before_install:
     - mkdir -p $HOME/download-cache
     - mkdir -p build/logs
-    - mkdir logs
+    - mkdir -p logs
     - mkdir -p data/tmp/minify
     - mysql -u root -e "CREATE USER 'local'@'%' IDENTIFIED BY 'h0st'"
     - mysql -u root -e "CREATE USER 'local'@'localhost' IDENTIFIED BY 'h0st'"
