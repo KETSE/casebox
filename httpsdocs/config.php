@@ -32,7 +32,7 @@ try {
     $cfg = array_merge($cfg, Config::getPlatformConfigForCore($cfg['core_name']));
 } catch (\Exception $e) { //return http "not found" if cant load core config
     if (Util\is_cli()) {
-        trigger_error("ERROR: Config::getPlatformConfigForCore(".$cfg['core_name'].")", E_USER_ERROR);
+        trigger_error("ERROR: Config::getPlatformConfigForCore(".$cfg['core_name'].") cfg=".print_r($cfg, true), E_USER_ERROR);
     } else {
 
         header(@$_SERVER["SERVER_PROTOCOL"].' 404 Not Found');
