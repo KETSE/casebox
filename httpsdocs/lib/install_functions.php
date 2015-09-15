@@ -488,12 +488,15 @@ function createMainDatabase($cfg)
         }
     } else {
         if (confirm('create__casebox_from_dump')) {
+             echo "Create database ". $cbDb. PHP_EOL;
             if (\CB\DB\dbQuery('CREATE DATABASE IF NOT EXISTS `' . $cbDb . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
                 echo shell_exec('mysql --host=' . $cfg['db_host'] . ' --user=' . $dbUser . ( $dbPass ? ' --password=' . $dbPass : '' )  . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
             } else {
                 $rez = false;
                 showError('Cant create database "' . $cbDb . '".');
             }
+        } else {
+            trigger_error("Database ".$cbDb." not exists, try to set create__casebox_from_dump = y ", E_USER_ERROR);
         }
     }
 
