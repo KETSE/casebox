@@ -7,7 +7,6 @@
  * @author ghindows
  */
 
-
 //define constants
 define('CB_ROOT_PATH', dirname(__DIR__) . DIRECTORY_SEPARATOR);
 define('CB_DOC_ROOT', CB_ROOT_PATH . 'httpsdocs' . DIRECTORY_SEPARATOR);

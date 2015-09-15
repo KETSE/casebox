@@ -261,7 +261,7 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
     //verify if solr core exist
     $solrHost     = $cfg['solr_host'];
     $solrPort     = $cfg['solr_port'];
-    $createCore   = true;
+    $createCore   = true && confirm('solr_create_cores');
     $askReindex   = true;
     $fullCoreName = $cfg['prefix'].'_'.$coreName;
 
@@ -458,8 +458,6 @@ function initDBConfig(&$cfg)
  */
 function createMainDatabase($cfg)
 {
-
-    print_r($cfg);
 
     $rez = true;
 

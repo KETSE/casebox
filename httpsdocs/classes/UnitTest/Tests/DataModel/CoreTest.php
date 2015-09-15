@@ -16,6 +16,8 @@ class CoreTest extends \PHPUnit_Framework_TestCase
         //delete core if maibe remained from previous failed tests
         if (DM\Core::exists($this->testCoreName)) {
             $this->testDeleteCore();
+        } else {
+           $this->assertTrue(true, 'Cant test core existance');
         }
     }
 

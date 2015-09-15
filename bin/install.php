@@ -97,7 +97,7 @@ if (!empty($configFile) && file_exists($configFile)) {
 if (!empty($options['config'])) {
     // define('CB\\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')', false);
     \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
-    $cfg = $options['config'];
+    $cfg = $cfg+$options['config'];
 
 } else {
     \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
@@ -176,7 +176,7 @@ $cfg['backup_dir'] = readParam('backup_dir', $cfg['backup_dir']);
 defineBackupDir($cfg);
 
 echo "\nYou have configured main options for casebox.\n" .
-    "Saving your settings to casebox.ini ... ";
+    "Saving your settings to " . \CB\DOC_ROOT . 'config.ini';
 
 if (!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == false)) {
     backupFile(\CB\DOC_ROOT . 'config.ini');
