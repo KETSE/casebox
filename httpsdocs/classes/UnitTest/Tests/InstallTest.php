@@ -21,7 +21,7 @@ class InstallTest extends \PHPUnit_Framework_TestCase
 
     }
 
-    public function testCreateSolrConfigsetsSymlinks()
+   /* public function testCreateSolrConfigsetsSymlinks()
     {
         $cfg = \CB\Config::loadConfigFile(\CB_DOC_ROOT . 'config.ini');
 
@@ -38,7 +38,7 @@ class InstallTest extends \PHPUnit_Framework_TestCase
             file_exists($result['links']['default']),
             'solr default configset symlink not created : ' .$result['links']['default']
         );
-    }
+    } */
 
     public function _testReindexSolr()
     {
