@@ -3,25 +3,57 @@ language: php
 php:
   - 5.6
 
+cache:
+    directories:
+        - $HOME/download-cache
+
 addons:
   hosts:
     - test.casebox.org
 
+before_install:
+    - mkdir -p $HOME/download-cache
+    - mkdir -p build/logs
+    - mkdir logs
+    - mkdir -p data/tmp/minify
+
+install:
+   - sudo apt-get update
+   - sudo apt-get install apache2 libapache2-mod-fastcgi
+   # enable php-fpm
+   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+   - sudo a2enmod rewrite actions fastcgi alias
+   - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+   - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+   # configure apache virtual hosts
+   - sudo cp -f tests/server/apache/travis-ci-apache /etc/apache2/sites-available/default
+   - sudo sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place /etc/apache2/sites-available/default
+   - sudo service apache2 restart
+   # install composer
+   - curl -sS https://getcomposer.org/installer | php
+   - php composer.phar install --no-interaction
+
 before_script:
- - curl -sS https://getcomposer.org/installer | php
- - php composer.phar install --no-interaction
- - mysql -u root -e "CREATE USER 'local'@'%' IDENTIFIED BY 'h0st'"
- - mysql -u root -e "CREATE USER 'local'@'localhost' IDENTIFIED BY 'h0st'"
- - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'local'@'%'"
- - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'local'@'localhost'"
- - curl -O http://archive.apache.org/dist/lucene/solr/5.3.0/solr-5.3.0.tgz
- - tar xzf solr-5.3.0.tgz solr-5.3.0/bin/install_solr_service.sh --strip-components=2
- - sh ./install_solr_service.sh solr-5.3.0.tgz
+   # configure databases, add user
+   - mysql -u root -e "CREATE USER 'local'@'%' IDENTIFIED BY 'h0st'"
+   - mysql -u root -e "CREATE USER 'local'@'localhost' IDENTIFIED BY 'h0st'"
+   - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'local'@'%'"
+   - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'local'@'localhost'"
+  # copy and install solr
+   - export SOLR_VERSION="5.1.0"
+   - bash tests/server/solr/solr5-install.sh
+  # add solr core cbtest_log
+   - export SOLR_CORENAME="cbtest_log"
+   - export SOLR_CONFIGSET="log"
+   - bash tests/server/solr/solr5-addcore.sh
+  # add solr core test
+   - export SOLR_CORENAME="cbtest_test"
+   - export SOLR_CONFIGSET="default"
+   - bash tests/server/solr/solr5-addcore.sh
 
 script:
- - mkdir -p build/logs
- - php vendor/bin/phpunit -c phpunit.xml httpsdocs/classes/UnitTest/Tests/
+ - php vendor/bin/phpunit -c tests/phpunit-travis.xml httpsdocs/classes/UnitTest/Tests/
 
 after_script:
  - sh -c 'if [ "$TRAVIS_PHP_VERSION" != "hhvm" ]; then php vendor/bin/coveralls -v; fi;'
-
+ - bash tests/server/solr/solr5-stop.sh
