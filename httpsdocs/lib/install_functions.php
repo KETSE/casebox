@@ -459,6 +459,8 @@ function initDBConfig(&$cfg)
 function createMainDatabase($cfg)
 {
 
+    print_r($cfg);
+
     $rez = true;
 
     connectDBWithSuUser($cfg);

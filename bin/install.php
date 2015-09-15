@@ -228,6 +228,7 @@ if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
 }
 
 //create default database (<prefix>__casebox)
+echo "create Main Database:".PHP_EOL;
 createMainDatabase($cfg);
 
 echo "\nCasebox was successfully configured on your system\n" .
