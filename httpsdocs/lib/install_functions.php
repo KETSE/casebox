@@ -261,7 +261,7 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
     //verify if solr core exist
     $solrHost     = $cfg['solr_host'];
     $solrPort     = $cfg['solr_port'];
-    $createCore   = true && confirm('solr_create_cores');
+    $createCore   = true;
     $askReindex   = true;
     $fullCoreName = $cfg['prefix'].'_'.$coreName;
 
@@ -340,7 +340,7 @@ function solrCreateCore($host, $port, $coreName, $cfg = array())
 {
     $rez = true;
 
-    if (isset($cfg['solr_home'])) {
+    if (isset($cfg['solr_home']) && confirm('solr_create_cores') ) {
 
         $CB_CORE_SOLR_PATH = $cfg['solr_home'].$coreName;
 
@@ -351,7 +351,7 @@ function solrCreateCore($host, $port, $coreName, $cfg = array())
         }
 
         // make link to config
-        /* $confLink = $CB_CORE_SOLR_PATH.DIRECTORY_SEPARATOR.'conf';
+        $confLink = $CB_CORE_SOLR_PATH.DIRECTORY_SEPARATOR.'conf';
 
         $CBCSPath = \CB\SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
 
@@ -361,7 +361,7 @@ function solrCreateCore($host, $port, $coreName, $cfg = array())
             $r = symlink($confPath, $confLink);
         } elseif (!file_exists($confPath)) {
             trigger_error($confPath, E_USER_WARNING);
-        } */
+        }
 
         if (\CB\Util\getOS() == "LINUX") {
             // set owner of core folder for solr same as parent
