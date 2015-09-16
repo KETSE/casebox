@@ -19,7 +19,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(is_numeric($this->solr->ping()));
     }
 
-    public function testDeleteByQuery()
+   /* public function testDeleteByQuery()
     {
         $this->solr->deleteByQuery('*:*');
 
@@ -45,7 +45,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         } catch (\Exception $e) {
             $this->assertTrue(false, 'Error full reindexing');
         }
-    }
+    } */
 
     public function tearDown()
     {
