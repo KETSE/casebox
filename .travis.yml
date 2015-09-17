@@ -32,6 +32,8 @@ before_script:
   # copy and install solr
    - export SOLR_VERSION="5.1.0"
    - bash tests/server/solr/solr5-install.sh
+   # may take few seconds to start and may not be available when the script is executed
+   - sleep 10
   # add solr core cbtest_log
    - export SOLR_CORENAME="cbtest_log"
    - export SOLR_CONFIGSET="log"
