@@ -59,7 +59,7 @@ if (!isset($cfg)|| !is_array($cfg)) {
 }
 //define some library paths
 $cfg['HTML_PURIFIER'] = 'htmlpurifier/library/HTMLPurifier.auto.php';
-$cfg['SOLR_CLIENT'] = 'Solr/Service.php';
+$cfg['SOLR_CLIENT'] = 'Apache/Solr/Service.php';
 $cfg['MINIFY_PATH'] = DOC_ROOT . 'libx/min/';
 $cfg['TIKA_SERVER'] = DOC_ROOT . 'libx/tika-server.jar';
 

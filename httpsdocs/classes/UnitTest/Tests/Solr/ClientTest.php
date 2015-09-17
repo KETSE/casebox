@@ -8,98 +8,51 @@ use CB\Search;
 class ClientTest extends \PHPUnit_Framework_TestCase
 {
     private $solr;
+    private $config = [
+        'solr_host' => 'localhost',
+        'solr_port' => 8983,
+        'solr_core' => 'cbtest_test'
+    ];
 
     public function setUp()
     {
-        $this->solr = new Client();
+        $layer = new \Apache_Solr_Compatibility_Solr4CompatibilityLayer;
+        $this->solr = $solr = new \Apache_Solr_Service($this->config['solr_host'], $this->config['solr_port'], "/solr/".$this->config['solr_core']."/", false, $layer);
+
     }
 
     public function testConnection()
     {
-        $this->assertTrue(is_numeric($this->solr->ping()) && $this->solr->ping() > 0, "test ping solr not pass");
+        $this->assertTrue(is_numeric($this->solr->ping()));
     }
 
-    /**
-     * @depends testConnection
-     */
-    public function testAddDocument()
-    {
 
-        // add documents
-        $data = [
-            'name' => 'testDeleteByQuery',
-            'pid' => 1,
-            'template_id' => 5,
-            'data' => [
-                '_title' => 'testDeleteByQuery'
-            ]
-        ];
+    public function testAddDocument() {
 
-        // try to add one folder to root tree
-        $obj = new \CB\Objects\Object();
+        $doc = new \Apache_Solr_Document();
+        $doc->id = 9999;
+        $doc->name="testAddDocument";
+        $doc->dstatus = 0;
+        $response = $this->solr->addDocument($doc);
 
-        // first create object
-        $data['id'] = $obj->create($data);
 
-        $search = new Search();
-        $rez    = $search->query(
-            array(
-                'fq' => [ 'name:testDeleteByQuery'],
-                'rows' => 1
-            )
-        );
 
-        // select document from solr
-        //  $rez = $this->solr->search('name:testDeleteByQuery', 0, 10, []);
-        $this->assertTrue($rez['total'] >= 1, "query result:".print_r($rez, true));
+        $this->assertTrue($response->getHttpStatus() == 200, "ERROR SOLR ADD DOCUMENT:".print_r($response,true));
+
+                $response = $this->solr->commit();
+
+        $this->assertTrue($response->getHttpStatus() == 200, "ERROR SOLR COMMIT:".print_r($response,true));
+
     }
 
-    /**
-     * @depends testAddDocument
-     */
-    public function testDeleteByQuery()
-    {
+/**
+ * @depends testAddDocument
+ */
+    public function testQuery() {
 
-        $search = new Search();
-        $rez    = $search->query(
-            array(
-                'fq' => [ 'name:testDeleteByQuery'],
-                'rows' => 1
-            )
-        );
-
-        $this->assertTrue($rez['total'] >= 1, 'Delete all by query didnt clear the solr instance.');
-
-        $this->solr->deleteByQuery('name:testDeleteByQuery');
-
-        $this->solr->commit(false,false);
-
-        $rez = $search->query(
-            array(
-                'fq' => [ 'name:testDeleteByQuery'],
-                'rows' => 1
-            )
-        );
-
-        $this->assertTrue($rez['total'] == 0, 'Delete all by query didnt clear the solr instance.'); 
+        $response =  $this->solr->search("id:9999");
+        $r = json_decode($response->getRawResponse(),true);
+        $this->assertTrue(isset($r['response']['numFound']) && $r['response']['numFound'] >=0, print_r($r,true));
     }
-
-    public function testReindexing()
-    {
-       try {
-            $this->solr->updateTree(array('all' => true));
-
-            $this->solr->optimize();
-
-            $this->assertTrue(true);
-        } catch (\Exception $e) {
-            $this->assertTrue(false, 'Error full reindexing');
-        }
-        
-    }
-
-    public function tearDown()
-    {
-        unset($this->solr);
-    }
+    
 }

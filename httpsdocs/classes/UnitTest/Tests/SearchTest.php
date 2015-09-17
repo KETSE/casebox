@@ -39,7 +39,9 @@ class SearchTest extends \PHPUnit_Framework_TestCase
 
         $this->assertArraySubset(
             $data['result'],
-            $result
+            $result,
+            false,
+            print_r($result,true)
         );
 
     }
