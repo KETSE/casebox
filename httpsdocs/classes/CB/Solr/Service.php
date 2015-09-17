@@ -90,7 +90,7 @@ class Service
             if (!class_exists('\\Apache_Solr_Compatibility_Solr4CompatibilityLayer', false)) {
                 require_once 'Solr/Compatibility/AddDocumentXmlCreator.php';
                 require_once 'Solr/Compatibility/CompatibilityLayer.php';
-                require_once 'Solr/Apache_Solr_Compatibility_Solr4CompatibilityLayer.php';
+                require_once 'Solr/Compatibility/Apache_Solr_Compatibility_Solr4CompatibilityLayer.php';
             }
 
     $layer = new \Apache_Solr_Compatibility_Solr4CompatibilityLayer;
