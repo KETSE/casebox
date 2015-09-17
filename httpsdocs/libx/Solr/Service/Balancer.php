@@ -29,18 +29,12 @@
  *
  * @copyright Copyright 2007-2011 Servigistics, Inc. (http://servigistics.com)
  * @license http://solr-php-client.googlecode.com/svn/trunk/COPYING New BSD
- * @version $Id: Balancer.php 54 2011-02-04 16:29:18Z donovan.jimenez $
+ * @version $Id$
  *
  * @package Apache
  * @subpackage Solr
  * @author Donovan Jimenez <djimenez@conduit-it.com>, Dan Wolfe
  */
-
-// See Issue #1 (http://code.google.com/p/solr-php-client/issues/detail?id=1)
-// Doesn't follow typical include path conventions, but is more convenient for users
-require_once(dirname(dirname(__FILE__)) . '/Service.php');
-
-require_once(dirname(dirname(__FILE__)) . '/NoServiceAvailableException.php');
 
 /**
  * Reference Implementation for using multiple Solr services in a distribution. Functionality
@@ -53,12 +47,12 @@ class Apache_Solr_Service_Balancer
 	/**
 	 * SVN Revision meta data for this class
 	 */
-	const SVN_REVISION = '$Revision: 54 $';
+	const SVN_REVISION = '$Revision$';
 
 	/**
 	 * SVN ID meta data for this class
 	 */
-	const SVN_ID = '$Id: Balancer.php 54 2011-02-04 16:29:18Z donovan.jimenez $';
+	const SVN_ID = '$Id$';
 
 	protected $_createDocuments = true;
 

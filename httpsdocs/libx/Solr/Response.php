@@ -29,14 +29,12 @@
  *
  * @copyright Copyright 2007-2011 Servigistics, Inc. (http://servigistics.com)
  * @license http://solr-php-client.googlecode.com/svn/trunk/COPYING New BSD
- * @version $Id: Response.php 54 2011-02-04 16:29:18Z donovan.jimenez $
+ * @version $Id$
  *
  * @package Apache
  * @subpackage Solr
  * @author Donovan Jimenez <djimenez@conduit-it.com>
  */
-
-require_once(dirname(__FILE__) . '/ParserException.php');
 
 /**
  * Represents a Solr response.  Parses the raw response into a set of stdClass objects
@@ -50,12 +48,12 @@ class Apache_Solr_Response
 	/**
 	 * SVN Revision meta data for this class
 	 */
-	const SVN_REVISION = '$Revision: 54 $';
+	const SVN_REVISION = '$Revision$';
 
 	/**
 	 * SVN ID meta data for this class
 	 */
-	const SVN_ID = '$Id: Response.php 54 2011-02-04 16:29:18Z donovan.jimenez $';
+	const SVN_ID = '$Id$';
 
 	/**
 	 * Holds the raw response used in construction

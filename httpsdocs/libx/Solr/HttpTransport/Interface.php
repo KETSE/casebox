@@ -36,9 +36,6 @@
  * @author Timo Schmidt <timo.schmidt@aoemedia.de>, Donovan Jimenez <djimenez@conduit-it.com>
  */
 
-// require Apache_Solr_HttpTransport_Response
-require_once(dirname(__FILE__) . '/Response.php');
-
 /**
  * Interface that all Transport (HTTP Requester) implementations must implement. These
  * Implementations can then be plugged into the Service instance in order to user their
@@ -59,7 +56,17 @@ interface Apache_Solr_HttpTransport_Interface
 	 * @param float $timeout
 	 */
 	public function setDefaultTimeout($timeout);
-		
+	
+	/**
+	 * Set authentication credentials to pass along with the requests.
+	 * 
+	 * These will be used to perform HTTP Basic authentication.
+	 * 
+	 * @param string $username
+	 * @param string $password
+	 */
+	public function setAuthenticationCredentials($username, $password);
+	
 	/**
 	 * Perform a GET HTTP operation with an optional timeout and return the response
 	 * contents, use getLastResponseHeaders to retrieve HTTP headers

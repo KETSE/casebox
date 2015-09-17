@@ -29,7 +29,7 @@
  *
  * @copyright Copyright 2007-2011 Servigistics, Inc. (http://servigistics.com)
  * @license http://solr-php-client.googlecode.com/svn/trunk/COPYING New BSD
- * @version $Id: InvalidArgumentException.php 54 2011-02-04 16:29:18Z donovan.jimenez $
+ * @version $Id$
  *
  * @package Apache
  * @subpackage Solr
@@ -41,10 +41,10 @@ class Apache_Solr_InvalidArgumentException extends Apache_Solr_Exception
 	/**
 	 * SVN Revision meta data for this class
 	 */
-	const SVN_REVISION = '$Revision: 54 $';
+	const SVN_REVISION = '$Revision$';
 
 	/**
 	 * SVN ID meta data for this class
 	 */
-	const SVN_ID = '$Id: InvalidArgumentException.php 54 2011-02-04 16:29:18Z donovan.jimenez $';
+	const SVN_ID = '$Id$';
 }

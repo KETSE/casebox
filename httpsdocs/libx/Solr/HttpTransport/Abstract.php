@@ -48,7 +48,7 @@ abstract class Apache_Solr_HttpTransport_Abstract implements Apache_Solr_HttpTra
 	 * @var float
 	 */
 	private $_defaultTimeout = false;
-		
+			
 	/**
 	 * Get the current default timeout setting (initially the default_socket_timeout ini setting)
 	 * in seconds
