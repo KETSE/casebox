@@ -14,7 +14,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
     {
         $methods = array(
             'getLast'
-            ,'getUnsent'
+            ,'getUnseen'
             ,'getCount'
             ,'markAsRead'
             ,'markAllAsRead'

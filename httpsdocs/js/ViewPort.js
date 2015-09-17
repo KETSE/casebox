@@ -645,7 +645,7 @@ Ext.define('CB.ViewPort', {
         if(!App.activateTab(App.mainTabPanel, 'notificationsView')) {
             App.addTab(
                 App.mainTabPanel
-                ,new CB.browser.NotificationsView({
+                ,new CB.notifications.View({
                     data: {id: 'notificationsView' }
                     ,closable: false
                 })

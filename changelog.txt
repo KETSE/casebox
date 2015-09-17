@@ -1,3 +1,7 @@
+CaseBox 1.9.525 (2015-09-16)
+==============================
+- #7536 Email notifications going wild
+
 CaseBox 1.9.524 (2015-09-10)
 ==============================
 - #8726 JS small fixed to improve EditGrid rendering&speed, improve UX

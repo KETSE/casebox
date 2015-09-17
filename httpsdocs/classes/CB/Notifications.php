@@ -75,6 +75,7 @@ class Notifications
 
         if (is_numeric($id)) {
             User::setUserConfigParam('lastSeenActionId', $id);
+            DM\Notifications::markAsSeen(User::getId(), $id);
             $rez = array('success' => true);
         }
 

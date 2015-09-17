@@ -183,7 +183,8 @@ return array_merge(
             ,'//js/object/field/editor/Form.js'
             ,'//js/object/field/editor/Tag.js'
             ,'//js/view/BoundListKeyNav.js'
-            ,'//js/browser/NotificationsView.js'
+            ,'//js/notifications/View.js'
+            ,'//js/notifications/SettingsWindow.js'
             // ,'//js/overrides/form/action/Submit.js'
         )
 

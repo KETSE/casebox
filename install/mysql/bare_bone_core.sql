@@ -190,13 +190,13 @@ CREATE TABLE `notifications` (
   `prev_action_ids` text COMMENT 'previous action ids(for same obj, action type, user) that have not yet been read',
   `from_user_id` int(11) DEFAULT NULL,
   `user_id` int(10) unsigned NOT NULL,
-  `email_sent` tinyint(1) NOT NULL DEFAULT '-1' COMMENT '-1 doesnt need to send, 0 - no, 1 - yes',
+  `seen` tinyint(1) NOT NULL DEFAULT '0',
   `read` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'notification has been read in CB',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNQ_notifications` (`object_id`,`action_type`,`from_user_id`,`user_id`),
   KEY `FK_notifications__action_id` (`action_id`),
   KEY `FK_notifications_user_id` (`user_id`),
-  KEY `IDX_notifications_email_sent` (`email_sent`),
+  KEY `IDX_notifications_seen` (`seen`),
   CONSTRAINT `FK_notifications__action_id` FOREIGN KEY (`action_id`) REFERENCES `action_log` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_notifications_user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -703,10 +703,12 @@ DELIMITER $$
 
 /*!50003 CREATE */ /*!50003 TRIGGER `templates_structure_bi` BEFORE INSERT ON `templates_structure` FOR EACH ROW BEGIN
 	DECLARE msg VARCHAR(255);
+	/* trivial check for cycles */
 	if (new.id = new.pid) then
 		set msg = concat('Error: cyclic reference in templates_structure ', cast(new.id as char));
 		signal sqlstate '45000' set message_text = msg;
 	end if;
+	/* end of trivial check for cycles */
 	if(NEW.PID is not null) THEN
 		SET NEW.LEVEL = COALESCE((SELECT `level` + 1 FROM templates_structure WHERE id = NEW.PID), 0);
 	END IF;
@@ -723,10 +725,12 @@ DELIMITER $$
 
 /*!50003 CREATE */ /*!50003 TRIGGER `templates_structure_bu` BEFORE UPDATE ON `templates_structure` FOR EACH ROW BEGIN
 	DECLARE msg VARCHAR(255);
+	/* trivial check for cycles */
 	IF (new.id = new.pid) THEN
 		SET msg = CONCAT('Error: cyclic reference in templates_structure ', CAST(new.id AS CHAR));
 		signal SQLSTATE '45000' SET message_text = msg;
 	END IF;
+	/* end of trivial check for cycles */
 	IF(NEW.PID IS NOT NULL) THEN
 		SET NEW.LEVEL = coalesce((SELECT `level` +1 FROM templates_structure WHERE id = NEW.PID), 0);
 	END IF;
@@ -756,10 +760,13 @@ DELIMITER $$
 
 /*!50003 CREATE */ /*!50003 TRIGGER `tree_bi` BEFORE INSERT ON `tree` FOR EACH ROW BEGIN
 	DECLARE msg VARCHAR(255);
+	/* trivial check for cycles */
 	if (new.id = new.pid) then
 		set msg = concat('Error inserting cyclic reference: ', cast(new.id as char));
 		signal sqlstate '45000' set message_text = msg;
 	end if;
+	/* end of trivial check for cycles */
+	-- set owner id equal to creator id if null given
 	set new.oid = coalesce(new.oid, new.cid);
     END */$$
 
@@ -773,9 +780,11 @@ DELIMITER $$
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `tree_ai` */$$
 
 /*!50003 CREATE */ /*!50003 TRIGGER `tree_ai` AFTER INSERT ON `tree` FOR EACH ROW BEGIN
+	/* get pids path, text path, case_id and store them in tree_info table*/
 	declare tmp_new_case_id
 		,tmp_new_security_set_id bigint unsigned default null;
 	DECLARE tmp_new_pids TEXT DEFAULT '';
+	/* check if inserted node is a case */
 	if( 	(new.template_id is not null)
 		and (select id from templates where (id = new.template_id) and (`type` = 'case') )
 	) THEN
@@ -808,6 +817,7 @@ DELIMITER $$
 		,tmp_new_case_id
 		,tmp_new_security_set_id
 	);
+	/* end of get pids path, text path, case_id and store them in tree_info table*/
     END */$$
 
 
@@ -822,6 +832,7 @@ DELIMITER $$
 /*!50003 CREATE */ /*!50003 TRIGGER `tree_au` AFTER UPDATE ON `tree` FOR EACH ROW BEGIN
 	DECLARE tmp_old_pids
 		,tmp_new_pids TEXT DEFAULT '';
+
 	DECLARE tmp_old_case_id
 		,tmp_new_case_id
 		,tmp_old_security_set_id
@@ -831,15 +842,18 @@ DELIMITER $$
 	DECLARE tmp_old_pids_length
 		,tmp_old_security_set_length
 		,tmp_acl_count INT UNSIGNED DEFAULT 0;
+
+	/* get pids path, case_id and store them in tree_info table*/
 	IF( (COALESCE(old.pid, 0) <> COALESCE(new.pid, 0) )
 	    OR ( old.inherit_acl <> new.inherit_acl )
 	  )THEN
+		-- get old data
 		SELECT
-			ti.pids
-			,ti.case_id
-			,ti.acl_count
-			,ti.security_set_id
-			,ts.set
+			ti.pids -- 1,2,3
+			,ti.case_id -- null
+			,ti.acl_count -- 2
+			,ti.security_set_id -- 4
+			,ts.set -- '1,3'
 		INTO
 			tmp_old_pids
 			,tmp_old_case_id
@@ -849,11 +863,17 @@ DELIMITER $$
 		FROM tree_info ti
 		LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
 		WHERE ti.id = new.id;
+
+		/* check if updated node is a case */
 		IF(tmp_old_case_id = old.id) THEN
 			SET tmp_new_case_id = new.id;
 		END IF;
+
+		/* form new data based on new parent
+		*/
 		if(new.pid is null) THEN
 			SET tmp_new_pids = new.id;
+			-- tmp_new_case_id already set above
 			SET tmp_new_security_set_id = null;
 			set tmp_new_security_set = '';
 		ELSE
@@ -871,32 +891,41 @@ DELIMITER $$
 			LEFT JOIN tree_info ti ON t.id = ti.id
 			LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
 			WHERE t.id = new.pid;
+
 			SET tmp_new_pids = TRIM( ',' FROM CONCAT( tmp_new_pids, ',', new.id) );
 		END IF;
+		/* end of form new data based on new parent */
+		/* detect new security set for the node */
 		IF(tmp_acl_count > 0) THEN
+			-- we need to replace security sets that include updated node id
 			IF(new.inherit_acl = 0) THEN
 				SET tmp_new_security_set = new.id;
 			else
 				SET tmp_new_security_set = TRIM( ',' FROM CONCAT(tmp_new_security_set, ',', new.id ) );
 			END IF;
+
 			UPDATE tree_acl_security_sets
 			SET `set` = tmp_new_security_set
 				,updated = 1
 			WHERE id = tmp_old_security_set_id;
 			SET tmp_new_security_set_id = tmp_old_security_set_id;
 		ELSE
+			-- we have to rename security sets for all childs without including updated node in the searched sets
 			IF(new.inherit_acl = 0) THEN
 				SET tmp_new_security_set_id = NULL;
 				SET tmp_new_security_set = '';
 			END IF;
 		END IF;
+		/* end of detect security set for the node */
 		SET tmp_old_pids_length = LENGTH( tmp_old_pids ) +1;
 		SET tmp_old_security_set_length = LENGTH( tmp_old_security_set ) +1;
+		-- update node info with new data
 		UPDATE tree_info
 		SET	pids = tmp_new_pids
 			,case_id = tmp_new_case_id
 			,security_set_id = tmp_new_security_set_id
 		WHERE id = new.id;
+		/* now cyclic updating all childs info for this updated object */
 		CREATE TEMPORARY TABLE IF NOT EXISTS `tmp_tree_info_pids`(
 			`id` BIGINT UNSIGNED NOT NULL,
 			`inherit_acl` TINYINT(1) NOT NULL DEFAULT '1',
@@ -957,6 +986,7 @@ DELIMITER $$
 				JOIN tree t
 					ON ti.id = t.pid;
 		END WHILE;
+		/* update old sequrity sets to new ones */
 		UPDATE tmp_tree_info_security_sets
 			,tree_acl_security_sets
 			SET tree_acl_security_sets.`set` = TRIM( ',' FROM CONCAT(tmp_new_security_set, SUBSTRING(tree_acl_security_sets.set, tmp_old_security_set_length)) )
@@ -964,6 +994,7 @@ DELIMITER $$
 		WHERE tmp_tree_info_security_sets.id <> coalesce(tmp_new_security_set_id, 0)
 			AND tmp_tree_info_security_sets.id = tree_acl_security_sets.id
 			AND tree_acl_security_sets.set LIKE CONCAT(tmp_old_security_set,',%');
+		/* try to delete old security set if no dependances */
 		if(tmp_old_security_set_id <> coalesce(tmp_new_security_set_id, 0)) THEN
 			if( (select count(*) from tree_info where security_set_id = tmp_old_security_set_id) = 0) THEN
 				delete from `tree_acl_security_sets` where id = tmp_old_security_set_id;
@@ -996,27 +1027,36 @@ DELIMITER $$
 	from tree_info ti
 	left join `tree_acl_security_sets` ts on ti.security_set_id = ts.id
 	where ti.id = new.node_id;
+	/* we have to analize 2 cases when node has already other security rules attached and when this is the first rule attached.
+	In first case we have to mark as updated only the security set assigned to this node and child sets
+	In second case we have to add the new security set and update all lower security sets form that tree baranch
+	*/
 	if(tmp_acl_count > 1) THEN
 		UPDATE tree_info
 		SET acl_count = tmp_acl_count
 		WHERE id = new.node_id;
+		-- mark main security set as updated
 		update `tree_acl_security_sets`
 		set updated = 1
 		where id = tmp_old_security_set_id;
+		-- mark child security sets as updated
 		UPDATE `tree_acl_security_sets`
 		SET updated = 1
 		WHERE `set` like concat(tmp_old_security_set, ',%');
 	ELSE
+		/* create new security set*/
 		set tmp_new_security_set = trim( ',' from concat(tmp_old_security_set, ',', new.node_id) );
 		insert into tree_acl_security_sets (`set`)
 		values(tmp_new_security_set)
 		on duplicate key
 		update id = last_insert_id(id);
 		set tmp_new_security_set_id = last_insert_id();
+		/* end of create new security set*/
 		UPDATE tree_info
 		SET 	acl_count = tmp_acl_count
 			,security_set_id = tmp_new_security_set_id
 		WHERE id = new.node_id;
+		/* now we have to update all child security sets */
 		CALL p_update_child_security_sets(new.node_id, tmp_old_security_set_id, tmp_new_security_set_id);
 	END IF;
     END */$$
@@ -1033,6 +1073,7 @@ DELIMITER $$
 /*!50003 CREATE */ /*!50003 TRIGGER `tree_acl_au` AFTER UPDATE ON `tree_acl` FOR EACH ROW BEGIN
 	DECLARE tmp_security_set_id BIGINT UNSIGNED;
 	DECLARE tmp_security_set VARCHAR(9999) DEFAULT '';
+	/* mark security set as updated including all dependent(child) security sets*/
 	SELECT ti.security_set_id
 		,ts.set
 	INTO tmp_security_set_id
@@ -1040,9 +1081,11 @@ DELIMITER $$
 	FROM tree_info ti
 	JOIN `tree_acl_security_sets` ts ON ti.security_set_id = ts.id
 	WHERE ti.id = new.node_id;
+	-- mark main security set as updated
 	UPDATE `tree_acl_security_sets`
 	SET updated = 1
 	WHERE id = tmp_security_set_id;
+	-- mark child security sets as updated
 	UPDATE `tree_acl_security_sets`
 	SET updated = 1
 	WHERE `set` LIKE CONCAT(tmp_security_set, ',%');
@@ -1065,6 +1108,8 @@ DELIMITER $$
 	DECLARE tmp_old_security_set
 		,tmp_new_security_set VARCHAR(9999) DEFAULT '';
 	declare tmp_inherit_acl  tinyint(1) default 1;
+	/*Note: node should have a security set associated if we are in after delete security rule */
+	/* get node data */
 	SELECT  case when (ti.acl_count >0)
 			THEN ti.acl_count - 1
 			ELSE 0
@@ -1077,28 +1122,39 @@ DELIMITER $$
 	FROM tree_info ti
 	JOIN `tree_acl_security_sets` ts ON ti.security_set_id = ts.id
 	WHERE ti.id = old.node_id;
+	/* we have to analize 2 cases when this is not the last deleted security rule and when it's the last one.
+	In first case we have to mark as updated only the security set assigned to this node and child sets
+	In second case we have to update all lower security sets form that tree branch and delete assigned security set for this node
+	*/
 	IF(tmp_acl_count > 0) THEN
 		UPDATE tree_info
 		SET acl_count = tmp_acl_count
 		WHERE id = old.node_id;
+		-- mark main security set as updated
 		UPDATE `tree_acl_security_sets`
 		SET updated = 1
 		WHERE id = tmp_old_security_set_id;
+		-- mark child security sets as updated
 		UPDATE `tree_acl_security_sets`
 		SET updated = 1
 		WHERE `set` LIKE CONCAT(tmp_old_security_set, ',%');
 	ELSE
+		/* get inheritance status of the node */
 		select inherit_acl
 		into tmp_inherit_acl
 		from tree
 		where id = old.node_id;
+		/* create new security set or delete it*/
 		if(tmp_inherit_acl = 1) THEN
+			-- get old_security_set length
 			set tmp_length = length( SUBSTRING_INDEX( tmp_old_security_set, ',', -1 ) );
+			-- get string length for parent pids (without current node)
 			set tmp_length = LENGTH( tmp_old_security_set) - tmp_length - 1;
 			if(tmp_length < 0) Then
 				Set tmp_length = 0;
 			END IF;
 			SET tmp_new_security_set = substring( tmp_old_security_set, 1,  tmp_length );
+			/* get new security set id/**/
 			if(LENGTH(tmp_new_security_set) > 0) THEN
 				select id
 				into tmp_new_security_set_id
@@ -1108,10 +1164,12 @@ DELIMITER $$
 				set tmp_new_security_set_id = null;
 			END IF;
 		END IF;
+		-- update tree_info for processed node
 		UPDATE tree_info
 		SET acl_count = tmp_acl_count
 			,security_set_id = tmp_new_security_set_id
 		WHERE id = old.node_id;
+		/* now we have to update all child security sets */
 		CALL p_update_child_security_sets(old.node_id, tmp_old_security_set_id, tmp_new_security_set_id);
 		IF( COALESCE(tmp_new_security_set_id, 0) <> tmp_old_security_set_id) THEN
 			DELETE FROM tree_acl_security_sets
@@ -1206,13 +1264,16 @@ DELIMITER $$
 
 /*!50003 CREATE */ /*!50003 TRIGGER `users_groups_ai` AFTER INSERT ON `users_groups` FOR EACH ROW BEGIN
 	declare tmp_everyone_user_id int unsigned;
+	/* if we inserted a user then mark sequrity sets that contain everyone user as updated */
 	IF( new.type = 2 ) THEN
+		/* get everyone group id into temporary variable */
 		SELECT id
 		into tmp_everyone_user_id
 		FROM users_groups
 		WHERE `type` = 1
 			AND `system` = 1
 			AND name = 'everyone';
+		/* update corresponding security sets */
 		update `tree_acl_security_sets`
 		set updated = 1
 			where id in (
@@ -1264,6 +1325,7 @@ DELIMITER $$
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `users_groups_association_ai` */$$
 
 /*!50003 CREATE */ /*!50003 TRIGGER `users_groups_association_ai` AFTER INSERT ON `users_groups_association` FOR EACH ROW BEGIN
+	/* mark sets as updated that depend on this group */
 	UPDATE tree_acl_security_sets
 	SET updated = 1
 		WHERE id IN (
@@ -1273,6 +1335,7 @@ DELIMITER $$
 			WHERE ta.`user_group_id` = new.group_id
 		)
 	;
+	/* end of mark sets as updated that depend on this group */
     END */$$
 
 
@@ -1285,6 +1348,7 @@ DELIMITER $$
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `users_groups_association_ad` */$$
 
 /*!50003 CREATE */ /*!50003 TRIGGER `users_groups_association_ad` AFTER DELETE ON `users_groups_association` FOR EACH ROW BEGIN
+	/* mark sets as updated that contain deleted user */
 	UPDATE tree_acl_security_sets
 	SET updated = 1
 		WHERE id IN (
@@ -1293,6 +1357,7 @@ DELIMITER $$
 			WHERE user_id = old.user_id
 		)
 	;
+	/* end of mark sets as updated that contain deleted user */
     END */$$
 
 
@@ -1328,6 +1393,7 @@ BEGIN
 	WHILE((tmp_pid IS NOT NULL) AND (COALESCE(tmp_type,'') <> 'case') AND ( INSTR(CONCAT(tmp_path, '/'), CONCAT('/',tmp_pid,'/') ) =0) ) DO
 		SET tmp_path = CONCAT('/', tmp_pid, tmp_path);
 		SET in_id = tmp_pid;
+		-- SELECT pid, `type` INTO tmp_pid, tmp_type FROM tree WHERE id = in_id;
 		SELECT t.pid, tp.`type` INTO tmp_pid, tmp_type FROM tree t LEFT JOIN templates tp ON t.template_id = tp.id WHERE t.id = in_id;
 	END WHILE;
 	IF(COALESCE(tmp_type,'') <> 'case') THEN
@@ -1646,6 +1712,7 @@ DELIMITER $$
     SQL SECURITY INVOKER
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_clear_lost_ids(id bigint UNSIGNED);
+
 	delete from tmp_clear_lost_ids;
 	insert into tmp_clear_lost_ids
 		SELECT o.id
@@ -1715,6 +1782,7 @@ BEGIN
 		  ,tree.dstatus = 0
 		  , tree.updated = 1
 		where tmp_achild_ids.id = tree.id;
+
 		DELETE FROM tmp_achild_ids2;
 		insert into tmp_achild_ids2 select id from tmp_achild_ids;
 		delete from tmp_achild_ids;
@@ -1745,6 +1813,7 @@ BEGIN
 			,tree.dstatus = 2
 			,tree.updated = 1
 		    where tmp_dchild_ids.id = tree.id;
+
 		DELETE FROM tmp_dchild_ids2;
 		insert into tmp_dchild_ids2 select id from tmp_dchild_ids;
 		delete from tmp_dchild_ids;
@@ -1765,22 +1834,27 @@ DELIMITER $$
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_achild_ids(id bigint UNSIGNED);
 	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_achild_ids2(id BIGINT UNSIGNED);
+
 	delete from tmp_achild_ids;
 	DELETE FROM tmp_achild_ids2;
 	insert into tmp_achild_ids
 		select id
 		from tree
 		where pid = in_id and draft = 1;
+
 	while(ROW_COUNT() > 0)do
 		update tree, tmp_achild_ids
 		  set 	tree.draft = 0
 			,tree.updated = 1
 		where tmp_achild_ids.id = tree.id;
+
 		DELETE FROM tmp_achild_ids2;
+
 		insert into tmp_achild_ids2
 			select id
 			from tmp_achild_ids;
 		delete from tmp_achild_ids;
+
 		INSERT INTO tmp_achild_ids
 			SELECT t.id
 			FROM tree t
@@ -1820,6 +1894,8 @@ DELIMITER $$
 BEGIN
 	create table if not exists tmp_tags_sort (`id` int(11) unsigned NOT NULL AUTO_INCREMENT,
 	  `pid` int(11) unsigned DEFAULT NULL,
+	  /*`l1` varchar(100) DEFAULT NULL,
+	  `type` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '1=tag else = folder',/**/
 	  `order` smallint(5) unsigned NOT NULL DEFAULT '0',
 	  PRIMARY KEY (`id`));
 	delete from tmp_tags_sort;
@@ -1832,6 +1908,7 @@ BEGIN
 			SELECT t.id, case when t.pid = @pid then @i:=@i+1 else @i:=1 END, @pid := t.pid
 			FROM tags t left join tmp_tags_sort ts3 on t.pid = ts3.id LEFT JOIN tmp_tags_sort ts4 ON t.id = ts4.id WHERE ts3.id is NOT null and ts4.id is null ORDER BY t.pid, t.`type`, t.l1;
 	end while;
+	-- select * from tmp_tags_sort;
 	update tags t, tmp_tags_sort ts set t.order = ts.order where t.id = ts.id;
 	drop table tmp_tags_sort;
     END */$$
@@ -1850,6 +1927,8 @@ DELIMITER $$
 BEGIN
 	create table if not exists tmp_templates_sort (`id` int(11) unsigned NOT NULL AUTO_INCREMENT,
 	  `pid` int(11) unsigned DEFAULT NULL,
+	  /*`l1` varchar(100) DEFAULT NULL,
+	  `type` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '1=tag else = folder',/**/
 	  `order` smallint(5) unsigned NOT NULL DEFAULT '0',
 	  PRIMARY KEY (`id`));
 	delete from tmp_templates_sort;
@@ -1862,6 +1941,7 @@ BEGIN
 			SELECT t.id, case when t.pid = @pid then @i:=@i+1 else @i:=1 END, @pid := t.pid
 			FROM templates t left join tmp_templates_sort ts3 on t.pid = ts3.id LEFT JOIN tmp_templates_sort ts4 ON t.id = ts4.id WHERE ts3.id is NOT null and ts4.id is null ORDER BY t.pid, t.`type`, t.l1;
 	end while;
+	-- select * from tmp_templates_sort;
 	update templates t, tmp_templates_sort ts set t.order = ts.order where t.id = ts.id;
 	drop table tmp_templates_sort;
     END */$$
@@ -1884,14 +1964,17 @@ BEGIN
 	DECLARE tmp_from_security_set, msg
 		,tmp_to_security_set varchar(9999);
 	DECLARE tmp_security_set_length INT UNSIGNED DEFAULT 0;
+	-- get from set
 	select `set`
 	into tmp_from_security_set
 	from `tree_acl_security_sets`
 	where id = in_from_security_set_id;
+	-- get to set
 	SELECT `set`
 	INTO tmp_to_security_set
 	FROM `tree_acl_security_sets`
 	WHERE id = in_to_security_set_id;
+	-- set from set length
 	SET tmp_security_set_length = LENGTH( tmp_from_security_set ) +1;
 	CREATE TEMPORARY TABLE IF NOT EXISTS `tmp_update_child_sets_pids`(
 		`id` BIGINT UNSIGNED NOT NULL,
@@ -1911,6 +1994,7 @@ BEGIN
 	INSERT INTO tmp_update_child_sets_childs (id)
 	values(in_node_id);
 	WHILE( ROW_COUNT() > 0 )DO
+		-- update empty security sets for childs to parent security set
 		update tmp_update_child_sets_childs
 			,tree_info
 		set tree_info.security_set_id = in_to_security_set_id
@@ -1938,9 +2022,11 @@ BEGIN
 				ON ti.id = t.pid
 				and t.inherit_acl = 1;
 	END WHILE;
+	-- remove destination security_set from possible updated sets
 	delete
 	from tmp_update_child_sets_security_sets
 	where id = in_to_security_set_id;
+	/* update old child sequrity sets to new ones */
 	UPDATE tmp_update_child_sets_security_sets
 		,tree_acl_security_sets
 		SET tree_acl_security_sets.`set` = CONCAT(
@@ -1983,29 +2069,38 @@ DELIMITER $$
     SQL SECURITY INVOKER
 BEGIN
 	DECLARE `tmp_level` INT DEFAULT 0;
+
 	CREATE TABLE IF NOT EXISTS tmp_level_id (`id` INT(11) UNSIGNED NOT NULL, PRIMARY KEY (`id`));
 	CREATE TABLE IF NOT EXISTS tmp_level_pid (`id` INT(11) UNSIGNED NOT NULL, PRIMARY KEY (`id`));
+
 	INSERT INTO tmp_level_id
 	  SELECT ts1.id
 	  FROM templates_structure ts1
 	  LEFT JOIN templates_structure ts2 ON ts1.pid = ts2.id
 	  WHERE ts2.id IS NULL;
+
 	WHILE (ROW_COUNT() > 0) DO
 	  UPDATE templates_structure, tmp_level_id
 	  SET templates_structure.`level` = tmp_level
 	  WHERE templates_structure.id = tmp_level_id.id;
+
 	  DELETE FROM tmp_level_pid;
+
 	  INSERT INTO tmp_level_pid
 		SELECT id FROM tmp_level_id;
+
 	  DELETE FROM tmp_level_id;
 	  INSERT INTO tmp_level_id
 	    SELECT ts1.id
 	    FROM templates_structure ts1
 	    JOIN tmp_level_pid ts2 ON ts1.pid = ts2.id;
+
 	  SET tmp_level = tmp_level + 1;
 	END WHILE;
+
 	DROP TABLE tmp_level_id;
 	DROP TABLE tmp_level_pid;
+
     END */$$
 DELIMITER ;
 

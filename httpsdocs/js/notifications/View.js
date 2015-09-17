@@ -1,10 +1,9 @@
+Ext.namespace('CB.notifications');
 
-Ext.namespace('CB.browser');
-
-Ext.define('CB.browser.NotificationsView', {
+Ext.define('CB.notifications.View', {
     extend: 'Ext.Panel'
 
-    ,alias: 'widget.CBBrowserNotificationsView'
+    ,alias: 'widget.CBNotificationsView'
 
     ,border: false
     ,layout: 'fit'
@@ -387,5 +386,4 @@ Ext.define('CB.browser.NotificationsView', {
         App.explorer.objectPanel.expand();
         this.actions.preview.hide();
     }
-
 });

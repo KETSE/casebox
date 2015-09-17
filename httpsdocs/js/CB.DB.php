@@ -28,12 +28,27 @@ CB.DB.yesno = new Ext.data.ArrayStore({
     //,fields: [{name: 'id', type: 'int'}, 'name']
     ,data:  [[0, ' '], [-1, L.no], [1, L.yes]]
 });
+
 CB.DB.sex = new Ext.data.ArrayStore({
     idIndex: 0
     ,model: 'Generic2'
     //,fields: ['id', 'name']
     ,data:  [[null, '-'], ['m', L.male], ['f', L.female]]
 });
+
+CB.DB.notifyFor = new Ext.data.ArrayStore({
+    idIndex: 0
+    ,model: 'Generic2'
+    //,fields: ['id', 'name']
+    ,data:  [['all', 'All types'], ['mentioned', 'Only assigned and mentioning'], ['none', 'None']]
+});
+
+CB.DB.idleTimings = new Ext.data.ArrayStore({
+    idIndex: 0
+    ,model: 'Generic'
+    ,data:  [[2, '2 Minutes'], [5, '5 Minutes'], [10, '10 Minutes'], [15, '15 Minutes'], [20, '20 Minutes'], [30, '30 Minutes'], [45, '45 Minutes'], [60, '1 hour']]
+});
+
 CB.DB.templateTypes = new Ext.data.ArrayStore({
     idIndex: 0
     ,model: 'Generic2'

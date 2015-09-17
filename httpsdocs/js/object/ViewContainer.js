@@ -281,17 +281,10 @@ Ext.define('CB.object.ViewContainer', {
             ,new Ext.Button({
                 itemId: 'subscription'
                 ,arrowVisible: false
-                ,iconCls: 'im-follow'
+                ,iconCls: 'im-ignore'
                 ,scale: 'medium'
                 ,menu: [
                     {
-                        text: L.FollowText
-                        ,iconCls: 'im-follow'
-                        ,itemId: 'follow'
-                        ,height: 24
-                        ,scope: this
-                        ,handler: this.onSubscriptionButtonClick
-                    }, {
                         text: L.WatchText
                         ,iconCls: 'im-watch'
                         ,itemId: 'watch'
@@ -305,6 +298,12 @@ Ext.define('CB.object.ViewContainer', {
                         ,height: 24
                         ,scope: this
                         ,handler: this.onSubscriptionButtonClick
+                    },'-',{
+                        text: L.Customize
+                        ,iconCls: 'i-settings'
+                        ,itemId: 'notify-settings'
+                        ,scope: this
+                        ,handler: this.onNotificationsCustomizeClick
                     }
                 ]
             })
@@ -958,6 +957,11 @@ Ext.define('CB.object.ViewContainer', {
             }
             ,this
         );
+    }
+
+    ,onNotificationsCustomizeClick: function(b, e) {
+        var w = new CB.notifications.SettingsWindow();
+        w.show();
     }
 
     /**

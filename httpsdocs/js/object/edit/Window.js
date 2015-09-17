@@ -176,27 +176,27 @@ Ext.define('CB.object.edit.Window', {
         this.subscriptionButton = new Ext.Button({
             itemId: 'subscription'
             ,arrowVisible: false
-            ,iconCls: 'i-follow'
+            ,iconCls: 'i-ignore'
             // ,scale: 'medium'
             ,menu: [
                 {
-                    text: L.FollowText
-                    ,iconCls: 'i-follow'
-                    ,itemId: 'follow'
-                    ,scope: this
-                    ,handler: this.onSubscriptionButtonClick
-                }, {
                     text: L.WatchText
                     ,iconCls: 'i-watch'
                     ,itemId: 'watch'
                     ,scope: this
                     ,handler: this.onSubscriptionButtonClick
-                }, {
+                },{
                     text: L.IgnoreText
                     ,iconCls: 'i-ignore'
                     ,itemId: 'ignore'
                     ,scope: this
                     ,handler: this.onSubscriptionButtonClick
+                },'-',{
+                    text: L.Customize
+                    ,iconCls: 'i-gear'
+                    ,itemId: 'notify-settings'
+                    ,scope: this
+                    ,handler: this.onNotificationsCustomizeClick
                 }
             ]
         });
@@ -796,6 +796,9 @@ Ext.define('CB.object.edit.Window', {
             }
             ,this
         );
+    }
+    ,onNotificationsCustomizeClick: function(b, e) {
+        clog('customize');
     }
 
     ,onSaveObjectEvent: function(objComp, ev) {

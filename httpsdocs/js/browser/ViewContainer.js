@@ -481,7 +481,7 @@ Ext.define('CB.browser.ViewContainer', {
             }
         });
 
-        this.notificationsView = new CB.browser.NotificationsView({
+        this.notificationsView = new CB.notifications.View({
 
         });
 

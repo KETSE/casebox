@@ -184,6 +184,8 @@ $API = array_merge(
                 ,'getTSVTemplateData' => array('len' => 1)
                 ,'enableTSV'          => array('len' => 1)
                 ,'disableTSV'         => array('len' => 0)
+                ,'getNotificationSettings' => array('len' => 0)
+                ,'setNotificationSettings' => array('len' => 1)
             )
         )
 
