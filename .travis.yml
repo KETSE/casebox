@@ -25,10 +25,10 @@ before_install:
     - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'local'@'localhost'"
 
 install:
-#   - curl -sS https://getcomposer.org/installer | php
-   - composer install
+   - curl -sS https://getcomposer.org/installer | php
 #   - php composer.phar install --no-interaction
    - composer.phar install --no-interaction
+
 
 before_script:
   # copy and install solr
@@ -50,7 +50,7 @@ before_script:
    - php tests/auto_install.php
 
 script:
- - phpunit -c tests/phpunit-travis.xml httpsdocs/classes/UnitTest/Tests/
+   - vendor/bin/phpunit -c tests/phpunit-travis.xml httpsdocs/classes/UnitTest/Tests/
 
 after_script:
  - if [ -f vendor/bin/coveralls ] ; then php vendor/bin/coveralls -v || true ; fi
