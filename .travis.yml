@@ -27,7 +27,7 @@ before_install:
 install:
    - curl -sS https://getcomposer.org/installer | php
 #   - php composer.phar install --no-interaction
-   - composer.phar install --no-interaction
+   - php composer.phar install --no-interaction
 
 
 before_script:
