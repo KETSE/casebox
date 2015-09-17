@@ -125,8 +125,13 @@ if (\CB\Util\getOS() != "WIN") {
 $cfg['prefix'] = readParam('prefix', $cfg['prefix']);
 
 //init db config
+$tryInitDBConfig = 0;
 do {
     initDBConfig($cfg);
+    $tryInitDBConfig++;
+   if($tryInitDBConfig > 3) {
+       trigger_error("ERROR: Cannot configure database connections !!!", E_USER_ERROR);
+   }
 } while (!verifyDBConfig($cfg));
 
 //specify server_name
