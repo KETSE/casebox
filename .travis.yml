@@ -45,7 +45,7 @@ before_script:
    - export SOLR_CONFIGSET="default"
    - bash tests/server/solr/solr5-addcore.sh
   # add php extensions
-   - phpenv config-rm "${TRAVIS_BUILD_DIR}/tests/server/php/config-extensions.ini"
+   - phpenv config-add "${TRAVIS_BUILD_DIR}/tests/server/php/config-extensions.ini"
   # autoinstall CASEBOX
    - php tests/auto_install.php
 
