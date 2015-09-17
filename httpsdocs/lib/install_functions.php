@@ -340,7 +340,7 @@ function solrCreateCore($host, $port, $coreName, $cfg = array())
 {
     $rez = true;
 
-    if (isset($cfg['solr_home']) && confirm('solr_create_cores') ) {
+    if ( isset($cfg['solr_home']) ) {
 
         $CB_CORE_SOLR_PATH = $cfg['solr_home'].$coreName;
 

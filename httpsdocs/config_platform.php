@@ -90,7 +90,7 @@ define(
     'CB\\IS_DEBUG_HOST',
     (
         empty($_SERVER['SERVER_NAME']) ||
-        (!empty($cfg['debug_hosts']) && Util\isInValues($_SERVER['REMOTE_ADDR'], $cfg['debug_hosts']))
+        (!empty($cfg['debug_hosts']) && Util\isInValues($_SERVER['REMOTE_ADDR'], $cfg['debug_hosts'])) || Util\is_cli()
     )
 );
 
