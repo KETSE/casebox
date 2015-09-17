@@ -87,10 +87,14 @@ class Service
                 require_once $this->client;
             }
 
+    $layer = new \Apache_Solr_Compatibility_Solr4CompatibilityLayer;
+
             $this->solr_handler = new \Apache_Solr_Service(
                 $this->host,
                 $this->port,
-                $this->core
+                $this->core,
+                false,
+                $layer
             );
 
             if (! $this->solr_handler->ping()) {

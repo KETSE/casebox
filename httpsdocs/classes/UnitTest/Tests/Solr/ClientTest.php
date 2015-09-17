@@ -19,6 +19,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(is_numeric($this->solr->ping()) && $this->solr->ping() > 0, "test ping solr not pass");
     }
 
+    /**
+     * @depends testConnection
+     */
     public function testAddDocument()
     {
 
@@ -57,7 +60,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testDeleteByQuery()
     {
 
-      /*  $search = new Search();
+        $search = new Search();
         $rez    = $search->query(
             array(
                 'fq' => [ 'name:testDeleteByQuery'],
@@ -69,6 +72,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         $this->solr->deleteByQuery('name:testDeleteByQuery');
 
+        $this->solr->commit(false,false);
 
         $rez = $search->query(
             array(
@@ -77,12 +81,12 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             )
         );
 
-        $this->assertTrue($rez['total'] == 0, 'Delete all by query didnt clear the solr instance.'); */
+        $this->assertTrue($rez['total'] == 0, 'Delete all by query didnt clear the solr instance.'); 
     }
 
     public function testReindexing()
     {
-     /*   try {
+       try {
             $this->solr->updateTree(array('all' => true));
 
             $this->solr->optimize();
@@ -90,7 +94,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(true);
         } catch (\Exception $e) {
             $this->assertTrue(false, 'Error full reindexing');
-        } */ 
+        }
+        
     }
 
     public function tearDown()
