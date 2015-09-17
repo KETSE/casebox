@@ -20,7 +20,7 @@ before_install:
     - mkdir -p logs
     - mkdir -p data/tmp/minify
     - mysql -u root -e "CREATE USER 'test'@'%' IDENTIFIED BY 't3st'"
-    - mysql -u root -e "CREATE USER 'test'@'localhost' IDENTIFIED BY 'test'"
+    - mysql -u root -e "CREATE USER 'test'@'localhost' IDENTIFIED BY 't3st'"
     - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'test'@'%'"
     - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'test'@'localhost'"
 
