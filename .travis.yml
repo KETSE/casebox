@@ -19,10 +19,10 @@ before_install:
     - mkdir -p build/logs
     - mkdir -p logs
     - mkdir -p data/tmp/minify
-    - mysql -u root -e "CREATE USER 'local'@'%' IDENTIFIED BY 'h0st'"
-    - mysql -u root -e "CREATE USER 'local'@'localhost' IDENTIFIED BY 'h0st'"
-    - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'local'@'%'"
-    - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'local'@'localhost'"
+    - mysql -u root -e "CREATE USER 'test'@'%' IDENTIFIED BY 't3st'"
+    - mysql -u root -e "CREATE USER 'test'@'localhost' IDENTIFIED BY 'test'"
+    - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'test'@'%'"
+    - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'test'@'localhost'"
 
 install:
    - curl -sS https://getcomposer.org/installer | php
@@ -45,7 +45,7 @@ before_script:
    - export SOLR_CONFIGSET="default"
    - bash tests/server/solr/solr5-addcore.sh
   # add php extensions
-   - phpenv config-rm tests/server/php/myconfig.ini
+   - phpenv config-rm "${TRAVIS_BUILD_DIR}/tests/server/php/myconfig.ini"
   # autoinstall CASEBOX
    - php tests/auto_install.php
 
