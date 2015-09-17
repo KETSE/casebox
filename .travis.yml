@@ -25,6 +25,8 @@ before_install:
     - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'test'@'localhost'"
 
 install:
+   - pecl install mbstring
+   - pecl install curl
    - curl -sS https://getcomposer.org/installer | php
 #   - php composer.phar install --no-interaction
    - php composer.phar install --no-interaction
