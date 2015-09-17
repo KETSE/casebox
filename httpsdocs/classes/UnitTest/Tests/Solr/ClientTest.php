@@ -21,7 +21,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function testAddDocument()
     {
-/*
+
         // add documents
         $data = [
             'name' => 'testDeleteByQuery',
@@ -48,7 +48,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         // select document from solr
         //  $rez = $this->solr->search('name:testDeleteByQuery', 0, 10, []);
-        $this->assertTrue($rez['total'] >= 1, "query result:".print_r($rez, true)); */
+        $this->assertTrue($rez['total'] >= 1, "query result:".print_r($rez, true));
     }
 
     /**
