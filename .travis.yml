@@ -25,8 +25,10 @@ before_install:
     - mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'local'@'localhost'"
 
 install:
-   - curl -sS https://getcomposer.org/installer | php
-   - php composer.phar install --no-interaction
+#   - curl -sS https://getcomposer.org/installer | php
+   - composer install
+#   - php composer.phar install --no-interaction
+   - composer.phar install --no-interaction
 
 before_script:
   # copy and install solr
@@ -42,11 +44,13 @@ before_script:
    - export SOLR_CORENAME="cbtest_test"
    - export SOLR_CONFIGSET="default"
    - bash tests/server/solr/solr5-addcore.sh
+  # add php extensions
+   - phpenv config-rm tests/server/php/myconfig.ini
   # autoinstall CASEBOX
    - php tests/auto_install.php
 
 script:
- - vendor/bin/phpunit -c tests/phpunit-travis.xml httpsdocs/classes/UnitTest/Tests/
+ - phpunit -c tests/phpunit-travis.xml httpsdocs/classes/UnitTest/Tests/
 
 after_script:
  - if [ -f vendor/bin/coveralls ] ; then php vendor/bin/coveralls -v || true ; fi
