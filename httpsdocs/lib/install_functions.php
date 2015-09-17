@@ -304,7 +304,7 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
         if (confirm($paramPrefix.'solr_reindex', 'n')) {
             echo 'Reindexing core ... ';
 
-                    $options['c'] = $this->coreName;
+                    $options['c'] = $coreName;
                     $options['a'] = true;
                     $options['l'] = true;
                     require_once \CB\BIN_DIR.'solr_reindex_core.php';
