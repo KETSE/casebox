@@ -85,7 +85,11 @@ class Helpers
                 //$test_cfg['server_name']     = Install\readParam('server_name', $test_cfg['server_name']);
                 $test_hostname               = preg_replace('/^http(s)?:\/\//si', '', $test_cfg['server_name']);
 
-                //$test_cfg['solr_home']     = Install\readParam('solr_home', $test_cfg['solr_home']);
+                   $tests_solr_path = CB_ROOT_PATH.'tests/server/solr/solr-5.1.0/server/';
+
+            if (file_exists($tests_solr_path)) {
+                    $test_cfg['solr_home'] = CB_ROOT_PATH.'tests/server/solr/solr-5.1.0/server/';
+                }
 
                 $test_cfg['admin_email']     = 'admin@'.$test_hostname;
                 $test_cfg['sender_email']    = 'sender@'.$test_hostname;
