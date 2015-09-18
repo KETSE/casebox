@@ -345,6 +345,12 @@ function solrCreateCore($host, $port, $coreName, $cfg = array())
 {
     $rez = true;
 
+    $status =  json_decode(fopen('http://' . $host. ':' . $port . '/solr/admin/cores?action=STATUS&wt=json','r'),true);
+
+    if (isset($status['status']) && isset($status['status']['$coreName'])) {
+        return true;
+    }
+    
     if ( isset($cfg['solr_home']) ) {
 
         $CB_CORE_SOLR_PATH = $cfg['solr_home'].$coreName;
