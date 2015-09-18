@@ -345,7 +345,7 @@ function solrCreateCore($host, $port, $coreName, $cfg = array())
 {
     $rez = true;
 
-    $status =  json_decode(fopen('http://' . $host. ':' . $port . '/solr/admin/cores?action=STATUS&wt=json','r'),true);
+    $status =  json_decode(file_get_contents('http://' . $host. ':' . $port . '/solr/admin/cores?action=STATUS&wt=json'),true);
 
     if (isset($status['status']) && isset($status['status']['$coreName'])) {
         return true;
