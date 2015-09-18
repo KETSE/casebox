@@ -43,6 +43,7 @@ apigen.neon
 /tests/composer.lock
 /tests/vendor/**
 /tests/logs/**
+/tests/server/solr/solr-5.*
 composer.phar
 composer.lock
 vendor/**
