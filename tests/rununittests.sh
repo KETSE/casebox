@@ -7,6 +7,8 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # The default destination of the coverage results
 DEST="$DIR/reports/"
 
+export TRAVIS_BUILD_DIR="${DIR}/../"
+
 # The function to show the help
 
 showHelp () {
@@ -65,6 +67,22 @@ if [ $coverage ];
     then
       $DIR/../vendor/bin/phpunit $coverage $DEST$OUTFILE --configuration $DIR/phpunit.xml --verbose --bootstrap $DIR/init.php $DIR/../httpsdocs/classes/UnitTest
     else 
-      php $DIR/auto_install.php
-      $DIR/../vendor/bin/phpunit --colors --verbose --debug --bootstrap $DIR/init.php $DIR/../httpsdocs/classes/UnitTest
+
+        export SOLR_VERSION="5.1.0"
+        bash $DIR/server/solr/solr5-install.sh
+
+       export SOLR_CORENAME="cbtest_log"
+       export SOLR_CONFIGSET="cbtest_log"
+      bash $DIR/server/solr/solr5-addcore.sh
+
+       export SOLR_CORENAME="cbtest_test"
+      export SOLR_CONFIGSET="cbtest_default"
+      bash $DIR/server/solr/solr5-addcore.sh
+
+        php $DIR/auto_install.php
+        $DIR/../vendor/bin/phpunit --colors --verbose --debug --bootstrap $DIR/init.php $DIR/../httpsdocs/classes/UnitTest
+
+     //   bash $DIR/server/solr/solr5-stop.sh
+
+
     fi

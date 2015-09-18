@@ -41,10 +41,10 @@ fi
 
 if [ -d "${TRAVIS_BUILD_DIR}/sys/solr_configsets" ]; then 
     echo "Create  configsets in ${SOLR_DIR}" 
-    mkdir "${SOLR_DIR}/server/solr/configsets/default_configs"
-    cp -ar "${TRAVIS_BUILD_DIR}/sys/solr_configsets/default_config" "${SOLR_DIR}/server/solr/configsets/default_configs"
-    mkdir "${SOLR_DIR}/server/solr/configsets/log_configs"
-    cp -ar "${TRAVIS_BUILD_DIR}/sys/solr_configsets/log_config" "${SOLR_DIR}/server/solr/configsets/log_configs"
+    mkdir "${SOLR_DIR}/server/solr/configsets/cbtest_default_configs"
+    cp -ar "${TRAVIS_BUILD_DIR}sys/solr_configsets/default_config/conf" "${SOLR_DIR}/server/solr/configsets/cbtest_default_configs/"
+    mkdir "${SOLR_DIR}/server/solr/configsets/cbtest_log_configs"
+    cp -ar "${TRAVIS_BUILD_DIR}sys/solr_configsets/log_config/conf" "${SOLR_DIR}/server/solr/configsets/cbtest_log_configs/"
 fi
 
 echo "Changing dir into ${SOLR_DIR}" 
