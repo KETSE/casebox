@@ -350,7 +350,7 @@ function solrCreateCore($host, $port, $coreName, $cfg = array())
     if (isset($status['status']) && isset($status['status'][$coreName])) {
         return true;
     } else {
-        echo $status.PHP_EOL;
+        echo print_r($status,true).PHP_EOL;
     }
     
     if ( isset($cfg['solr_home']) ) {
