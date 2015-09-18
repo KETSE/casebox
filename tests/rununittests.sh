@@ -7,7 +7,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # The default destination of the coverage results
 DEST="$DIR/reports/"
 
-export TRAVIS_BUILD_DIR="${DIR}/../"
+export TRAVIS_BUILD_DIR="${DIR}/.."
 
 # The function to show the help
 
