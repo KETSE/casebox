@@ -35,7 +35,7 @@ for CORENAME in $SOLR_CORENAME
 do
 # create core folder 
    mkdir -p "${SOLR_DIR}/server/solr/${CORENAME}/"
-   ln -s  "${SOLR_DIR}/server/solr/configsets/${SOLR_CONFIGSET}_configs/conf" "${SOLR_DIR}/server/solr/${CORENAME}/conf"
+   cp -ar "${SOLR_DIR}/server/solr/configsets/${SOLR_CONFIGSET}_configs/conf" "${SOLR_DIR}/server/solr/${CORENAME}/"
    export CMD="${SOLR_DIR}/bin/solr create_core -c ${CORENAME}"
      echo "Configuring Core named ${CORENAME}"
    exec $CMD
