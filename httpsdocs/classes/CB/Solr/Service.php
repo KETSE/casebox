@@ -87,11 +87,11 @@ class Service
                 require_once $this->client;
             }
 
-         /*   if (!class_exists('\\Apache_Solr_Compatibility_Solr4CompatibilityLayer', false)) {
+            if (!class_exists('\\Apache_Solr_Compatibility_Solr4CompatibilityLayer', false)) {
                 require_once 'Apache/Solr/Compatibility/AddDocumentXmlCreator.php';
                 require_once 'Apache/Solr/Compatibility/CompatibilityLayer.php';
                 require_once 'Apache/Solr/Compatibility/Solr4CompatibilityLayer.php';
-            } */
+            }
 
     $layer = new \Apache_Solr_Compatibility_Solr4CompatibilityLayer;
 
