@@ -343,9 +343,15 @@ Ext.define('CB.notifications.View', {
         }
 
         if(!Ext.isEmpty(r.data)) {
-            var modelName = this.store.getModel().getName();
+            var oldRec
+                ,modelName = this.store.getModel().getName();
 
             for (var i = 0; i < r.data.length; i++) {
+                oldRec = this.store.findRecord('ids', r.data[i].ids, 0, false, false, true);
+                if(oldRec) {
+                    this.store.remove(oldRec);
+                }
+
                 this.store.addSorted(
                     Ext.create(modelName, r.data[i])
                 );

@@ -507,6 +507,7 @@ Ext.define('CB.controller.Browsing', {
         params.start = 0;
         params.page = 1;
 
+        this.updatePreview(params);
         this.VC.setParams(params);
     }
 

@@ -1,4 +1,18 @@
-CaseBox 1.9.525 (2015-09-16)
+CaseBox 1.9.526 (2015-09-22)
+==============================
+- Don't notify admin when extracted file content is empty. Happens often for scanned pdfs.
+- #7985 Add Favorites for users to quickly navigate objects they want to bookmark
+
+Fixed Bugs:
+----------
+- remove old notification records with same id on receiving new ones
+
+Notes:
+----------
+- updated translations in _casebox.sql
+- updated bare_bone_core.sql
+
+CaseBox 1.9.525 (2015-09-17)
 ==============================
 - #7536 Email notifications going wild
 

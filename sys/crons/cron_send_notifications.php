@@ -85,7 +85,7 @@ foreach ($users as $uid => $u) {
                 echo 'Devel skip: '.$u['email'] . ': ' . $subject . "\n";
 
             } else {
-                echo $u['email'].': ' . $subject  . "\n";
+                // echo $u['email'].': ' . $subject  . "\n";
 
                 $sender = Notifications::getSender($action['from_user_id']);
 
@@ -159,6 +159,8 @@ foreach ($users as $uid => $u) {
             // file_put_contents(TEMP_DIR . $mail[3].'.html', $mail[2]."<br />\n<h1>" . $mail[0]. "<h1>" . $mail[1]);
              // COMMENTED FOR TEST
             // echo $u['email'], "\n" . $mail[0] . "\n".$mail[1]."\n\n";
+            echo $u['email'].': ' . $mail[0]  . "\n";
+
             if (!mail(
                 $u['email'],
                 $mail[0],
@@ -181,7 +183,11 @@ foreach ($users as $uid => $u) {
         }
 
         if (!empty($seenMaxId)) {
-            DM\Notifications::markAsSeen($uid, $seenMaxId);
+            Notifications::updateLastSeenId($seenMaxId, $uid);
+        }
+
+        if ($sendType == 'all') {
+            User::setUserConfigParam('lastNotifyTime', Util\dateISOToMysql('now'), $uid);
         }
     }
 

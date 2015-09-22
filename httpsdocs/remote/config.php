@@ -51,8 +51,7 @@ $API = array_merge(
             'methods'=>array(
                 'create'        =>  array('len' => 1)
                 ,'read'         =>  array('len' => 1)
-                ,'update'       =>  array('len' => 1)
-                ,'destroy'      =>  array('len' => 1)
+                ,'delete'       =>  array('len' => 1)
             )
         )
 

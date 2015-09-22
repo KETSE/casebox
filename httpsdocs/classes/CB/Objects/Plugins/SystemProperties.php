@@ -31,6 +31,7 @@ class SystemProperties extends Base
             $data,
             array(
                 'id' => 1
+                ,'name' => 1
                 ,'template_id' => 1
                 ,'cid' => 1
                 ,'cdate' => 1

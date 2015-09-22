@@ -77,13 +77,11 @@ CREATE TABLE `crons` (
 DROP TABLE IF EXISTS `favorites`;
 
 CREATE TABLE `favorites` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
-  `object_id` bigint(20) unsigned NOT NULL,
-  `cdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`user_id`,`object_id`),
-  KEY `FK_favorites_object_id` (`object_id`),
-  CONSTRAINT `FK_favorites_object_id` FOREIGN KEY (`object_id`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_favorites_user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  `node_id` varchar(20) DEFAULT NULL,
+  `data` text NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `favorites` */

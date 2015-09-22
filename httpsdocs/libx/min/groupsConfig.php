@@ -116,7 +116,8 @@ return array_merge(
             ,'//js/CB.Clipboard.js'
             ,'//js/CB.FilterPanel.js'
 
-            ,'//js/CB.Favorites.js'
+            ,'//js/favorites/Panel.js'
+            // ,'//js/favorites/Button.js'
 
             ,'//js/plugin/dd/FilesDropZone.js'
             ,'//js/CB.Uploader.js'

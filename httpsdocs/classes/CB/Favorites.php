@@ -1,88 +1,75 @@
 <?php
 namespace CB;
 
+use CB\DataModel as DM;
+
 class Favorites
 {
     public function create($p)
     {
-        $rez = array('succes' => true, 'data' => array());
-        if (empty($p['data'])) {
+        $rez = array(
+            'succes' => false
+            ,'data' => array()
+        );
+
+        if (empty($p['node_id']) || empty($p['data'])) {
             return $rez;
         }
-        DB\dbQuery(
-            'INSERT INTO favorites (user_id, object_id)
-            VALUES($1
-                 , $2) ON duplicate KEY
-            UPDATE object_id = $2',
-            array(
-                $_SESSION['user']['id']
-                ,$p['data']['id']
-            )
-        ) or die(DB\dbQueryError());
 
-        $res = DB\dbQuery(
-            'SELECT t.id
-                 , t.type
-                 , t.name
-                 , ti.`path`
-            FROM favorites f
-            JOIN tree t ON f.object_id = t.id
-            JOIN tree_info ti on t.id = ti.id
-            WHERE f.user_id = $1
-                AND object_id = $2',
-            array(
-                $_SESSION['user']['id']
-                ,$p['data']['id']
-            )
-        ) or die(DB\dbQueryError());
+        $data = array(
+            'name' => Purify::filename($p['data']['name'])
+            ,'path' => $p['data']['path']
+            ,'pathText' => empty($p['data']['pathText'])
+                ? ''
+                : $p['data']['pathText']
+        );
 
-        if ($r = $res->fetch_assoc()) {
-            //$r['id'] = intval($r['id']);
-            $rez['data'][] = $r;
+        if (is_numeric($p['node_id'])) {
+            $data['template_id'] = Objects::getTemplateId($p['node_id']);
+            $data['iconCls'] = Browser::getIcon($data);
+
+        } elseif (!empty($p['data']['iconCls'])) {
+            $data['iconCls'] = $p['data']['iconCls'];
         }
-        $res->close();
+
+        $d = array(
+            'user_id' => User::getId()
+            ,'node_id' => $p['node_id']
+            ,'data' => Util\jsonEncode($data)
+        );
+
+        $id = DM\Favorites::create($d);
+
+        $rez = array(
+            'success' => true
+            ,'data' => array(
+                'id' => $id
+                ,'node_id' => $d['node_id']
+                ,'data' => $data
+            )
+        );
 
         return $rez;
     }
+
     public function read($p)
     {
-        $rez = array('succes' => true, 'data' => array());
-        $res = DB\dbQuery(
-            'SELECT t.id, t.type, t.name, ti.`path`
-            FROM favorites f
-            JOIN tree t ON f.object_id = t.id
-            JOIN tree_info ti on t.id = ti.id
-            WHERE f.user_id = $1',
-            $_SESSION['user']['id']
-        ) or die(DB\dbQueryError());
+        $rez = array(
+            'succes' => true
+            ,'data' => array()
+        );
 
-        while ($r = $res->fetch_assoc()) {
-            $rez['data'][] = $r;
-        }
-        $res->close();
+        $rez['data'] = DM\Favorites::readAll(User::getId());
 
         return $rez;
     }
-    public function update($p)
-    {
-        $rez = array('succes' => true, 'data' => array());
 
-        return $rez;
-
-    }
-    public function destroy($p)
+    public function delete($nodeId)
     {
-        $rez = array('succes' => true, 'data' => array());
-        DB\dbQuery(
-            'DELETE
-            FROM favorites
-            WHERE user_id = $1
-                AND object_id = $2',
-            array(
-                $_SESSION['user']['id']
-                ,intval($p['data'])
-            )
-        ) or die(DB\dbQueryError());
+        $rez = array(
+            'success' => DM\Favorites::deleteByNodeId($nodeId)
+            ,'node_id' => $nodeId
+        );
 
         return $rez;
     }

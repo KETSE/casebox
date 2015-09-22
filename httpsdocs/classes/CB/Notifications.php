@@ -69,13 +69,17 @@ class Notifications
      * @param  int  $id
      * @return json response
      */
-    public function updateLastSeenId($id)
+    public static function updateLastSeenId($id, $userId = false)
     {
         $rez = array('success' => false);
 
+        if ($userId == false) {
+            $userId = User::getId();
+        }
+
         if (is_numeric($id)) {
-            User::setUserConfigParam('lastSeenActionId', $id);
-            DM\Notifications::markAsSeen(User::getId(), $id);
+            User::setUserConfigParam('lastSeenActionId', $id, $userId);
+            DM\Notifications::markAsSeen($userId, $id);
             $rez = array('success' => true);
         }
 

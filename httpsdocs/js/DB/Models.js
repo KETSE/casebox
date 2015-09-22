@@ -106,8 +106,17 @@ Ext.define('ObjectsRecord', {
         ,{name: 'date', type: 'date'}
         ,{name: 'template_id', type: 'int'}
         ,{name: 'status', type: 'int'}
-        , 'iconCls'
-        , 'cfg'
+        ,'iconCls'
+        ,'cfg'
+    ]
+});
+
+Ext.define('FavoriteRecord', {
+    extend: 'Ext.data.Model'
+    ,fields: [
+        {name: 'id', type: 'int'}
+        ,'node_id'
+        ,'data'
     ]
 });
 
