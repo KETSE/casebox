@@ -1,10 +1,9 @@
+Ext.namespace('CB.notifications');
 
-Ext.namespace('CB.browser');
-
-Ext.define('CB.browser.NotificationsView', {
+Ext.define('CB.notifications.View', {
     extend: 'Ext.Panel'
 
-    ,alias: 'widget.CBBrowserNotificationsView'
+    ,alias: 'widget.CBNotificationsView'
 
     ,border: false
     ,layout: 'fit'
@@ -57,10 +56,15 @@ Ext.define('CB.browser.NotificationsView', {
             ]
         });
 
-        //add grid component
-        this.items = [
-            this.getGridConfig()
-        ];
+        Ext.apply(this, {
+            items: [
+                this.getGridConfig()
+            ]
+            ,listeners: {
+                scope: this
+                ,activate: this.onActivateEvent
+            }
+        });
 
         this.callParent(arguments);
 
@@ -85,6 +89,10 @@ Ext.define('CB.browser.NotificationsView', {
             ,extraParams: {}
             ,pageSize: 200
             ,model: 'Notification'
+            ,sorters: [{
+                 property: 'action_id'
+                 ,direction: 'DESC'
+            }]
             ,proxy: new  Ext.data.DirectProxy({
                 paramsAsHash: true
                 ,directFn: CB_Notifications.getList
@@ -105,15 +113,33 @@ Ext.define('CB.browser.NotificationsView', {
     }
 
     ,onStoreLoad: function(store, records, successful, eOpts) {
+        var rd = store.proxy.reader.rawData;
+
+        if(rd.success === true) {
+            this.lastSeenActionId = rd.lastSeenActionId;
+            this.updateSeenRecords();
+        }
+    }
+
+    ,updateSeenRecords: function() {
+        var visible = this.getEl().isVisible(true);
+        this.store.each(
+            function(r) {
+                r.set('seen', visible || (r.get('action_id') <= this.lastSeenActionId));
+            }
+            ,this
+        );
+
         this.fireNotificationsUpdated();
     }
 
-
     ,fireNotificationsUpdated: function() {
-        var recs = this.store.queryBy('read', false, false, false, true)
+        var readRecs = this.store.queryBy('read', false, false, false, true)
+            ,seenRecs = this.store.queryBy('seen', false, false, false, true)
             ,params = {
                 total: this.store.getCount()
-                ,unread: recs.getCount()
+                ,unread: readRecs.getCount()
+                ,unseen: seenRecs.getCount()
             };
 
         App.fireEvent('notificationsUpdated', params);
@@ -165,7 +191,6 @@ Ext.define('CB.browser.NotificationsView', {
                 scope: this
                 ,rowclick: this.onRowClick
                 ,selectionchange: this.onSelectionChange
-                ,itemcontextmenu: this.onItemContextMenu
             }
 
         };
@@ -251,8 +276,22 @@ Ext.define('CB.browser.NotificationsView', {
         this.fireNotificationsUpdated();
     }
 
-    ,onItemContextMenu: function(grid, record, item, index, e, eOpts) {
+    ,onActivateEvent: function() {
+        var fr = this.store.first()
+            ,lastId = fr.get('action_id');
 
+        if (this.lastSeenActionId != lastId) {
+            CB_Notifications.updateLastSeenId(
+                lastId
+                ,function(r, e) {
+                    if(r.success === true) {
+                        this.lastSeenActionId = lastId;
+                        this.updateSeenRecords();
+                    }
+                }
+                ,this
+            );
+        }
     }
 
     ,onLogin: function() {
@@ -289,22 +328,40 @@ Ext.define('CB.browser.NotificationsView', {
             params.fromId = rec.get('action_id');
         }
 
-        CB_Notifications.getNewCount(
+        CB_Notifications.getNew(
             params
-            ,this.processGetNewCount
+            ,this.processGetNew
             ,this
         );
 
         this.checkNotificationsTask.delay(1000* 20); //2 minutes
     }
 
-    ,processGetNewCount: function(r, e) {
+    ,processGetNew: function(r, e) {
         if(Ext.isEmpty(r) || (r.success !== true)) {
             return;
         }
 
-        if(r.count > 0) {
-            this.onReloadClick();
+        if(!Ext.isEmpty(r.data)) {
+            var oldRec
+                ,modelName = this.store.getModel().getName();
+
+            for (var i = 0; i < r.data.length; i++) {
+                oldRec = this.store.findRecord('ids', r.data[i].ids, 0, false, false, true);
+                if(oldRec) {
+                    this.store.remove(oldRec);
+                }
+
+                this.store.addSorted(
+                    Ext.create(modelName, r.data[i])
+                );
+            }
+
+            if(this.getEl().isVisible(true)) {
+                this.onActivateEvent();
+            } else {
+                this.updateSeenRecords();
+            }
         }
     }
 
@@ -335,5 +392,4 @@ Ext.define('CB.browser.NotificationsView', {
         App.explorer.objectPanel.expand();
         this.actions.preview.hide();
     }
-
 });

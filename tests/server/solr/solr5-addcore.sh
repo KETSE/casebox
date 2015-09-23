@@ -7,7 +7,7 @@ cd $(dirname $0)
 export SOLR_VERSION=${SOLR_VERSION:-5.1.0}
 export SOLR_NAME="solr-$SOLR_VERSION"
 export SOLR_DIR="`pwd`/${SOLR_NAME}"
-export SOLR_PORT=${SOLR_PORT:-8983}
+export SOLR_PORT=${SOLR_PORT:-8180}
 
 export SOLR_CONFIGSET=${SOLR_CONFIGSET:-basic}
 
@@ -33,7 +33,7 @@ if [ -n "$SOLR_CORENAME" ]; then
   echo "Add solr cores"
 for CORENAME in $SOLR_CORENAME
 do
-# create core folder 
+# create core folder
    mkdir -p "${SOLR_DIR}/server/solr/${CORENAME}/"
    cp -ar "${SOLR_DIR}/server/solr/configsets/${SOLR_CONFIGSET}_configs/conf" "${SOLR_DIR}/server/solr/${CORENAME}/"
    export CMD="${SOLR_DIR}/bin/solr create_core -c ${CORENAME}"

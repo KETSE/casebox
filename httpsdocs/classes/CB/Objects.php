@@ -368,14 +368,14 @@ class Objects
             return null;
         }
 
-        $var_name = 'obj_template_type'.$objectId;
+        $varName = 'obj_template_type'.$objectId;
 
-        if (!Cache::exist($var_name)) {
+        if (!Cache::exist($varName)) {
             $tc = Templates\SingletonCollection::getInstance();
-            Cache::set($var_name, $tc->getType(self::getTemplateId($objectId)));
+            Cache::set($varName, $tc->getType(self::getTemplateId($objectId)));
         }
 
-        return Cache::get($var_name);
+        return Cache::get($varName);
     }
 
     /**
@@ -422,9 +422,9 @@ class Objects
 
         foreach ($ids as $id) {
             //verify if already have cached result
-            $var_name = 'Objects['.$id.']';
-            if (\CB\Cache::exist($var_name)) {
-                $rez[$id]  = \CB\Cache::get($var_name);
+            $varName = 'Objects['.$id.']';
+            if (\CB\Cache::exist($varName)) {
+                $rez[$id]  = \CB\Cache::get($varName);
             } else {
                 $toLoad[] = $id;
             }
@@ -435,14 +435,14 @@ class Objects
             $data = DataModel\Objects::read($toLoad);
 
             foreach ($data as $objData) {
-                $var_name = 'Objects[' . $objData['id'] . ']';
+                $varName = 'Objects[' . $objData['id'] . ']';
 
                 $o = static::getCustomClassByType($tc->getType($objData['template_id']));
 
                 if (!empty($o)) {
                     $o->setData($objData, false);
 
-                    \CB\Cache::set($var_name, $o);
+                    \CB\Cache::set($varName, $o);
                     $rez[$objData['id']] = $o;
                 }
             }
@@ -689,7 +689,7 @@ class Objects
      * @param array $p
      *        [
      *            int objectId
-     *            varchar type      (follow, watch, ignore)
+     *            varchar type      (watch, ignore)
      *        ]
      * return array     json responce
      */
@@ -697,7 +697,7 @@ class Objects
     {
         //validate input params
         if (empty($p['objectId']) || !is_numeric($p['objectId']) ||
-            empty($p['type']) || !in_array($p['type'], array('follow', 'watch', 'ignore'))
+            empty($p['type']) || !in_array($p['type'], array('watch', 'ignore'))
         ) {
             throw new \Exception(L\get('Wrong_input_data'));
         }
@@ -706,26 +706,28 @@ class Objects
         $userId = User::getId();
         $obj = $this->getCachedObject($p['objectId']);
         $sd = $obj->getSysData();
-        $fu = empty($sd['fu'])
-            ? array()
-            : $sd['fu'];
+
         $wu = empty($sd['wu'])
             ? array()
             : $sd['wu'];
 
-        switch ($p['type']) {
-            case 'follow':
-                $sd['wu'] = array_diff($wu, array($userId));
-                $sd['fu'] = array_merge(array_diff($fu, array($userId)), array($userId));
-                break;
+        //backward compatibility, move fu to wu
+        $fu = empty($sd['fu'])
+            ? array()
+            : $sd['fu'];
 
+        if (!empty($fu)) {
+            $wu = array_merge($fu, $wu);
+            $wu = array_unique($wu);
+            unset($sd['fu']);
+        }
+
+        switch ($p['type']) {
             case 'watch':
-                $sd['fu'] = array_diff($fu, array($userId));
                 $sd['wu'] = array_merge(array_diff($wu, array($userId)), array($userId));
                 break;
 
             case 'ignore':
-                $sd['fu'] = array_diff($fu, array($userId));
                 $sd['wu'] = array_diff($wu, array($userId));
                 break;
         }

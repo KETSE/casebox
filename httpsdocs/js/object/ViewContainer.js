@@ -34,6 +34,8 @@ Ext.define('CB.object.ViewContainer', {
                     ,this.BC.get('completetask')
                     ,'->'
                     ,this.BC.get('preview')
+                    ,this.BC.get('star')
+                    ,this.BC.get('unstar')
                     ,this.BC.get('subscription')
                     ,this.BC.get('more')
                     ,'-'
@@ -88,6 +90,8 @@ Ext.define('CB.object.ViewContainer', {
         App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
         App.on('objectchanged', this.onObjectChanged, this);
         App.on('objectsaction', this.onObjectsAction, this);
+
+        App.Favorites.on('change', this.onFavoritesChange, this);
     }
 
     /**
@@ -166,6 +170,26 @@ Ext.define('CB.object.ViewContainer', {
                 ,handler: this.onCloseClick
             })
 
+            ,star: new Ext.Action({
+                iconCls: 'i-star'
+                ,qtip: L.Star
+                ,itemId: 'star'
+                ,scale: 'medium'
+                ,hidden: true
+                ,scope: this
+                ,handler: this.onStarClick
+            })
+
+            ,unstar: new Ext.Action({
+                iconCls: 'i-unstar'
+                ,qtip: L.Unstar
+                ,itemId: 'unstar'
+                ,scale: 'medium'
+                ,hidden: true
+                ,scope: this
+                ,handler: this.onUnstarClick
+            })
+
         };
     }
 
@@ -208,20 +232,6 @@ Ext.define('CB.object.ViewContainer', {
                 ,scope: this
                 ,handler: this.onReopenTaskClick
             }
-
-            // ,subscribe: {
-            //     text: L.Subscribe
-            //     ,itemId: 'subscribe'
-            //     ,scope: this
-            //     ,handler: this.onSubscribeClick
-            // }
-
-            // ,unsubscribe: {
-            //     text: L.Unsubscribe
-            //     ,itemId: 'unsubscribe'
-            //     ,scope: this
-            //     ,handler: this.onUnsubscribeClick
-            // }
 
             ,rename: {
                 itemId: 'rename'
@@ -269,6 +279,8 @@ Ext.define('CB.object.ViewContainer', {
             ,new Ext.Button(this.actions.openExternal)
             ,new Ext.Button(this.actions.fitImage)
             ,new Ext.Button(this.actions.completeTask)
+            ,new Ext.Button(this.actions.star)
+            ,new Ext.Button(this.actions.unstar)
             ,new Ext.Button(this.actions.preview)
 
             ,new Ext.Button({
@@ -281,17 +293,10 @@ Ext.define('CB.object.ViewContainer', {
             ,new Ext.Button({
                 itemId: 'subscription'
                 ,arrowVisible: false
-                ,iconCls: 'im-follow'
+                ,iconCls: 'im-ignore'
                 ,scale: 'medium'
                 ,menu: [
                     {
-                        text: L.FollowText
-                        ,iconCls: 'im-follow'
-                        ,itemId: 'follow'
-                        ,height: 24
-                        ,scope: this
-                        ,handler: this.onSubscriptionButtonClick
-                    }, {
                         text: L.WatchText
                         ,iconCls: 'im-watch'
                         ,itemId: 'watch'
@@ -305,6 +310,12 @@ Ext.define('CB.object.ViewContainer', {
                         ,height: 24
                         ,scope: this
                         ,handler: this.onSubscriptionButtonClick
+                    },'-',{
+                        text: L.Customize
+                        ,iconCls: 'i-settings'
+                        ,itemId: 'notify-settings'
+                        ,scope: this
+                        ,handler: this.onNotificationsCustomizeClick
                     }
                 ]
             })
@@ -549,7 +560,9 @@ Ext.define('CB.object.ViewContainer', {
         //hide all by default
         this.topToolbar.items.each(
             function(i) {
-                if((i.itemId != ('close')) && (['tbfill', 'tbseparator'].indexOf(i.getXType()) < 0)) {
+                if((['close'].indexOf(i.itemId) < 0) &&
+                   (['tbfill', 'tbseparator'].indexOf(i.getXType()) < 0)
+                ) {
                     i.hide();
                 }
             }
@@ -595,6 +608,9 @@ Ext.define('CB.object.ViewContainer', {
             ti.tbar['more'] = {};
         }
 
+        ti.tbar.star = {};
+        ti.tbar.unstar = {};
+
         var subscription = Ext.valueFrom(ti.tbar['subscription'], 'ignore');
         this.BC.get('subscription').setIconCls('im-' + subscription);
 
@@ -617,6 +633,8 @@ Ext.define('CB.object.ViewContainer', {
             }
             ,this
         );
+
+        this.onFavoritesChange();
 
         this.updateCreateMenu();
     }
@@ -960,6 +978,11 @@ Ext.define('CB.object.ViewContainer', {
         );
     }
 
+    ,onNotificationsCustomizeClick: function(b, e) {
+        var w = new CB.notifications.SettingsWindow();
+        w.show();
+    }
+
     /**
      * handler for WebDav Link menu button click
      * Shows a window with link for WebDav editing
@@ -1058,6 +1081,32 @@ Ext.define('CB.object.ViewContainer', {
      */
     ,onCloseClick: function() {
         this.collapse();
+    }
+
+    ,onStarClick: function(b, e) {
+        var ld = this.loadedData
+            ,d = {
+                id: ld.id
+                ,name: ld.name
+                ,iconCls: ld.iconCls
+                ,path: '/' + ld.pids + '/' + ld.id
+                ,pathText: ld.path
+            };
+
+        App.Favorites.setStarred(d);
+    }
+
+    ,onUnstarClick: function(b, e) {
+        App.Favorites.setUnstarred(this.loadedData.id);
+    }
+
+    ,onFavoritesChange: function() {
+        if(this.loadedData) {
+            var isStarred = App.Favorites.isStarred(this.loadedData.id);
+
+            this.actions.star.setHidden(isStarred);
+            this.actions.unstar.setHidden(!isStarred);
+        }
     }
 }
 );

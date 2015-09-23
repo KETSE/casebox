@@ -18,6 +18,7 @@ class Listeners
                 $class= new Grid();
                 break;
 
+            case 'stream':
             case 'activityStream':
                 $class= new ActivityStream();
                 break;

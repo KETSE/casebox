@@ -22,7 +22,7 @@ class DBProvider
     {
         return array(
             'success' => true
-            ,'data' => User::getUserState()
+            ,'data' => User::getUserConfigParam('state', array())
         );
 
     }
@@ -35,7 +35,7 @@ class DBProvider
     {
         $rez = array('success' => true);
 
-        $state = User::getUserState();
+        $state = User::getUserConfigParam('state', array());
 
         if (!empty($p['value']) || isset($state[$p['name']])) {
             if (empty($p['value'])) {
@@ -44,7 +44,7 @@ class DBProvider
                 $state[$p['name']] = $p['value'];
             }
 
-            User::setUserState($state);
+            User::setUserConfigParam('state', $state);
         }
 
         return $rez;

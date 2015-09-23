@@ -34,32 +34,54 @@ class Notifications
 
         return array(
             'success' => true
+            ,'lastSeenActionId' => User::getUserConfigParam('lastSeenActionId', 0)
             ,'data' => $this->getRecords($params)
         );
     }
 
     /**
-     * get new notifications count
+     * get new notification records
      * @param  array $p containing fromId property
      * @return json  response
      */
-    public function getNewCount($p)
+    public function getNew($p)
     {
         $rez = array(
             'success' => true
-            ,'count' => 0
+            ,'data' => array()
         );
 
         $this->prepareParams($p);
+
+        $p['user_id'] = User::getId();
 
         $fromId = empty($p['fromId'])
             ? false
             : intval($p['fromId']);
 
-        $rez['count'] = DM\Notifications::getCount(
-            User::getId(),
-            $fromId
-        );
+        $rez['data'] = $this->getRecords($p);
+
+        return $rez;
+    }
+
+    /**
+     * update last seen laction id
+     * @param  int  $id
+     * @return json response
+     */
+    public static function updateLastSeenId($id, $userId = false)
+    {
+        $rez = array('success' => false);
+
+        if ($userId == false) {
+            $userId = User::getId();
+        }
+
+        if (is_numeric($id)) {
+            User::setUserConfigParam('lastSeenActionId', $id, $userId);
+            DM\Notifications::markAsSeen($userId, $id);
+            $rez = array('success' => true);
+        }
 
         return $rez;
     }
@@ -154,6 +176,10 @@ class Notifications
                         '<div class="cG" style="padding-top: 2px">' . Util\formatAgoTime($r['action_time']). '</div>'
 
             );
+
+            if (is_numeric($record['ids'])) {
+                $record['id'] = $record['ids'];
+            }
 
             $rez[] = $record;
         }

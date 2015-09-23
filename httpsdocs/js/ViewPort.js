@@ -42,7 +42,6 @@ Ext.define('CB.ViewPort', {
                 ,createobject: this.createObject
                 ,deleteobject: this.onDeleteObject
                 ,opencalendar: this.openCalendar
-                ,favoritetoggle: this.toggleFavorite
                 ,useradded: this.onUsersChange
                 ,userdeleted: this.onUsersChange
             }
@@ -318,8 +317,8 @@ Ext.define('CB.ViewPort', {
     }
 
     ,updateNotificationsCount: function(counts) {
-        var text = (counts.unread > 0)
-            ? counts.unread
+        var text = (counts.unseen > 0)
+            ? counts.unseen
 
             : '';
 
@@ -496,9 +495,6 @@ Ext.define('CB.ViewPort', {
 
         /* end of adding menu items */
 
-        App.Favorites = new CB.Favorites();
-        App.Favorites.load();
-
         this.populateMainMenu();
     }
 
@@ -561,14 +557,46 @@ Ext.define('CB.ViewPort', {
 
     ,populateMainMenu: function(){
         App.mainTree = App.mainLPanel.add({
-            xtype: 'CBBrowserTree'
+            layout: 'border'
             ,border: false
-            ,bodyStyle: 'border: 0'
-            ,data: {
-                rootNode: App.config.rootNode
-            }
-            ,rootVisible:true
-        });
+            ,scrollable: false
+            ,items: [
+                {
+                    xtype: 'CBBrowserTree'
+                    ,region: 'center'
+                    ,border: false
+                    ,bodyStyle: 'border: 0'
+                    ,data: {
+                        rootNode: App.config.rootNode
+                    }
+                    ,rootVisible:true
+                }, {
+                    region: 'south'
+                    ,xtype: 'tabpanel'
+                    ,tabPosition: 'bottom'
+                    ,cls: 'left-bottom-tabpanel'
+                    ,split: {
+                        size: 3
+                        ,collapsible: true
+                        ,style: 'background-color: #dfe8f6'
+                    }
+                    ,stateful: true
+                    ,stateId: 'lpsr'
+                    ,collapseMode: 'mini'
+                    ,border: false
+                    ,bodyBorder: false
+                    ,bodyStyle: 'background-color: transparent'
+                    ,minHeight: 100
+                    ,items: [
+                        {
+                            xtype: 'CBFavoritesPanel'
+                        }
+                    ]
+                }
+            ]
+        }).items.getAt(0);
+
+        App.Favorites = App.mainLPanel.down('CBFavoritesPanel');
 
         App.mainLPanel.getLayout().setActiveItem(0);
 
@@ -645,7 +673,7 @@ Ext.define('CB.ViewPort', {
         if(!App.activateTab(App.mainTabPanel, 'notificationsView')) {
             App.addTab(
                 App.mainTabPanel
-                ,new CB.browser.NotificationsView({
+                ,new CB.notifications.View({
                     data: {id: 'notificationsView' }
                     ,closable: false
                 })
@@ -729,15 +757,6 @@ Ext.define('CB.ViewPort', {
             Ext.Msg.alert(L.Error, L.ErrorOccured);
         }
     }
-
-    ,toggleFavorite: function(p){
-        CB_Browser.toggleFavorite(p, this.processToggleFavorite, this);
-    }
-
-    ,processToggleFavorite: function(r, e){
-        this.fireEvent('favoritetoggled', r, e);
-    }
-
 
     ,focusLastElement: function(){
         if(this.lastFocusedElement){

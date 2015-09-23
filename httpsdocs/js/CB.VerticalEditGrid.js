@@ -31,6 +31,7 @@ Ext.define('CB.VerticalEditGrid', {
             autoFill: false
             ,deferInitialRefresh: false
             ,stripeRows: true
+            ,markDirty: false
             ,getRowClass: function( record, index, rowParams, store ){
                 var rez = '';
                 if(record.get('type') == 'H'){
@@ -469,7 +470,24 @@ Ext.define('CB.VerticalEditGrid', {
             return;
         }
 
-        var nodesList = this.helperTree.queryNodeListBy(this.helperNodesFilter.bind(this));
+        var nodesList = this.helperTree.queryNodeListBy(this.helperNodesFilter.bind(this))
+            ,ids = this.store.collect('id')
+            ,update = false
+            ,i, idx;
+
+        //check if store records should be updated
+        for (i = 0; i < nodesList.length; i++) {
+            idx = ids.indexOf(nodesList[i].data.id);
+            if(idx < 0) {
+                update = true;
+            } else {
+                ids.splice(idx, 1);
+            }
+        }
+
+        if(!update && Ext.isEmpty(ids)) {
+            return;
+        }
 
         if(this.store && this.store.suspendEvents) {
             this.store.suspendEvents(true);
@@ -478,7 +496,7 @@ Ext.define('CB.VerticalEditGrid', {
         this.store.removeAll(false);
 
         var records = [];
-        for (var i = 0; i < nodesList.length; i++) {
+        for (i = 0; i < nodesList.length; i++) {
             var attr = nodesList[i].data;
             var r  = attr.templateRecord;
 

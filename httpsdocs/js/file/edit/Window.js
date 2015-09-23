@@ -66,6 +66,8 @@ Ext.define('CB.file.edit.Window', {
             ,this.downloadSeparator
             ,this.actions.download
             ,'->'
+            ,this.actions.star
+            ,this.actions.unstar
             ,this.subscriptionButton
             ,this.actions.refresh
             ,new Ext.Button({

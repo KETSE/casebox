@@ -22,4 +22,18 @@ Ext.override(Ext.util.AbstractMixedCollection, {
 
         return rez;
     }
+
+    ,indexOfKey : function(key) {
+        if (!this.map.hasOwnProperty(key)) {
+            this.length = this.items.length;
+
+            return this.keys.indexOf(key);
+        }
+
+        if (this.indexGeneration !== this.generation) {
+            this.rebuildIndexMap();
+        }
+
+        return this.indexMap[key];
+    }
 });

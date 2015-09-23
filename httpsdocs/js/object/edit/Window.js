@@ -94,11 +94,14 @@ Ext.define('CB.object.edit.Window', {
 
         Ext.Direct.on('exception', this.onAppException, this);
 
+        App.Favorites.on('change', this.onFavoritesChange, this);
+
         this.doLoad();
     }
 
     ,onBeforeDestroy: function() {
         Ext.Direct.un('exception', this.onAppException, this);
+        App.Favorites.un('change', this.onFavoritesChange, this);
     }
 
     /**
@@ -151,6 +154,26 @@ Ext.define('CB.object.edit.Window', {
                 ,handler: this.onRenameClick
             })
 
+            ,star: new Ext.Action({
+                iconCls: 'i-star'
+                ,qtip: L.Star
+                ,itemId: 'star'
+                ,scale: 'medium'
+                ,hidden: true
+                ,scope: this
+                ,handler: this.onStarClick
+            })
+
+            ,unstar: new Ext.Action({
+                iconCls: 'i-unstar'
+                ,qtip: L.Unstar
+                ,itemId: 'unstar'
+                ,scale: 'medium'
+                ,hidden: true
+                ,scope: this
+                ,handler: this.onUnstarClick
+            })
+
             ,showInfoPanel: new Ext.Action({
                 iconCls: 'i-info'
                 ,enableToggle: true
@@ -176,27 +199,27 @@ Ext.define('CB.object.edit.Window', {
         this.subscriptionButton = new Ext.Button({
             itemId: 'subscription'
             ,arrowVisible: false
-            ,iconCls: 'i-follow'
+            ,iconCls: 'i-ignore'
             // ,scale: 'medium'
             ,menu: [
                 {
-                    text: L.FollowText
-                    ,iconCls: 'i-follow'
-                    ,itemId: 'follow'
-                    ,scope: this
-                    ,handler: this.onSubscriptionButtonClick
-                }, {
                     text: L.WatchText
                     ,iconCls: 'i-watch'
                     ,itemId: 'watch'
                     ,scope: this
                     ,handler: this.onSubscriptionButtonClick
-                }, {
+                },{
                     text: L.IgnoreText
                     ,iconCls: 'i-ignore'
                     ,itemId: 'ignore'
                     ,scope: this
                     ,handler: this.onSubscriptionButtonClick
+                },'-',{
+                    text: L.Customize
+                    ,iconCls: 'i-gear'
+                    ,itemId: 'notify-settings'
+                    ,scope: this
+                    ,handler: this.onNotificationsCustomizeClick
                 }
             ]
         });
@@ -206,6 +229,8 @@ Ext.define('CB.object.edit.Window', {
             ,this.actions.save
             ,this.actions.cancel
             ,'->'
+            ,this.actions.star
+            ,this.actions.unstar
             ,this.subscriptionButton
             ,this.actions.refresh
             ,new Ext.Button({
@@ -724,6 +749,8 @@ Ext.define('CB.object.edit.Window', {
 
             this.actions.rename.hide();
         }
+
+        this.onFavoritesChange();
     }
 
     /**
@@ -796,6 +823,10 @@ Ext.define('CB.object.edit.Window', {
             }
             ,this
         );
+    }
+    ,onNotificationsCustomizeClick: function(b, e) {
+        var w = new CB.notifications.SettingsWindow();
+        w.show();
     }
 
     ,onSaveObjectEvent: function(objComp, ev) {
@@ -1208,5 +1239,29 @@ Ext.define('CB.object.edit.Window', {
             'Copy to clipboard: Ctrl+C, Enter'
             , window.location.origin + '/' + App.config.coreName + '/view/' + this.data.id + '/'
         );
+    }
+
+    ,onStarClick: function(b, e) {
+        var ld = this.data
+            ,d = {
+                id: ld.id
+                ,name: ld.name
+                ,iconCls: ld.iconCls
+                ,path: '/' + ld.pids + '/' + ld.id
+                ,pathText: ld.path
+            };
+
+        App.Favorites.setStarred(d);
+    }
+
+    ,onUnstarClick: function(b, e) {
+        App.Favorites.setUnstarred(this.data.id);
+    }
+
+    ,onFavoritesChange: function() {
+        var isStarred = App.Favorites.isStarred(this.data.id);
+
+        this.actions.star.setHidden(isStarred);
+        this.actions.unstar.setHidden(!isStarred);
     }
 });

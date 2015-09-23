@@ -1511,29 +1511,29 @@ class User
     }
 
     /**
-     * get interface state array of the current user
+     * get users config param (ex. state array of the current user)
      * @return array
      */
-    public static function getUserState()
+    public static function getUserConfigParam($name, $default = null, $userId = false)
     {
-        $cfg = static::getUserConfig();
+        $cfg = static::getUserConfig($userId);
 
-        return empty($cfg['state'])
-            ? array()
-            : $cfg['state'];
+        return empty($cfg[$name])
+            ? $default
+            : $cfg[$name];
     }
 
     /**
-     * set user state array
+     * set users config param
      * @param array $state
      */
-    public static function setUserState($state)
+    public static function setUserConfigParam($name, $value, $userId = false)
     {
-        $cfg = static::getUserConfig();
+        $cfg = static::getUserConfig($userId);
 
-        $cfg['state'] = $state;
+        $cfg[$name] = $value;
 
-        static::setUserConfig($cfg);
+        static::setUserConfig($cfg, $userId);
     }
 
     public static function getTSVConfig($userId = false)
@@ -1552,6 +1552,110 @@ class User
         $cfg = static::getUserConfig($userId);
         $cfg['security']['TSV'] = $TSVConfig;
         $cfg = static::setUserConfig($cfg, $userId);
+    }
+
+    public static function getNotificationSettings($userId = false)
+    {
+        $rez = array(
+            'success' => true
+            ,'data' => array(
+                'notifyFor' => 'mentioned'
+                ,'delay' => 2
+                ,'delaySize' => 15
+            )
+        );
+
+        $ns = static::getUserConfigParam('notificationSettings', false, $userId);
+
+        if (!empty($ns)) {
+            $rez['data'] = $ns;
+        }
+
+        return $rez;
+    }
+
+    public static function setNotificationSettings($p, $userId = false)
+    {
+        $d = array(
+            'notifyFor' => empty($p['notifyFor'])
+                ? 'mentioned'
+                : $p['notifyFor']
+            ,'delay' => empty($p['delay'])
+                ? 2
+                : intval($p['delay'])
+            ,'delaySize' => empty($p['delaySize'])
+                ? 15
+                : intval($p['delaySize'])
+        );
+
+        static::setUserConfigParam('notificationSettings', $d, $userId);
+
+        return array('success' => true);
+    }
+
+    public static function updateLastActionTime()
+    {
+        return DM\User::update(
+            array(
+                'id' => static::getId()
+                ,'last_action_time' => Util\dateISOToMysql('now')
+            )
+        );
+    }
+
+    public static function isIdle($userId = false)
+    {
+        $rez = true;
+
+        if (!is_numeric($userId)) {
+            $userId = static::getId();
+        }
+
+        $r = DM\User::read($userId);
+
+        if (!empty($r['last_action_time'])) {
+            $minutes = Util\getDatesDiff($r['last_action_time']);
+            $rez = ($minutes > 2);
+        }
+
+        return $rez;
+    }
+
+    /**
+     * check if reached specified interval for sending emails
+     * @param  int     $userId
+     * @return varchar | false
+     */
+    public static function canSendNotifications($userId = false)
+    {
+        $rez = static::isIdle($userId);
+        if ($rez) {
+            $rez = false;
+            $s = static::getNotificationSettings($userId)['data'];
+
+            switch ($s['notifyFor']) {
+                case 'all':
+                case 'mentioned':
+                    $rez = $s['notifyFor'];
+
+                    if ($s['delay'] == 2) {
+                        $lastNotifyTime = static::getUserConfigParam('lastNotifyTime', false, $userId);
+
+                        if (!empty($lastNotifyTime)) {
+                            $diff = Util\getDatesDiff($lastNotifyTime);
+                            if ($diff < $s['delaySize']) {
+                                //send mentioned notifications instantly if idle
+                                //no matter of delay, only other nitifications will be merged after delay
+                                $rez = 'mentioned'; //false;
+                            }
+                        }
+                    }
+
+                    break;
+            }
+        }
+
+        return $rez;
     }
 
     /**

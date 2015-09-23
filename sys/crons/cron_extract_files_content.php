@@ -83,16 +83,25 @@ while ($r = $res->fetch_assoc()) {
                         echo "... size: ".strlen($text)."\n";
                         $text = gzcompress($text, 9);
                         file_put_contents($filename.'.gz', $text);
-                    } else {
-                        $skip_parsing = 1;
-                        notifyAdminAboutContent($r['id']);
                     }
 
                     $meta = getZipFileContent($filename.'.zip', '__METADATA__');
                     $meta = mb_convert_encoding($meta, mb_detect_encoding($meta), 'UTF-8');
                     preg_match('/page-count",\s*"([0-9]+)"/i', $meta, $matches);
                     $pages = empty($matches[1]) ? null : $matches[1];
+
+                    //try another match
+                    if (empty($pages)) {
+                        preg_match('/NPages",\s*"([0-9]+)"/i', $meta, $matches);
+                        $pages = empty($matches[1]) ? null : $matches[1];
+
+                    }
                     echo " pages: $pages";
+
+                    if (empty($text) && empty($pages)) {
+                        $skip_parsing = 1;
+                        notifyAdminAboutContent($r['id']);
+                    }
 
                     unlink($filename.'.zip');
                 } else {

@@ -265,6 +265,12 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
     $askReindex   = true;
     $fullCoreName = $cfg['prefix'].'_'.$coreName;
 
+       $status =  json_decode(file_get_contents('http://' . $solrHost. ':' . $solrPort . '/solr/admin/cores?action=STATUS&wt=json'),true);
+
+    if (isset($status['status']) && isset($status['status'][$fullCoreName]) && !\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') ) {
+        return true;
+    }
+
     $solr = \CB\Solr\Service::verifyConfigConnection(
         array(
             'host' => $solrHost
@@ -344,15 +350,7 @@ function solrUnloadCore($host, $port, $coreName)
 function solrCreateCore($host, $port, $coreName, $cfg = array())
 {
     $rez = true;
-
-    $status =  json_decode(file_get_contents('http://' . $host. ':' . $port . '/solr/admin/cores?action=STATUS&wt=json'),true);
-
-    if (isset($status['status']) && isset($status['status'][$coreName])) {
-        return true;
-    } else {
-        echo print_r($status,true).PHP_EOL;
-    }
-    
+   
     if ( isset($cfg['solr_home']) ) {
 
         $CB_CORE_SOLR_PATH = $cfg['solr_home'].$coreName;
