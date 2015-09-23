@@ -10,7 +10,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     private $solr;
     private $config = [
         'solr_host' => 'localhost',
-        'solr_port' => 8983,
+        'solr_port' => 8180,
         'solr_core' => 'cbtest_test'
     ];
 
@@ -54,5 +54,5 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $r = json_decode($response->getRawResponse(),true);
         $this->assertTrue(isset($r['response']['numFound']) && $r['response']['numFound'] >=0, print_r($r,true));
     }
-    
+
 }

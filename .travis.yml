@@ -12,7 +12,7 @@ cache:
 
 addons:
   hosts:
-    - test.casebox.org
+    - dev.casebox.local
 
 before_install:
     - mkdir -p $HOME/download-cache
