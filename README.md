@@ -1,10 +1,10 @@
-CaseBox
+Casebox
 ======================================================
 
 Casebox is a Content Management Platform for record, file and task management.
 
 Full documentation can be found on the website:
-https://www.casebox.org/docs/
+http://docs.casebox.org/en/latest/
 
 Made at Ketse & HURIDOCS
 -------------------------
@@ -17,4 +17,4 @@ Code status
 
 [![Build Status](https://travis-ci.org/KETSE/casebox.svg?branch=gb_travis)](https://travis-ci.org/KETSE/casebox)
 
-[![Coverage Status](https://coveralls.io/repos/KETSE/casebox/badge.svg?branch=gb_travis&service=github)](https://coveralls.io/github/KETSE/casebox?branch=gb_travis)
+[![Coverage Status](https://coveralls.io/repos/KETSE/casebox/badge.svg?branch=gb_devel&service=github)](https://coveralls.io/github/KETSE/casebox?branch=gb_devel)
