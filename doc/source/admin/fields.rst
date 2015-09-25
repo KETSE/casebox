@@ -1,3 +1,6 @@
+Fields
+======
+
 Create a new thesauri 
 ------------------------
 Use the tree window to browse to System/Templates folder
