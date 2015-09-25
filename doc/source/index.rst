@@ -32,7 +32,7 @@ The main documentation is organized into a three sections:
    :caption: Administrator Manual
 
    admin/index
-   admin/forms
+   admin/form
    admin/templates
    admin/fields
 
