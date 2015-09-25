@@ -16,5 +16,4 @@ Code status
 -------------------------
 
 [![Build Status](https://travis-ci.org/KETSE/casebox.svg?branch=gb_travis)](https://travis-ci.org/KETSE/casebox)
-
-[![Coverage Status](https://coveralls.io/repos/KETSE/casebox/badge.svg?branch=gb_travis&service=github)](https://coveralls.io/github/KETSE/casebox?branch=gb_travis)
+[![Coverage Status](https://coveralls.io/repos/KETSE/casebox/badge.svg?branch=devel&service=github)](https://coveralls.io/github/KETSE/casebox?branch=devel)
