@@ -7,6 +7,9 @@ These are the steps required to be able to use a new form/object in Casebox
 2. Add fields to the newly created form
 3. Make the form available in menus
 
+
+Create New Form
+-----------------------
 Use the tree window to browse to System/Templates folder
 
 
