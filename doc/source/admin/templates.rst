@@ -121,15 +121,13 @@ Form items created!
 
 
 Add the newly created template to a menu
-
+.......................................
 Now you have to enable creating the new form you created by adding it to the menu.
 
 Browse to System/Menus
 
 
-
 Edit General Menu
-...................
 
 Edit the 'Menu' label and add your object by enabling the checkbox next to its title
 
