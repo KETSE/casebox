@@ -188,6 +188,24 @@ Ext.define('CB.object.edit.Window', {
                 ,scope: this
                 ,handler: this.onPermalinkClick
             })
+
+            ,notifyOn: new Ext.Action({
+                text: L.NotifyOn
+                ,hidden: true
+                ,iconCls: 'im-watch'
+                ,itemId: 'notifyOn'
+                ,scope: this
+                ,handler: this.onSubscriptionButtonClick
+            })
+
+            ,notifyOff: new Ext.Action({
+                text: L.NotifyOff
+                ,hidden: true
+                ,iconCls: 'im-ignore'
+                ,itemId: 'notifyOff'
+                ,scope: this
+                ,handler: this.onSubscriptionButtonClick
+            })
         };
     }
 
@@ -196,34 +214,6 @@ Ext.define('CB.object.edit.Window', {
      * @return array
      */
     ,getToolbarButtons: function() {
-        this.subscriptionButton = new Ext.Button({
-            itemId: 'subscription'
-            ,arrowVisible: false
-            ,iconCls: 'i-ignore'
-            // ,scale: 'medium'
-            ,menu: [
-                {
-                    text: L.WatchText
-                    ,iconCls: 'i-watch'
-                    ,itemId: 'watch'
-                    ,scope: this
-                    ,handler: this.onSubscriptionButtonClick
-                },{
-                    text: L.IgnoreText
-                    ,iconCls: 'i-ignore'
-                    ,itemId: 'ignore'
-                    ,scope: this
-                    ,handler: this.onSubscriptionButtonClick
-                },'-',{
-                    text: L.Customize
-                    ,iconCls: 'i-gear'
-                    ,itemId: 'notify-settings'
-                    ,scope: this
-                    ,handler: this.onNotificationsCustomizeClick
-                }
-            ]
-        });
-
         return [
             this.actions.edit
             ,this.actions.save
@@ -231,7 +221,6 @@ Ext.define('CB.object.edit.Window', {
             ,'->'
             ,this.actions.star
             ,this.actions.unstar
-            ,this.subscriptionButton
             ,this.actions.refresh
             ,new Ext.Button({
                 qtip: L.More
@@ -242,6 +231,9 @@ Ext.define('CB.object.edit.Window', {
                     this.actions['delete']
                     ,this.actions.rename
                     ,this.actions.permalink
+                    ,'-'
+                    ,this.actions.notifyOn
+                    ,this.actions.notifyOff
                 ]
             })
             ,this.actions.showInfoPanel
@@ -805,25 +797,32 @@ Ext.define('CB.object.edit.Window', {
         }
 
         var subscription = Ext.valueFrom(commonParams.subscription, 'ignore');
-        this.subscriptionButton.setIconCls('im-' + subscription);
+        this.actions.notifyOn.setHidden(subscription == 'watch');
+        this.actions.notifyOff.setHidden(subscription == 'ignore');
     }
 
     ,onSubscriptionButtonClick: function(b, e) {
+        var type = (b.itemId == 'notifyOn')
+            ? 'watch'
+            : 'ignore';
+
         CB_Objects.setSubscription(
             {
                 objectId: this.data.id
-                ,type: b.itemId
+                ,type: type
             }
             ,function(r, e) {
                 if(r.success !== true) {
                     return;
                 }
 
-                this.subscriptionButton.setIconCls('im-' + b.itemId);
+                this.actions.notifyOn.setHidden(type == 'watch');
+                this.actions.notifyOff.setHidden(type == 'ignore');
             }
             ,this
         );
     }
+
     ,onNotificationsCustomizeClick: function(b, e) {
         var w = new CB.notifications.SettingsWindow();
         w.show();

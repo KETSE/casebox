@@ -520,6 +520,8 @@ Ext.define('CB.VerticalEditGrid', {
         }
         this.store.resumeEvents();
         this.store.add(records);
+
+        return true;
     }
 
     ,helperNodesFilter: function(node){
@@ -746,7 +748,9 @@ Ext.define('CB.VerticalEditGrid', {
             );
         }
 
-        this.syncRecordsWithHelper();
+        if(!this.syncRecordsWithHelper()) {
+            this.getView().refresh();
+        }
 
         this.gainFocus();
     }

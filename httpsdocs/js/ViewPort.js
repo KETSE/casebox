@@ -419,10 +419,15 @@ Ext.define('CB.ViewPort', {
             }
             ,'-'
             ,{
+                text: L.NotifySettings
+                // ,iconCls: 'i-settings'
+                // ,itemId: 'notify-settings'
+                ,scope: this
+                ,handler: this.onNotifySettingsClick
+            },{
                 text: L.Theme
                 ,menu: themes
-            }
-            ,{
+            },{
                 text: L.Language
                 // ,iconCls: 'icon-language'
                 ,hideOnClick: false
@@ -569,7 +574,6 @@ Ext.define('CB.ViewPort', {
                     ,data: {
                         rootNode: App.config.rootNode
                     }
-                    ,rootVisible:true
                 }, {
                     region: 'south'
                     ,xtype: 'tabpanel'
@@ -693,6 +697,11 @@ Ext.define('CB.ViewPort', {
                 id: objectId
             }
         });
+    }
+
+    ,onNotifySettingsClick: function(b, e) {
+        var w = new CB.notifications.SettingsWindow();
+        w.show();
     }
 
     ,setUserLanguage: function(b, e){
