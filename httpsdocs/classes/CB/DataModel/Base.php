@@ -281,11 +281,12 @@ class Base
                 case 'timestamp':
                 case 'date':
                     $dt = explode(' ', $p[$fn]);
+
                     $valid = sizeof($dt) < 3;
 
                     if ($valid) {
                         $d = explode('-', $dt[0]);
-                        $valid = (sizeof($dt) == 3);
+                        $valid = (sizeof($d) == 3);
 
                         if ($valid) {
                             $valid = is_numeric($d[0]) &&
@@ -296,7 +297,7 @@ class Base
 
                     if ($valid && !empty($dt[1])) {
                         $t = explode(':', $dt[1]);
-                        $valid = (sizeof($dt) < 4);
+                        $valid = (sizeof($t) < 4);
 
                         if ($valid) {
                             $valid = is_numeric($t[0]) &&

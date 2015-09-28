@@ -51,8 +51,7 @@ $API = array_merge(
             'methods'=>array(
                 'create'        =>  array('len' => 1)
                 ,'read'         =>  array('len' => 1)
-                ,'update'       =>  array('len' => 1)
-                ,'destroy'      =>  array('len' => 1)
+                ,'delete'       =>  array('len' => 1)
             )
         )
 
@@ -72,7 +71,8 @@ $API = array_merge(
         ,'CB_Notifications' => array(
             'methods'=>array(
                 'getList'=> array('len' => 1)
-                ,'getNewCount'=> array('len' => 1)
+                ,'getNew'=> array('len' => 1)
+                ,'updateLastSeenId'=> array('len' => 1)
                 ,'markAsRead'=> array('len' => 1)
                 ,'markAllAsRead'=> array('len' => 0)
             )
@@ -183,6 +183,8 @@ $API = array_merge(
                 ,'getTSVTemplateData' => array('len' => 1)
                 ,'enableTSV'          => array('len' => 1)
                 ,'disableTSV'         => array('len' => 0)
+                ,'getNotificationSettings' => array('len' => 0)
+                ,'setNotificationSettings' => array('len' => 1)
             )
         )
 

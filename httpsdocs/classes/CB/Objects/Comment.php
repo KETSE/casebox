@@ -119,29 +119,29 @@ class Comment extends Object
             ,'date' => Util\dateMysqlToISO('now')
         );
 
-        $fu = empty($posd['fu'])
+        $wu = empty($posd['wu'])
             ? array()
-            : $posd['fu'];
+            : $posd['wu'];
         $uid = User::getId();
 
-        if (!in_array($uid, $fu)) {
+        if (!in_array($uid, $wu)) {
             $newUserIds[] = intval($uid);
         }
 
         //analize comment text and get referenced users
         $uids = Util\getReferencedUsers($p['data']['_title']);
         foreach ($uids as $uid) {
-            if (!in_array($uid, $fu)) {
+            if (!in_array($uid, $wu)) {
                 $newUserIds[] = $uid;
             }
         }
 
         //update only if new users added
         if (!empty($newUserIds)) {
-            $fu = array_merge($fu, $newUserIds);
-            $fu = Util\toNumericArray($fu);
+            $wu = array_merge($wu, $newUserIds);
+            $wu = Util\toNumericArray($wu);
 
-            $posd['fu'] = array_unique($fu);
+            $posd['wu'] = array_unique($wu);
 
         }
 

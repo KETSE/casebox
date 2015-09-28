@@ -42,6 +42,16 @@ apigen.neon
 /tests/composer.phar
 /tests/composer.lock
 /tests/vendor/**
+/tests/logs/**
+/tests/server/solr/solr-5.*
+composer.phar
+composer.lock
+vendor/**
+build/**
 /tests/tmp/**
 /tests/reports/**
 _rest_managed.json
+
+
+# eclude ReadTheDocs built files
+/doc/build

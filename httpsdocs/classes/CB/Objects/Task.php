@@ -76,11 +76,13 @@ class Task extends Object
     }
 
     /**
-     * analize object data and set 'fu' property in sys_data
+     * analize object data and set 'wu' property in sys_data
+     *
+     * return newly assigned ids
      */
     protected function setFollowers()
     {
-        parent::setFollowers();
+        $rez = parent::setFollowers();
 
         $d = &$this->data;
         $sd = &$d['sys_data'];
@@ -92,20 +94,27 @@ class Task extends Object
         }
         $newAssigned = Util\toNumericArray(@$this->getFieldValue('assigned', 0)['value']);
         $diff = array_diff($newAssigned, $oldAssigned);
-        $fu = empty($sd['fu'])
+        $wu = empty($sd['wu'])
             ? array()
-            : $sd['fu'];
+            : $sd['wu'];
 
-        $fu = array_merge($fu, $diff);
+        $wu = array_merge($wu, $diff);
+
+        $rez = array_merge($rez, $newAssigned);
 
         //analize referenced users from description
         if (!empty($d['data']['description'])) {
             $uids = Util\getReferencedUsers($d['data']['description']);
             if (!empty($uids)) {
-                $fu = array_merge($fu, $uids);
+                $wu = array_merge($wu, $uids);
+                $rez = array_merge($rez, $wu);
             }
         }
-        $sd['fu'] = array_unique($fu);
+        $sd['wu'] = array_unique($wu);
+
+        $rez = array_unique($rez);
+
+        return $rez;
     }
 
     /**

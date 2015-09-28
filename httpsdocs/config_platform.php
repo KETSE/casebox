@@ -59,7 +59,7 @@ if (!isset($cfg)|| !is_array($cfg)) {
 }
 //define some library paths
 $cfg['HTML_PURIFIER'] = 'htmlpurifier/library/HTMLPurifier.auto.php';
-$cfg['SOLR_CLIENT'] = 'Solr/Service.php';
+$cfg['SOLR_CLIENT'] = 'Apache/Solr/Service.php';
 $cfg['MINIFY_PATH'] = DOC_ROOT . 'libx/min/';
 $cfg['TIKA_SERVER'] = DOC_ROOT . 'libx/tika-server.jar';
 
@@ -71,6 +71,9 @@ if (file_exists(DOC_ROOT.'config.ini')) {
         //conect to db using global params from config.ini
         DB\connect($cfg);
     }
+
+} else {
+    trigger_error("WARNING: file not exists ".DOC_ROOT.'config.ini', E_USER_WARNING);
 }
 
 //define global prefix used
@@ -87,7 +90,7 @@ define(
     'CB\\IS_DEBUG_HOST',
     (
         empty($_SERVER['SERVER_NAME']) ||
-        (!empty($cfg['debug_hosts']) && Util\isInValues($_SERVER['REMOTE_ADDR'], $cfg['debug_hosts']))
+        (!empty($cfg['debug_hosts']) && Util\isInValues($_SERVER['REMOTE_ADDR'], $cfg['debug_hosts'])) || Util\is_cli()
     )
 );
 

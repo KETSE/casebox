@@ -54,9 +54,11 @@ Ext.define('Notification', {
         {name: 'ids', type: 'string'}
         ,{name: 'user_id', type: 'int'}
         ,{name: 'object_id', type: 'int'}
+        ,{name: 'action_id', type: 'int'}
         ,{name: 'text',  type: 'string'}
         ,{name: 'date_text',  type: 'string'}
         ,{name: 'read',  type: 'bool'}
+        ,{name: 'seen',  type: 'bool'}
         ,'data'
     ]
 });
@@ -104,8 +106,17 @@ Ext.define('ObjectsRecord', {
         ,{name: 'date', type: 'date'}
         ,{name: 'template_id', type: 'int'}
         ,{name: 'status', type: 'int'}
-        , 'iconCls'
-        , 'cfg'
+        ,'iconCls'
+        ,'cfg'
+    ]
+});
+
+Ext.define('FavoriteRecord', {
+    extend: 'Ext.data.Model'
+    ,fields: [
+        {name: 'id', type: 'int'}
+        ,'node_id'
+        ,'data'
     ]
 });
 

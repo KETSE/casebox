@@ -116,7 +116,8 @@ return array_merge(
             ,'//js/CB.Clipboard.js'
             ,'//js/CB.FilterPanel.js'
 
-            ,'//js/CB.Favorites.js'
+            ,'//js/favorites/Panel.js'
+            // ,'//js/favorites/Button.js'
 
             ,'//js/plugin/dd/FilesDropZone.js'
             ,'//js/CB.Uploader.js'
@@ -183,7 +184,8 @@ return array_merge(
             ,'//js/object/field/editor/Form.js'
             ,'//js/object/field/editor/Tag.js'
             ,'//js/view/BoundListKeyNav.js'
-            ,'//js/browser/NotificationsView.js'
+            ,'//js/notifications/View.js'
+            ,'//js/notifications/SettingsWindow.js'
             // ,'//js/overrides/form/action/Submit.js'
         )
 

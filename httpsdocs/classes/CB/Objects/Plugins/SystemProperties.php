@@ -31,6 +31,7 @@ class SystemProperties extends Base
             $data,
             array(
                 'id' => 1
+                ,'name' => 1
                 ,'template_id' => 1
                 ,'cid' => 1
                 ,'cdate' => 1
@@ -58,7 +59,7 @@ class SystemProperties extends Base
 
         $d['subscription'] = 'ignore';
         if (!empty($sd['fu']) && in_array($userId, $sd['fu'])) {
-            $d['subscription'] = 'follow';
+            $d['subscription'] = 'watch'; //follow
         } if (!empty($sd['wu']) && in_array($userId, $sd['wu'])) {
             $d['subscription'] = 'watch';
         }

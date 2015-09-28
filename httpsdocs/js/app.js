@@ -435,7 +435,7 @@ function initApp() {
             return '<pre style="white-space: pre-wrap">' + v + '</pre>';
         }
         ,titleAttribute: function(v, m, r, ri, ci, s){
-            m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
+            m.tdAttr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
             return v;
         }
         ,userName: function(v){ return CB.DB.usersStore.getName(v);}

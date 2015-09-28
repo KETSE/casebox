@@ -18,15 +18,15 @@ class Notifications
     }
 
     /**
-     * get new notifications count for current user
+     * get new notification records
      * @param  array $p containing fromId property
      * @return json  response
      */
-    public function getNewCount($p)
+    public function getNew($p)
     {
         $class = new \CB\Notifications();
 
-        return $class->getNewCount($p);
+        return $class->getNew($p);
     }
 
     /**

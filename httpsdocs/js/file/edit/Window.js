@@ -66,7 +66,8 @@ Ext.define('CB.file.edit.Window', {
             ,this.downloadSeparator
             ,this.actions.download
             ,'->'
-            ,this.subscriptionButton
+            ,this.actions.star
+            ,this.actions.unstar
             ,this.actions.refresh
             ,new Ext.Button({
                 qtip: L.More
@@ -78,6 +79,9 @@ Ext.define('CB.file.edit.Window', {
                     ,this.actions.webdavlink
                     ,this.actions.rename
                     ,this.actions.permalink
+                    ,'-'
+                    ,this.actions.notifyOn
+                    ,this.actions.notifyOff
                 ]
             })
             ,this.actions.showInfoPanel
@@ -386,7 +390,7 @@ Ext.define('CB.file.edit.Window', {
 
     /**
      * event handler for content editors change
-     * @param  component ed [description]
+     * @param  component ed
      * @return void
      */
     ,onEditorChangeEvent: function(ed) {

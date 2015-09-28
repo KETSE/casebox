@@ -18,7 +18,7 @@ if (!$cd['success']) {
 //dont try to send any notification if the script starts for the first time
 if (empty($cd['last_start_time'])) {
     DB\dbQuery(
-        'UPDATE notifications SET email_sent = -1 WHERE email_sent = 0'
+        'UPDATE notifications SET seen = 1 WHERE seen = 0'
     ) or die(DB\dbQueryError());
 
     exit();
@@ -40,7 +40,7 @@ $sendNotificationMails = (
 );
 
 //collect notifications to be sent
-$recs = DM\Notifications::getUnsent();
+$recs = DM\Notifications::getUnseen();
 
 foreach ($recs as $r) {
     $uid = $r['to_user_id'];
@@ -52,14 +52,25 @@ foreach ($recs as $r) {
 }
 
 //iterate mails for each user and send them
-foreach ($users as $u) {
+foreach ($users as $uid => $u) {
     if (empty($u['email'])) {
         continue;
     }
 
+    $sendType = User::canSendNotifications($uid);
+
+    if ($sendType == false) {
+        continue;
+    }
     $lang = $languages[$u['language_id']-1];
 
     if (filter_var($u['email'], FILTER_VALIDATE_EMAIL)) {
+        //group mails into digest and separate ones (where user is mentioned)
+        $mails = array(
+            'digest' => array()
+            ,'separate' => array()
+        );
+
         foreach ($u['mails'] as $notificationId => $action) {
             //[$core #$nodeId] $action_type $template_name: $object_title
             $templateId = Objects::getTemplateId($action['object_id']);
@@ -74,35 +85,109 @@ foreach ($users as $u) {
                 echo 'Devel skip: '.$u['email'] . ': ' . $subject . "\n";
 
             } else {
-                echo $u['email'].': ' . $subject  . "\n";
+                // echo $u['email'].': ' . $subject  . "\n";
 
-                $message = Notifications::getMailBodyForAction($action, $u);
                 $sender = Notifications::getSender($action['from_user_id']);
 
-                // file_put_contents(TEMP_DIR . $action['id'].'.html', "$sender<br />\n<h1>$subject<h1>" . $message);
-                //  COMMENTED FOR TEST
-                if (!mail(
-                    $u['email'],
-                    $subject,
-                    $message,
-                    "Content-type: text/html; charset=utf-8\r\nFrom: ". $sender . "\r\n"
-                )) {
-                    $markNotificationAsSent = false;
+                $actionIds = Util\toNumericArray($action['action_ids']);
 
-                    System::notifyAdmin(
-                        'CaseBox cron notification: Cant send notification (' . $notificationId . ') mail to "'. $u['email'] . '"',
-                        $message
+                $actions = array();
+                $actions[sizeof($actionIds) - 1] = $action;
+
+                //remove last action id (already loaded)
+                array_shift($actionIds);
+
+                //add all actions if multiple
+                if (!empty($actionIds)) {
+                    $actionIds = array_reverse($actionIds);
+
+                    $recs = DM\Log::getRecords($actionIds);
+                    $actionIds = array_flip($actionIds);
+
+                    foreach ($recs as $r) {
+                        $action['object_pid'] = $r['object_pid'];
+                        $action['action_time'] = $r['action_time'];
+                        $action['data'] = Util\jsonDecode($r['data']);
+                        $action['activity_data_db'] = Util\jsonDecode($r['activity_data_db']);
+
+                        $actions[$actionIds[$r['id']]] = $action;
+                    }
+                }
+
+                for ($i=0; $i < sizeof($actions); $i++) {
+                    $a = $actions[$i];
+
+                    $message = Notifications::getMailBodyForAction($a, $u);
+
+                    $isMentioned = (
+                        !empty($a['data']['mentioned']) &&
+                        in_array($uid, $a['data']['mentioned'])
                     );
 
-                } else {
-                    DB\dbQuery(
-                        'UPDATE notifications
-                        SET email_sent = 1
-                        WHERE id = $1',
-                        $notificationId
-                    ) or die(DB\dbQueryError());
+                    if ($isMentioned) {
+                        $mails['separate'][] = array($subject, $message, $sender, $notificationId);
+                    } elseif ($sendType == 'all') {
+                        $mails['digest'][] = array($subject, $message, $sender, $notificationId);
+                    }
                 }
             }
+        }
+
+        //merge digest emails group into one email and put it into separate group
+        if (sizeof($mails['digest']) == 1) {
+            $mails['separate'][] = $mails['digest'][0];
+        } elseif (!empty($mails['digest'])) {
+            $mail = array();
+            $ids = array();
+            $sender = '';
+            foreach ($mails['digest'] as $m) {
+                $mail[] = $m[1];
+                $sender = $m[2];
+                $ids[] = $m[3];
+            }
+            $mails['separate'][] = array(
+                '[' . $coreName . '] Notifications digest'
+                ,implode('<hr />', $mail)
+                ,$sender
+                ,$ids
+            );
+        }
+
+        $seenMaxId = 0;
+        foreach ($mails['separate'] as $mail) {
+            //send separate emails group
+            // file_put_contents(TEMP_DIR . $mail[3].'.html', $mail[2]."<br />\n<h1>" . $mail[0]. "<h1>" . $mail[1]);
+             // COMMENTED FOR TEST
+            // echo $u['email'], "\n" . $mail[0] . "\n".$mail[1]."\n\n";
+            echo $u['email'].': ' . $mail[0]  . "\n";
+
+            if (!mail(
+                $u['email'],
+                $mail[0],
+                $mail[1],
+                "Content-type: text/html; charset=utf-8\r\nFrom: ". $mail[2] . "\r\n"
+            )) {
+                System::notifyAdmin(
+                    'CaseBox cron notification: Cant send notification (' . $mail[3] . ') mail to "'. $u['email'] . '"',
+                    $mail[1]
+                );
+            } else {
+                if (is_array($mail[3])) {
+                    foreach ($mail[3] as $id) {
+                        $seenMaxId = max($seenMaxId, $id);
+                    }
+                } else {
+                    $seenMaxId = max($seenMaxId, $mail[3]);
+                }
+            }
+        }
+
+        if (!empty($seenMaxId)) {
+            Notifications::updateLastSeenId($seenMaxId, $uid);
+        }
+
+        if ($sendType == 'all') {
+            User::setUserConfigParam('lastNotifyTime', Util\dateISOToMysql('now'), $uid);
         }
     }
 

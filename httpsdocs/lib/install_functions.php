@@ -50,6 +50,7 @@ function getDefaultConfigValues()
 
         ,'PYTHON' => 'python'
         ,'backup_dir' => \CB\APP_DIR . 'backup' . DIRECTORY_SEPARATOR
+        ,'solr_create_cores' => 'y'
     );
 }
 
@@ -112,6 +113,7 @@ function getParamPhrase($paramName)
         ,'core_solr_reindex' => 'Reindex core [Y/n]: '
 
         ,'overwrite_existing_core_db' => "Core database exists. Would you like to backup it and overwrite with dump from current installation [Y/n]: "
+        ,'solr_create_cores' => "solr aucreate cores ?"
     );
 
     return empty($phrases[$paramName])
@@ -146,6 +148,8 @@ function setOwnershipForApacheUser(&$cfg)
         return ;
     }
 
+    return ;
+    
     $files = array(
         \CB\LOGS_DIR,
         \CB\DATA_DIR,
@@ -223,7 +227,7 @@ function createSolrConfigsetsSymlinks(&$cfg)
             $r = $r && symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $logLinkName);
         }
 
-        if (\CB\Util\getOS() == "LINUX") {
+        if (\CB\Util\getOS() == "LINUX" && \CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') ) {
                 shell_exec("chown -R ".fileowner($CBCSPath).":".filegroup($CBCSPath)." ".$CBCSPath);
         }
 
@@ -235,7 +239,7 @@ function createSolrConfigsetsSymlinks(&$cfg)
             // symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR. 'conf', $logCore . DIRECTORY_SEPARATOR . 'conf' );
         }
 
-        if (\CB\Util\getOS() == "LINUX") {
+        if (\CB\Util\getOS() == "LINUX" && \CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') ) {
                 // set owner of core folder for solr
                 shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$logCore);
         }
@@ -260,6 +264,12 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
     $createCore   = true;
     $askReindex   = true;
     $fullCoreName = $cfg['prefix'].'_'.$coreName;
+
+       $status =  json_decode(file_get_contents('http://' . $solrHost. ':' . $solrPort . '/solr/admin/cores?action=STATUS&wt=json'),true);
+
+    if (isset($status['status']) && isset($status['status'][$fullCoreName]) && !\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') ) {
+        return true;
+    }
 
     $solr = \CB\Solr\Service::verifyConfigConnection(
         array(
@@ -300,8 +310,13 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
         if (confirm($paramPrefix.'solr_reindex', 'n')) {
             echo 'Reindexing core ... ';
 
-            $cmd_reindex_core = 'php '.\CB\BIN_DIR.'solr_reindex_core.php -c '.$coreName.' -a -l';
-            $reindex_result = shell_exec($cmd_reindex_core);
+                    $options['c'] = $coreName;
+                    $options['a'] = true;
+                    $options['l'] = true;
+                    require_once \CB\BIN_DIR.'solr_reindex_core.php';
+
+            //$cmd_reindex_core = 'php '.\CB\BIN_DIR.'solr_reindex_core.php -c '.$coreName.' -a -l';
+            //$reindex_result = shell_exec($cmd_reindex_core);
             // here need to verify result of execution solr_reindex_core.php
             showMessage();
         }
@@ -335,8 +350,8 @@ function solrUnloadCore($host, $port, $coreName)
 function solrCreateCore($host, $port, $coreName, $cfg = array())
 {
     $rez = true;
-
-    if (isset($cfg['solr_home'])) {
+   
+    if ( isset($cfg['solr_home']) ) {
 
         $CB_CORE_SOLR_PATH = $cfg['solr_home'].$coreName;
 
@@ -347,7 +362,7 @@ function solrCreateCore($host, $port, $coreName, $cfg = array())
         }
 
         // make link to config
-        /* $confLink = $CB_CORE_SOLR_PATH.DIRECTORY_SEPARATOR.'conf';
+        $confLink = $CB_CORE_SOLR_PATH.DIRECTORY_SEPARATOR.'conf';
 
         $CBCSPath = \CB\SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
 
@@ -357,7 +372,7 @@ function solrCreateCore($host, $port, $coreName, $cfg = array())
             $r = symlink($confPath, $confLink);
         } elseif (!file_exists($confPath)) {
             trigger_error($confPath, E_USER_WARNING);
-        } */
+        }
 
         if (\CB\Util\getOS() == "LINUX") {
             // set owner of core folder for solr same as parent
@@ -482,12 +497,15 @@ function createMainDatabase($cfg)
         }
     } else {
         if (confirm('create__casebox_from_dump')) {
+             echo "Create database ". $cbDb. PHP_EOL;
             if (\CB\DB\dbQuery('CREATE DATABASE IF NOT EXISTS `' . $cbDb . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
                 echo shell_exec('mysql --host=' . $cfg['db_host'] . ' --user=' . $dbUser . ( $dbPass ? ' --password=' . $dbPass : '' )  . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
             } else {
                 $rez = false;
                 showError('Cant create database "' . $cbDb . '".');
             }
+        } else {
+            trigger_error("Database ".$cbDb." not exists, try to set create__casebox_from_dump = y ", E_USER_ERROR);
         }
     }
 

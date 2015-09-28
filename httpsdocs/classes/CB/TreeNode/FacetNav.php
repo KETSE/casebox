@@ -2,37 +2,13 @@
 namespace CB\TreeNode;
 
 use CB\Config;
-use CB\Util;
 use CB\Facets;
 use CB\Objects;
 use CB\Search;
 use CB\User;
 
-class FacetNav extends Base
+class FacetNav extends Query
 {
-
-    public function getChildren(&$pathArray, $requestParams)
-    {
-        $rez = array();
-        $this->path = $pathArray;
-        $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
-        $this->requestParams = $requestParams;
-
-        if (!$this->acceptedPath($pathArray, $requestParams)) {
-            return;
-        }
-
-        $this->lastNodeDepth = $this->lastNode->getClassDepth();
-
-        if (empty($this->lastNode) || ($this->lastNode->guid != $this->guid)) {
-            $rez = $this->getRootNode();
-        } else {
-            $rez = $this->getChildNodes();
-        }
-
-        return $rez;
-    }
-
     public function getName($id = false)
     {
         $rez = 'no name';
@@ -54,21 +30,7 @@ class FacetNav extends Base
         } else {
             switch ($id) {
                 case 'root':
-                    $cfg = &$this->config;
-                    $l = Config::get('user_language');
-
-                    if (empty($cfg['title_'.$l])) {
-                        $l = Config::get('language');
-                        if (empty($cfg['title_'.$l])) {
-                            if (!empty($cfg['title'])) {
-                                $rez = $cfg['title'];
-                            }
-                        } else {
-                            $rez = $cfg['title_' . $l];
-                        }
-                    } else {
-                        $rez = $cfg['title_' . $l];
-                    }
+                    $rez = parent::getName('root');
 
                     break;
             }
@@ -79,16 +41,10 @@ class FacetNav extends Base
 
     protected function getRootNode()
     {
-        return array(
-            'data' => array(
-                array(
-                    'name' => $this->getName('root')
-                    ,'id' => $this->getId('root')
-                    ,'iconCls' => Util\coalesce(@$this->config['iconCls'], 'icon-folder')
-                    ,'has_childs' => (!empty($this->config['level_fields']) || !empty($this->config['show_in_tree']))
-                )
-            )
-        );
+        $rez = parent::getRootNode();
+        $rez['data'][0]['has_childs'] = (!empty($this->config['level_fields']) || !empty($this->config['show_in_tree']));
+
+        return $rez;
     }
 
     protected function getParentNodeFilters()
@@ -283,18 +239,5 @@ class FacetNav extends Base
         $this->LevelFieldConfigs = $rez;
 
         return $rez;
-    }
-
-    /**
-     * replace possible variables in a filter array for solr query
-     * @param  array reference &$filterArray
-     * @return void
-     */
-    protected function replaceFilterVars(&$filterArray)
-    {
-        //
-        foreach ($filterArray as $key => $value) {
-            $filterArray[$key] = str_replace('$activeUserId', $_SESSION['user']['id'], $value);
-        }
     }
 }

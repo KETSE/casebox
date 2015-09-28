@@ -28,7 +28,7 @@ class Notifications extends Base
         ,'action_type' => 'varchar'
         ,'from_user_id' => 'int'
         ,'user_id' => 'int'
-        ,'email_sent' => 'int'
+        ,'seen' => 'int'
         ,'read' => 'int'
     );
 
@@ -51,7 +51,7 @@ class Notifications extends Base
             ,empty($p['action_type']) ? null : $p['action_type']
             ,empty($p['from_user_id']) ? null : $p['from_user_id']
             ,empty($p['user_id']) ? null : $p['user_id']
-            ,empty($p['email_sent']) ? 0 : $p['email_sent']
+            ,empty($p['seen']) ? 0 : $p['seen']
         );
 
         //add database record
@@ -62,7 +62,7 @@ class Notifications extends Base
             ,action_type
             ,from_user_id
             ,user_id
-            ,email_sent
+            ,seen
             )
             VALUES($1, $2, $2, $3, $4, $5, $6)
 
@@ -71,7 +71,7 @@ class Notifications extends Base
             UPDATE
             action_id = $2
             ,action_ids = CASE WHEN `read` = 1 THEN $2 ELSE CONCAT($2, \',\', action_ids) END
-            ,email_sent = $6
+            ,seen = $6
             ,`read` = 0';
 
         DB\dbQuery($sql, $params) or die(DB\dbQueryError());
@@ -105,6 +105,7 @@ class Notifications extends Base
             n.id
             ,l.object_id
             ,l.action_type
+            ,n.action_id
             ,n.read
             ,n.from_user_id
             ,n.user_id
@@ -114,7 +115,7 @@ class Notifications extends Base
         JOIN action_log l
             ON n.action_id = l.id
         WHERE n.user_id = $1 '.
-        (empty($fromId) ? '' : ' AND n.id > $2 ') .
+        (empty($fromId) ? '' : ' AND n.action_id > $2 ') .
         'ORDER BY l.action_time DESC, id DESC
         LIMIT ' . $limit;
 
@@ -135,12 +136,12 @@ class Notifications extends Base
     }
 
     /**
-     * get notifications that was not sent by mail yet
+     * get notifications that were not seen
      *
      * @param  int   $userId optional
      * @return array
      */
-    public static function getUnsent($userId = false)
+    public static function getUnseen($userId = false)
     {
         $rez = array();
 
@@ -153,6 +154,7 @@ class Notifications extends Base
         $sql = 'SELECT
             n.id
             ,n.object_id
+            ,n.action_ids
             ,n.action_type
             ,n.user_id `to_user_id`
             ,n.`from_user_id`
@@ -163,7 +165,7 @@ class Notifications extends Base
         FROM `' . static::getTableName() . '` n
             JOIN action_log l
                 ON n.action_id = l.id
-        WHERE n.email_sent = 0 '.
+        WHERE n.seen = 0 '.
         (($userId == false)
             ? ''
             : ' AND user_id = $1 '
@@ -206,7 +208,7 @@ class Notifications extends Base
 
         $sql = 'SELECT count(*) `count`
         FROM `' . static::getTableName() . '`
-        WHERE user_id = $1 AND id > $2';
+        WHERE user_id = $1 AND action_id > $2';
 
         $res = DB\dbQuery(
             $sql,
@@ -247,6 +249,30 @@ class Notifications extends Base
                 SET `read` = 1
                 WHERE user_id = $1 AND id IN (' . implode(',', $ids) .')',
                 $userId
+            ) or die(DB\dbQueryError());
+        }
+    }
+
+    /**
+     * mark user notifications as seen
+     * @param  int  $userId
+     * @param  int  $id
+     * @return void
+     */
+    public static function markAsSeen($userId, $upToId)
+    {
+        //validate params
+        \CB\raiseErrorIf(
+            !is_numeric($userId),
+            'ErroneousInputData'
+        );
+
+        if (is_numeric($upToId)) {
+            DB\dbQuery(
+                'UPDATE `' . static::getTableName() . '`
+                SET `seen` = 1
+                WHERE user_id = $1 AND id <= $2 AND seen = 0',
+                array($userId, $upToId)
             ) or die(DB\dbQueryError());
         }
     }

@@ -7,28 +7,19 @@
  * @author ghindows
  */
 
-//define constants
-define('CB_ROOT_PATH', dirname(__DIR__) . DIRECTORY_SEPARATOR);
-define('CB_DOC_ROOT', CB_ROOT_PATH . 'httpsdocs' . DIRECTORY_SEPARATOR);
+include __DIR__.'/config.php';
 
-define('TEST_PATH', __DIR__ . DIRECTORY_SEPARATOR);
+include TEST_PATH . '../vendor/autoload.php';
 
-define('TEST_PATH_TEMP', TEST_PATH . 'tmp' . DIRECTORY_SEPARATOR);
+include CB_DOC_ROOT . 'classes/UnitTest/Helpers.php';
 
-define('DEFAULT_TEST_CBPREFIX', 'cbtest');
-define('DEFAULT_TEST_CORENAME', 'test');
-define('DEFAULT_TEST_USERNAME', 'root');
-define('DEFAULT_TEST_USERPASS', 'devel');
-
-//create tmp if doesnt exist
-if (!file_exists(TEST_PATH_TEMP)) {
-    mkdir(TEST_PATH_TEMP, 0755, true);
-}
-
-include TEST_PATH . 'vendor/autoload.php';
-
-UnitTest\Helpers::prepareInstance();
+require_once CB_DOC_ROOT . 'lib/install_functions.php';
 
 UnitTest\Helpers::init();
 
+error_reporting(E_ALL);
 ini_set('display_errors', 1);
+
+
+
+

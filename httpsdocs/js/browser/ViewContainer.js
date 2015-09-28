@@ -162,6 +162,20 @@ Ext.define('CB.browser.ViewContainer', {
                 ,handler: this.onExportClick
             })
 
+            ,star: new Ext.Action({
+                iconCls: 'i-star'
+                ,text: L.Star
+                ,scope: this
+                ,handler: this.onStarClick
+            })
+
+            ,unstar: new Ext.Action({
+                iconCls: 'i-unstar'
+                ,text: L.Unstar
+                ,scope: this
+                ,handler: this.onUnstarClick
+            })
+
             ,restore: new Ext.Action({
                 text: L.Restore
                 ,itemId: 'restore'
@@ -481,7 +495,7 @@ Ext.define('CB.browser.ViewContainer', {
             }
         });
 
-        this.notificationsView = new CB.browser.NotificationsView({
+        this.notificationsView = new CB.notifications.View({
 
         });
 
@@ -678,6 +692,7 @@ Ext.define('CB.browser.ViewContainer', {
             rez = this.cardContainer.items.getAt(indexOrName);
         } else {
             var viewName = 'CBBrowserView' + Ext.util.Format.capitalize(indexOrName);
+
             this.cardContainer.items.each(
                 function(i, idx) {
                     if(i.getXType() == viewName) {
@@ -1438,6 +1453,8 @@ Ext.define('CB.browser.ViewContainer', {
                     ,this.actions.contextReload
                     ,this.actions.contextDelete
                     ,this.actions.contextRename
+                    ,this.actions.star
+                    ,this.actions.unstar
                     ,this.actions.webdavlink
                     ,this.actions.permalink
                     ,'-'
@@ -1448,7 +1465,8 @@ Ext.define('CB.browser.ViewContainer', {
             });
         }
 
-        var visible = Ext.isEmpty(this.getSelection());
+        var s = this.getSelection()
+            ,visible = Ext.isEmpty(s);
 
         this.createItem.setHidden(!visible);
         this.createItemSeparator.setHidden(!visible);
@@ -1462,6 +1480,15 @@ Ext.define('CB.browser.ViewContainer', {
             );
 
             this.createItem.setDisabled(this.createItem.menu.items.getCount() < 1);
+        }
+
+        if(s && (s.length == 1)) {
+            var canStar = !App.Favorites.isStarred(s[0].nid);
+            this.actions.star.setHidden(!canStar) ;
+            this.actions.unstar.setHidden(canStar) ;
+        } else {
+            this.actions.star.setHidden(true) ;
+            this.actions.unstar.setHidden(true) ;
         }
 
         this.contextMenu.showAt(e.getXY());
@@ -1521,5 +1548,22 @@ Ext.define('CB.browser.ViewContainer', {
                 'Copy to clipboard: Ctrl+C, Enter'
                 , window.location.origin + '/' + App.config.coreName + '/view/' + selection[0].nid + '/');
         }
+    }
+
+    ,onStarClick: function(b, e) {
+        var d = this.getSelection()[0]
+            ,data = {
+                id: d.nid
+                ,name: d.name
+                ,iconCls: d.iconCls
+                ,pathText: this.folderProperties.pathtext
+                ,path: this.folderProperties.path + '/' + d.nid
+            };
+
+        App.Favorites.setStarred(data);
+    }
+
+    ,onUnstarClick: function(b, e) {
+        App.Favorites.setUnstarred(this.getSelection()[0].nid);
     }
 });

@@ -295,21 +295,21 @@ class File extends Object
 
         $newUserIds = array();
 
-        $fu = empty($posd['fu'])
+        $wu = empty($posd['wu'])
             ? array()
-            : $posd['fu'];
+            : $posd['wu'];
         $uid = User::getId();
 
-        if (!in_array($uid, $fu)) {
+        if (!in_array($uid, $wu)) {
             $newUserIds[] = intval($uid);
         }
 
         //update only if new users added
         if (!empty($newUserIds)) {
-            $fu = array_merge($fu, $newUserIds);
-            $fu = Util\toNumericArray($fu);
+            $wu = array_merge($wu, $newUserIds);
+            $wu = Util\toNumericArray($wu);
 
-            $posd['fu'] = array_unique($fu);
+            $posd['wu'] = array_unique($wu);
 
             $this->parentObj->updateSysData($posd);
         }
