@@ -35,10 +35,20 @@ Note: You can get the Id of any folder/object by clicking on the object and read
 
 Populated from an Object
 ..........................
+When creating the field pick type object
+In config add the ID of the folder
+
+{
+"source":"tree",
+"scope": folder_id
+} 
 
 Populated from users
 .........................
-
+To choose from a list of users use the "Source" directive with the value of "users".
+{
+"source":"users"
+}
 
 Create a multi select field
 ----------------------------
