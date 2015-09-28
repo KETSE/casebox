@@ -574,7 +574,8 @@ Ext.define('CB.ViewPort', {
                     ,data: {
                         rootNode: App.config.rootNode
                     }
-                }, {
+                }
+                , {
                     region: 'south'
                     ,xtype: 'tabpanel'
                     ,tabPosition: 'bottom'
@@ -591,6 +592,7 @@ Ext.define('CB.ViewPort', {
                     ,bodyBorder: false
                     ,bodyStyle: 'background-color: transparent'
                     ,minHeight: 100
+                    ,hidden: true
                     ,items: [
                         {
                             xtype: 'CBFavoritesPanel'

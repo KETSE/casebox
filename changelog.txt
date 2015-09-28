@@ -1,5 +1,6 @@
 CaseBox 1.9.527 (2015-09-28)
 ==============================
+- hide favorites panel
 - #8848 Hide Tree.RootNode
 - #8811 Remove Notifications button in objPreviewPanel and add one option in dropdown menu
 
