@@ -1,5 +1,5 @@
-Fields
-======
+Simple Fields Configuration
+============================
 
 Create a new thesauri 
 ------------------------
@@ -19,6 +19,7 @@ Create a drop down list field
 ---------------------------------------------------
 
 Populated from a Thesaurus
+...........................
 
 When creating the field pick type object
 In config add the ID of the Thesaurus folder
@@ -33,9 +34,10 @@ Note: You can get the Id of any folder/object by clicking on the object and read
 
 
 Populated from an Object
+..........................
 
 Populated from users
-
+.........................
 
 
 Create a multi select field
