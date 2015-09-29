@@ -1,6 +1,5 @@
 <?php
 namespace CB;
-
 require_once 'init.php';
 
 if (!empty($_SESSION['check_TSV']) && ((time() - $_SESSION['check_TSV']) > 180)) {
@@ -9,6 +8,8 @@ if (!empty($_SESSION['check_TSV']) && ((time() - $_SESSION['check_TSV']) > 180))
 
 $coreName = Config::get('core_name');
 $coreUrl = Config::get('core_url');
+
+$useGoogleOauth2_json = Config::get('googleapis_credentials');
 
 /* check if set an object id for view in url and store it in session for redirect after success login*/
 if (!empty($_GET['view']) && is_numeric($_GET['view'])) {
@@ -80,6 +81,43 @@ if (empty($_SESSION['check_TSV'])) {
                 <span class="icon-lock"></span>
             </label>
             <a style="margin-top: 30px;" class="pull-right" href="<?php echo '/'.$coreName; ?>/recover/forgot-password/"><?php echo L\get('ForgotPassword'); ?></a>
+            <?php
+
+            if ($useGoogleOauth2_json && $GPlus = Util\jsonDecode($useGoogleOauth2_json, true)) {
+
+        if (isset($GPlus['web']) && isset($GPlus['web']['client_id']) && isset($GPlus['web']['client_secret']) && isset($GPlus['web']['redirect_uris'])
+            && count($GPlus['web']['redirect_uris'])) {
+
+            ini_set('display_errors', 1);
+            error_reporting(E_ALL);
+
+            require_once realpath(__DIR__.'/../vendor/').'/autoload.php';
+
+            $provider = new \League\OAuth2\Client\Provider\Google([
+                'clientId' => $GPlus['web']['client_id'],
+                'clientSecret' => $GPlus['web']['client_secret'],
+                'redirectUri' => $GPlus['web']['redirect_uris'][0],
+                'hostedDomain' => $_SERVER['SERVER_NAME'],
+                'access_token' => Config::get('core_name')
+                //   'token' => strtr(base64_encode('{"core":"'.Config::get('core_name').'"}'), '+/=', '-_,')
+            ]);
+
+            $generator    = $provider->getRandomFactory()->getMediumStrengthGenerator();
+            $random_state = $generator->generateString(32);
+
+            $state = [
+                'core' => Config::get('core_name'),
+                'state' => $random_state
+            ];
+
+            $authUrl = $provider->getAuthorizationUrl(['state' => strtr(base64_encode(json_encode($state)), '+/=', '-_,')]);
+
+            $_SESSION['oauth2state'] = $provider->getState();
+
+            echo "<a style='margin-top:25px;margin-right:25px;' class='pull-right' href='".$authUrl."'><img src='/css/i/gplus_signin_button.png' style='height:35px' /></a>";
+        }
+    }
+    ?>
             <input type="submit" name="s" id="s" value="<?php echo L\get('Login');?>" class="btn btn-info" style="margin-top: 26px;" disabled>
     <?php
 

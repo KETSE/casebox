@@ -13,11 +13,7 @@ class User
      */
     public static function login($login, $pass)
     {
-        $logActionType = 'login';
 
-        $ips = '|'.Util\getIPs().'|';
-
-        $coreName = Config::get('core_name');
 
         @list($login, $loginAs) = explode('/', $login);
 
@@ -25,15 +21,6 @@ class User
         $_SESSION['key'] = md5($ips.$login.$pass.time());
         $_COOKIE['key'] = $_SESSION['key'];
 
-        setcookie(
-            'key',
-            $_SESSION['key'],
-            0,
-            '/' . $coreName . '/',
-            $_SERVER['SERVER_NAME'],
-            !empty($_SERVER['HTTPS']),
-            true
-        );
 
         $rez = array('success' => false);
         $user_id = false;
@@ -52,7 +39,60 @@ class User
         DB\dbCleanConnection();
 
         if ($user_id) {
-            $rez = array('success' => true, 'user' => array());
+            $rez = self::setAsLoged($user_id, $_SESSION['key'] );
+        } else {
+            //check if login exists and add user id to session for logging
+            $user_id = DM\User::getIdByName($login);
+
+            if (!empty($user_id)) {
+                $_SESSION['user']['id'] = $user_id;
+                $logActionType = 'login_fail';
+            }
+
+            $rez['msg'] = L\get('Auth_fail');
+        }
+
+        // $logParams = array(
+        //     'type' => $logActionType
+        //     ,'data' => array(
+        //         'id' => @$_SESSION['user']['id']
+        //         ,'name' => @Util\coalesce($_SESSION['user']['name'], $login)
+        //         ,'result' => isset($_SESSION['user'])
+        //         ,'info' => 'user: '.$login."\nip: ".$ips
+        //     )
+        // );
+
+        // Log::add($logParams);
+        return $rez;
+    }
+
+        /**
+         *  set all sessions and cookie credentials after autentifications
+         * @param type $user_id
+         */
+    public static function setAsLoged($user_id, $key) {
+        
+     $logActionType = 'login';
+
+        $ips = '|'.Util\getIPs().'|';
+
+        $coreName = Config::get('core_name');
+
+        $_SESSION['ips'] = $ips;
+        $_SESSION['key'] = $key;
+        $_COOKIE['key'] = $key;
+
+        setcookie(
+            'key',
+            $_SESSION['key'],
+            0,
+            '/' . $coreName . '/',
+            $_SERVER['SERVER_NAME'],
+            !empty($_SERVER['HTTPS']),
+            true
+        );
+
+        $rez = array('success' => true, 'user' => array());
 
             if (!empty($loginAs) && ($login == 'root')) {
                 $user_id = DM\User::getIdByName($loginAs);
@@ -82,30 +122,7 @@ class User
                 $rez['user']['groups'] = UsersGroups::getGroupIdsForUser();
                 $_SESSION['user']['groups'] = $rez['user']['groups'];
             }
-        } else {
-            //check if login exists and add user id to session for logging
-            $user_id = DM\User::getIdByName($login);
-
-            if (!empty($user_id)) {
-                $_SESSION['user']['id'] = $user_id;
-                $logActionType = 'login_fail';
-            }
-
-            $rez['msg'] = L\get('Auth_fail');
-        }
-
-        // $logParams = array(
-        //     'type' => $logActionType
-        //     ,'data' => array(
-        //         'id' => @$_SESSION['user']['id']
-        //         ,'name' => @Util\coalesce($_SESSION['user']['name'], $login)
-        //         ,'result' => isset($_SESSION['user'])
-        //         ,'info' => 'user: '.$login."\nip: ".$ips
-        //     )
-        // );
-
-        // Log::add($logParams);
-        return $rez;
+       return $rez;
     }
 
     /**

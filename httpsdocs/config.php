@@ -41,6 +41,8 @@ try {
     exit();
 }
 
+//echo '<pre>'.print_r($cfg,true).'</pre>';
+
 DB\connectWithParams($cfg);
 
 //loading full config of the core
@@ -84,8 +86,9 @@ ini_set("session.gc_divisor", "100");
 ini_set("session.gc_probability", "1");
 
 session_set_cookie_params($sessionLifetime, '/' . $cfg['core_name'] . '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
-session_name(
-    str_replace(
+session_set_cookie_params($sessionLifetime, '/oauth2callback/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
+
+$SESSION_NAME = str_replace(
         array(
             '.casebox.org'
             ,'.'
@@ -93,8 +96,9 @@ session_name(
         ),
         '',
         $_SERVER['SERVER_NAME']
-    ).$cfg['core_name']
-);
+    ).$cfg['core_name'];
+
+session_name( $SESSION_NAME );
 
 //error reporting params
 error_reporting(IS_DEBUG_HOST ? E_ALL : E_ERROR);

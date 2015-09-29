@@ -16,6 +16,62 @@ namespace CB;
 
 require_once 'init.php';
 
+if (isset($_GET['state']) && isset($_SESSION['oauth2state'])) {
+
+    $state_json         = base64_decode(strtr($_GET['state'], '-_,', '+/='));
+    $state              = json_decode($state_json, true);
+    $session_state_json = base64_decode(strtr($_SESSION['oauth2state'], '-_,', '+/='));
+    $session_state      = json_decode($session_state_json, true);
+    if (isset($session_state['state']) && isset($state['state']) && isset($state['email'])) {
+
+            //ini_set('display_errors', 1);
+            //error_reporting(E_ALL);
+
+
+        DB\connect();
+
+        $QueryUser = 'select id,enabled from users_groups where email like  $1 ';
+
+        $res = DB\dbQuery(
+            $QueryUser,
+            array($state['email'])
+        ) or die( DB\dbQueryError() );
+
+       if (($r = $res->fetch_assoc()) && ($r['enabled'] == 1)) {
+            $user_id = $r['id'];
+        } else {
+            $_SESSION['message'] = 'Email '.$state['email'].' not authorized for this core. '.L\get('Specify_username');
+        }
+
+        $res->close();
+
+        echo '<pre>'.print_r($session_state, true).'</pre>';
+        echo '<pre>'.print_r($state, true).'</pre>';
+        if($user_id>0) {
+
+           $r = User::setAsLoged( $user_id , $session_state['state'] );
+
+
+            if ($r['success'] == false) {
+                $errors[] = L\get('Auth_fail');
+            } else {
+                $cfg = User::getTSVConfig();
+                if (!empty($cfg['method'])) {
+                    $_SESSION['check_TSV'] = time();
+                } else {
+                    $_SESSION['user']['TSV_checked'] = true;
+                }
+            }
+
+          // die('<pre>'.print_r($_SESSION, true).'</pre>');
+           header('Location: '.Config::get('core_url') );
+           return ;
+        }
+    } else {
+        die('WRONG STATE!!!');
+    }
+}
+
 //reset if sign out clicked on check tsv
 if (!empty($_GET['l'])) {
     unset($_SESSION['check_TSV']);
