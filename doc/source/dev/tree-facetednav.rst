@@ -29,7 +29,7 @@ How to configure ``FacetedNav``:
     }
 
 
-``level_fields`` should be defined in :doc:`faceting`. These are fields indexed in SOLR.
+``level_fields`` should be defined in :doc:`filter`. These are fields indexed in SOLR.
 
 Configuration options
 ***********************
