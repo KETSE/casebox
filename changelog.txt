@@ -1,3 +1,70 @@
+CaseBox 1.9.527 (2015-09-28)
+==============================
+- hide favorites panel
+- #8848 Hide Tree.RootNode
+- #8811 Remove Notifications button in objPreviewPanel and add one option in dropdown menu
+
+Fixed Bugs:
+----------
+- #8843 TagField editor not showing selected value
+- #8840 Error 'Cannot connect to server' when logging out
+
+CaseBox 1.9.526 (2015-09-22)
+==============================
+- Don't notify admin when extracted file content is empty. Happens often for scanned pdfs.
+- #7985 Add Favorites for users to quickly navigate objects they want to bookmark
+
+Fixed Bugs:
+----------
+- remove old notification records with same id on receiving new ones
+
+Notes:
+----------
+- updated translations in _casebox.sql
+- updated bare_bone_core.sql
+
+CaseBox 1.9.525 (2015-09-17)
+==============================
+- #7536 Email notifications going wild
+
+CaseBox 1.9.524 (2015-09-10)
+==============================
+- #8726 JS small fixed to improve EditGrid rendering&speed, improve UX
+- #8621 Adding new treeNode class: vNode. acts like FacetNav but no faceting
+- #8620 Upgrading Cfg for facetedNav & adding a new view: 'stream'
+
+CaseBox 1.9.523 (2015-09-08)
+==============================
+- #8656 Unresponsive script on Firefox
+- #8586 UI frozen, unresponsive script in firefox browser reported
+- #8562 Notifications improvements
+- #8652 Creating new users from root - should be either set pw or email invite
+
+CaseBox 1.9.522 (2015-09-07)
+==============================
+- #8407 Buttons in LeftRibbon
+- #8608 High CPU usage when browsing HandHelp
+- #7118 Create simpler names for templates template/fields template
+
+CaseBox 1.9.521 (2015-09-05)
+==============================
+- #8006 Grid DC config management
+- #7501 Not all notifications come by email
+- #8528 UI broken after using grouping in Grid
+
+Fixed Bugs:
+----------
+- #8166 Notifications not properly updated
+
+CaseBox 1.9.520 (2015-09-03)
+==============================
+- #7881 onClick actions for object fields in Record preview grid
+- #8471 Reopening a task should cancel completion for Assignee
+- #8011 The comment should be transferred into the object window when opening it
+- #8483 New number for consultation when duplicating
+- #8341 Can't follow a task if it's opened in a pop up window
+- #8352 "sort" has no effect in treeNode config
+
 CaseBox 1.9.519 (2015-09-02)
 ==============================
 - #8011 The comment should be transferred into the object window when opening it

@@ -206,7 +206,7 @@ Ext.define('CB.browser.view.ActivityStream',{
                 ,total = p.reader.rawData.total
                 ,rez = '';
 
-            if ((total > 0) && (start + s.getCount() < total)) {
+            if (el && (total > 0) && (start + s.getCount() < total)) {
                 el.setStyle('display', 'inherit');
             }
         }

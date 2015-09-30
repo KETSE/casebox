@@ -151,6 +151,7 @@ class Base
 
         $sp = &$p['params'];
         $result = &$p['result'];
+        $view = &$result['view'];
         $data = &$result['data'];
 
         $rez = array();
@@ -159,8 +160,9 @@ class Base
 
         $displayColumns = $this->getDC();
 
+        //This if remains as backward compatible, but will be removed in future commits
         if (!empty($displayColumns['sort'])) {
-            $p['result']['sort'] = $displayColumns['sort'];
+            $view['sort'] = $displayColumns['sort'];
         }
 
         //get state
@@ -302,44 +304,44 @@ class Base
 
         /* user clicked a column to sort by */
         if (!empty($ip['userSort'])) {
-            $p['result']['sort'] = array(
+            $view['sort'] = array(
                 'property' => $ip['sort'][0]['property']
                 ,'direction' => $ip['sort'][0]['direction']
             );
 
         } elseif (!empty($state['sort'])) {
-            $p['result']['sort'] = $state['sort'];
+            $view['sort'] = $state['sort'];
         }
         /* end of get user state and merge the state with display columns */
 
         //check grouping params
         if (!empty($ip['userGroup']) && !empty($ip['group'])) {
-            $p['result']['group'] = array(
+            $view['group'] = array(
                 'property' => $ip['sourceGroupField']
                 ,'direction' => $ip['group']['direction']
             );
 
         } elseif (isset($state['group'])) {
-            $p['result']['group'] = $state['group'];
+            $view['group'] = $state['group'];
 
         } elseif (isset($displayColumns['group'])) {
-            $p['result']['group'] = $displayColumns['group'];
+            $view['group'] = $displayColumns['group'];
         }
 
         //analize grouping
         $this->analizeGrouping($p);
 
         if (!empty($rez)) {
-            $p['result']['DC'] = $rez;
+            $result['DC'] = $rez;
         }
 
         /* check if we need to sort records using php (in case sort field is not from solr)*/
-        if (!empty($p['result']['sort']) &&
-            !empty($rez[$p['result']['sort']['property']]['localSort']) &&
-            !in_array($p['result']['sort']['property'], $defaultColumns)
+        if (!empty($view['sort']) &&
+            !empty($rez[$view['sort']['property']]['localSort']) &&
+            !in_array($view['sort']['property'], $defaultColumns)
 
         ) {
-            $s = &$p['result']['sort'];
+            $s = &$view['sort'];
 
             Util\sortRecordsArray(
                 $data,
@@ -414,22 +416,25 @@ class Base
      */
     protected function analizeGrouping(&$p)
     {
-        if (empty($p['result']['group']['property'])) {
+        if (empty($p['result']['view']['group']['property'])) {
             return;
         }
 
         //sync grouping sort direction with sorting if same column
         $result = &$p['result'];
-        if (!empty($result['group']) && !empty($result['sort'])) {
-            if (@$result['group']['property'] == $result['sort']['property']) {
-                $result['group']['direction'] = $result['sort']['direction'];
+        $view = &$result['view'];
+        $group = &$view['group'];
+
+        if (!empty($view['sort'])) {
+            if (@$group['property'] == $view['sort']['property']) {
+                $group['direction'] = $view['sort']['direction'];
             } else {
-                $result['group']['direction'] = 'ASC';
+                $group['direction'] = 'ASC';
             }
         }
         //end of sync
 
-        $field = $p['result']['group']['property'];
+        $field = $group['property'];
         $data = &$p['result']['data'];
 
         $count = sizeof($data);
@@ -528,7 +533,7 @@ class Base
 
         if (!empty($path)) {
             $node = $path[sizeof($path)-1];
-            $rez = $node->getNodeParam('DC');
+            $rez = $node->getDC();
         }
 
         //apply properties for default casebox columns

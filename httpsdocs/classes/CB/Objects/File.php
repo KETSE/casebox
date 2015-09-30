@@ -2,7 +2,6 @@
 namespace CB\Objects;
 
 use CB\DB;
-use CB\Config;
 use CB\Objects;
 use CB\User;
 use CB\Util;
@@ -25,11 +24,11 @@ class File extends Object
 
         $disableActivityLogStatus = \CB\Config::getFlag('disableActivityLog');
 
-        Config::setFlag('disableActivityLog', true);
+        \CB\Config::setFlag('disableActivityLog', true);
 
         $rez = parent::create($p);
 
-        Config::setFlag('disableActivityLog', $disableActivityLogStatus);
+        \CB\Config::setFlag('disableActivityLog', $disableActivityLogStatus);
 
         $p = &$this->data;
 
@@ -147,11 +146,11 @@ class File extends Object
     public function update($p = false)
     {
         //disable default log from parent Object class
-        Config::setFlag('disableActivityLog', true);
+        \CB\Config::setFlag('disableActivityLog', true);
 
         $rez = parent::update($p);
 
-        Config::setFlag('disableActivityLog', false);
+        \CB\Config::setFlag('disableActivityLog', false);
 
         $p = &$this->data;
 
@@ -296,21 +295,21 @@ class File extends Object
 
         $newUserIds = array();
 
-        $fu = empty($posd['fu'])
+        $wu = empty($posd['wu'])
             ? array()
-            : $posd['fu'];
+            : $posd['wu'];
         $uid = User::getId();
 
-        if (!in_array($uid, $fu)) {
+        if (!in_array($uid, $wu)) {
             $newUserIds[] = intval($uid);
         }
 
         //update only if new users added
         if (!empty($newUserIds)) {
-            $fu = array_merge($fu, $newUserIds);
-            $fu = Util\toNumericArray($fu);
+            $wu = array_merge($wu, $newUserIds);
+            $wu = Util\toNumericArray($wu);
 
-            $posd['fu'] = array_unique($fu);
+            $posd['wu'] = array_unique($wu);
 
             $this->parentObj->updateSysData($posd);
         }

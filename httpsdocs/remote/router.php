@@ -41,6 +41,10 @@ if (!function_exists('\\ExtDirect\\extDirectShutdownFunction')) {
 
             echo Util\jsonEncode($data);
         }
+
+        if (\CB\User::isLoged()) {
+            \CB\User::updateLastActionTime();
+        }
     }
 }
 

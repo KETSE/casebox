@@ -7,6 +7,8 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # The default destination of the coverage results
 DEST="$DIR/reports/"
 
+export TRAVIS_BUILD_DIR=`dirname "${DIR}"`
+
 # The function to show the help
 
 showHelp () {
@@ -20,7 +22,7 @@ showHelp () {
 }
 
 # first check if you have composer installed
-if [ ! -f $DIR/composer.phar ]; then
+if [ ! -f $DIR/../composer.phar ]; then
     echo "error: first install Composer the Dependency Manager for PHP "
     echo "#curl -sS https://getcomposer.org/installer | php"
     echo "#wget https://getcomposer.org/composer.phar"
@@ -29,7 +31,7 @@ if [ ! -f $DIR/composer.phar ]; then
 fi
 
 # check if you have PHPunit package
-if [ ! -f $DIR/vendor/bin/phpunit ]; then
+if [ ! -f $DIR/../vendor/bin/phpunit ]; then
     echo "error: phpunit not found, install phpunit from Composer Dependency Manager "
     echo "#php composer.phar install"
     exit
@@ -43,7 +45,12 @@ while getopts "c:d:h?" opt; do
     case $opt in
         c) 
             coverage="--coverage-$OPTARG"
+            if [ "$OPTARG"=="clover.xml" ]; then 
+            OUTFILE="clover.xml"
+            else
             OUTFILE="coverage.$OPTARG"
+            fi
+
             continue
         ;;
         d)
@@ -58,8 +65,24 @@ while getopts "c:d:h?" opt; do
 done
 if [ $coverage ];
     then
-        $DIR/vendor/bin/phpunit $coverage $DEST$OUTFILE --configuration $DIR/phpunit.xml --verbose --bootstrap init.php $DIR/test
-        exit
-    fi
+      $DIR/../vendor/bin/phpunit $coverage $DEST$OUTFILE --configuration $DIR/phpunit.xml --verbose --bootstrap $DIR/init.php $DIR/../httpsdocs/classes/UnitTest
+    else 
 
-$DIR/vendor/bin/phpunit --colors --verbose --debug --bootstrap init.php $DIR/test
+        export SOLR_VERSION="5.1.0"
+        bash $DIR/server/solr/solr5-install.sh
+
+       export SOLR_CORENAME="cbtest_log"
+       export SOLR_CONFIGSET="cbtest_log"
+      bash $DIR/server/solr/solr5-addcore.sh
+
+       export SOLR_CORENAME="cbtest_test"
+      export SOLR_CONFIGSET="cbtest_default"
+      bash $DIR/server/solr/solr5-addcore.sh
+
+        php $DIR/auto_install.php
+        $DIR/../vendor/bin/phpunit --colors --verbose --debug --bootstrap $DIR/init.php $DIR/../httpsdocs/classes/UnitTest
+
+     //   bash $DIR/server/solr/solr5-stop.sh
+
+
+    fi

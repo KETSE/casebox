@@ -21,7 +21,7 @@ class InstallTest extends \PHPUnit_Framework_TestCase
 
     }
 
-    public function testCreateSolrConfigsetsSymlinks()
+   /* public function testCreateSolrConfigsetsSymlinks()
     {
         $cfg = \CB\Config::loadConfigFile(\CB_DOC_ROOT . 'config.ini');
 
@@ -38,9 +38,9 @@ class InstallTest extends \PHPUnit_Framework_TestCase
             file_exists($result['links']['default']),
             'solr default configset symlink not created : ' .$result['links']['default']
         );
-    }
+    } */
 
-    public function testReindexSolr()
+    public function _testReindexSolr()
     {
         /*
         $argv[1] = '-c';
@@ -48,16 +48,18 @@ class InstallTest extends \PHPUnit_Framework_TestCase
         $argv[3] = '-a';
         $argv[4] = '-l'; */
 
-        $content = Helpers::getIncludeContents(\CB\BIN_DIR . 'solr_reindex_core.php');
+        $options =  array(
 
-        $this->assertEquals('no core specified or invalid options set.', $content);
+        );
+        $content = Helpers::getIncludeContents(\CB\BIN_DIR . 'solr_reindex_core.php', $options);
+
+        // $this->assertEquals('no core specified or invalid options set.', $content);
+        $this->assertEquals('Core not found or inactive.', trim($content) );
 
         $options =  array(
-            'options' => array(
-                'core' => DEFAULT_TEST_CORENAME
-                ,'all' => true
-                ,'nolimit' => true
-            )
+                'c' => DEFAULT_TEST_CORENAME,
+                'a' => true,
+                'l' => true
         );
 
         $content = Helpers::getIncludeContents(\CB\BIN_DIR . 'solr_reindex_core.php', $options);

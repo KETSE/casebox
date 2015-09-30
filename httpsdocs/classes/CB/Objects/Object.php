@@ -127,7 +127,7 @@ class Object
         }
 
         if (empty($p['cid'])) {
-            $p['cid'] = $_SESSION['user']['id'];
+            $p['cid'] = User::getId();
         }
         if (empty($p['oid'])) {
             $p['oid'] = $p['cid'];
@@ -209,7 +209,12 @@ class Object
         //fire create event
         \CB\fireEvent('nodeDbCreate', $this);
 
-        $this->logAction('create');
+        $this->logAction(
+            'create',
+            array(
+                'mentioned' => $this->lastMentionedUserIds
+            )
+        );
 
         return $this->id;
     }
@@ -229,7 +234,7 @@ class Object
         //filter fields
         $this->filterHTMLFields($p['data']);
 
-        $this->setFollowers();
+        $this->lastMentionedUserIds = $this->setFollowers();
 
         $this->collectSolrData();
 
@@ -248,22 +253,27 @@ class Object
     }
 
     /**
-     * analize object data and set 'fu' property in sys_data
+     * analize object data and set 'wu' property in sys_data
+     *
+     * return newly assigned ids
      */
     protected function setFollowers()
     {
+        $rez = array();
+
         $d = &$this->data;
         $sd = &$d['sys_data'];
         $tpl = $this->getTemplate();
 
         //add creator as follower by default, but not for folder template
-        if (empty($sd['fu'])) {
-            $sd['fu'] = array();
+        if (empty($sd['wu'])) {
+            $sd['wu'] = array();
         }
 
         if ($d['template_id'] != Config::get('default_folder_template')) {
-            if (!in_array($d['cid'], $sd['fu'])) {
-                $sd['fu'][] = intval($d['cid']);
+            if (!in_array($d['cid'], $sd['wu'])) {
+                $sd['wu'][] = intval($d['cid']);
+                $rez[] = intval($d['cid']);
             }
         }
 
@@ -277,7 +287,8 @@ class Object
                         if (!empty($v['value'])) {
                             $uids = Util\getReferencedUsers($v['value']);
                             if (!empty($uids)) {
-                                $sd['fu'] = array_merge($sd['fu'], $uids);
+                                $sd['wu'] = array_merge($sd['wu'], $uids);
+                                $rez = array_merge($rez, $uids);
                             }
                         }
                     }
@@ -286,7 +297,11 @@ class Object
 
         }
 
-        $sd['fu'] = array_unique($sd['fu']);
+        $sd['wu'] = array_unique($sd['wu']);
+
+        $rez = array_unique($rez);
+
+        return $rez;
     }
 
     /**
@@ -1191,7 +1206,7 @@ class Object
      *
      * @param array $data template properties
      */
-    public function setData($data)
+    public function setData($data, $filterHtmlValues = true)
     {
         $this->data = $data;
         unset($this->linearData);
@@ -1201,7 +1216,7 @@ class Object
             $this->loaded = true;
         }
 
-        if (!empty($this->data['data'])) {
+        if ($filterHtmlValues && !empty($this->data['data'])) {
             $this->filterHTMLFields($this->data['data']);
         }
     }

@@ -111,7 +111,9 @@ class SearchResults extends Dbnode
             }
         }
 
-        return parent::getViewConfig($pathArray, $rp);
+        $rez = parent::getViewConfig($pathArray, $rp);
+
+        return $rez;
     }
 
     /**

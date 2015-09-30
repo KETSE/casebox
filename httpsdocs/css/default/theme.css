@@ -71,8 +71,8 @@
 .im-fit{background-image: url(m/ic_open_with_black_24dp.png); min-width: 24px}
 .im-filter{background-image: url(m/ic_filter_list_black_24dp.png); min-width: 24px}
 .im-filter-negative{background-image: url(m/ic_filter_list_black_24dp_negative.png); min-width: 24px}
-.im-follow{background-image: url(m/ic_email_black_18dp.png); min-width: 24px}
-.im-ignore{background-image: url(m/ic_notifications_none_black_18dp.png); min-width: 24px}
+.im-follow, .i-follow{background-image: url(m/ic_email_black_18dp.png); min-width: 24px}
+.im-ignore, .i-ignore{background-image: url(m/ic_notifications_none_black_18dp.png); min-width: 24px}
 .im-menu{background-image: url(m/ic_menu_black_24dp.png); min-width: 24px}
 .im-menu-negative{background-image: url(m/ic_menu_black_24dp_negative.png); min-width: 24px}
 .im-notifications{background-image: url(m/ic_notifications_black_24dp.png); min-width: 24px}
@@ -87,10 +87,12 @@
 .im-settings{background-image: url(m/ic_settings_applications_black_24dp.png); min-width: 24px}
 .im-settings-negative{background-image: url(m/ic_settings_white_24dp.png); min-width: 24px}
 .im-sort{background-image: url(m/ic_sort_black_24dp.png); min-width: 24px}
+.im-star{background-image: url(m/ic_star_black_18dp.png); min-width: 24px}
+.im-unstar{background-image: url(ic_star_outline_black_18dp.png); min-width: 24px}
 .im-tune{background-image: url(m/ic_tune_black_24dp.png); min-width: 24px}
 .im-upload{background-image: url(m/ic_file_upload_black_24dp.png); min-width: 24px}
 .im-trash{background-image: url(m/ic_delete_black_24dp.png); min-width: 24px}
-.im-watch{background-image: url(m/ic_notifications_active_black_18dp.png); min-width: 24px}
+.im-watch, .i-watch{background-image: url(m/ic_notifications_active_black_18dp.png); min-width: 24px}
 
 .x-menu-item .ib-browse{background-image: url(s/folder-horizontal-open.png); background-position: 0 50%; background-repeat: no-repeat}
 .x-menu-item .ib-del{background-image: url(s/cross-script.png); background-position: 0 50%; background-repeat: no-repeat}

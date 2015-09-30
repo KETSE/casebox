@@ -480,6 +480,9 @@ color: black !important;
 .icon-fav { background-image: url(i/ico/_fav.png) !important}
 .icon-favplus { background-image: url(i/ico/star-plus.png) !important}
 
+.i-star { background-image: url(i/ico/_fav.png)}
+.i-unstar { background-image: url(i/ico/star-empty.png)}
+
 .icon-lock { background-image: url(i/ico/_lock.png) !important}
 
 
@@ -880,4 +883,10 @@ padding-top: 45%;
 .complex-fieldcontainer .x-form-item .x-form-item-body {
     padding: 7px;
     border-top: 2px solid #cccccc
+}
+
+.left-bottom-tabpanel .x-tab-bar-default-bottom {
+    background-color: transparent;
+    background-image: none;
+    border: 0;
 }

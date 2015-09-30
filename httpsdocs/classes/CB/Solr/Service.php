@@ -87,10 +87,20 @@ class Service
                 require_once $this->client;
             }
 
+            if (!class_exists('\\Apache_Solr_Compatibility_Solr4CompatibilityLayer', false)) {
+                require_once 'Apache/Solr/Compatibility/AddDocumentXmlCreator.php';
+                require_once 'Apache/Solr/Compatibility/CompatibilityLayer.php';
+                require_once 'Apache/Solr/Compatibility/Solr4CompatibilityLayer.php';
+            }
+
+    $layer = new \Apache_Solr_Compatibility_Solr4CompatibilityLayer;
+
             $this->solr_handler = new \Apache_Solr_Service(
                 $this->host,
                 $this->port,
-                $this->core
+                $this->core,
+                false,
+                $layer
             );
 
             if (! $this->solr_handler->ping()) {

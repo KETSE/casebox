@@ -221,6 +221,7 @@ class Dbnode extends Base
 
         if ($rez === false) {
             $rez = parent::getNodeParam($param);
+
         } else {
             $rez = array(
                 'from' => $from

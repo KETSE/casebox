@@ -94,11 +94,14 @@ Ext.define('CB.object.edit.Window', {
 
         Ext.Direct.on('exception', this.onAppException, this);
 
+        App.Favorites.on('change', this.onFavoritesChange, this);
+
         this.doLoad();
     }
 
     ,onBeforeDestroy: function() {
         Ext.Direct.un('exception', this.onAppException, this);
+        App.Favorites.un('change', this.onFavoritesChange, this);
     }
 
     /**
@@ -151,6 +154,26 @@ Ext.define('CB.object.edit.Window', {
                 ,handler: this.onRenameClick
             })
 
+            ,star: new Ext.Action({
+                iconCls: 'i-star'
+                ,qtip: L.Star
+                ,itemId: 'star'
+                ,scale: 'medium'
+                ,hidden: true
+                ,scope: this
+                ,handler: this.onStarClick
+            })
+
+            ,unstar: new Ext.Action({
+                iconCls: 'i-unstar'
+                ,qtip: L.Unstar
+                ,itemId: 'unstar'
+                ,scale: 'medium'
+                ,hidden: true
+                ,scope: this
+                ,handler: this.onUnstarClick
+            })
+
             ,showInfoPanel: new Ext.Action({
                 iconCls: 'i-info'
                 ,enableToggle: true
@@ -165,6 +188,24 @@ Ext.define('CB.object.edit.Window', {
                 ,scope: this
                 ,handler: this.onPermalinkClick
             })
+
+            ,notifyOn: new Ext.Action({
+                text: L.NotifyOn
+                ,hidden: true
+                ,iconCls: 'im-watch'
+                ,itemId: 'notifyOn'
+                ,scope: this
+                ,handler: this.onSubscriptionButtonClick
+            })
+
+            ,notifyOff: new Ext.Action({
+                text: L.NotifyOff
+                ,hidden: true
+                ,iconCls: 'im-ignore'
+                ,itemId: 'notifyOff'
+                ,scope: this
+                ,handler: this.onSubscriptionButtonClick
+            })
         };
     }
 
@@ -178,6 +219,8 @@ Ext.define('CB.object.edit.Window', {
             ,this.actions.save
             ,this.actions.cancel
             ,'->'
+            ,this.actions.star
+            ,this.actions.unstar
             ,this.actions.refresh
             ,new Ext.Button({
                 qtip: L.More
@@ -188,6 +231,9 @@ Ext.define('CB.object.edit.Window', {
                     this.actions['delete']
                     ,this.actions.rename
                     ,this.actions.permalink
+                    ,'-'
+                    ,this.actions.notifyOn
+                    ,this.actions.notifyOff
                 ]
             })
             ,this.actions.showInfoPanel
@@ -245,9 +291,7 @@ Ext.define('CB.object.edit.Window', {
             ,scrollable: false
             ,listeners: {
                 scope: this
-                ,loaded: function() {
-                    this.pluginsContainer.setCommentValue(this.initialConfig.data.comment);
-                }
+                ,loaded: this.onPluginsContainerLoaded
             }
         });
     }
@@ -528,7 +572,11 @@ Ext.define('CB.object.edit.Window', {
             ,data: r.data.data
         };
 
-        this.startEditAfterObjectsStoreLoadIfNewObject = true;
+        //focus default grid cell if no comment given that should be scrolled and focused
+        if(Ext.isEmpty(this.initialConfig.data.comment)) {
+            this.startEditAfterObjectsStoreLoadIfNewObject = true;
+        }
+
         this.objectsStore.reload();
 
         /* detect template type of the opened object and create needed grid */
@@ -693,6 +741,8 @@ Ext.define('CB.object.edit.Window', {
 
             this.actions.rename.hide();
         }
+
+        this.onFavoritesChange();
     }
 
     /**
@@ -722,6 +772,60 @@ Ext.define('CB.object.edit.Window', {
         this.setTitle(Ext.util.Format.htmlEncode(title));
         this.setIconCls(getItemIcon(editForm.data));
         this.updateLayout();
+    }
+
+    ,onPluginsContainerLoaded: function(cmp, commonParams) {
+        var icd = this.initialConfig.data;
+
+        if(!Ext.isEmpty(icd.comment)) {
+            cmp.setCommentValue(icd.comment);
+
+            //scroll it into view
+            var cc = cmp.getCommentComponent();
+            if(cc) {
+                var i = this.items.getAt(0);
+                if(!i.scrollable) {
+                    i = this.items.getAt(1);
+                }
+                cc.getEl().scrollIntoView(i.body, false, false, true);
+
+                i.body.scrollBy(0, 40, false);
+
+                cc.focus(false, 100);
+            }
+
+        }
+
+        var subscription = Ext.valueFrom(commonParams.subscription, 'ignore');
+        this.actions.notifyOn.setHidden(subscription == 'watch');
+        this.actions.notifyOff.setHidden(subscription == 'ignore');
+    }
+
+    ,onSubscriptionButtonClick: function(b, e) {
+        var type = (b.itemId == 'notifyOn')
+            ? 'watch'
+            : 'ignore';
+
+        CB_Objects.setSubscription(
+            {
+                objectId: this.data.id
+                ,type: type
+            }
+            ,function(r, e) {
+                if(r.success !== true) {
+                    return;
+                }
+
+                this.actions.notifyOn.setHidden(type == 'watch');
+                this.actions.notifyOff.setHidden(type == 'ignore');
+            }
+            ,this
+        );
+    }
+
+    ,onNotificationsCustomizeClick: function(b, e) {
+        var w = new CB.notifications.SettingsWindow();
+        w.show();
     }
 
     ,onSaveObjectEvent: function(objComp, ev) {
@@ -1134,5 +1238,29 @@ Ext.define('CB.object.edit.Window', {
             'Copy to clipboard: Ctrl+C, Enter'
             , window.location.origin + '/' + App.config.coreName + '/view/' + this.data.id + '/'
         );
+    }
+
+    ,onStarClick: function(b, e) {
+        var ld = this.data
+            ,d = {
+                id: ld.id
+                ,name: ld.name
+                ,iconCls: ld.iconCls
+                ,path: '/' + ld.pids + '/' + ld.id
+                ,pathText: ld.path
+            };
+
+        App.Favorites.setStarred(d);
+    }
+
+    ,onUnstarClick: function(b, e) {
+        App.Favorites.setUnstarred(this.data.id);
+    }
+
+    ,onFavoritesChange: function() {
+        var isStarred = App.Favorites.isStarred(this.data.id);
+
+        this.actions.star.setHidden(isStarred);
+        this.actions.unstar.setHidden(!isStarred);
     }
 });

@@ -112,6 +112,9 @@ class Log
         if (empty($rez['iconCls'])) {
             $rez['iconCls'] = Browser::getIcon($rez);
         }
+        if (!empty($p['mentioned'])) {
+            $rez['mentioned'] = $p['mentioned'];
+        }
 
         $rez['pids'] = empty($rez['pids'])
             ? Objects::getPids($rez['id'])
@@ -206,15 +209,16 @@ class Log
         $activityData = Util\toJSONArray($p['activity_data_db']);
 
         $users = array();
+        //backward compatibility
         if (!empty($activityData['fu'])) {
             foreach ($activityData['fu'] as $uid) {
-                $users[intval($uid)] = 0; // email unsent meaning
+                $users[intval($uid)] = 0;
             }
         }
 
         if (!empty($activityData['wu'])) {
             foreach ($activityData['wu'] as $uid) {
-                $users[intval($uid)] = -1; // email doesnt need to be sent
+                $users[intval($uid)] = 0;
             }
         }
 
@@ -228,9 +232,9 @@ class Log
             ,'from_user_id' => $p['user_id']
         );
 
-        foreach ($users as $uid => $uMailSent) {
+        foreach ($users as $uid => $seen) {
             $params['user_id'] = $uid;
-            $params['email_sent'] = $uMailSent;
+            $params['seen'] = $seen;
             DM\Notifications::add($params);
         }
     }

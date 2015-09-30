@@ -586,6 +586,10 @@ class Search extends Solr\Client
         //shold also be added to warmUp ?
         $rez = array_merge($rez, $this->processResultFacets());
 
+        if (!empty($this->inputParams['view'])) {
+            $rez['view'] = $this->inputParams['view'];
+        }
+
         $eventParams = array(
             'result' => &$rez
             ,'params' => &$this->params

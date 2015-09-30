@@ -279,6 +279,22 @@ function formatTaskTime($isoDateString, $showTime = true)
 }
 
 /**
+ * get difference in minutes between two dates
+ * @param  varchar $d1
+ * @param  varchar $d2
+ * @param  varchar $format
+ * @return varchar
+ */
+function getDatesDiff($d1, $d2 = 'now')
+{
+    $d1 = strtotime($d1);
+    $d2 = strtotime($d2);
+    $rez = ($d2 - $d1) / (60);
+
+    return $rez;
+}
+
+/**
  * formats a dateTime period between two dates (without time). For ex.: Tue Apr 30, 2013 - 31
  * @param  varchar $fromDateTime mysql formated date
  * @param  varchar $toDateTime   mysql formated date
@@ -844,4 +860,23 @@ function getReferencedUsers($text)
     }
 
     return $rez;
+}
+
+/**
+ *  return true if script is run from commandline
+ * @return boolean
+ */
+function is_cli()
+{
+    if( defined('STDIN') )
+    {
+        return true;
+    }
+
+    if( empty($_SERVER['REMOTE_ADDR']) and !isset($_SERVER['HTTP_USER_AGENT']) and count($_SERVER['argv']) > 0)
+    {
+        return true;
+    }
+
+    return false;
 }

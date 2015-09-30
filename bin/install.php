@@ -44,7 +44,7 @@ switch (CB\Util\getOS()) {
 
         if (!in_array($currentUser, array('root'))) {
             echo "\033[31mThis script should be run under \"root\" \033[0m\n";
-            die("try command #sudo php install.php\n");
+         //   die("try command #sudo php install.php\n");
         }
 
         break;
@@ -71,6 +71,7 @@ try {
 }
 
 // detect working mode (interactive or not)
+
 if (empty($options)) {
     $options = getopt('f:', array('file:'));
 }
@@ -78,6 +79,7 @@ if (empty($options)) {
 $configFile = empty($options['f'])
     ? @$options['file']
     : $options['f'];
+
 
 if (!empty($configFile) && file_exists($configFile)) {
     $options['config'] = \CB\Config::loadConfigFile($configFile);
@@ -95,7 +97,7 @@ if (!empty($configFile) && file_exists($configFile)) {
 if (!empty($options['config'])) {
     // define('CB\\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')', false);
     \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
-    // $cfg = $options['config'];
+    $cfg = $cfg+$options['config'];
 
 } else {
     \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
@@ -111,18 +113,25 @@ $defaultValues = getDefaultConfigValues();
 
 $cfg = $cfg + $defaultValues;
 
-if (\CB\Util\getOS()!="WIN") {
+if (\CB\Util\getOS() != "WIN") {
     //ask for apache user and set ownership for some folders
     $cfg['apache_user'] = readParam('apache_user', $cfg['apache_user']);
-    setOwnershipForApacheUser($cfg);
+    if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+        setOwnershipForApacheUser($cfg);
+    }
 }
 
 //init prefix
 $cfg['prefix'] = readParam('prefix', $cfg['prefix']);
 
 //init db config
+$tryInitDBConfig = 0;
 do {
     initDBConfig($cfg);
+    $tryInitDBConfig++;
+   if($tryInitDBConfig > 3) {
+       trigger_error("ERROR: Cannot configure database connections !!!", E_USER_ERROR);
+   }
 } while (!verifyDBConfig($cfg));
 
 //specify server_name
@@ -138,8 +147,10 @@ if (!empty($l)) {
     $cfg['server_name'] = $l;
 }
 
+if (confirm('solr_create_cores')) {
 //init solr connection
-initSolrConfig($cfg);
+    initSolrConfig($cfg);
+}
 
 $cfg['admin_email'] = readParam('admin_email', $cfg['admin_email']);
 $cfg['sender_email'] = readParam('sender_email', $cfg['sender_email']);
@@ -170,7 +181,7 @@ $cfg['backup_dir'] = readParam('backup_dir', $cfg['backup_dir']);
 defineBackupDir($cfg);
 
 echo "\nYou have configured main options for casebox.\n" .
-    "Saving your settings to casebox.ini ... ";
+    "Saving your settings to " . \CB\DOC_ROOT . 'config.ini';
 
 if (!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == false)) {
     backupFile(\CB\DOC_ROOT . 'config.ini');
@@ -209,18 +220,22 @@ foreach ($requiredDirs as $dir) {
     }
 }
 
+
+if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE'))
 //---------- create solr symlinks for casebox config sets
-if (createSolrConfigsetsSymlinks($cfg)) {
-    echo "Solr configsets symlinks created sucessfully.\n\r";
-} else {
-    echo "Error creating symlinks to solr configsets.\n\r";
-}
+        if (createSolrConfigsetsSymlinks($cfg)) {
+        echo "Solr configsets symlinks created sucessfully.\n\r";
+    } else {
+        echo "Error creating symlinks to solr configsets.\n\r";
+    }
 
 //try to create log core
-
-createSolrCore($cfg, 'log', 'log_');
+if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+    createSolrCore($cfg, 'log', 'log_');
+}
 
 //create default database (<prefix>__casebox)
+echo "create Main Database:".PHP_EOL;
 createMainDatabase($cfg);
 
 echo "\nCasebox was successfully configured on your system\n" .

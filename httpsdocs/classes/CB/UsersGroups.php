@@ -247,8 +247,12 @@ class UsersGroups
         $p['name'] = strip_tags($p['name']);
         $p['name'] = trim($p['name']);
 
-        $p1 = empty($p['password']) ? '' : $p['password'];
-        $p2 = empty($p['confirm_password']) ? '' : $p['confirm_password'];
+        $p1 = empty($p['password'])
+            ? ''
+            : $p['password'];
+        $p2 = empty($p['confirm_password'])
+            ? ''
+            : $p['confirm_password'];
 
         if (empty($p['name']) || ($p1 != $p2)) {
             return $rez;
@@ -299,7 +303,7 @@ class UsersGroups
             ,'email' => $p['email']
         );
 
-        if (!empty($p['password'])) {
+        if (!empty($p['password']) && !empty($p['psw_setup']['ps']) && ($p['psw_setup']['ps'] == 2)) {
             $params['password'] = $p['password'];
         }
 
@@ -343,7 +347,7 @@ class UsersGroups
         }
 
         //check if send invite is set and create notification
-        if (!empty($p['send_invite'])) {
+        if (!empty($p['psw_setup']['ps']) && ($p['psw_setup']['ps'] == 1)) {
             $this->sendResetPasswordMail($user_id, 'invite');
         }
 

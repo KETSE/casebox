@@ -82,7 +82,14 @@ Ext.define('CB.plugin.Panel', {
         //check if object was found (success = true)
         if(r.success !== true) {
             this.update('<div class="x-preview-mask">' + L.RecordIdNotFound.replace('{id}', '#' + params.id) + '</div>');
+
         } else {
+            var commonInfo = r.common
+                ? r.common
+                : r.data.systemProperties.data;
+
+            Ext.apply(params, commonInfo);
+
             this.removeAll(true);
 
             this.createMenu = r.menu;
@@ -106,7 +113,6 @@ Ext.define('CB.plugin.Panel', {
                     if(!Ext.isDefined(v.data)) {
                         c.setVisible(false);
                     } else {
-                        Ext.copyToIf(params, v.data, 'pids,path,name,template_id,status,statusCls,cid,cdate_ago_text,uid,udate_ago_text');
                         c.onLoadData(v);
                     }
                 }
@@ -147,7 +153,7 @@ Ext.define('CB.plugin.Panel', {
             this.doLayout(true, true);
         }
 
-        this.fireEvent('loaded', this);
+        this.fireEvent('loaded', this, params);
     }
 
     ,clear: function() {

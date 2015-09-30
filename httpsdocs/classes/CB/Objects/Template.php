@@ -644,7 +644,11 @@ class Template extends Object
 
                             if ($html && !empty($pids)) {
                                 $pids = str_replace(',', '/', $pids);
-                                $label = '<a class="locate click" template_id="'.$d['template_id'].'" path="'.$pids.'" nid="'.$id.'">'.$label.'</a>';
+                                $linkType = empty($field['cfg']['linkType'])
+                                    ? ''
+                                    : 'link-type-' . $field['cfg']['linkType'];
+
+                                $label = '<a class="click ' . $linkType . '" template_id="'.$d['template_id'].'" path="'.$pids.'" nid="'.$id.'">'.$label.'</a>';
                             }
 
                             switch (@$field['cfg']['renderer']) {

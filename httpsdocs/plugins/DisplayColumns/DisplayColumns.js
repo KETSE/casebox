@@ -45,26 +45,27 @@ Ext.define('CB.plugin.DisplayColumns', {
             return;
         }
 
-        var rez = store.proxy.reader.rawData;
+        var rez = store.proxy.reader.rawData
+            ,view = Ext.valueFrom(rez.view, {});
 
         //set flag to avoid saving grid state while restoring remote config
         this.grid.disableStateSave = true;
 
-        if(!Ext.isEmpty(rez.sort)) {// && Ext.isEmpty(this.store.sortInfo)
+        if(!Ext.isEmpty(view.sort)) {// && Ext.isEmpty(this.store.sortInfo)
             var sorters = this.store.getSorters();
             sorters.suspendEvents();
             sorters.clear();
 
-            sorters.addSort(rez.sort.property, rez.sort.direction);
+            sorters.addSort(view.sort.property, view.sort.direction);
             sorters.resumeEvents(true);
         }
 
         //add corresponding metadata to obj.result if DisplayColumns changed
         this.currentColumns = rez.DC || [];
 
-        var currentState = (rez.view ? rez.view.type : '') +
+        var currentState = view.type +
             Ext.util.JSON.encode(this.currentColumns) +
-            (rez.sort ? Ext.util.JSON.encode(rez.sort) : '');
+            (view.sort ? Ext.util.JSON.encode(view.sort) : '');
 
         if(this.lastState !== currentState) {
             var storeFields = this.getNewMetadata();
@@ -78,7 +79,7 @@ Ext.define('CB.plugin.DisplayColumns', {
 
         //restore or disable grouping state
         var groupFeature = this.grid.view.features[0];
-        if(!Ext.isEmpty(rez.group) && !Ext.isEmpty(rez.group.property)) {
+        if(!Ext.isEmpty(view.group) && !Ext.isEmpty(view.group.property)) {
             store.remoteSort = false;
 
             if(groupFeature.disabled) {
@@ -90,18 +91,20 @@ Ext.define('CB.plugin.DisplayColumns', {
                 }
 
                 if(Ext.isEmpty(menuItem.parentMenu.activeHeader)) {
-                    menuItem.parentMenu.activeHeader = this.grid.getVisibleColumnManager().getHeaderByDataIndex(rez.group.property);
+                    menuItem.parentMenu.activeHeader = this.grid.getVisibleColumnManager().getHeaderByDataIndex(view.group.property);
                 }
 
-                groupFeature.onGroupMenuItemClick(menuItem, eOpts);
+                if(!Ext.isEmpty(menuItem.parentMenu.activeHeader)) {
+                    groupFeature.onGroupMenuItemClick(menuItem, eOpts);
+                }
             }
 
-            var groupDir = Ext.valueFrom(rez.group.direction, 'ASC');
+            var groupDir = Ext.valueFrom(view.group.direction, 'ASC');
             if(store.getGroupDir != groupDir) {
                 store.group('group', groupDir);//rez.group.property
             }
 
-        } else if(Ext.isEmpty(rez.group) && !groupFeature.disabled) {
+        } else if(Ext.isEmpty(view.group) && !groupFeature.disabled) {
             store.remoteSort = false;
             groupFeature.disable();
         }

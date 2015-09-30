@@ -76,6 +76,14 @@ Ext.define('CB.browser.Tree', {
                 ,handler: this.onPasteShortcutClick
             })
 
+            ,reload: new Ext.Action({
+                iconCls: 'icon-refresh'
+                ,text: L.Reload
+                ,disabled: true
+                ,scope: this
+                ,handler: this.onReloadClick
+            })
+
             ,'delete': new Ext.Action({
                 text: L.Delete
                 ,iconCls: 'i-trash'
@@ -91,12 +99,18 @@ Ext.define('CB.browser.Tree', {
                 ,handler: this.onRenameClick
             })
 
-            ,reload: new Ext.Action({
-                iconCls: 'icon-refresh'
-                ,text: L.Reload
-                ,disabled: true
+            ,star: new Ext.Action({
+                iconCls: 'i-star'
+                ,text: L.Star
                 ,scope: this
-                ,handler: this.onReloadClick
+                ,handler: this.onStarClick
+            })
+
+            ,unstar: new Ext.Action({
+                iconCls: 'i-unstar'
+                ,text: L.Unstar
+                ,scope: this
+                ,handler: this.onUnstarClick
             })
 
             ,permissions: new Ext.Action({
@@ -235,7 +249,6 @@ Ext.define('CB.browser.Tree', {
         App.mainViewPort.on('fileuploaded', this.onObjectsSaved, this);
         App.mainViewPort.on('taskupdated', this.onObjectsSaved, this);
         App.mainViewPort.on('taskcreated', this.onObjectsSaved, this);
-        App.mainViewPort.on('favoritetoggled', this.onObjectsSaved, this);
         App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
         App.on('objectchanged', this.onObjectsSaved, this);
     }
@@ -394,7 +407,7 @@ Ext.define('CB.browser.Tree', {
             this.actions.copy.setDisabled(!canCopy);
 
             var canPaste = !App.clipboard.isEmpty()
-                && ( !this.inFavorites(node) || App.clipboard.containShortcutsOnly() )
+                && App.clipboard.containShortcutsOnly()
                 && ( node.data.system === 0 );
             this.actions.paste.setDisabled(!canPaste);
 
@@ -417,22 +430,6 @@ Ext.define('CB.browser.Tree', {
         this.fireEvent('selectionchanged');
     }
 
-    ,isFavoriteNode: function(node){
-        if(Ext.isEmpty(node)) {
-            return false;
-        }
-        return ((node.data.system == 1) && (node.data.type == 1));
-    }
-
-    ,inFavorites: function(node) {
-        isFavoriteNode = false;
-        do{
-            isFavoriteNode = this.isFavoriteNode(node);
-            node = node.parentNode;
-        }while(node && (node.getDepth() > 0) && !isFavoriteNode);
-        return isFavoriteNode;
-    }
-
     ,onContextMenu: function (tree, record, item, index, e, eOpts) {
         if(Ext.isEmpty(this.contextMenu)){/* create context menu if not aleready created */
             this.contextMenu = new Ext.menu.Menu({
@@ -447,6 +444,8 @@ Ext.define('CB.browser.Tree', {
                 ,this.actions.reload
                 ,this.actions['delete']
                 ,this.actions.rename
+                ,this.actions.star
+                ,this.actions.unstar
                 ,'-'
                 ,this.createItem
                 ,'-'
@@ -458,6 +457,10 @@ Ext.define('CB.browser.Tree', {
         // node.select();
         e.stopEvent();
         this.contextMenu.node = record;
+
+        var canStar = !App.Favorites.isStarred(record.data.nid);
+        this.actions.star.setHidden(!canStar) ;
+        this.actions.unstar.setHidden(canStar) ;
 
         this.contextMenu.showAt(e.getXY());
     }
@@ -885,5 +888,23 @@ Ext.define('CB.browser.Tree', {
             deleteNodes[i].remove(true);
         }
         /* TODO: also delete all visible nodes(links) that are links to the deleted node or any its child */
+    }
+
+    ,onStarClick: function(b, e) {
+        var n = this.contextMenu.node
+            ,d = n.data
+            ,data = {
+                id: d.nid
+                ,name: d.name
+                ,iconCls: d.iconCls
+                ,pathText: d.path
+                ,path: n.getPath('nid', '/')
+            };
+
+        App.Favorites.setStarred(data);
+    }
+
+    ,onUnstarClick: function(b, e) {
+        App.Favorites.setUnstarred(this.contextMenu.node.data.nid);
     }
 });
