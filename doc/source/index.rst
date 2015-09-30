@@ -51,6 +51,7 @@ The main documentation is organized into a three sections:
    dev/fields
    dev/tree
    dev/grid
+   dev/faceting
    dev/filter
    dev/search
    dev/files
