@@ -82,7 +82,10 @@ if [ $coverage ];
         php $DIR/auto_install.php
         $DIR/../vendor/bin/phpunit --colors --verbose --debug --bootstrap $DIR/init.php $DIR/../httpsdocs/classes/UnitTest
 
-     //   bash $DIR/server/solr/solr5-stop.sh
+      bash $DIR/server/solr/solr5-stop.sh
 
+     echo "remove solr directory"
+
+     rm -rf "${DIR}/server/solr/solr-${SOLR_VERSION}"
 
     fi
