@@ -66,8 +66,8 @@ class Notifications
 
     /**
      * update last seen laction id
-     * @param  int  $id
      * @return json response
+     * @param  int  $id
      */
     public static function updateLastSeenId($id, $userId = false)
     {

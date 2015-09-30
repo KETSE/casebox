@@ -1,3 +1,14 @@
+CaseBox 1.9.527 (2015-09-28)
+==============================
+- hide favorites panel
+- #8848 Hide Tree.RootNode
+- #8811 Remove Notifications button in objPreviewPanel and add one option in dropdown menu
+
+Fixed Bugs:
+----------
+- #8843 TagField editor not showing selected value
+- #8840 Error 'Cannot connect to server' when logging out
+
 CaseBox 1.9.526 (2015-09-22)
 ==============================
 - Don't notify admin when extracted file content is empty. Happens often for scanned pdfs.

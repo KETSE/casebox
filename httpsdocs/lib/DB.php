@@ -88,7 +88,7 @@ function connectWithParams($p)
             $dbh->query('USE `'.$newParams['name'].'`') or die('Cannot access database "' . $newParams['name'] . '"');
         }
 
-        $dbh->query("SET NAMES 'UTF8'");
+        $dbh->set_charset('utf8');
 
         // set time zone for database to 00:00
         $dbh->query('SET @@session.time_zone = "+00:00"') or die(dbQueryError());
@@ -103,6 +103,21 @@ function connectWithParams($p)
     \CB\Cache::set('dbh', $dbh);
 
     return $dbh;
+}
+
+function close()
+{
+    $rez = false;
+
+    $dbh = \CB\Cache::get('dbh');
+
+    if (!empty($dbh)) {
+        \CB\Cache::remove('dbh');
+
+        $rez = $dbh->close();
+    }
+
+    return $rez;
 }
 
 if (!function_exists(__NAMESPACE__.'\dbQuery')) {
@@ -129,11 +144,14 @@ if (!function_exists(__NAMESPACE__.'\dbQuery')) {
             if (!is_scalar($v) && !is_null($v)) {
                 throw new \Exception("param error: ".print_r($parameters, 1)."\n For SQL: $query", 1);
             }
-            $parameters[$k] = is_int($v) ? $v : (
-                null === $v ?
-                'NULL' :
-                "'".$dbh->real_escape_string($v)."'"
+            $parameters[$k] = is_int($v)
+                ? $v
+                : (
+                    (null === $v) ?
+                    'NULL' :
+                    "'" . $dbh->real_escape_string($v) . "'"
                 );
+            // \CB\debug("parameters[$k]", $v, $parameters[$k], $dbh->ping(), $dbh->get_charset());
         }
 
         \CB\Cache::set('queryParameters', $parameters);

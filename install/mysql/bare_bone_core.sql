@@ -195,8 +195,8 @@ CREATE TABLE `notifications` (
   KEY `FK_notifications__action_id` (`action_id`),
   KEY `FK_notifications_user_id` (`user_id`),
   KEY `IDX_notifications_seen` (`seen`),
-  CONSTRAINT `FK_notifications__action_id` FOREIGN KEY (`action_id`) REFERENCES `action_log` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_notifications_user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_notifications_user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_notifications__action_id` FOREIGN KEY (`action_id`) REFERENCES `action_log` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `notifications` */
@@ -313,13 +313,11 @@ CREATE TABLE `translations` (
   `ar` varchar(1000) DEFAULT NULL,
   `zh` varchar(1000) DEFAULT NULL,
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '0 - anywhere, 1 - server, 2 - client',
-  `udate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `info` varchar(1000) DEFAULT NULL COMMENT 'Where in CB the term is used, what it means',
   `deleted` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '0 - not deleted, 1 - deleted',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNIQUE_translations__name` (`name`),
   KEY `FK_translations__pid` (`pid`),
-  KEY `FK_translations_udate` (`udate`),
   CONSTRAINT `FK_translations__pid` FOREIGN KEY (`pid`) REFERENCES `translations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

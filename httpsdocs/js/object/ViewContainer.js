@@ -36,7 +36,6 @@ Ext.define('CB.object.ViewContainer', {
                     ,this.BC.get('preview')
                     ,this.BC.get('star')
                     ,this.BC.get('unstar')
-                    ,this.BC.get('subscription')
                     ,this.BC.get('more')
                     ,'-'
                     ,this.BC.get('openExternal')
@@ -190,6 +189,21 @@ Ext.define('CB.object.ViewContainer', {
                 ,handler: this.onUnstarClick
             })
 
+            ,notifyOn: new Ext.Action({
+                text: L.NotifyOn
+                ,iconCls: 'im-watch'
+                ,itemId: 'notifyOn'
+                ,scope: this
+                ,handler: this.onSubscriptionButtonClick
+            })
+
+            ,notifyOff: new Ext.Action({
+                text: L.NotifyOff
+                ,iconCls: 'im-ignore'
+                ,itemId: 'notifyOff'
+                ,scope: this
+                ,handler: this.onSubscriptionButtonClick
+            })
         };
     }
 
@@ -289,35 +303,6 @@ Ext.define('CB.object.ViewContainer', {
                 ,iconCls: 'im-points'
                 ,scale: 'medium'
                 ,menu: []
-            })
-            ,new Ext.Button({
-                itemId: 'subscription'
-                ,arrowVisible: false
-                ,iconCls: 'im-ignore'
-                ,scale: 'medium'
-                ,menu: [
-                    {
-                        text: L.WatchText
-                        ,iconCls: 'im-watch'
-                        ,itemId: 'watch'
-                        ,height: 24
-                        ,scope: this
-                        ,handler: this.onSubscriptionButtonClick
-                    }, {
-                        text: L.IgnoreText
-                        ,iconCls: 'im-ignore'
-                        ,itemId: 'ignore'
-                        ,height: 24
-                        ,scope: this
-                        ,handler: this.onSubscriptionButtonClick
-                    },'-',{
-                        text: L.Customize
-                        ,iconCls: 'i-settings'
-                        ,itemId: 'notify-settings'
-                        ,scope: this
-                        ,handler: this.onNotificationsCustomizeClick
-                    }
-                ]
             })
         ]);
     }
@@ -577,6 +562,9 @@ Ext.define('CB.object.ViewContainer', {
             return;
         }
 
+        ti.menu['notifyOn'] = {addDivider: 'top'};
+        ti.menu['notifyOff'] = {};
+
         /* update menu items */
         var isFirstItem = true;
         Ext.iterate(
@@ -586,7 +574,10 @@ Ext.define('CB.object.ViewContainer', {
                 if(k == '-') {
                     this.menu.add('-');
                 } else {
-                    var b = this.menuItemConfigs[k];
+                    var b = (this.menuItemConfigs[k])
+                        ? Ext.clone(this.menuItemConfigs[k])
+                        : this.actions[k];
+
                     if(b) {
                         if ((!isFirstItem) &&
                           (v.addDivider == 'top')
@@ -594,8 +585,7 @@ Ext.define('CB.object.ViewContainer', {
                             this.menu.add('-');
                         }
 
-                        var cfg = Ext.apply({}, b);
-                        var item = this.menu.add(cfg);
+                        this.menu.add(b);
                         isFirstItem = false;
                     }
                 }
@@ -612,9 +602,9 @@ Ext.define('CB.object.ViewContainer', {
         ti.tbar.unstar = {};
 
         var subscription = Ext.valueFrom(ti.tbar['subscription'], 'ignore');
-        this.BC.get('subscription').setIconCls('im-' + subscription);
 
-        ti.tbar['subscription'] = {};
+        this.actions.notifyOn.setHidden(subscription == 'watch');
+        this.actions.notifyOff.setHidden(subscription == 'ignore');
 
         // hide all bottons from toolbar
         Ext.iterate(
@@ -962,25 +952,25 @@ Ext.define('CB.object.ViewContainer', {
     }
 
     ,onSubscriptionButtonClick: function(b, e) {
+        var type = (b.itemId == 'notifyOn')
+            ? 'watch'
+            : 'ignore';
+
         CB_Objects.setSubscription(
             {
                 objectId: this.loadedData.id
-                ,type: b.itemId
+                ,type: type
             }
             ,function(r, e) {
                 if(r.success !== true) {
                     return;
                 }
 
-                this.BC.get('subscription').setIconCls('im-' + b.itemId);
+                this.actions.notifyOn.setHidden(type == 'watch');
+                this.actions.notifyOff.setHidden(type == 'ignore');
             }
             ,this
         );
-    }
-
-    ,onNotificationsCustomizeClick: function(b, e) {
-        var w = new CB.notifications.SettingsWindow();
-        w.show();
     }
 
     /**

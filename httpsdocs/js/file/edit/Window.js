@@ -68,7 +68,6 @@ Ext.define('CB.file.edit.Window', {
             ,'->'
             ,this.actions.star
             ,this.actions.unstar
-            ,this.subscriptionButton
             ,this.actions.refresh
             ,new Ext.Button({
                 qtip: L.More
@@ -80,6 +79,9 @@ Ext.define('CB.file.edit.Window', {
                     ,this.actions.webdavlink
                     ,this.actions.rename
                     ,this.actions.permalink
+                    ,'-'
+                    ,this.actions.notifyOn
+                    ,this.actions.notifyOff
                 ]
             })
             ,this.actions.showInfoPanel

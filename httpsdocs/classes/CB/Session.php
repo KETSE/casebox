@@ -52,11 +52,7 @@ class Session implements \SessionHandlerInterface
         $this->gc($this->lifetime);
 
         // close database-connection
-        $dbh = Cache::get('dbh');
-
-        if (!empty($dbh)) {
-            $rez = mysqli_close($dbh);
-        }
+        $rez = DB\close();
 
         return $rez;
     }

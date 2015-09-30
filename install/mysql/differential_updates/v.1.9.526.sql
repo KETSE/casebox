@@ -1,5 +1,7 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 
+DELETE FROM favorites;
+
 /* Alter table in target */
 ALTER TABLE `favorites`
 	ADD COLUMN `id` bigint(20) unsigned   NOT NULL auto_increment first ,

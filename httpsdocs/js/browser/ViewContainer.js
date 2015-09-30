@@ -1482,7 +1482,7 @@ Ext.define('CB.browser.ViewContainer', {
             this.createItem.setDisabled(this.createItem.menu.items.getCount() < 1);
         }
 
-        if(s.length == 1) {
+        if(s && (s.length == 1)) {
             var canStar = !App.Favorites.isStarred(s[0].nid);
             this.actions.star.setHidden(!canStar) ;
             this.actions.unstar.setHidden(canStar) ;

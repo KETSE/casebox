@@ -766,7 +766,12 @@ class User
         while (!empty($_SESSION['last_sessions'])) {
             @unlink(session_save_path().DIRECTORY_SEPARATOR.'sess_'.array_shift($_SESSION['last_sessions']));
         }
+
         session_destroy();
+
+        DB\close();
+
+        unset($_SESSION['user']);
 
         return $rez;
     }
