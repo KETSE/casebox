@@ -68,6 +68,8 @@ if [ $coverage ];
       $DIR/../vendor/bin/phpunit $coverage $DEST$OUTFILE --configuration $DIR/phpunit.xml --verbose --bootstrap $DIR/init.php $DIR/../httpsdocs/classes/UnitTest
     else 
 
+    service solr stop
+
         export SOLR_VERSION="5.1.0"
         bash $DIR/server/solr/solr5-install.sh
 
@@ -79,6 +81,8 @@ if [ $coverage ];
       export SOLR_CONFIGSET="cbtest_default"
       bash $DIR/server/solr/solr5-addcore.sh
 
+      cp $DIR/../httpsdocs/config.ini $DIR/tmp/config.ini.old
+
         php $DIR/auto_install.php
         $DIR/../vendor/bin/phpunit --colors --verbose --debug --bootstrap $DIR/init.php $DIR/../httpsdocs/classes/UnitTest
 
@@ -87,5 +91,9 @@ if [ $coverage ];
      echo "remove solr directory"
 
      rm -rf "${DIR}/server/solr/solr-${SOLR_VERSION}"
+
+      cp $DIR/tmp/config.ini.old $DIR/../httpsdocs/config.ini 
+
+   service solr start
 
     fi
