@@ -97,8 +97,8 @@ if (empty($_SESSION['check_TSV'])) {
                 'clientId' => $GPlus['web']['client_id'],
                 'clientSecret' => $GPlus['web']['client_secret'],
                 'redirectUri' => $GPlus['web']['redirect_uris'][0],
-                'hostedDomain' => $_SERVER['SERVER_NAME'],
-                'access_token' => Config::get('core_name')
+                // 'hostedDomain' => $_SERVER['SERVER_NAME']//,
+                // 'access_token' => Config::get('core_name')
                 //   'token' => strtr(base64_encode('{"core":"'.Config::get('core_name').'"}'), '+/=', '-_,')
             ]);
 

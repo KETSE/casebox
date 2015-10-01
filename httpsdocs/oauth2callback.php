@@ -28,8 +28,8 @@ if ($useGoogleOauth2_json && $GPlus = Util\jsonDecode($useGoogleOauth2_json, tru
         $provider = new \League\OAuth2\Client\Provider\Google([
             'clientId' => $GPlus['web']['client_id'],
             'clientSecret' => $GPlus['web']['client_secret'],
-            'redirectUri' => $GPlus['web']['redirect_uris'][0],
-            'hostedDomain' => $_SERVER['SERVER_NAME']
+            'redirectUri' => $GPlus['web']['redirect_uris'][0]/*,
+            'hostedDomain' => $_SERVER['SERVER_NAME']*/
         ]);
 
        if ( empty($_GET['state']) ) {
