@@ -45,7 +45,7 @@ if [ -d "${TRAVIS_BUILD_DIR}/sys/solr_configsets" ]; then
     cp -ar "${TRAVIS_BUILD_DIR}/sys/solr_configsets/default_config/conf" "${SOLR_DIR}/server/solr/configsets/cbtest_default_configs/"
     mkdir "${SOLR_DIR}/server/solr/configsets/cbtest_log_configs"
     cp -ar "${TRAVIS_BUILD_DIR}/sys/solr_configsets/log_config/conf" "${SOLR_DIR}/server/solr/configsets/cbtest_log_configs/"
-    ls -la "${SOLR_DIR}/server/solr/configsets/cbtest_log_configs/conf"
+#    ls -la "${SOLR_DIR}/server/solr/configsets/cbtest_log_configs/conf"
 fi
 
 echo "Changing dir into ${SOLR_DIR}"

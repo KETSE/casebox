@@ -3,6 +3,8 @@ namespace CB;
 
 require_once 'init.php';
 
+//die('<pre>'.print_r($_SESSION,true).'</pre>');
+
 $coreName = Config::get('core_name');
 
 $coreUrl = Config::get('core_url');

@@ -19,6 +19,8 @@ function __autoload($className)
 
         if (stream_resolve_include_path($className)) {
             require_once $className;
+        } else {
+           // trigger_error('NOT_FOUND: '.$className,E_USER_WARNING);
         }
     }
 }

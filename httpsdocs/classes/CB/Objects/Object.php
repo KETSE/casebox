@@ -197,6 +197,11 @@ class Object
         ) or die(DB\dbQueryError());
 
         $this->id = DB\dbLastInsertId();
+
+        if(!isset($this->id) || ! (intval($this->id) >0) ) {
+            trigger_error('Error on create object : '.\CB\Cache::get('lastSql'), E_USER_ERROR);
+        }
+
         $p['id'] = $this->id;
 
         $this->createCustomData();
@@ -1876,12 +1881,12 @@ class Object
                 $obj = &$params['new'];
             }
 
-            $logActionId = Log::add($params);
-
             $uid = User::getId();
 
             //add action to object sys_data
             $data = $obj->getData();
+            $params['data'] = $data;
+            $logActionId = Log::add($params);
 
             $lastAction = $obj->getLastActionData();
 
