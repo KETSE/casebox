@@ -735,19 +735,6 @@ DELIMITER $$
 
 DELIMITER ;
 
-/* Trigger structure for table `translations` */
-
-DELIMITER $$
-
-/*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `translation_bu` */$$
-
-/*!50003 CREATE */ /*!50003 TRIGGER `translation_bu` BEFORE UPDATE ON `translations` FOR EACH ROW BEGIN
-	SET new.udate = CURRENT_TIMESTAMP;
-    END */$$
-
-
-DELIMITER ;
-
 /* Trigger structure for table `tree` */
 
 DELIMITER $$

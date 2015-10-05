@@ -39,6 +39,9 @@ class Log
 
         $p['activityData'] = static::getActivityData($data);
 
+        if(!isset($data['id'])) {
+            trigger_error('Log data error :'.print_r($data,true),E_USER_ERROR);
+        }
         $params = array(
             'object_id' => $data['id']
             ,'object_pid' => @$data['pid']

@@ -1,21 +1,22 @@
 <?php
 /**
-*	configuration file
-*	@author Țurcanu Vitalie <vitalie.turcanu@gmail.com>
-*	@access private
-*	@package CaseBox
-*	@copyright Copyright (c) 2013, HURIDOCS, KETSE
-*	@version 2.0 refactoring 17 april 2013. Introduce CB namespace for casebox platform scripts
-**/
+ * 	configuration file
+ * 	@author Țurcanu Vitalie <vitalie.turcanu@gmail.com>
+ * 	@access private
+ * 	@package CaseBox
+ * 	@copyright Copyright (c) 2013, HURIDOCS, KETSE
+ * 	@version 2.0 refactoring 17 april 2013. Introduce CB namespace for casebox platform scripts
+ * */
+
 namespace CB;
 
 /*
-    steps:
-    1. include platform config
-    4. Detect core name and initialize by defining specific params
-    5. based on loaded configs set casebox php options, session lifetime, error_reporting and define required casebox constants
+  steps:
+  1. include platform config
+  4. Detect core name and initialize by defining specific params
+  5. based on loaded configs set casebox php options, session lifetime, error_reporting and define required casebox constants
 
-*/
+ */
 
 require_once 'config_platform.php';
 
@@ -25,14 +26,15 @@ $cfg = Cache::get('platformConfig');
 $cfg['core_name'] = detectCore() or die('Cannot detect core');
 
 //set default database name
-$cfg['db_name'] = PREFIX . $cfg['core_name'];
+$cfg['db_name'] = PREFIX.$cfg['core_name'];
 
-    //loading core defined params
+//loading core defined params
 try {
     $cfg = array_merge($cfg, Config::getPlatformConfigForCore($cfg['core_name']));
 } catch (\Exception $e) { //return http "not found" if cant load core config
     if (Util\is_cli()) {
-        trigger_error("ERROR: Config::getPlatformConfigForCore(".$cfg['core_name'].") cfg=".print_r($cfg, true), E_USER_ERROR);
+        trigger_error("ERROR: Config::getPlatformConfigForCore(".$cfg['core_name'].") cfg=".print_r($cfg, true),
+            E_USER_ERROR);
     } else {
 
         header(@$_SERVER["SERVER_PROTOCOL"].' 404 Not Found');
@@ -40,6 +42,8 @@ try {
 
     exit();
 }
+
+//echo '<pre>'.print_r($cfg,true).'</pre>';
 
 DB\connectWithParams($cfg);
 
@@ -58,10 +62,9 @@ if ($status != Config::$CORESTATUS_ACTIVE) {
 DB\connectWithParams($config);
 
 /**
-*   So, we have defined main paths and loaded configs.
-*   Now define and configure all other options (for php, session, etc)
-**/
-
+ *   So, we have defined main paths and loaded configs.
+ *   Now define and configure all other options (for php, session, etc)
+ * */
 /* setting php configuration options, session lifetime and error_reporting level */
 ini_set('max_execution_time', 500);
 ini_set('short_open_tag', 'off');
@@ -74,27 +77,25 @@ ini_set('memory_limit', '400M');
 
 // session params
 $sessionLifetime = (
-    IS_DEBUG_HOST
-        ? 0
-        : Config::get('session.lifetime', 4320)
-) * 60;
+    IS_DEBUG_HOST ? 0 : Config::get('session.lifetime', 4320)
+    ) * 60;
 
 ini_set("session.gc_maxlifetime", $sessionLifetime);
 ini_set("session.gc_divisor", "100");
 ini_set("session.gc_probability", "1");
 
-session_set_cookie_params($sessionLifetime, '/' . $cfg['core_name'] . '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
-session_name(
-    str_replace(
+session_set_cookie_params($sessionLifetime, '/'.$cfg['core_name'].'/', $_SERVER['SERVER_NAME'],
+    !empty($_SERVER['HTTPS']), true);
+
+$SESSION_NAME = str_replace(
         array(
-            '.casebox.org'
-            ,'.'
-            ,'-'
-        ),
-        '',
-        $_SERVER['SERVER_NAME']
-    ).$cfg['core_name']
-);
+        '.casebox.org'
+        , '.'
+        , '-'
+        ), '', $_SERVER['SERVER_NAME']
+    ).$cfg['core_name'];
+
+session_name($SESSION_NAME);
 
 //error reporting params
 error_reporting(IS_DEBUG_HOST ? E_ALL : E_ERROR);

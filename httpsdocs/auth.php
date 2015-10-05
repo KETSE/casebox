@@ -12,9 +12,22 @@
  * @package CaseBox
  *
  * */
+
 namespace CB;
 
 require_once 'init.php';
+
+// die(print_r($_SESSION, true));
+
+if (Oauth2Utils::isOauth2Login()) {
+
+    $Check = Oauth2Utils::checkLogined();
+    if ($Check['success']) {
+        header('Location: '.Config::get('core_url'));
+    } else {
+        $errors[] = $Check['message'];
+    }
+}
 
 //reset if sign out clicked on check tsv
 if (!empty($_GET['l'])) {
@@ -23,8 +36,8 @@ if (!empty($_GET['l'])) {
 
 if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
     $errors = array();
-    $u = strtolower(trim($_POST['u']));
-    $p = $_POST['p'];
+    $u      = strtolower(trim($_POST['u']));
+    $p      = $_POST['p'];
     if (empty($u)) {
         $errors[] = L\get('Specify_username');
     }
@@ -35,7 +48,7 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
     if (empty($errors)) {
         DB\connect();
         $user = new User();
-        $r = $user->Login($u, $p);
+        $r    = $user->Login($u, $p);
 
         if ($r['success'] == false) {
             $errors[] = L\get('Auth_fail');
@@ -49,20 +62,17 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
         }
     }
     $_SESSION['message'] = array_shift($errors);
-
 } elseif (!empty($_SESSION['check_TSV']) && !empty($_POST['c'])) {
-    $u = new User();
-    $cfg = $u->getTSVConfig();
-    $authenticator = $u->getTSVAuthenticator($cfg['method'], $cfg['sd']);
+    $u                  = new User();
+    $cfg                = $u->getTSVConfig();
+    $authenticator      = $u->getTSVAuthenticator($cfg['method'], $cfg['sd']);
     $verificationResult = $authenticator->verifyCode($_POST['c']);
 
     if ($verificationResult === true) {
         unset($_SESSION['check_TSV']);
         $_SESSION['user']['TSV_checked'] = true;
     } else {
-        $_SESSION['message'] = is_string($verificationResult)
-            ? htmlspecialchars($verificationResult, ENT_COMPAT)
-            : 'Wrong verification code. Please try again.';
+        $_SESSION['message'] = is_string($verificationResult) ? htmlspecialchars($verificationResult, ENT_COMPAT) : 'Wrong verification code. Please try again.';
     }
 }
 
@@ -75,8 +85,7 @@ if (!User::isLoged()) {
 if (!empty($_SESSION['redirect']['view'])) {
     $viewId = $_SESSION['redirect']['view'];
     unset($_SESSION['redirect']['view']);
-    header('Location: '.$coreUrl.'view/' . $viewId . '/');
-
+    header('Location: '.$coreUrl.'view/'.$viewId.'/');
 } else {
     header('Location: '.$coreUrl);
 }
