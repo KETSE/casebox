@@ -28,7 +28,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
             )
         );
 
-        $this->assertTrue(is_numeric($id), 'Cant create core');
+        $this->assertTrue(is_numeric($id), 'Cant create User');
 
     }
 
@@ -138,5 +138,27 @@ class UserTest extends \PHPUnit_Framework_TestCase
     public function tearDown()
     {
         unset($this->testName);
+    }
+
+    /**
+     * @depends testCreate
+     */
+    public function testsetAsLoged() {
+
+        $id = DM\User::create(
+                    array(
+                        'name' => $this->testName
+                        ,'password' => 'qq'
+                    )
+                );
+
+        $this->assertTrue(is_numeric($id), 'Cant create User');
+
+        \CB\User::setAsLoged($id, 'tests_key');
+
+        $this->assertTrue(\CB\User::isLoged(),' Error: user is not logged');
+        $this->assertEquals($id, $_SESSION['user']['id'], 'Sessions user is not equal with setted users');
+        $this->assertEquals('tests_key', $_SESSION['key'], 'Sessions key is not equal with setted keys');
+
     }
 }

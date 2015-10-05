@@ -46,20 +46,25 @@ class Notifications
      */
     public function getNew($p)
     {
-        $rez = array(
-            'success' => true
-            ,'data' => array()
-        );
 
-        $this->prepareParams($p);
+      if (User::isLoged()) {
+          
+            $rez = array(
+                'success' => true
+                , 'data' => array()
+            );
 
-        $p['user_id'] = User::getId();
+            $this->prepareParams($p);
 
-        $fromId = empty($p['fromId'])
-            ? false
-            : intval($p['fromId']);
+            $p['user_id'] = User::getId();
 
-        $rez['data'] = $this->getRecords($p);
+            $fromId = empty($p['fromId']) ? false : intval($p['fromId']);
+
+            $rez['data'] = $this->getRecords($p);
+        } else {
+            $rez = array(
+                'success' => false);
+        }
 
         return $rez;
     }

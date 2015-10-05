@@ -124,6 +124,8 @@ class User
             // set user groups
             $rez['user']['groups']      = UsersGroups::getGroupIdsForUser();
             $_SESSION['user']['groups'] = $rez['user']['groups'];
+
+            $_SESSION['user']['TSV_checked'] = true;
         }
 
         return $rez;
@@ -752,10 +754,24 @@ class User
         // );
         // Log::add($logParams);
 
-        while (!empty($_SESSION['last_sessions'])) {
+        /*while (!empty($_SESSION['last_sessions'])) {
+
             @unlink(session_save_path().DIRECTORY_SEPARATOR.'sess_'.array_shift($_SESSION['last_sessions']));
+            array('success' => false, 'msg' => print_r($_SESSION,true) );
+        } */
+
+        // session_destroy();
+        try {
+            session_start();
+            session_unset();
+            session_destroy();
+            session_write_close();
+            setcookie(session_name(),'',0,'/');
+            session_regenerate_id(true);
+           $rez = array('success' => true);
+        } catch (Exception $exc) {
+            $rez = array('success' => false, 'msg' => $exc->getTraceAsString() );
         }
-        session_destroy();
 
         return $rez;
     }
