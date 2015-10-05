@@ -47,34 +47,6 @@ Ext.define('CB.Calendar', {
         this.eventStore = Ext.create('Ext.calendar.data.MemoryEventStore', {
             autoLoad: false
             ,autoDestroy: true
-            /**,listeners: {
-                scope: this
-                ,add: function(st, recs, opt){
-                    Ext.each(
-                        recs
-                        , function(r){
-                            var cls = 'cal-cat-'+ Ext.valueFrom(r.get('cls'), 'default') +
-                                ( (r.get('task_status') == 3) ? ' cal-status-c' : '');
-
-                            if(r.get('template_id') == App.config.default_task_template) {
-                                r.set('iconCls', '');
-                            } else {
-                                r.set('iconCls', getItemIcon(r.data));
-                            }
-
-                            if(!Ext.isEmpty(r.get('iconCls'))) {
-                                cls = cls + ' icon-padding '+ r.get('iconCls');
-                            }
-                            cls += ' user-color-' + r.data.cid;
-                            clog('cls');
-                            r.set('cls', cls);
-                            r.commit();
-                        }
-                        ,this
-                    );
-                    // this.getLayout().activeItem.syncSize();
-                }
-            }/**/
         });
 
         this.eventsReloadTask = new Ext.util.DelayedTask( this.doReloadEventsStore, this);
@@ -470,11 +442,12 @@ Ext.define('CB.browser.view.Calendar', {
 
         this.coloringCombo.store.loadData(data);
         this.coloringCombo.setValue(this.selectedColoring);
+        this.coloringCombo.setHidden(this.coloringCombo.store.getCount() < 2);
     }
 
     ,onColoringComboChange: function(c, rec, eOpts) {
         this.selectedColoring = c.getValue();
-        clog('onColoringComboChange', arguments, this.selectedColoring);
+
         this.fireEvent('reload', this);
     }
 
@@ -541,11 +514,6 @@ Ext.define('CB.browser.view.Calendar', {
                 ,'more'
             ]
         );
-
-        // for debugging
-        this.selectedColoring = 'task_importance_is';
-        this.calendar.setStartDate(new Date('2015-05-01 00:00:00'));
-        //
 
         this.calendar.fireViewChange();
     }

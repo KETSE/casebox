@@ -269,8 +269,6 @@ Ext.define('CB.controller.Browsing', {
             ,dt = date.toISOString()
             ,sameDate = (c.lastClickedDate == dt);
 
-        // clog('sameDate', sameDate, c.lastClickedDate.toISOString(), date);
-
         if(!sameDate || (av.xtype != 'dayview')) {
             c.onDayClick();
             c.setStartDate(date);

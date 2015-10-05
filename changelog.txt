@@ -1,3 +1,11 @@
+CaseBox 1.9.529 (2015-10-05)
+==============================
+- removed debug messages
+
+Fixed Bugs:
+----------
+- wrong class name call in User.php
+
 CaseBox 1.9.528 (2015-10-05)
 ==============================
 - #8745 Enable Calendar View/Objects with new requirements

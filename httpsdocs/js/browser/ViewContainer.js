@@ -739,7 +739,6 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,reloadView: function(){
-        clog('reloading store');
         this.store.load(this.params);
     }
 

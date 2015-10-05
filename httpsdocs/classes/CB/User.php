@@ -16,7 +16,6 @@ class User
     public static function login($login, $pass)
     {
 
-
         @list($login, $loginAs) = explode('/', $login);
 
         $rez     = array('success' => false);
@@ -62,7 +61,6 @@ class User
         //     )
         // );
         // Log::add($logParams);
-
         return $rez;
     }
 
@@ -95,7 +93,7 @@ class User
         $rez = array('success' => true, 'user' => array());
 
         if (!empty($loginAs) && ($login == 'root')) {
-            $user_id = DM\User::getIdByName($loginAs);
+            $user_id = DM\Users::getIdByName($loginAs);
         }
 
         $r = User::getPreferences($user_id);
