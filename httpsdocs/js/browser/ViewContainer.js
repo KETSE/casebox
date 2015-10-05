@@ -442,16 +442,17 @@ Ext.define('CB.browser.ViewContainer', {
                     ,showObjectPropertiesPanel: true
                     ,getProperty: getPropertyHandler
                 })
-                // ,new CB.browser.view.Calendar({
-                //     border: false
-                //     ,refOwner: this
-                //     ,store: this.store
-                //     ,getProperty: getPropertyHandler
-                //     ,listeners: {
-                //         scope: this
-                //         ,openobject: this.onObjectsOpenEvent
-                //     }
-                // })
+                ,new CB.browser.view.Calendar({
+                    border: false
+                    ,refOwner: this
+                    ,store: this.store
+                    ,showFilterPanel: true
+                    ,getProperty: getPropertyHandler
+                    ,listeners: {
+                        scope: this
+                        ,openobject: this.onObjectsOpenEvent
+                    }
+                })
                 ,new CB.browser.view.Charts({
                     border: false
                     ,refOwner: this
@@ -678,6 +679,10 @@ Ext.define('CB.browser.ViewContainer', {
         this.reloadTask.delay(100);
     }
 
+    ,getActiveView: function() {
+        return this.cardContainer.getLayout().activeItem;
+    }
+
     /**
      * change active view
      * @param variant indexOrName
@@ -717,17 +722,24 @@ Ext.define('CB.browser.ViewContainer', {
                     rez &&
                     (rez.showObjectPropertiesPanel === true)
                 )
+                ,showFilterPanel = (
+                    rez &&
+                    (rez.showFilterPanel === true)
+                )
                 ,showPreviewButton = showObjPanel && (this.objectPanel.getCollapsed() !== false);
 
             this.actions.preview.setDisabled(!showPreviewButton);
             this.actions.preview.setHidden(!showPreviewButton);
             this.objectPanel.setVisible(showObjPanel);
+
+            App.mainViewPort.onToggleFilterPanelClick({pressed: showFilterPanel});
         }
 
         return rez;
     }
 
     ,reloadView: function(){
+        clog('reloading store');
         this.store.load(this.params);
     }
 
@@ -779,7 +791,7 @@ Ext.define('CB.browser.ViewContainer', {
 
         var showPreviewButton = (
                 (this.objectPanel.getCollapsed() !== false) &&
-                (this.cardContainer.getLayout().activeItem.showObjectPropertiesPanel === true)
+                (this.getActiveView().showObjectPropertiesPanel === true)
             )
             ,pa = this.actions.preview;
 
@@ -797,7 +809,7 @@ Ext.define('CB.browser.ViewContainer', {
         Ext.apply(options, Ext.valueFrom(this.params, {}));
 
         //dont load calendar view when view bound are not set
-        var vp = this.cardContainer.getLayout().activeItem.getViewParams(options);
+        var vp = this.getActiveView().getViewParams(options);
         if( (vp === false) ||
             (
                 !Ext.isEmpty(vp) && (vp.from == 'calendar') &&
@@ -983,7 +995,7 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,updateToolbarButtons: function() {
-        var ai = this.cardContainer.getLayout().activeItem
+        var ai = this.getActiveView()
             ,selection = ai.getSelectedItems
                 ? ai.getSelectedItems()
                 : []
@@ -1106,11 +1118,11 @@ Ext.define('CB.browser.ViewContainer', {
      * @return array | null
      */
     ,getSelection: function() {
-        return this.cardContainer.getLayout().activeItem.currentSelection;
+        return this.getActiveView().currentSelection;
     }
 
     ,onObjectsSelectionChange: function(objectsDataArray){
-        this.cardContainer.getLayout().activeItem.currentSelection = objectsDataArray;
+        this.getActiveView().currentSelection = objectsDataArray;
         this.updateToolbarButtons();
     }
 
@@ -1220,7 +1232,7 @@ Ext.define('CB.browser.ViewContainer', {
 
     ,onDownloadClick: function(b, e) {
         var ids = [];
-        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+        var selection = this.getSelection();
         if(Ext.isEmpty(selection)) {
             return;
         }
@@ -1232,7 +1244,7 @@ Ext.define('CB.browser.ViewContainer', {
 
     ,onContextPreviewClick: function(b, e) {
         var ids = [];
-        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+        var selection = this.getSelection();
         if(Ext.isEmpty(selection)) {
             return;
         }
@@ -1244,7 +1256,7 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onDeleteClick: function(b, e) {
-        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+        var selection = this.getSelection();
 
         if(Ext.isEmpty(selection)) {
             return;
@@ -1268,7 +1280,7 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onRenameClick: function(b, e) {
-        this.cardContainer.getLayout().activeItem.onRenameClick(b, e);
+        this.getActiveView().onRenameClick(b, e);
     }
 
     ,onRestoreClick: function() {
@@ -1311,11 +1323,15 @@ Ext.define('CB.browser.ViewContainer', {
         if(this.actions.copy.isDisabled()) {
             return;
         }
-        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+
+        var selection = this.getSelection();
+
         if(Ext.isEmpty(selection)) {
             return;
         }
+
         var rez = [];
+
         for (var i = 0; i < selection.length; i++) {
             rez.push({
                 id: selection[i].nid
@@ -1346,15 +1362,17 @@ Ext.define('CB.browser.ViewContainer', {
         if(this.actions.permissions.isDisabled()) {
             return;
         }
-        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
-        var id = Ext.isEmpty(selection)
-            ? this.folderProperties.id
-            : Ext.valueFrom(selection[0].nid, selection[0].id);
+
+        var selection = this.getSelection()
+            ,id = Ext.isEmpty(selection)
+                ? this.folderProperties.id
+
+                : Ext.valueFrom(selection[0].nid, selection[0].id);
         App.mainViewPort.openPermissions(id);
     }
 
     ,onEditClick: function (b, e) {
-        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+        var selection = this.getSelection();
 
         if(!Ext.isEmpty(selection)) {
             var p = Ext.apply({}, selection[0]);

@@ -61,7 +61,8 @@ Ext.define('CB.Login', {
             ,keys: [{key: 13, fn: this.doLogin, scope: this}]
         });
         this.on('afterrender', this.doShow);
-        CB.Login.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
     }
 
     ,doShow: function(w) {
@@ -185,7 +186,7 @@ Ext.define('CB.VerifyPassword', {
 
         this.on('show', this.doShow, this);
 
-        CB.VerifyPassword.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
 
     ,doShow: function(w) {

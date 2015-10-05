@@ -14,14 +14,14 @@ class UserTest extends \PHPUnit_Framework_TestCase
     public function testExistance()
     {
         //delete core if maibe remained from previous failed tests
-        if (DM\User::exists($this->testName)) {
+        if (DM\Users::exists($this->testName)) {
             $this->testDelete();
         }
     }
 
     public function testCreate()
     {
-        $id = DM\User::create(
+        $id = DM\Users::create(
             array(
                 'name' => $this->testName
                 ,'password' => 'qq'
@@ -34,9 +34,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
 
     public function testRead()
     {
-        $id = DM\User::toId($this->testName);
+        $id = DM\Users::toId($this->testName);
 
-        $rez = DM\User::read($id);
+        $rez = DM\Users::read($id);
 
         $this->assertArraySubset(
             array(
@@ -51,7 +51,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 
     public function testUpdate()
     {
-        $id = DM\User::toId($this->testName);
+        $id = DM\Users::toId($this->testName);
 
         $params = array(
             'id' => $id
@@ -69,8 +69,8 @@ class UserTest extends \PHPUnit_Framework_TestCase
             ,'cid' => 1
         );
 
-        DM\User::update($params);
-        $data = DM\User::read($id);
+        DM\Users::update($params);
+        $data = DM\Users::read($id);
 
         $params['password'] = md5('aero' . $params['password']);
 
@@ -85,8 +85,8 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $params['password'] = 'b';
         $params['enabled'] = 1;
 
-        DM\User::updateByName($params);
-        $data = DM\User::read($id);
+        DM\Users::updateByName($params);
+        $data = DM\Users::read($id);
 
         $params['password'] = md5('aero' . $params['password']);
 
@@ -96,41 +96,41 @@ class UserTest extends \PHPUnit_Framework_TestCase
         );
 
         //verify password
-        $this->assertTrue(DM\User::verifyPassword($id, 'b'), 'Wrong password');
+        $this->assertTrue(DM\Users::verifyPassword($id, 'b'), 'Wrong password');
 
         //check id by mail
-        $id = DM\User::getIdByEmail('f');
+        $id = DM\Users::getIdByEmail('f');
         $this->assertTrue(is_numeric($id), 'Cant get Id by mail');
 
         //check id by recover hash
-        $id = DM\User::getIdByRecoveryHash('---');
+        $id = DM\Users::getIdByRecoveryHash('---');
         $this->assertTrue(is_numeric($id), 'Cant get Id by recover hash');
 
         //check owner
-        $this->assertTrue(DM\User::getOwnerId($id) == 1, 'different owner set');
+        $this->assertTrue(DM\Users::getOwnerId($id) == 1, 'different owner set');
     }
 
     public function testIdExists()
     {
-        $id = DM\User::toId($this->testName);
+        $id = DM\Users::toId($this->testName);
 
         $this->assertTrue(
-            DM\User::idExists($id),
+            DM\Users::idExists($id),
             'Id doesnt exist'
         );
 
         $this->assertTrue(
-            !DM\User::idExists(-$id),
+            !DM\Users::idExists(-$id),
             'Id exist'
         );
     }
 
     public function testDelete()
     {
-        $id = DM\User::toId($this->testName);
+        $id = DM\Users::toId($this->testName);
 
         $this->assertTrue(
-            DM\User::delete($id),
+            DM\Users::delete($id),
             'Cant delete'
         );
     }

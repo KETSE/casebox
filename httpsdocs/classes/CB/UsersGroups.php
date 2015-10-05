@@ -282,14 +282,14 @@ class UsersGroups
         }
 
         //check if user with such email doesn exist
-        $user_id = DM\User::getIdByEmail($p['email']);
+        $user_id = DM\Users::getIdByEmail($p['email']);
         if (!empty($user_id)) {
             throw new \Exception(L\get('UserEmailExists'));
         }
 
         /*check user existance, if user already exists but is deleted
         then its record will be used for new user */
-        $user_id = DM\User::getIdByName($p['name']);
+        $user_id = DM\Users::getIdByName($p['name']);
         if (!empty($user_id)) {
             throw new \Exception(L\get('User_exists'));
         }
@@ -307,11 +307,11 @@ class UsersGroups
             $params['password'] = $p['password'];
         }
 
-        $user_id = DM\User::getIdByName($p['name'], false);
+        $user_id = DM\Users::getIdByName($p['name'], false);
         if (!empty($user_id)) {
             //update
             $params['id'] = $user_id;
-            DM\User::update($params);
+            DM\Users::update($params);
 
             /* in case it was a deleted user we delete all old acceses */
             DB\dbQuery('DELETE FROM users_groups_association WHERE user_id = $1', $user_id) or die(DB\dbQueryError());
@@ -319,7 +319,7 @@ class UsersGroups
             /* end of in case it was a deleted user we delete all old acceses */
         } else {
             //create
-            $user_id = DM\User::create($params);
+            $user_id = DM\Users::create($params);
         }
 
         $rez = array(

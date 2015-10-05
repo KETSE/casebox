@@ -31,7 +31,8 @@ Ext.define('CB.PasteFromWord', {
                 ,{ text: Ext.MessageBox.buttonText.cancel, handler: this.doClose, scope: this}
             ]
         });
-        CB.PasteFromWord.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
 
         this.editor = this.items.getAt(0);
 

@@ -292,21 +292,28 @@ class Base implements \CB\Interfaces\TreeNode
         foreach ($cfg['data'] as $k => $v) {
             $name = $k;
             $config = null;
-            if (is_scalar($v)) {
-                $name = $v;
-                if (!empty($facetsDefinitions[$name])) {
-                    $config = $facetsDefinitions[$name];
-                }
-            } else {
+
+            if (!empty($v)) {
                 $config = $v;
+
+                if (is_scalar($v)) {
+                    if (!empty($facetsDefinitions[$v])) {
+                        $config = $facetsDefinitions[$v];
+                    } else {
+                        $config = array('type' => $v);
+                    }
+                    $name = $v;
+                    $config['name'] = $v;
+                }
+
+            } else {
+                $config = array(
+                    'name' => $k
+                    ,'type' => $k
+                );
             }
 
-            if (is_null($config)) {
-                \CB\debug('Cannot find facet config:' . var_export($name, 1) . var_export($v, 1));
-            } else {
-                $config['name'] = $name;
-                $facets[$name] = \CB\Facets::getFacetObject($config);
-            }
+            $facets[$name] = \CB\Facets::getFacetObject($config);
         }
 
         if (!empty($rp['view']['type'])) {

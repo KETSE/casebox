@@ -249,7 +249,7 @@ class Search extends Solr\Client
         // }
 
         if (!empty($p['dateStart'])) {
-            $fq[] = 'date:[' .
+            $range = ':[' .
                 Util\dateMysqlToISO($p['dateStart']) .
                 ' TO ' .
                 (empty($p['dateEnd'])
@@ -257,6 +257,7 @@ class Search extends Solr\Client
                     : Util\dateMysqlToISO($p['dateEnd'])
                 ) .
                 ']';
+            $fq[] = "date$range OR date_end$range";
         }
 
         return $fq;

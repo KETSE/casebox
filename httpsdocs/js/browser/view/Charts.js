@@ -241,7 +241,9 @@ Ext.define('CB.browser.view.Charts', {
                 ,activate: this.onActivate
             }
         });
-        CB.browser.view.Charts.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
+
         this.currentButton = this.refOwner.buttonCollection.get('barchart');
 
         this.selectedFacets = [];

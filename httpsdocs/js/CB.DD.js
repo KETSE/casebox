@@ -14,7 +14,8 @@ Ext.define('CB.DD', {
     ,action: 'copy' // copy / move / shortcut
 
     ,constructor: function(config){
-        CB.DD.superclass.constructor.call(this, config);
+        this.callParent(arguments);
+        // CB.DD.superclass.constructor.call(this, config);
     }
     /**
      * Execute a Drag and Drop operation

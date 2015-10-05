@@ -9,7 +9,8 @@ Ext.define('CB.browser.view.Interface', {
     ,viewName: 'none'
 
     ,initComponent: function(){
-        CB.browser.view.Interface.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
 
         this.enableBubble([
             'changeparams'

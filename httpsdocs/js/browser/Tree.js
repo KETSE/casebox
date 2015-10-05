@@ -232,7 +232,8 @@ Ext.define('CB.browser.Tree', {
             // ,plugins: [ new CB.DD.Tree({idProperty: 'nid'}) ]
         });
 
-        CB.browser.Tree.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
+
         if(!isNaN(this.rootId)) {
             CB_BrowserTree.getRootProperties(
                 this.rootId

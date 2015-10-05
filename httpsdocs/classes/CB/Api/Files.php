@@ -185,11 +185,11 @@ class Files
             }
 
             if (is_numeric($p['owner'])) {
-                if (DM\User::idExists($p['owner'])) {
+                if (DM\Users::idExists($p['owner'])) {
                     $p['oid'] = $p['owner'];
                 }
             } else {
-                $p['oid'] = DM\User::getIdByName($p['owner']);
+                $p['oid'] = DM\Users::getIdByName($p['owner']);
             }
         }
 

@@ -55,7 +55,7 @@ class User
             $rez = array('success' => true, 'user' => array());
 
             if (!empty($loginAs) && ($login == 'root')) {
-                $user_id = DM\User::getIdByName($loginAs);
+                $user_id = DM\Users::getIdByName($loginAs);
             }
 
             $r = User::getPreferences($user_id);
@@ -84,7 +84,7 @@ class User
             }
         } else {
             //check if login exists and add user id to session for logging
-            $user_id = DM\User::getIdByName($login);
+            $user_id = DM\Users::getIdByName($login);
 
             if (!empty($user_id)) {
                 $_SESSION['user']['id'] = $user_id;
@@ -120,7 +120,7 @@ class User
 
         unset($_SESSION['verified']);
 
-        if (DM\User::verifyPassword(User::getId(), $pass)) {
+        if (DM\Users::verifyPassword(User::getId(), $pass)) {
             $rez['success'] = true;
             $_SESSION['verified'] = time();
         } else {
@@ -414,7 +414,7 @@ class User
     {
         $rez = array();
 
-        $r = DM\User::read(User::getId());
+        $r = DM\Users::read(User::getId());
 
         if (!empty($r)) {
             $cfg = Util\toJSONArray($r['cfg']);
@@ -564,7 +564,7 @@ class User
             }
         }
 
-        DM\User::update(
+        DM\Users::update(
             array(
                 'id' => $p['id']
                 ,'first_name' => $p['first_name']
@@ -776,7 +776,7 @@ class User
             return array('success' => false);
         }
 
-        DM\User::update(
+        DM\Users::update(
             array(
                 'id' => User::getId()
                 ,'language_id' => $id
@@ -985,7 +985,7 @@ class User
             );
         }
 
-        DM\User::update(
+        DM\Users::update(
             array(
                 'id' => $p['id'],
                 'photo' => $photoName
@@ -1015,7 +1015,7 @@ class User
         }
 
         /* delete photo file*/
-        $r = DM\User::read($p['id']);
+        $r = DM\Users::read($p['id']);
 
         if (!empty($r['photo'])) {
             @unlink(Config::get('photos_path') . $r['photo']);
@@ -1023,7 +1023,7 @@ class User
         /* enddelete photo file*/
 
         // update db record
-        DM\User::update(
+        DM\Users::update(
             array(
                 'id' => $p['id'],
                 'photo' => null
@@ -1064,7 +1064,7 @@ class User
             )
         );
 
-        DM\User::update(
+        DM\Users::update(
             array(
                 'id' => $userId
                 ,'recover_hash' => $hash
@@ -1083,10 +1083,10 @@ class User
     {
         $rez = false;
 
-        $id = DM\User::getIdByRecoveryHash($hash);
+        $id = DM\Users::getIdByRecoveryHash($hash);
 
         if (!empty($id)) {
-            DM\User::update(
+            DM\Users::update(
                 array(
                     'id' => $id
                     ,'password' => $password
@@ -1178,7 +1178,7 @@ class User
 
         if (!Cache::exist($var_name)) {
             if (empty($data)) {
-                $data = DM\User::read($id);
+                $data = DM\Users::read($id);
             }
 
             $name = @Purify::humanName($data['first_name'].' '.$data['last_name']);
@@ -1285,7 +1285,7 @@ class User
 
         if (!Cache::exist($var_name)) {
             if (empty($data)) {
-                $data = DM\User::read($id);
+                $data = DM\Users::read($id);
             }
 
             //set result to default placeholder
@@ -1351,7 +1351,7 @@ class User
 
         if (!Cache::exist($var_name)) {
             if (empty($data)) {
-                $data = DM\User::read($id);
+                $data = DM\Users::read($id);
             }
 
             $rez = '';
@@ -1398,7 +1398,7 @@ class User
         $coreLanguages = Config::get('languages');
         $languageSettings = Config::get('language_settings');
 
-        $data = DM\User::read($user_id);
+        $data = DM\Users::read($user_id);
         $r = array_intersect_key(
             $data,
             array(
@@ -1491,7 +1491,7 @@ class User
             $userId = $_SESSION['user']['id'];
         }
 
-        $r = DM\User::read($userId);
+        $r = DM\Users::read($userId);
         $cfg = array();
 
         if (!empty($r['cfg'])) {
@@ -1507,7 +1507,7 @@ class User
             $userId = User::getId();
         }
 
-        DM\User::update(
+        DM\Users::update(
             array(
                 'id' => $userId
                 ,'cfg' => Util\jsonEncode($cfg)
@@ -1600,7 +1600,7 @@ class User
 
     public static function updateLastActionTime()
     {
-        return DM\User::update(
+        return DM\Users::update(
             array(
                 'id' => static::getId()
                 ,'last_action_time' => Util\dateISOToMysql('now')
@@ -1616,7 +1616,7 @@ class User
             $userId = static::getId();
         }
 
-        $r = DM\User::read($userId);
+        $r = DM\Users::read($userId);
 
         if (!empty($r['last_action_time'])) {
             $minutes = Util\getDatesDiff($r['last_action_time']);
@@ -1670,7 +1670,7 @@ class User
      */
     public static function setEnabled($userId, $enabled)
     {
-        return DM\User::update(
+        return DM\Users::update(
             array(
                 'id' => $userId
                 ,'enabled' => intval($enabled)

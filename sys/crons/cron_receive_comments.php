@@ -154,7 +154,7 @@ foreach ($mailServers as $mailConf) {
             $emailFrom = extractEmailFromText($mail['from']);   // user email
             $emailTo = extractEmailFromText($mail['to']);  // <comments@casebox.org>
 
-            $userId = DM\User::getIdByEmail($emailFrom);
+            $userId = DM\Users::getIdByEmail($emailFrom);
 
             $_SESSION['user'] = array('id' => $userId);
 

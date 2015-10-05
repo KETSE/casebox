@@ -1,7 +1,6 @@
 <?php
 namespace CB\Objects;
 
-use CB\Config;
 use CB\Util;
 use CB\User;
 use CB\Objects;
@@ -31,11 +30,11 @@ class Comment extends Object
 
         //disable default log from parent Object class
         //we'll set comments add as comment action for parent
-        Config::setFlag('disableActivityLog', true);
+        \CB\Config::setFlag('disableActivityLog', true);
 
         $rez = parent::create($p);
 
-        Config::setFlag('disableActivityLog', false);
+        \CB\Config::setFlag('disableActivityLog', false);
 
         $this->updateParentFollowers();
 
@@ -59,11 +58,11 @@ class Comment extends Object
     {
         //disable default log from parent Object class
         //we'll set comments add as comment action for parent
-        Config::setFlag('disableActivityLog', true);
+        \CB\Config::setFlag('disableActivityLog', true);
 
         $rez = parent::update($p);
 
-        Config::setFlag('disableActivityLog', false);
+        \CB\Config::setFlag('disableActivityLog', false);
 
         $p = &$this->data;
 
@@ -199,7 +198,7 @@ class Comment extends Object
         //replace users with their names
         if (in_array('user', $replacements) &&preg_match_all('/@([\w\.\-]+[\w])/', $message, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
-                $userId = DM\User::getIdByName($match[1]);
+                $userId = DM\Users::getIdByName($match[1]);
                 if (is_numeric($userId)) {
                     $userName = $match[1];
                     $message = str_replace(

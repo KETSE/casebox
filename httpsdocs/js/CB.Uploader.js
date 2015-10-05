@@ -26,7 +26,8 @@ Ext.define('CB.Uploader', {
         this.config = config || {};
         Ext.applyIf(this.config, this.defaultConfig);
 
-        CB.Uploader.superclass.constructor.call(this, config);
+        this.callParent(arguments);
+        // CB.Uploader.superclass.constructor.call(this, config);
     }
 
     ,init: function(){
@@ -709,7 +710,7 @@ Ext.define('CB.UploadWindow', {
         });
 
 
-        CB.UploadWindow.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
 
     ,onAfterRender: function(){
@@ -857,7 +858,9 @@ Ext.define('CB.UploadWindowButton', {
             ,handler: this.showUploadWindow
             ,scope: this
         });
-        CB.UploadWindowButton.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
+
         this.uploader.on('progresschange', this.onProgressChange, this);
     }
     ,showUploadWindow: function(b, e){

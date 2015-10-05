@@ -1579,7 +1579,7 @@ class Security
         if (!Cache::exist($var_name)) {
             Cache::set(
                 $var_name,
-                (DM\User::getIdByName('root') == $userId)
+                (DM\Users::getIdByName('root') == $userId)
             );
         }
 
@@ -1605,7 +1605,7 @@ class Security
      */
     public static function isUsersOwner($userId)
     {
-        return (User::getId() == DM\User::getOwnerId($userId));
+        return (User::getId() == DM\Users::getOwnerId($userId));
     }
 
     /**

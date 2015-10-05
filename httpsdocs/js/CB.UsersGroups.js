@@ -1611,7 +1611,7 @@ Ext.define('CB.ChangePasswordWindow', {
             }
         });
 
-        CB.ChangePasswordWindow.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
     ,onSubmitSuccess: function(r, e){
         this.fireEvent('passwordchanged');

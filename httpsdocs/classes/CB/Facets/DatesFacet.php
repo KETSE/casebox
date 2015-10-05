@@ -99,7 +99,7 @@ class DatesFacet extends StringsFacet
         }
     }
 
-    public function getClientData()
+    public function getClientData($options = array())
     {
         $rez = array(
             'f' => $this->field

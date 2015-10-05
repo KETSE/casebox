@@ -110,9 +110,11 @@ return array_merge(
 
             ,'//js/CB.TextEditWindow.js'
             ,'//js/CB.HtmlEditWindow.js'
-            ,'//js/CB.Facet.js'
-            ,'//js/CB.FacetText.js'
-            ,'//js/CB.FacetList.js'
+            ,'//js/facet/Base.js'
+            ,'//js/facet/Text.js'
+            ,'//js/facet/List.js'
+            ,'//js/facet/Calendar.js'
+            ,'//js/facet/UsersColor.js'
             ,'//js/CB.Clipboard.js'
             ,'//js/CB.FilterPanel.js'
 

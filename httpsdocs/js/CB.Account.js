@@ -82,7 +82,8 @@ Ext.define('CB.Account', {
                 ]
             }
         );
-        CB.Account.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
 
         /* autoclose form if no activity in 5 minutes */
         // this.autoCloseTask = new Ext.util.DelayedTask(this.destroy, this);
@@ -352,7 +353,9 @@ Ext.define('CB.ProfileForm', {
                 ,change: this.onChange
             }
         });
-        CB.ProfileForm.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
+
         this.grid = this.items.getAt(1);
 
         if(CB.DB.countries.getCount() === 0) {
@@ -740,7 +743,8 @@ Ext.define('CB.SecurityForm', {
             }
             ]
         });
-        CB.SecurityForm.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
 
         this.saveButton = this.down('#saveButton');
         this.resetButton = this.down('#resetButton');
@@ -969,7 +973,9 @@ Ext.define('CB.TSVWindow', {
                 }
             }]
         });
-        CB.TSVWindow.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
+
         this.form = this.down('form');
     }
 
@@ -1185,7 +1191,8 @@ Ext.define('CB.TSVsmsForm', {
             }
             ]
         });
-        CB.TSVsmsForm.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
     }
     ,prepareInterface: function(data){
         this.getForm().setValues(data);

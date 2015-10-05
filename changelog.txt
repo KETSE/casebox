@@ -1,3 +1,12 @@
+CaseBox 1.9.528 (2015-10-05)
+==============================
+- #8745 Enable Calendar View/Objects with new requirements
+
+Fixed Bugs:
+----------
+- #8864 CB tries to sort in pivot view and it gives Error
+- saving a search template changes its type from "search" to "template"
+
 CaseBox 1.9.527 (2015-09-28)
 ==============================
 - hide favorites panel

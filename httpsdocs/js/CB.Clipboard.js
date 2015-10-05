@@ -5,7 +5,8 @@ Ext.define('CB.Clipboard', {
     ,action: 'copy' // copy / move / shortcut
 
     ,constructor: function(config){
-        CB.Clipboard.superclass.constructor.call(this, config);
+        this.callParent(arguments);
+        // CB.Clipboard.superclass.constructor.call(this, config);
     }
 
     ,set:function(data, action) {

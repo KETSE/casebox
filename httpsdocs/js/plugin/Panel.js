@@ -86,7 +86,7 @@ Ext.define('CB.plugin.Panel', {
         } else {
             var commonInfo = r.common
                 ? r.common
-                : r.data.systemProperties.data;
+                : Ext.valueFrom(r.data.systemProperties, {}).data;
 
             Ext.apply(params, commonInfo);
 

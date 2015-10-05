@@ -27,7 +27,25 @@
 	margin-left: 5px;
 }
 
-.filter_list li { line-height:16px; padding: 3px 10px 3px 24px; background: url(i/squares.png) 5px -151px no-repeat;}
+.filter_list li {
+	line-height:16px;
+	padding: 3px 10px 3px 3px;
+}
+
+.filter_list li .tick{
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	margin-right: 5px;
+	background-image: url(i/squares.png);
+	background-position: 0 -156px;
+	background-repeat: no-repeat;
+}
+
+.filter_list .tick.active {
+	background-position: 0 -104px
+}
+
 .filter_list li.toggle {
 	padding: 3px 10px 0 0;
 	text-align: right;
@@ -40,10 +58,17 @@
 .facet-expanded .filter_list .more { display: block;}
 .facet-expanded .filter_list .toggle {display: none;}
 
-.filter_list .active { background-position: 5px -99px }
 .filter_list a {text-decoration: none; color: #555; }
 .filter_list a:hover {text-decoration: underline; color: #000; }
-.activeFilters .filter_list li{margin-left:0;}
+
+.activeFilters .filter_list li{
+	margin-left:0;
+	background-image: url(i/squares.png);
+	padding: 3px 10px 3px 24px;
+	background-position: 5px -151px;
+	background-repeat: no-repeat;
+}
+
 .activeFilters .filter_list li, .activeFilters .filter_list li a { background-position: 5px 6px; color: #C1272D; }
 .activeFilters .filter_list li.reset, .activeFilters .filter_list li.reset a { background-position: 5px -47px; color: #676767; }
 .filter_list li span{

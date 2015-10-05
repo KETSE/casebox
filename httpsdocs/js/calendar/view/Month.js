@@ -10,14 +10,14 @@
 Ext.define('Ext.calendar.view.Month', {
     extend: 'Ext.calendar.view.AbstractCalendar',
     alias: 'widget.monthview',
-    
+
     requires: [
         'Ext.XTemplate',
         'Ext.calendar.template.Month',
         'Ext.calendar.util.WeekEventRenderer',
         'Ext.calendar.view.MonthDayDetail'
     ],
-    
+
     /**
      * @cfg {Boolean} showTime
      * True to display the current time in today's box in the calendar, false to not display it (defautls to true)
@@ -35,14 +35,14 @@ Ext.define('Ext.calendar.view.Month', {
     todayText: 'Today',
     /**
      * @cfg {Boolean} showHeader
-     * True to display a header beneath the navigation bar containing the week names above each week's column, false not to 
+     * True to display a header beneath the navigation bar containing the week names above each week's column, false not to
      * show it and instead display the week names in the first row of days in the calendar (defaults to false).
      */
     showHeader: false,
     /**
      * @cfg {Boolean} showWeekLinks
      * True to display an extra column before the first day in the calendar that links to the {@link Ext.calendar.WeekView view}
-     * for each individual week, false to not show it (defaults to false). If true, the week links can also contain the week 
+     * for each individual week, false to not show it (defaults to false). If true, the week links can also contain the week
      * number depending on the value of {@link #showWeekNumbers}.
      */
     showWeekLinks: false,
@@ -77,7 +77,7 @@ Ext.define('Ext.calendar.view.Month', {
      * Fires after the user clicks within the view container and not on an event element
      * @param {Ext.calendar.view.Month} this
      * @param {Date} dt The date/time that was clicked on
-     * @param {Boolean} allday True if the day clicked on represents an all-day box, else false. Clicks within the 
+     * @param {Boolean} allday True if the day clicked on represents an all-day box, else false. Clicks within the
      * MonthView always return true for this param.
      * @param {Ext.core.Element} el The Element that was clicked on
      */
@@ -112,7 +112,7 @@ Ext.define('Ext.calendar.view.Month', {
         Ext.destroy(this.ddSelector);
         Ext.destroy(this.dragZone);
         Ext.destroy(this.dropZone);
-        
+
         this.callParent(arguments);
     },
 
@@ -154,7 +154,7 @@ Ext.define('Ext.calendar.view.Month', {
                 evTbl = this.el.select('.ext-cal-evt-tbl'),
                 wkLinkW = this.el.down('.ext-cal-week-link').getWidth(),
                 w = this.el.getWidth()-wkLinkW;
-            
+
             hd.setWidth(w);
             bgTbl.setWidth(w);
             evTbl.setWidth(w);
@@ -219,18 +219,18 @@ Ext.define('Ext.calendar.view.Month', {
 
             tpl = !(Ext.isIE7m || this.operaLT11) ?
             new Ext.XTemplate(
-                '<div id="{_elId}" class="{_selectorCls} {_colorCls} {spanCls} ext-cal-evt ext-cal-evr">',
+                '<div id="{_elId}" class="{_selectorCls} {_colorCls} {spanCls} ext-cal-evt ext-cal-evr {cls}" style="{style}">',
                     body,
                 '</div>'
             )
             : new Ext.XTemplate(
                 '<tpl if="_renderAsAllDay">',
-                    '<div id="{_elId}" class="{_selectorCls} {spanCls} {_colorCls} {_operaLT11} ext-cal-evo">',
+                    '<div id="{_elId}" class="{_selectorCls} {spanCls} {_colorCls} {_operaLT11} ext-cal-evo {cls}" style="{style}">',
                         '<div class="ext-cal-evm">',
                             '<div class="ext-cal-evi">',
                 '</tpl>',
                 '<tpl if="!_renderAsAllDay">',
-                    '<div id="{_elId}" class="{_selectorCls} {_colorCls} {_operaLT11} ext-cal-evt ext-cal-evr">',
+                    '<div id="{_elId}" class="{_selectorCls} {_colorCls} {_operaLT11} ext-cal-evt ext-cal-evr {cls}" style="{style}">',
                 '</tpl>',
                     body,
                 '<tpl if="_renderAsAllDay">',
@@ -317,7 +317,7 @@ Ext.define('Ext.calendar.view.Month', {
             padding = this.getViewPadding(),
             w = (box.width - padding.width) / this.dayCount,
             h = (box.height - padding.height) / this.getWeekCount();
-            
+
         if(contentOnly){
             // measure last row instead of first in case text wraps in first row
             var hd = this.el.select('.ext-cal-dtitle').last().parent('tr');
@@ -325,7 +325,7 @@ Ext.define('Ext.calendar.view.Month', {
         }
         return {height: h, width: w};
     },
-    
+
     // private
     getEventHeight : function() {
         if (!this.eventHeight) {
@@ -339,16 +339,16 @@ Ext.define('Ext.calendar.view.Month', {
         }
         return this.eventHeight;
     },
-    
+
     // private
     getMaxEventsPerDay : function(){
         var dayHeight = this.getDaySize(true).height,
             eventHeight = this.getEventHeight(),
             max = Math.max(Math.floor((dayHeight - eventHeight) / eventHeight), 0);
-        
+
         return max;
     },
-    
+
     // private
     getViewPadding: function(sides) {
         var sides = sides || 'tlbr',
@@ -357,7 +357,7 @@ Ext.define('Ext.calendar.view.Month', {
             right = sides.indexOf('r') > -1,
             height = this.showHeader && top ? this.el.select('.ext-cal-hd-days-tbl').first().getHeight() : 0,
             width = 0;
-        
+
         if (this.isHeaderView) {
             if (left) {
                 width = this.el.select('.ext-cal-gutter').first().getWidth();
@@ -369,7 +369,7 @@ Ext.define('Ext.calendar.view.Month', {
         else if (this.showWeekLinks && left) {
             width = this.el.select('.ext-cal-week-link').first().getWidth();
         }
-        
+
         return {
             height: height,
             width: width
@@ -403,7 +403,7 @@ Ext.define('Ext.calendar.view.Month', {
     // private
     onInitDrag: function() {
         this.callParent(arguments);
-        
+
         if (this.dayOverClass) {
             Ext.select(this.daySelector).removeCls(this.dayOverClass);
         }
@@ -450,7 +450,7 @@ Ext.define('Ext.calendar.view.Month', {
         var p = this.detailPanel,
             dayEl = this.getDayEl(dt),
             box = dayEl.getBox();
-        
+
         p.setWidth(Math.max(box.width, 220));
         p.show();
         p.getEl().alignTo(dayEl, 't-t?');
@@ -459,7 +459,7 @@ Ext.define('Ext.calendar.view.Month', {
     // private
     onHide: function() {
         this.callParent(arguments);
-        
+
         if (this.detailPanel) {
             this.detailPanel.hide();
         }

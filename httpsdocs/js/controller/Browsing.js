@@ -75,6 +75,7 @@ Ext.define('CB.controller.Browsing', {
 
         //add filter panel listeners
         fp.on('change', this.onFiltersChange, this);
+        fp.on('dateselect', this.onFilterPanelDateSelect, this);
 
         //add object panel listeners
         op.on('expand', this.onOPExpand, this);
@@ -260,6 +261,25 @@ Ext.define('CB.controller.Browsing', {
      */
     ,onFiltersChange: function(filters){
         this.VC.changeSomeParams({filters: filters});
+    }
+
+    ,onFilterPanelDateSelect: function(date){
+        var c = this.VC.getActiveView().calendar
+            ,av = c.getActiveView()
+            ,dt = date.toISOString()
+            ,sameDate = (c.lastClickedDate == dt);
+
+        // clog('sameDate', sameDate, c.lastClickedDate.toISOString(), date);
+
+        if(!sameDate || (av.xtype != 'dayview')) {
+            c.onDayClick();
+            c.setStartDate(date);
+        } else {
+            c.onWeekClick();
+            c.setStartDate(date);
+        }
+
+        c.lastClickedDate = dt;
     }
 
 

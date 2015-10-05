@@ -5,7 +5,7 @@ namespace CB\DataModel;
 use CB\DB;
 use CB\Util;
 
-class User extends Base
+class Users extends Base
 {
     /**
      * database table name
@@ -311,6 +311,30 @@ class User extends Base
 
         if ($r = $res->fetch_assoc()) {
             $rez = true;
+        }
+        $res->close();
+
+        return $rez;
+    }
+
+    /**
+     * read all user records
+     * @return array
+     */
+    public static function readAll()
+    {
+        $rez = array();
+
+        $sql = 'SELECT *
+            FROM `' . static::getTableName() . '`
+            WHERE `type` = $1';
+
+        $res = DB\dbQuery($sql, static::$type) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            $r['cfg'] = Util\toJSONArray($r['cfg']);
+            $r['data'] = Util\toJSONArray($r['data']);
+            $rez[] = $r;
         }
         $res->close();
 

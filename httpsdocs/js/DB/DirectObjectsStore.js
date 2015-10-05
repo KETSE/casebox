@@ -43,7 +43,6 @@ Ext.define('CB.DB.DirectObjectsStore', {
 
         // Ext.apply(this, params);
         this.callParent([params]);
-        // CB.DB.DirectObjectsStore.superclass.constructor.call(this, params);
 
         this.getTexts = getStoreNames;
     }

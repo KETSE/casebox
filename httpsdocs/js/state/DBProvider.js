@@ -4,7 +4,8 @@ Ext.define('CB.state.DBProvider', {
     extend: 'Ext.state.Provider'
 
     ,constructor: function(config){
-        CB.state.DBProvider.superclass.constructor.call(this, arguments);
+        // this.callParent(arguments);
+        // CB.state.DBProvider.superclass.constructor.call(this, arguments);
 
         Ext.apply(
             this
@@ -18,6 +19,7 @@ Ext.define('CB.state.DBProvider', {
 
         Ext.apply(this, config);
 
+        this.callParent(arguments);
         CB.state.DBProvider.superclass.constructor.call(this);
 
         this.load();

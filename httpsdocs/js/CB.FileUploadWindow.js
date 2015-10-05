@@ -82,7 +82,8 @@ Ext.define('CB.FilesConfirmationWindow', {
             items: items
             ,buttons: buttons
         });
-        CB.FilesConfirmationWindow.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
 
         this.response = 'cancel';
     }
