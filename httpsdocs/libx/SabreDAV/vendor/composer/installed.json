@@ -107,17 +107,17 @@
     },
     {
         "name": "sabre/http",
-        "version": "4.0.0",
-        "version_normalized": "4.0.0.0",
+        "version": "4.1.0",
+        "version_normalized": "4.1.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/fruux/sabre-http.git",
-            "reference": "3b3ba70329e0ffc0a4d9855ca7d7583ab82b1023"
+            "reference": "5874c9c449e690242cf32884da9d32a3369a2c78"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/fruux/sabre-http/zipball/3b3ba70329e0ffc0a4d9855ca7d7583ab82b1023",
-            "reference": "3b3ba70329e0ffc0a4d9855ca7d7583ab82b1023",
+            "url": "https://api.github.com/repos/fruux/sabre-http/zipball/5874c9c449e690242cf32884da9d32a3369a2c78",
+            "reference": "5874c9c449e690242cf32884da9d32a3369a2c78",
             "shasum": ""
         },
         "require": {
@@ -133,7 +133,7 @@
         "suggest": {
             "ext-curl": " to make http requests with the Client class"
         },
-        "time": "2015-05-20 09:05:01",
+        "time": "2015-09-04 21:56:22",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -164,17 +164,17 @@
     },
     {
         "name": "sabre/xml",
-        "version": "1.1.0",
-        "version_normalized": "1.1.0.0",
+        "version": "1.2.0",
+        "version_normalized": "1.2.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/fruux/sabre-xml.git",
-            "reference": "185447d1ec37dc460d06e96697db10a944218286"
+            "reference": "a3eeef9f3f13ee42503a1e06e5df3a6fc95b479b"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/fruux/sabre-xml/zipball/185447d1ec37dc460d06e96697db10a944218286",
-            "reference": "185447d1ec37dc460d06e96697db10a944218286",
+            "url": "https://api.github.com/repos/fruux/sabre-xml/zipball/a3eeef9f3f13ee42503a1e06e5df3a6fc95b479b",
+            "reference": "a3eeef9f3f13ee42503a1e06e5df3a6fc95b479b",
             "shasum": ""
         },
         "require": {
@@ -189,7 +189,7 @@
             "phpunit/phpunit": "*",
             "sabre/cs": "~0.0.2"
         },
-        "time": "2015-06-29 22:18:41",
+        "time": "2015-08-30 07:57:48",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -220,17 +220,17 @@
     },
     {
         "name": "sabre/vobject",
-        "version": "3.4.6",
-        "version_normalized": "3.4.6.0",
+        "version": "3.4.7",
+        "version_normalized": "3.4.7.0",
         "source": {
             "type": "git",
             "url": "https://github.com/fruux/sabre-vobject.git",
-            "reference": "c2606c5985aabd14f37d444e494d72f67b71d290"
+            "reference": "7b3690545451159fc608dfac6696110f6770ff5d"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/fruux/sabre-vobject/zipball/c2606c5985aabd14f37d444e494d72f67b71d290",
-            "reference": "c2606c5985aabd14f37d444e494d72f67b71d290",
+            "url": "https://api.github.com/repos/fruux/sabre-vobject/zipball/7b3690545451159fc608dfac6696110f6770ff5d",
+            "reference": "7b3690545451159fc608dfac6696110f6770ff5d",
             "shasum": ""
         },
         "require": {
@@ -241,7 +241,7 @@
             "phpunit/phpunit": "*",
             "squizlabs/php_codesniffer": "*"
         },
-        "time": "2015-08-06 20:27:33",
+        "time": "2015-09-04 15:17:58",
         "bin": [
             "bin/vobject",
             "bin/generate_vcards"
@@ -288,17 +288,17 @@
     },
     {
         "name": "sabre/dav",
-        "version": "3.0.3",
-        "version_normalized": "3.0.3.0",
+        "version": "3.0.5",
+        "version_normalized": "3.0.5.0",
         "source": {
             "type": "git",
             "url": "https://github.com/fruux/sabre-dav.git",
-            "reference": "a4b1e1c49ac4f3768ae0446acb085d4c6f178c5e"
+            "reference": "69c1b5c9c19e52e2da15dc8920fce9ea9df9abcc"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/fruux/sabre-dav/zipball/a4b1e1c49ac4f3768ae0446acb085d4c6f178c5e",
-            "reference": "a4b1e1c49ac4f3768ae0446acb085d4c6f178c5e",
+            "url": "https://api.github.com/repos/fruux/sabre-dav/zipball/69c1b5c9c19e52e2da15dc8920fce9ea9df9abcc",
+            "reference": "69c1b5c9c19e52e2da15dc8920fce9ea9df9abcc",
             "shasum": ""
         },
         "require": {
@@ -327,7 +327,7 @@
             "ext-curl": "*",
             "ext-pdo": "*"
         },
-        "time": "2015-08-06 20:49:58",
+        "time": "2015-09-15 19:24:48",
         "bin": [
             "bin/sabredav",
             "bin/naturalselection"
