@@ -23,13 +23,6 @@ Ext.define('CB.object.edit.Window', {
         this.data = Ext.apply({}, this.config.data);
         delete this.data.html;
 
-        if(Ext.isEmpty(this.data.template_id)) {
-            return Ext.Msg.alert(
-                'Error opening object'
-                ,'Template should be specified for object window to load.'
-            );
-        }
-
         this.updateWindowTitle();
 
         this.objectsStore = new CB.DB.DirectObjectsStore({

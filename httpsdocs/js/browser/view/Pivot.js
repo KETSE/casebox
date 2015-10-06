@@ -471,7 +471,7 @@ Ext.define('CB.browser.view.Pivot',{
         Ext.iterate(
             this.data.facets
             ,function(key, val, o) {
-                data[key] = CB.FacetList.prototype.getFacetData(key, val.items);
+                data[key] = CB.facet.List.prototype.getFacetData(key, val.items);
 
                 for (var i = 0; i < data[key].length; i++) {
                     if(Ext.isObject(data[key][i].items)) {

@@ -604,21 +604,23 @@ function initApp() {
         var w = App.openWindow(wndCfg)
             ,winHeight = window.innerHeight;
 
-        if((winHeight > 0) && (w.getHeight() > winHeight)) {
-            w.setHeight(winHeight - 20);
-        }
-
-        if(templateType == 'file') {
-            w.center();
-
-            if(config.name && (detectFileEditor(config.name) !== false)) {
-                w.maximize();
+        if(w) {
+            if((winHeight > 0) && (w.getHeight() > winHeight)) {
+                w.setHeight(winHeight - 20);
             }
-        } else if(!w.existing) {
-            App.alignWindowNext(w);
-        }
 
-        delete w.existing;
+            if(templateType == 'file') {
+                w.center();
+
+                if(config.name && (detectFileEditor(config.name) !== false)) {
+                    w.maximize();
+                }
+            } else if(!w.existing) {
+                App.alignWindowNext(w);
+            }
+
+            delete w.existing;
+        }
     };
 
     App.openWindow = function(wndCfg) {
@@ -631,10 +633,17 @@ function initApp() {
             w.existing = true;
 
         } else {
-            w = Ext.create(wndCfg);
-            w.show();
+            if(Ext.isEmpty(wndCfg.data.template_id)) {
+                Ext.Msg.alert(
+                    'Error opening object'
+                    ,'Template should be specified for object window to load.'
+                );
+            } else {
+                w = Ext.create(wndCfg);
+                w.show();
 
-            w.taskButton = App.mainStatusBar.addTaskButton(w);
+                w.taskButton = App.mainStatusBar.addTaskButton(w);
+            }
         }
 
         return w;

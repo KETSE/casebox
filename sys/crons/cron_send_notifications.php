@@ -62,6 +62,7 @@ foreach ($users as $uid => $u) {
     if ($sendType == false) {
         continue;
     }
+
     $lang = $languages[$u['language_id']-1];
 
     if (filter_var($u['email'], FILTER_VALIDATE_EMAIL)) {

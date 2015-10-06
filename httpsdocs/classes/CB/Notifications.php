@@ -60,6 +60,7 @@ class Notifications
             : intval($p['fromId']);
 
         $rez['data'] = $this->getRecords($p);
+        $rez['lastSeenId'] = User::getUserConfigParam('lastSeenActionId', 0);
 
         return $rez;
     }

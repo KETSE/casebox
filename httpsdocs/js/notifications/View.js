@@ -125,7 +125,8 @@ Ext.define('CB.notifications.View', {
         var visible = this.getEl().isVisible(true);
         this.store.each(
             function(r) {
-                r.set('seen', visible || (r.get('action_id') <= this.lastSeenActionId));
+                var seen = visible || (r.get('action_id') <= this.lastSeenActionId);
+                r.set('seen', seen);
             }
             ,this
         );
@@ -334,7 +335,7 @@ Ext.define('CB.notifications.View', {
             ,this
         );
 
-        this.checkNotificationsTask.delay(1000* 20); //2 minutes
+        this.checkNotificationsTask.delay(1000 * 20); //20 seconds
     }
 
     ,processGetNew: function(r, e) {
@@ -357,11 +358,18 @@ Ext.define('CB.notifications.View', {
                 );
             }
 
+            this.grid.getView().refresh();
+
             if(this.getEl().isVisible(true)) {
                 this.onActivateEvent();
             } else {
                 this.updateSeenRecords();
             }
+        }
+
+        if(r.lastSeenId && (r.lastSeenId > this.lastSeenActionId)) {
+            this.lastSeenActionId = r.lastSeenId;
+            this.updateSeenRecords();
         }
     }
 

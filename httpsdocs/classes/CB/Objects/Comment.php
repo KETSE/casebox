@@ -43,6 +43,7 @@ class Comment extends Object
             array(
                 'new' => $this->getParentObject()
                 ,'comment' => $p['data']['_title']
+                ,'mentioned' => $this->lastMentionedUserIds
             )
         );
 
@@ -73,6 +74,7 @@ class Comment extends Object
             array(
                 'new' => Objects::getCachedObject($p['pid'])
                 ,'comment' => $p['data']['_title']
+                ,'mentioned' => $this->lastMentionedUserIds
             )
         );
 
@@ -109,7 +111,8 @@ class Comment extends Object
     {
         $p = &$this->data;
 
-        $posd = $this->getParentObject()->getSysData();
+        $po = $this->getParentObject();
+        $posd = $po->getSysData();
 
         $newUserIds = array();
 
@@ -128,8 +131,8 @@ class Comment extends Object
         }
 
         //analize comment text and get referenced users
-        $uids = Util\getReferencedUsers($p['data']['_title']);
-        foreach ($uids as $uid) {
+        $this->lastMentionedUserIds = Util\getReferencedUsers($p['data']['_title']);
+        foreach ($this->lastMentionedUserIds as $uid) {
             if (!in_array($uid, $wu)) {
                 $newUserIds[] = $uid;
             }
@@ -145,8 +148,7 @@ class Comment extends Object
         }
 
         //always update sys_data to change lastComment date
-        $this->getParentObject()->updateSysData($posd);
-
+        $po->updateSysData($posd);
     }
 
     /**

@@ -224,4 +224,13 @@ Ext.define('CB.browser.view.ActivityStream',{
             );
         }
     }
+
+    /**
+     * called from view container when reload is clicked
+     * @return void
+     */
+    ,onContainerReloadClick: function(params) {
+        delete params.start;
+        delete params.page;
+    }
 });

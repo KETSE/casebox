@@ -658,6 +658,8 @@ Ext.define('CB.browser.ViewContainer', {
 
     ,onCardItemChangeClick: function(b, e) {
         delete this.params.view;
+        delete this.params.start;
+        delete this.params.page;
 
         this.onSetToolbarItems(null);
 
@@ -673,6 +675,12 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onReloadClick: function(){
+        var av = this.getActiveView();
+
+        if(av.onContainerReloadClick) {
+            av.onContainerReloadClick(this.params);
+        }
+
         if(Ext.isEmpty(this.reloadTask)) {
             this.reloadTask = new Ext.util.DelayedTask(this.reloadView, this);
         }

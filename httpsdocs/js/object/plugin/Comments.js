@@ -27,7 +27,7 @@ Ext.define('CB.object.plugin.Comments', {
 
         var tpl = new Ext.XTemplate(
             '<table class="block-plugin" style="margin:0">'
-            ,'<div class="load-more click">' + L.ViewMore + '</div>'
+            ,'<div class="load-more click" title="' + L.MoreCommentsHint +'">' + L.ViewMore + '</div>'
             ,'<tpl for=".">'
             ,'<tr>'
             ,'    <td class="obj">'
@@ -186,7 +186,12 @@ Ext.define('CB.object.plugin.Comments', {
 
         this.loadedData.data = r.data.concat(this.loadedData.data);
 
+        var scrollable = this.up('panel').getScrollable()
+            ,scrollPosition = scrollable.getPosition();
+
         this.onLoadData(this.loadedData, e);
+
+        scrollable.scrollTo(scrollPosition);
     }
 
     ,onGetDraftIdCallback: function(draftId) {
@@ -295,9 +300,11 @@ Ext.define('CB.object.plugin.Comments', {
         var el = e.getTarget('.load-more');
 
         if(el) {
-            e.stopEvent();
-            this.onLoadMoreClick(e);
-            return;
+            el = Ext.get(el);
+            if(!el.hasListener('click')) {
+                e.stopEvent();
+                this.onLoadMoreClick(e);
+            }
         }
     }
 
@@ -447,7 +454,7 @@ Ext.define('CB.object.plugin.Comments', {
      */
     ,onShowAllClick: function(record, item, index) {
         item.children[1].setAttribute('class', 'comment comment-expanded');
-        this.updateLayout();
+        // this.updateLayout();
     }
 
     /**
@@ -468,7 +475,6 @@ Ext.define('CB.object.plugin.Comments', {
         if(Ext.isEmpty(el)) {
             return;
         }
-
         var divs = dv.getEl().query('td.comment');
 
         //iterate comments and see if any exceeds default height
@@ -479,6 +485,6 @@ Ext.define('CB.object.plugin.Comments', {
             }
         }
 
-        this.updateLayout();
+        // this.updateLayout();
     }
 });
