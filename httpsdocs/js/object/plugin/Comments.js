@@ -8,8 +8,8 @@ Ext.define('CB.object.plugin.Comments', {
         xtype: 'CBFieldComment'
     }
 
-    ,initComponent: function(config){
-
+    ,initComponent: function(config)
+{
         this.actions = {
             edit: new Ext.Action({
                 text: L.Edit
@@ -27,7 +27,9 @@ Ext.define('CB.object.plugin.Comments', {
 
         var tpl = new Ext.XTemplate(
             '<table class="block-plugin" style="margin:0">'
-            ,'<div class="load-more click" title="' + L.MoreCommentsHint +'">' + L.ViewMore + '</div>'
+            ,'<div class="load-more click">' + L.MoreCommentsHint
+            ,'  <span class="fr cG">{[this.totalText]}</span>'
+            ,'</div>'
             ,'<tpl for=".">'
             ,'<tr>'
             ,'    <td class="obj">'
@@ -123,7 +125,7 @@ Ext.define('CB.object.plugin.Comments', {
         } else {
             this.removeCls('have-more-items');
         }
-
+        this.dataView.tpl.totalText = r.data.length + ' ' + L.of + ' ' + r.total;
         this.dataView.store.loadData(r.data);
 
         this.attachElementsEvents();
@@ -454,7 +456,7 @@ Ext.define('CB.object.plugin.Comments', {
      */
     ,onShowAllClick: function(record, item, index) {
         item.children[1].setAttribute('class', 'comment comment-expanded');
-        // this.updateLayout();
+        this.updateLayout();
     }
 
     /**
@@ -485,6 +487,6 @@ Ext.define('CB.object.plugin.Comments', {
             }
         }
 
-        // this.updateLayout();
+        this.updateLayout();
     }
 });

@@ -40,8 +40,6 @@ Ext.define('CB.browser.view.Grid', {
                         rez += ' <span class="fs9">&hellip;</span>';
                         // rez += '<img class="click icon-arrow3" src="'+Ext.BLANK_IMAGE_URL+'" />';
                     }
-                    vi = getVersionsIcon(r.get('versions'));
-                    if(!Ext.isEmpty(vi)) rez = '<span class="ver_count ' + vi + '" title="'+L.FileVersionsCount+'">&nbsp;</span>'+ rez;
 
                     return rez;
                 }

@@ -59,7 +59,8 @@ Ext.define('CB.object.ViewContainer', {
                         ,editobject: this.onEditObjectEvent
                         ,editmeta: this.onEditObjectEvent
 
-                        ,loaded: this.onCardItemLoaded
+                        ,loaded: this.onPluginsContainerLoaded
+                        // ,loaded: this.onCardItemLoaded
                     }
                 },{
                     xtype: 'CBObjectPreview'
@@ -505,6 +506,10 @@ Ext.define('CB.object.ViewContainer', {
         this.onViewChange();
     }
 
+    ,onPluginsContainerLoaded: function(cmp, params) {
+        this.loadedData.subscription = params.subscription;
+        this.onCardItemLoaded(cmp);
+    }
     /**
      * adjustments on view loaded
      * @param  object item
@@ -601,7 +606,7 @@ Ext.define('CB.object.ViewContainer', {
         ti.tbar.star = {};
         ti.tbar.unstar = {};
 
-        var subscription = Ext.valueFrom(ti.tbar['subscription'], 'ignore');
+        var subscription = Ext.valueFrom(this.loadedData.subscription, 'ignore');
 
         this.actions.notifyOn.setHidden(subscription == 'watch');
         this.actions.notifyOff.setHidden(subscription == 'ignore');

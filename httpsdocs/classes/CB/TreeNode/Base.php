@@ -196,7 +196,7 @@ class Base implements \CB\Interfaces\TreeNode
                     }
 
                     $rez['sort'] = null;
-                    $rez['rows'] = 0;
+                    // $rez['rows'] = 0;
                     break;
 
                 default: // grid
@@ -323,11 +323,11 @@ class Base implements \CB\Interfaces\TreeNode
             $rows = false;
             $cols = false;
 
-            if (!empty($v['rows']['facet'])) {
-                $rows = $v['rows']['facet'];
+            if (!empty($v['rows']['facet']) && !empty($facets[$v['rows']['facet']])) {
+                $rows = $facets[$v['rows']['facet']];
             }
-            if (!empty($v['cols']['facet'])) {
-                $cols = $v['cols']['facet'];
+            if (!empty($v['cols']['facet']) && !empty($facets[$v['cols']['facet']])) {
+                $cols = $facets[$v['cols']['facet']];
             }
 
             if (($rp['view']['type'] == 'pivot') && (sizeof($facets) > 1)) {

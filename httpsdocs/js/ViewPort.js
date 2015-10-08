@@ -95,6 +95,7 @@ Ext.define('CB.ViewPort', {
                 ,arrowVisible: false
                 ,cls: 'user-menu-button'
                 ,iconCls: 'bgs32'
+                ,menuAlign: 'bl-br'
                 ,menu: []
                 ,name: 'userMenu'
             }
@@ -282,6 +283,7 @@ Ext.define('CB.ViewPort', {
                 ,iconCls: 'im-create-negative'
                 ,disabled: true
                 ,scale: 'large'
+                ,menuAlign: 'tl-tr'
                 ,menu: [
                 ]
             })
@@ -491,6 +493,7 @@ Ext.define('CB.ViewPort', {
                     ,arrowVisible: false
                     ,hideOnClick: false
                     ,scale: 'large'
+                    ,menuAlign: 'bl-br'
                     ,menu: managementItems
                 }
             );

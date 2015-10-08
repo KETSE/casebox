@@ -25,6 +25,7 @@ Ext.define('CB.plugin.Search.Button', {
             ,allowDepress: false
             ,hidden: true
             ,width: 20
+            ,menuAlign: 'tl-tr'
             ,menu: []
             // ,scope: owner
             // ,handler: this.onButtonClick

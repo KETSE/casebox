@@ -80,9 +80,7 @@ Ext.define('CB.object.plugin.SystemProperties', {
 
     ,getContainerToolbarItems: function() {
         rez = {
-            tbar: {
-                'subscription': this.data.subscription
-            }
+            tbar: {}
             ,menu: {}
         };
 

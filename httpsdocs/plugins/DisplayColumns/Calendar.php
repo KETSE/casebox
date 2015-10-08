@@ -8,6 +8,11 @@ class Calendar extends Base
 
     protected $fromParam = 'calendar';
 
+    public function onBeforeSolrQuery(&$p)
+    {
+        $p['rows'] = 500;
+    }
+
     public function onSolrQuery(&$p)
     {
         $result = &$p['result'];

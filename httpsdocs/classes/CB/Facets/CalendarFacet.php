@@ -9,6 +9,11 @@ class CalendarFacet extends StringsFacet
         return \CB\L\get('Calendar');
     }
 
+    public function getSolrParams()
+    {
+        return array();
+    }
+
     public function getClientData($options = array())
     {
         $rez = parent::getClientData();

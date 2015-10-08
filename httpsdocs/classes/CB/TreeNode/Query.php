@@ -50,6 +50,8 @@ class Query extends Base
     protected function getChildNodes()
     {
         $p = $this->requestParams;
+        unset($p['facets']);
+
         $fq = empty($this->config['fq'])
             ? array()
             : $this->config['fq'];
