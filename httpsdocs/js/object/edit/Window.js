@@ -1167,6 +1167,7 @@ Ext.define('CB.object.edit.Window', {
 
         var id = r.data.id;
         this.data.id = id;
+        this.data.pid = r.data.pid;
 
         //update loadedData.id of the plugins container so it will reload automaticly
         //on fileuploaded event

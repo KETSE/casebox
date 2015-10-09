@@ -82,6 +82,10 @@ class DBProvider
 
         if (!empty($p['params']['search']['template_id'])) {
             $guid = 'template_' . $p['params']['search']['template_id'];
+
+        } elseif (!empty($p['params']['query'])) {
+            $guid = 'search';
+
         } else {
             $path = empty($p['params']['path'])
                 ? $p['params']['id']

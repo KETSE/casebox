@@ -474,11 +474,7 @@ class Base implements \CB\Interfaces\TreeNode
 
         //its a config reference, get it from config
         if (!empty($rez['data']) && is_scalar($rez['data'])) {
-            $conf = \CB\Config::get('DCConfigs');
-
-            $rez['data'] = empty($conf[$rez['data']])
-                ? array()
-                : $conf[$rez['data']];
+            $rez['data'] = \CB\Config::getDCConfig($rez['data']);
         }
 
         return $rez;

@@ -1,3 +1,14 @@
+CaseBox 1.9.532 (2015-10-09)
+==============================
+- #8006 Grid DC config management.
+  Added search_DC config.
+
+Fixed Bugs:
+----------
+- #9033 Opening the Notifications panel when the Red mark appears will not show new notifications
+- #8935 Error with "Sort ascending"
+- #8860 Objects with "defaultPid" in tmpl are not created under that Pid, but directly in Tree
+
 CaseBox 1.9.531 (2015-10-07)
 ==============================
 - #8618 Popup menu for LeftRibbon should appear on the right of buttons, not below

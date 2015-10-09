@@ -198,7 +198,7 @@ class Object
 
         $this->id = DB\dbLastInsertId();
 
-        if(!isset($this->id) || ! (intval($this->id) >0) ) {
+        if (!isset($this->id) || ! (intval($this->id) >0) ) {
             trigger_error('Error on create object : '.\CB\Cache::get('lastSql'), E_USER_ERROR);
         }
 

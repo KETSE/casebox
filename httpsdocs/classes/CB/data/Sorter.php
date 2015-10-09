@@ -68,8 +68,9 @@ class Sorter
     // asText - Removes any tags and converts the value to a string
     public static function asTextAsc($a, $b)
     {
-        $a = @strip_tags($a[Sorter::$sortField]);
-        $b = @strip_tags($b[Sorter::$sortField]);
+        $f = Sorter::$sortField;
+        $a[$f] = @strip_tags($a[$f]);
+        $b[$f] = @strip_tags($b[$f]);
 
         return Sorter::asStringAsc($a, $b);
     }
@@ -78,14 +79,13 @@ class Sorter
     {
         return Sorter::asTextAsc($b, $a);
     }
+
     // asUCText - Removes any tags and converts the value to an uppercase string
     public static function asUCTextAsc($a, $b)
     {
-        $a = @strip_tags($a[Sorter::$sortField]);
-        $b = @strip_tags($b[Sorter::$sortField]);
-
-        $a = mb_strtoupper($a);
-        $b = mb_strtoupper($b);
+        $f = Sorter::$sortField;
+        $a[$f] = mb_strtoupper(@strip_tags($a[$f]));
+        $b[$f] = mb_strtoupper(@strip_tags($b[$f]));
 
         return Sorter::asStringAsc($a, $b);
     }
@@ -119,17 +119,11 @@ class Sorter
     // asUCString - Converts the value to an uppercase string
     public static function asUCStringAsc($a, $b)
     {
-        $a = @mb_strtoupper($a[Sorter::$sortField]);
-        $b = @mb_strtoupper($b[Sorter::$sortField]);
+        $f = Sorter::$sortField;
+        $a[$f] = @mb_strtoupper($a[$f]);
+        $b[$f] = @mb_strtoupper($b[$f]);
 
-        $rez = Sorter::asStringAsc(
-            array(
-                Sorter::$sortField => $a
-            ),
-            array(
-                Sorter::$sortField => $b
-            )
-        );
+        $rez = Sorter::asStringAsc($a, $b);
 
         return $rez;
     }

@@ -529,11 +529,33 @@ class Base
     {
         $rez = array();
 
-        $path = Cache::get('current_path');
+        $p = &$this->params;
 
-        if (!empty($path)) {
-            $node = $path[sizeof($path)-1];
-            $rez = $node->getDC();
+        $ip = &$p['inputParams'];
+
+        if (!empty($ip['query'])) {
+
+            $dc = Config::get('search_DC');
+
+            //its a config reference, get it from config
+            if (!empty($dc) && is_scalar($dc)) {
+                $dc = Config::getDCConfig($dc);
+            }
+
+            $rez['data'] = $dc;
+        }
+
+        if (empty($rez['data'])) {
+            $path = Cache::get('current_path');
+
+            if (!empty($path)) {
+                $node = $path[sizeof($path)-1];
+                $rez = $node->getDC();
+            }
+        }
+
+        if (!empty($ip['query'])) {
+            $rez['from'] = 'search';
         }
 
         //apply properties for default casebox columns

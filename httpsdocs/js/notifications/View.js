@@ -279,7 +279,10 @@ Ext.define('CB.notifications.View', {
 
     ,onActivateEvent: function() {
         var fr = this.store.first()
-            ,lastId = fr.get('action_id');
+            ,lastId = (fr && fr.get) ? fr.get('action_id') : 0;
+
+        this.grid.getView().refresh();
+        this.grid.view.scrollTo(0, 0);
 
         if (this.lastSeenActionId != lastId) {
             CB_Notifications.updateLastSeenId(
@@ -359,6 +362,7 @@ Ext.define('CB.notifications.View', {
             }
 
             this.grid.getView().refresh();
+            this.grid.view.scrollTo(0, 0);
 
             if(this.getEl().isVisible(true)) {
                 this.onActivateEvent();

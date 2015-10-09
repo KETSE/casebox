@@ -909,6 +909,7 @@ class Config extends Singleton
             ,'node_facets'
             ,'node_DC'
             ,'default_DC'
+            ,'search_DC'
             ,'default_object_plugins'
             ,'object_type_plugins'
             ,'treeNodes'
@@ -989,6 +990,18 @@ class Config extends Singleton
         }
 
         return $defaultValue;
+    }
+
+    public static function getDCConfig($alias)
+    {
+        $rez = array();
+        $conf = static::get('DCConfigs');
+
+        if (!empty($conf[$alias])) {
+            $rez = $conf[$alias];
+        }
+
+        return $rez;
     }
 
     /**
