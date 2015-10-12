@@ -23,7 +23,7 @@ class Oauth2UtilsTest extends \PHPUnit_Framework_TestCase
             'accessType' => 'mock_access_type'
         ]);
 
-        DM\User::updateByName(
+        DM\Users::updateByName(
             array(
                 'name' => 'root',
                 'email' => $this->email,
@@ -71,7 +71,7 @@ class Oauth2UtilsTest extends \PHPUnit_Framework_TestCase
     {
 
         unset($_SESSION['key']);
-        $this->assertFalse(\CB\User::isLoged(), 'ERROR checkLogined \CB\User::isLoged = true');
+        $this->assertFalse(\CB\User::isLoged(), 'ERROR checkLogined \CB\Users::isLoged = true');
 
         $url = $this->getUrl();
 
@@ -89,6 +89,6 @@ class Oauth2UtilsTest extends \PHPUnit_Framework_TestCase
         \CB\Oauth2Utils::checkLogined();
 
         $this->assertTrue(\CB\User::isLoged(),
-            'ERROR \CB\User::isLoged = false GET: '.print_r($_GET, true).' SESSIONS:'.print_r($_SESSION, true));
+            'ERROR \CB\Users::isLoged = false GET: '.print_r($_GET, true).' SESSIONS:'.print_r($_SESSION, true));
     }
 }
