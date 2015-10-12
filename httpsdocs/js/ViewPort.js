@@ -546,19 +546,22 @@ Ext.define('CB.ViewPort', {
         App.openPath(b.path);
     }
 
-    ,logout: function(){
+    ,logout: function () {
         return Ext.Msg.show({
             buttons: Ext.Msg.YESNO
-            ,title: L.ExitConfirmation
-            ,msg: L.ExitConfirmationMessage
-            ,fn: function(btn, text){
-                if (btn == 'yes')
-                    CB_User.logout(function(response, e){
-                        if(response.success === true) {
+            , title: L.ExitConfirmation
+            , msg: L.ExitConfirmationMessage
+            , fn: function (btn, text) {
+                if (btn == 'yes') {
+                    CB_User.logout(function (response, e) {
+                        if (response.success === true) {
                             App.confirmLeave = false;
                             window.location.reload();
+                        } else if(response.msg) {
+                            Ext.Msg.show({title: 'error', msg: response.msg});
                         }
                     });
+                }
             }
         });
     }

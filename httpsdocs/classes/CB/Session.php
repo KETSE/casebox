@@ -64,12 +64,14 @@ class Session implements \SessionHandlerInterface
      */
     public function destroy($session_id)
     {
-        $res = DB\dbQuery(
+
+       $res = DB\dbQuery(
             'DELETE FROM sessions WHERE id = $1',
             $session_id
         ) or die(DB\dbQueryError());
 
         return (DB\dbAffectedRows() > 0);
+        return true;
     }
 
     /**
