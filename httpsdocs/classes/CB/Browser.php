@@ -126,13 +126,15 @@ class Browser
         $this->result['view'] = $viewConfig;
 
         //remove sorting for some views
-        switch ($viewConfig['type']) {
-            case 'pivot':
-            case 'charts':
-            case 'calendar':
-                $this->requestParams['sort'] = null;
+        if (isset($viewConfig['type'])) {
+            switch ($viewConfig['type']) {
+                case 'pivot':
+                case 'charts':
+                case 'calendar':
+                    $this->requestParams['sort'] = null;
+            }
         }
-
+        
         $this->requestParams['facets'] = $this->detectFacets();
 
         $this->collectAllChildren();

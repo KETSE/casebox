@@ -145,7 +145,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
      */
     public function testsetAsLoged() {
 
-        $id = DM\User::create(
+        $id = DM\Users::create(
                     array(
                         'name' => $this->testName
                         ,'password' => 'qq'
