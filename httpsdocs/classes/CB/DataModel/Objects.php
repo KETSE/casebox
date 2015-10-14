@@ -45,4 +45,22 @@ class Objects //extends Base
 
         return $rez;
     }
+
+    /**
+     * check if the record with given id is marked as draft
+     * @param  int     $id
+     * @return boolean
+     */
+    public static function isDraft($id)
+    {
+        $rez = false;
+
+        $r = static::read($id);
+
+        if (!empty($r[0]['draft']) && ($r[0]['draft'] != 0)) {
+            $rez = true;
+        }
+
+        return $rez;
+    }
 }

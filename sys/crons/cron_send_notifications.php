@@ -26,42 +26,71 @@ if (empty($cd['last_start_time'])) {
 
 L\initTranslations();
 
-$users = array();
-
-$coreName = Config::get('core_name');
-$coreUrl = Config::get('core_url');
-$languages = Config::get('languages');
-$adminEmail = Config::get('ADMIN_EMAIL');
-
 //send notification mails only if not in dev mode or _dev_sent_mails not set to 0
-$sendNotificationMails = (
-    (Config::get('_dev_mode', 0) == 0) ||
-    (Config::get('_dev_send_mail', 1) == 1)
-);
+if ((Config::get('_dev_mode', 0) == 1) &&
+    (Config::get('_dev_send_mail', 1) == 0)
+) {
+    return;
+}
 
 //collect notifications to be sent
 $recs = DM\Notifications::getUnseen();
 
-foreach ($recs as $r) {
-    $uid = $r['to_user_id'];
-    if (!isset($users[$uid])) {
-        $users[$uid] = User::getPreferences($uid);
-    }
-
-    $users[$uid]['mails'][$r['id']] = $r;
-}
+$users = groupPerUsers($recs);
 
 //iterate mails for each user and send them
-foreach ($users as $uid => $u) {
+foreach ($users as $uid => $ud) {
+    sendUserMails($ud);
+
+    DB\dbQuery(
+        'UPDATE crons
+        SET last_action = CURRENT_TIMESTAMP
+        WHERE cron_id = $1',
+        $cron_id
+    ) or die('error updating crons last action');
+}
+
+//--------------------------------------------------------------------------
+
+/**
+ * group given notification records per user
+ * @param  array &$recs
+ * @return array
+ */
+function groupPerUsers(&$recs)
+{
+    $rez = array();
+    foreach ($recs as $r) {
+        $uid = $r['to_user_id'];
+        if (!isset($rez[$uid])) {
+            $rez[$uid] = User::getPreferences($uid);
+        }
+
+        $rez[$uid]['mails'][$r['id']] = $r;
+    }
+
+    return $rez;
+}
+
+function sendUserMails($u)
+{
+    $uid = $u['id'];
+
     if (empty($u['email'])) {
-        continue;
+        return;
     }
 
     $sendType = User::canSendNotifications($uid);
 
     if ($sendType == false) {
-        continue;
+        return;
     }
+
+    $coreName = Config::get('core_name');
+    // $coreUrl = Config::get('core_url');
+    $adminEmail = Config::get('ADMIN_EMAIL');
+
+    $languages = Config::get('languages');
 
     $lang = $languages[$u['language_id']-1];
 
@@ -72,130 +101,119 @@ foreach ($users as $uid => $u) {
             ,'separate' => array()
         );
 
-        foreach ($u['mails'] as $notificationId => $action) {
+        foreach ($u['mails'] as $notificationId => $notification) {
             //[$core #$nodeId] $action_type $template_name: $object_title
-            $templateId = Objects::getTemplateId($action['object_id']);
+            $templateId = Objects::getTemplateId($notification['object_id']);
             $templateName = Objects::getName($templateId);
 
-            $subject = '[' . $coreName . ' #' . $action['object_id'] . '] ' .
-                Notifications::getActionDeclination($action['action_type'], $lang) . ' ' .
-                $templateName . ' "' . htmlspecialchars_decode($action['data']['name']) . '"';
+            $subject = '[' . $coreName . ' #' . $notification['object_id'] . '] ' .
+                Notifications::getActionDeclination($notification['action_type'], $lang) . ' ' .
+                $templateName . ' "' . htmlspecialchars_decode($notification['data']['name']) . '"';
 
-            //skip sending notifications from devel server to other emails than Admin
-            if (!$sendNotificationMails && ($u['email'] !== $adminEmail)) {
-                echo 'Devel skip: '.$u['email'] . ': ' . $subject . "\n";
+            $sender = Notifications::getSender($notification['from_user_id']);
 
-            } else {
-                // echo $u['email'].': ' . $subject  . "\n";
+            //divide notification into separate number of actions it consist of
+            $actions = getNotificationActions($notification);
 
-                $sender = Notifications::getSender($action['from_user_id']);
+            for ($i=0; $i < sizeof($actions); $i++) {
+                $a = $actions[$i];
 
-                $actionIds = Util\toNumericArray($action['action_ids']);
+                $message = Notifications::getMailBodyForAction($a, $u);
 
-                $actions = array();
-                $actions[sizeof($actionIds) - 1] = $action;
+                $isMentioned = (
+                    !empty($a['data']['mentioned']) &&
+                    in_array($uid, $a['data']['mentioned'])
+                );
 
-                //remove last action id (already loaded)
-                array_shift($actionIds);
-
-                //add all actions if multiple
-                if (!empty($actionIds)) {
-                    $actionIds = array_reverse($actionIds);
-
-                    $recs = DM\Log::getRecords($actionIds);
-                    $actionIds = array_flip($actionIds);
-
-                    foreach ($recs as $r) {
-                        $action['object_pid'] = $r['object_pid'];
-                        $action['action_time'] = $r['action_time'];
-                        $action['data'] = Util\jsonDecode($r['data']);
-                        $action['activity_data_db'] = Util\jsonDecode($r['activity_data_db']);
-
-                        $actions[$actionIds[$r['id']]] = $action;
-                    }
-                }
-
-                for ($i=0; $i < sizeof($actions); $i++) {
-                    $a = $actions[$i];
-
-                    $message = Notifications::getMailBodyForAction($a, $u);
-
-                    $isMentioned = (
-                        !empty($a['data']['mentioned']) &&
-                        in_array($uid, $a['data']['mentioned'])
-                    );
-
-                    if ($isMentioned) {
-                        $mails['separate'][] = array($subject, $message, $sender, $notificationId);
-                    } elseif ($sendType == 'all') {
-                        $mails['digest'][] = array($subject, $message, $sender, $notificationId);
-                    }
-                }
+                $mails[$isMentioned ? 'separate' : 'digest'][] = array(
+                    'subject' => $subject,
+                    'body' => $message,
+                    'sender' => $sender,
+                    'nId' => $notificationId
+                );
             }
         }
 
         //merge digest emails group into one email and put it into separate group
         if (sizeof($mails['digest']) == 1) {
             $mails['separate'][] = $mails['digest'][0];
+
         } elseif (!empty($mails['digest'])) {
             $mail = array();
             $ids = array();
             $sender = '';
+
             foreach ($mails['digest'] as $m) {
-                $mail[] = $m[1];
-                $sender = $m[2];
-                $ids[] = $m[3];
+                $mail[] = $m['body'];
+                $sender = $m['sender'];
+                $ids[] = $m['nId'];
             }
+
             $mails['separate'][] = array(
-                '[' . $coreName . '] Notifications digest'
-                ,implode('<hr />', $mail)
-                ,$sender
-                ,$ids
+                'subject' => '[' . $coreName . '] Notifications digest'
+                ,'body' => implode('<hr />', $mail)
+                ,'sender' => $sender
+                ,'nId' => $ids
             );
         }
 
         $seenMaxId = 0;
         foreach ($mails['separate'] as $mail) {
-            //send separate emails group
-            // file_put_contents(TEMP_DIR . $mail[3].'.html', $mail[2]."<br />\n<h1>" . $mail[0]. "<h1>" . $mail[1]);
-             // COMMENTED FOR TEST
-            // echo $u['email'], "\n" . $mail[0] . "\n".$mail[1]."\n\n";
-            echo $u['email'].': ' . $mail[0]  . "\n";
+            echo $u['email'].': ' . $mail['subject']  . "\n";
 
             if (!mail(
                 $u['email'],
-                $mail[0],
-                $mail[1],
-                "Content-type: text/html; charset=utf-8\r\nFrom: ". $mail[2] . "\r\n"
+                $mail['subject'],
+                $mail['body'],
+                "Content-type: text/html; charset=utf-8\r\nFrom: ". $mail['sender'] . "\r\n"
             )) {
                 System::notifyAdmin(
-                    'CaseBox cron notification: Cant send notification (' . $mail[3] . ') mail to "'. $u['email'] . '"',
-                    $mail[1]
+                    'CaseBox cron notification: Cant send notification (' . $mail['nId'] . ') mail to "'. $u['email'] . '"',
+                    $mail['body']
                 );
             } else {
-                if (is_array($mail[3])) {
-                    foreach ($mail[3] as $id) {
-                        $seenMaxId = max($seenMaxId, $id);
-                    }
-                } else {
-                    $seenMaxId = max($seenMaxId, $mail[3]);
-                }
+                DM\Notifications::markAsSeen($uid, $mail['nId']);
             }
         }
 
-        if (!empty($seenMaxId)) {
-            Notifications::updateLastSeenId($seenMaxId, $uid);
-        }
-
-        if ($sendType == 'all') {
+        if (!empty($mails['digest'])) {
             User::setUserConfigParam('lastNotifyTime', Util\dateISOToMysql('now'), $uid);
         }
     }
+}
 
-    DB\dbQuery(
-        'UPDATE crons
-        SET last_action = CURRENT_TIMESTAMP
-        WHERE cron_id = $1',
-        $cron_id
-    ) or die('error updating crons last action');
+/**
+ * split notification into number of actions it consist of
+ * @param  array $notification
+ * @return array
+ */
+function getNotificationActions($notification)
+{
+    $rez = array();
+
+    $actionIds = Util\toNumericArray($notification['action_ids']);
+
+    $rez[sizeof($actionIds) - 1] = $notification;
+
+    //remove last action id (already loaded)
+    array_shift($actionIds);
+
+    //add all actions if multiple
+    if (!empty($actionIds)) {
+        $actionIds = array_reverse($actionIds);
+
+        $recs = DM\Log::getRecords($actionIds);
+        $actionIds = array_flip($actionIds);
+
+        foreach ($recs as $r) {
+            $notification['object_pid'] = $r['object_pid'];
+            $notification['action_time'] = $r['action_time'];
+            $notification['data'] = Util\jsonDecode($r['data']);
+            $notification['activity_data_db'] = Util\jsonDecode($r['activity_data_db']);
+
+            $rez[$actionIds[$r['id']]] = $notification;
+        }
+    }
+
+    return $rez;
 }

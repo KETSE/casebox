@@ -198,7 +198,7 @@ class Object
 
         $this->id = DB\dbLastInsertId();
 
-        if (!isset($this->id) || ! (intval($this->id) >0) ) {
+        if (!isset($this->id) || ! (intval($this->id) > 0)) {
             trigger_error('Error on create object : '.\CB\Cache::get('lastSql'), E_USER_ERROR);
         }
 
@@ -524,7 +524,13 @@ class Object
 
         \CB\fireEvent('nodeDbUpdate', $this);
 
-        $this->logAction('update', array('old' => $this->oldObject));
+        $this->logAction(
+            'update',
+            array(
+                'old' => $this->oldObject
+                ,'mentioned' => $this->lastMentionedUserIds
+            )
+        );
 
         return true;
     }
@@ -550,7 +556,7 @@ class Object
 
         $this->filterHTMLFields($d['data']);
 
-        $this->setFollowers();
+        $this->lastMentionedUserIds = $this->setFollowers();
 
         $this->collectSolrData();
 

@@ -915,6 +915,7 @@ class Config extends Singleton
             ,'treeNodes'
             ,'action_log'
             ,'maintenance'
+            ,'leftRibbonButtons'
         );
 
         foreach ($jsonProperties as $property) {

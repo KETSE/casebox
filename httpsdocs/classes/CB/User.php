@@ -23,8 +23,9 @@ class User
 
         /* try to authentificate */
         $res = DB\dbQuery(
-            'CALL p_user_login($1, $2, $3)', array($login, $pass, $ips)
-            ) or die(DB\dbQueryError());
+            'CALL p_user_login($1, $2, $3)',
+            array($login, $pass, $ips)
+        ) or die(DB\dbQueryError());
 
         if (($r = $res->fetch_assoc()) && ($r['status'] == 1)) {
             $user_id = $r['user_id'];
@@ -45,7 +46,7 @@ class User
 
             if (!empty($user_id)) {
                 $_SESSION['user']['id'] = $user_id;
-                $logActionType          = 'login_fail';
+                $logActionType = 'login_fail';
             }
 
             $rez['msg'] = L\get('Auth_fail');
@@ -82,11 +83,17 @@ class User
         $_SESSION['key'] = $key;
         $_COOKIE['key']  = $_SESSION['key'];
 
-        if ( php_sapi_name() == "cli" ) {
+        if (php_sapi_name() == "cli") {
             $_COOKIE['key'] = $_SESSION['key'];
         } else {
             setcookie(
-                'key', $_SESSION['key'], 0, '/'.$coreName.'/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true
+                'key',
+                $_SESSION['key'],
+                0,
+                '/'.$coreName.'/',
+                $_SERVER['SERVER_NAME'],
+                !empty($_SERVER['HTTPS']),
+                true
             );
         }
 
@@ -114,7 +121,7 @@ class User
 
             $rez['user']      = $r;
             $_SESSION['user'] = $r;
-            if ( php_sapi_name() == "cli" ) {
+            if (php_sapi_name() == "cli") {
                 $_COOKIE['key'] = $_SESSION['key'];
             } else {
                 setcookie('L', $r['language']);
@@ -313,9 +320,8 @@ class User
         /* default root node config */
         $root = Config::get('rootNode');
         if (is_null($root)) {
-            $root = Browser::getRootProperties(
-                    Browser::getRootFolderId()
-                )['data'];
+            $root = Browser::getRootProperties(Browser::getRootFolderId())['data'];
+
         } else {
             $root = Util\toJSONArray($root);
             if (isset($root['id'])) {
@@ -361,7 +367,7 @@ class User
         }
 
         if ($user_id === false) {
-            $user_id = $_SESSION['user']['id'];
+            $user_id = static::getId();
         }
         if (!Security::canEditUser($user_id)) {
             throw new \Exception(L\get('Access_denied'));
@@ -411,10 +417,10 @@ class User
         //get possible associated objects for display in grid
         if (!empty($rez['data'])) {
             $assocObjects = Objects::getAssociatedObjects(
-                    array(
-                        'template_id' => $rez['template_id']
-                        , 'data' => $rez['data']
-                    )
+                array(
+                    'template_id' => $rez['template_id'],
+                    'data' => $rez['data']
+                )
             );
             if (!empty($assocObjects['data'])) {
                 $rez['assocObjects'] = $assocObjects['data'];
@@ -461,19 +467,17 @@ class User
             throw new \Exception(L\get('Access_denied'));
         }
 
-        $rez              = array();
-        $cfg              = $this->getUserConfig($p['id']);
+        $rez  = array();
+        $cfg  = $this->getUserConfig($p['id']);
         $languageSettings = Config::get('language_settings');
 
         $p['first_name'] = Purify::humanName($p['first_name']);
-        $p['last_name']  = Purify::humanName($p['last_name']);
+        $p['last_name'] = Purify::humanName($p['last_name']);
 
         $p['sex'] = (strlen($p['sex']) > 1) ? null : $p['sex'];
 
         if (!empty($p['email'])) {
-            if (!filter_var(
-                    $p['email'], FILTER_VALIDATE_EMAIL
-                )) {
+            if (!filter_var($p['email'], FILTER_VALIDATE_EMAIL)) {
                 return array('success' => false, 'msg' => 'Invalid email address');
             }
         }
@@ -483,11 +487,12 @@ class User
         if (isset($p['country_code'])) {
             if (empty($p['country_code']) ||
                 filter_var(
-                    $p['country_code'], FILTER_VALIDATE_REGEXP,
+                    $p['country_code'],
+                    FILTER_VALIDATE_REGEXP,
                     array(
-                    'options' => array(
-                        'regexp' => '/^\+?\d*$/'
-                    )
+                        'options' => array(
+                            'regexp' => '/^\+?\d*$/'
+                        )
                     )
                 )
             ) {
@@ -523,13 +528,14 @@ class User
 
         if (isset($p['short_date_format'])) {
             if (filter_var(
-                    $p['short_date_format'], FILTER_VALIDATE_REGEXP,
-                    array(
+                $p['short_date_format'],
+                FILTER_VALIDATE_REGEXP,
+                array(
                     'options' => array(
                         'regexp' => '/^[\.,a-z \/\-]*$/i'
                     )
-                    )
-                )) {
+                )
+            )) {
                 $cfg['short_date_format'] = $p['short_date_format'];
             } else {
                 return array('success' => false, 'msg' => 'Invalid short date format');
@@ -538,13 +544,14 @@ class User
 
         if (isset($p['long_date_format'])) {
             if (filter_var(
-                    $p['long_date_format'], FILTER_VALIDATE_REGEXP,
-                    array(
+                $p['long_date_format'],
+                FILTER_VALIDATE_REGEXP,
+                array(
                     'options' => array(
                         'regexp' => '/^[\.,a-z \/\-]*$/i'
                     )
-                    )
-                )) {
+                )
+            )) {
                 $cfg['long_date_format'] = $p['long_date_format'];
             } else {
                 return array(
@@ -558,7 +565,7 @@ class User
             $p['data'] = array();
         }
 
-        if ($p['id'] != $_SESSION['user']['id']) {
+        if ($p['id'] != static::getId()) {
             if (Security::canAddUser()) {
                 unset($cfg['canAddUsers']);
                 if (isset($p['canAddUsers'])) {
@@ -587,7 +594,7 @@ class User
         );
 
         /* updating session params if the updated user profile is currently logged user */
-        if ($p['id'] == $_SESSION['user']['id']) {
+        if ($p['id'] == static::getId()) {
             $u = &$_SESSION['user'];
 
             $u['first_name'] = htmlentities($p['first_name'], ENT_QUOTES, 'UTF-8');
@@ -764,9 +771,9 @@ class User
             session_unset();
             session_destroy();
             session_write_close();
-            setcookie(session_name(),'',0,'/');
+            setcookie(session_name(), '', 0, '/');
             session_regenerate_id(true);
-           $rez = array('success' => true);
+            $rez = array('success' => true);
         } catch (Exception $exc) {
             $rez = array('success' => false, 'msg' => $exc->getTraceAsString() );
         }
@@ -851,108 +858,11 @@ class User
 
         $_SESSION['user']['cfg']['max_rows'] = $rows;
 
-        $cfg             = static::getUserConfig();
+        $cfg = static::getUserConfig();
         $cfg['max_rows'] = $rows;
         static::setUserConfig($cfg);
 
         return true;
-    }
-
-    /**
-     * get home folder id for specified user id. If folder does not exist it is created automaticly.
-     * @param  int $user_id
-     * @return int home folder id
-     */
-    public static function getUserHomeFolderId($user_id = false)
-    {
-        $rez = null;
-        if ($user_id == false) {
-            $user_id = $_SESSION['user']['id'];
-        }
-
-        if (defined('CB\\HOME_FOLDER'.$user_id)) {
-            return constant('CB\\HOME_FOLDER'.$user_id);
-        }
-
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE user_id = $1
-                    AND SYSTEM = 1
-                    AND (pid IS NULL)
-                    AND TYPE = 1', $_SESSION['user']['id']
-            ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['id'];
-        }
-        $res->close();
-        define('CB\\HOME_FOLDER'.$user_id, $rez);
-
-        return $rez;
-    }
-
-    /**
-     * get email folder id for specified user id. If folder does not exist it is created automaticly.
-     * @param  int $user_id
-     * @return int email folder id
-     */
-    public static function getEmailFolderId($user_id = false)
-    {
-        $rez = null;
-        if (empty($user_id)) {
-            $user_id = $_SESSION['user']['id'];
-        }
-        $pid = User::getUserHomeFolderId($user_id);
-
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE user_id = $1
-                AND SYSTEM = 1
-                AND pid =$2
-                AND type = 1', array(
-            $_SESSION['user']['id']
-            , $pid
-            )
-            ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['id'];
-        }
-        $res->close();
-        if (empty($rez)) {
-            DB\dbQuery(
-                    'INSERT INTO tree (
-                    pid
-                    ,user_id
-                    ,`system`
-                    ,`type`
-                    ,`name`
-                    ,cid
-                    ,uid
-                    ,template_id)
-                VALUES (
-                    $1
-                    ,$2
-                    ,1
-                    ,1
-                    ,\'[Emails]\'
-                    ,$3
-                    ,$3
-                    ,$4)',
-                    array(
-                    $pid
-                    , $user_id
-                    , $_SESSION['user']['id']
-                    , Config::get('default_folder_template')
-                    )
-                ) or die(DB\dbQueryError());
-            $rez = DB\dbLastInsertId();
-            Solr\Client::runCron();
-        }
-
-        return $rez;
     }
 
     /**
@@ -1070,8 +980,10 @@ class User
     public static function generateRecoveryHash($userId, $random)
     {
         $hash = password_hash(
-            $random, PASSWORD_BCRYPT, array(
-            'cost' => 15,
+            $random,
+            PASSWORD_BCRYPT,
+            array(
+                'cost' => 15,
             )
         );
 
@@ -1135,7 +1047,7 @@ class User
             'SELECT id
             FROM templates
             WHERE `type` =\'user\''
-            ) or die(DB\dbQueryError());
+        ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r['id'];
@@ -1233,7 +1145,7 @@ class User
     public static function getEmail($idOrData = false)
     {
         if ($idOrData === false) {
-            $idOrData = $_SESSION['user']['id'];
+            $idOrData = static::getId();
         }
 
         $data = is_numeric($idOrData) ? static::getPreferences($idOrData) : $idOrData;
@@ -1267,12 +1179,15 @@ class User
         $data = array();
 
         if ($idOrData === false) { //use current logged users
-            $id = $_SESSION['user']['id'];
+            $id = static::getId();
+
         } elseif (is_numeric($idOrData)) { //id specified
             $id = $idOrData;
+
         } elseif (is_array($idOrData) && !empty($idOrData['id']) && is_numeric($idOrData['id'])) {
             $id   = $idOrData['id'];
             $data = $idOrData;
+
         } else {
             return '';
         }
@@ -1330,12 +1245,15 @@ class User
         $data = array();
 
         if ($idOrData === false) { //use current logged users
-            $id = $_SESSION['user']['id'];
+            $id = static::getId();
+
         } elseif (is_numeric($idOrData)) { //id specified
             $id = $idOrData;
+
         } elseif (is_array($idOrData) && !empty($idOrData['id']) && is_numeric($idOrData['id'])) {
             $id   = $idOrData['id'];
             $data = $idOrData;
+
         } else {
             return '';
         }
@@ -1479,7 +1397,7 @@ class User
     private static function getUserConfig($userId = false)
     {
         if ($userId === false) {
-            $userId = $_SESSION['user']['id'];
+            $userId = static::getId();
         }
 
         $r = DM\Users::read($userId);
@@ -1581,6 +1499,23 @@ class User
         return array('success' => true);
     }
 
+    public static function getLastActionTime($userId = false)
+    {
+        $rez = null;
+
+        if (!is_numeric($userId)) {
+            $userId = static::getId();
+        }
+
+        $r = DM\Users::read($userId);
+
+        if (!empty($r['last_action_time'])) {
+            $rez = $r['last_action_time'];
+        }
+
+        return $rez;
+    }
+
     public static function updateLastActionTime()
     {
         return DM\Users::update(
@@ -1595,15 +1530,11 @@ class User
     {
         $rez = true;
 
-        if (!is_numeric($userId)) {
-            $userId = static::getId();
-        }
+        $lat = static::getLastActionTime($userId);
 
-        $r = DM\Users::read($userId);
-
-        if (!empty($r['last_action_time'])) {
-            $minutes = Util\getDatesDiff($r['last_action_time']);
-            $rez     = ($minutes > 2);
+        if (!empty($lat)) {
+            $minutes = Util\getDatesDiff($lat);
+            $rez = ($minutes > 2);
         }
 
         return $rez;
@@ -1611,8 +1542,14 @@ class User
 
     /**
      * check if reached specified interval for sending emails
-     * @param  int     $userId
-     * @return varchar | false
+     * @param int $userId
+     * @return
+     *         false - if user not idle
+     *         all - if user selected to receive all types of notifications
+     *                 and specified timeout have passed from lastNotifyTime
+     *         mentioned - if user selected to receive only mentioned or assigned notifications;
+     *                 mentioned notifications are sent instantly
+     *                 because are considered important actions
      */
     public static function canSendNotifications($userId = false)
     {

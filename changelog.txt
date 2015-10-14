@@ -1,3 +1,15 @@
+CaseBox 1.9.533 (2015-10-14)
+==============================
+~ #8818 Favorites vFolder
+- #9029 Emails coming with the same comment for record where notifications==off
+- #9042 Emails not sent to @oburlaca after 15min idle period
+- #9056 Date format not consistent andn "Nan-Nan" displayed
+- #8618 Popup menu for LeftRibbon should appear on the right of buttons, not below
+
+Fixed Bugs:
+----------
+- js error on request more comments in vertical layouted edit window
+
 CaseBox 1.9.532 (2015-10-09)
 ==============================
 - #8006 Grid DC config management.

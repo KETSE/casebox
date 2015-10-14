@@ -584,6 +584,13 @@ function initApp() {
             return;
         }
 
+        if(Ext.isEmpty(config.template_id)) {
+            return Ext.Msg.alert(
+                'Error opening object'
+                ,'Template should be specified for object window to load.'
+            );
+        }
+
         config.id = Ext.valueFrom(config.target_id, config.id);
 
         var templateType = CB.DB.templates.getType(config.template_id)
@@ -633,17 +640,10 @@ function initApp() {
             w.existing = true;
 
         } else {
-            if(Ext.isEmpty(wndCfg.data.template_id)) {
-                Ext.Msg.alert(
-                    'Error opening object'
-                    ,'Template should be specified for object window to load.'
-                );
-            } else {
-                w = Ext.create(wndCfg);
-                w.show();
+            w = Ext.create(wndCfg);
+            w.show();
 
-                w.taskButton = App.mainStatusBar.addTaskButton(w);
-            }
+            w.taskButton = App.mainStatusBar.addTaskButton(w);
         }
 
         return w;

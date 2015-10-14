@@ -98,6 +98,9 @@ Ext.define('CB.ViewPort', {
                 ,menuAlign: 'bl-br'
                 ,menu: []
                 ,name: 'userMenu'
+                ,listeners: {
+                    menushow: this.onButtonMenuShow
+                }
             }
             ,{
                 text: '<span style="margin-right: 10px">&nbsp;</span>'
@@ -286,6 +289,9 @@ Ext.define('CB.ViewPort', {
                 ,menuAlign: 'tl-tr'
                 ,menu: [
                 ]
+                ,listeners: {
+                    menushow: this.onButtonMenuShow
+                }
             })
         };
 
@@ -495,6 +501,9 @@ Ext.define('CB.ViewPort', {
                     ,scale: 'large'
                     ,menuAlign: 'bl-br'
                     ,menu: managementItems
+                    ,listeners: {
+                        menushow: this.onButtonMenuShow
+                    }
                 }
             );
         }
@@ -846,5 +855,13 @@ Ext.define('CB.ViewPort', {
             if(Ext.isArray(ids)) ids = ids.join(',');
             App.downloadFile(ids, true);
         }
+    }
+
+    ,onButtonMenuShow: function(btn, menu, eOpts) {
+        menu.showBy(
+            btn
+            ,Ext.valueFrom(btn.menuAlign, 'tl-tr')
+            ,[2, 0]
+        );
     }
 });

@@ -29,9 +29,13 @@ class Favorites extends Base
         ,'data' => 'text'
     );
 
-    public static function readAll($userId)
+    public static function readAll($userId = false)
     {
         $rez = array();
+
+        if ($userId == false) {
+            $userId = User::getId();
+        }
 
         $res = DB\dbQuery(
             'SELECT *

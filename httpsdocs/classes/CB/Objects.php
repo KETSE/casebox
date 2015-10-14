@@ -3,6 +3,7 @@ namespace CB;
 
 use CB\Util;
 use CB\Objects\Plugins;
+use CB\DataModel as DM;
 
 class Objects
 {
@@ -144,6 +145,15 @@ class Objects
         if (empty($d['id']) || !is_numeric($d['id'])) {
             return $this->create($d);
         }
+
+/*        if (empty($d['id']) ||
+            !is_numeric($d['id'])// ||
+            // (!empty($d['draft']) &&
+            //     DM\Objects::isDraft($d['id'])
+            // )
+        ) {
+            return $this->create($d);
+        }/**/
 
         // SECURITY: check if current user has write access to this action
         if (!Security::canWrite($d['id'])) {

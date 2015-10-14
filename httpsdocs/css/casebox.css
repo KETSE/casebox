@@ -480,7 +480,8 @@ color: black !important;
 .icon-fav { background-image: url(i/ico/_fav.png) !important}
 .icon-favplus { background-image: url(i/ico/star-plus.png) !important}
 
-.i-star { background-image: url(i/ico/_fav.png)}
+.i-star { background-image: url(i/ico/_fav.png) !important}
+.i-star-negative { background-image: url(i/ico/_fav-negative.png) !important}
 .i-unstar { background-image: url(i/ico/star-empty.png)}
 
 .icon-lock { background-image: url(i/ico/_lock.png) !important}

@@ -188,12 +188,23 @@ Ext.define('CB.object.plugin.Comments', {
 
         this.loadedData.data = r.data.concat(this.loadedData.data);
 
-        var scrollable = this.up('panel').getScrollable()
-            ,scrollPosition = scrollable.getPosition();
+        var panel = this.up('panel')
+            ,scrollable = false;
+
+        while(!scrollable && panel) {
+            scrollable = panel.getScrollable();
+            panel = panel.up('panel');
+        }
+
+        if(scrollable) {
+            scrollPosition = scrollable.getPosition();
+        }
 
         this.onLoadData(this.loadedData, e);
 
-        scrollable.scrollTo(scrollPosition);
+        if(scrollable) {
+            scrollable.scrollTo(scrollPosition);
+        }
     }
 
     ,onGetDraftIdCallback: function(draftId) {
