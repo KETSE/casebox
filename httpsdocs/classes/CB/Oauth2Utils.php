@@ -37,7 +37,7 @@ class Oauth2Utils
      */
     static function getGoogleConfig()
     {
-        $useGoogleOauth2_json = Config::get('googleapis_credentials');
+        $useGoogleOauth2_json = Config::get('oauth2_credentials_google');
         if ($useGoogleOauth2_json && $GPlus                = Util\jsonDecode($useGoogleOauth2_json, true)) {
             return $GPlus;
         }
@@ -93,30 +93,28 @@ class Oauth2Utils
             $state              = json_decode($state_json, true);
             $session_state_json = base64_decode(strtr($_SESSION['oauth2state'], '-_,', '+/='));
             $session_state      = json_decode($session_state_json, true);
-            if (isset($session_state['state']) && isset($state['state']) && isset($state['email'])) {
+            
+            if (isset($session_state['state']) && isset($state['state']) && $session_state['state'] == $state['state'] && isset($state['email'])) {
 
                 DB\connect();
-
+                
                 $QueryUser = 'select id,enabled from users_groups where email like  $1 ';
 
                 $res = DB\dbQuery(
                     $QueryUser, array($state['email'])
                     ) or die(DB\dbQueryError());
-
+                
                 if (($r = $res->fetch_assoc()) && ($r['enabled'] == 1)) {
                     $user_id = $r['id'];
                 } else {
-                    return [ 'success' => false, 'message' => 'Email '.$state['email'].' not authorized for this core. '.L\get('Specify_username')];
+                    return [ 'success' => false, 'message' => 'Email '.$state['email'].' not authorized for this core. '.L\get('Specify_username').' '];
                 }
 
                 $res->close();
 
-                //echo '<pre>'.print_r($session_state, true).'</pre>';
-                //echo '<pre>'.print_r($state, true).'</pre>';
                 if ($user_id > 0) {
 
                     $r = User::setAsLoged($user_id, $session_state['state']);
-
 
                     if ($r['success'] == false) {
                         $errors[] = L\get('Auth_fail');
@@ -124,6 +122,7 @@ class Oauth2Utils
                         $cfg = User::getTSVConfig();
                         if (!empty($cfg['method'])) {
                             $_SESSION['check_TSV'] = time();
+                            $_SESSION['user']['TSV_checked'] = false;
                         } else {
                             $_SESSION['user']['TSV_checked'] = true;
                         }
