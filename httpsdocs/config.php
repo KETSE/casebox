@@ -86,6 +86,7 @@ ini_set("session.gc_probability", "1");
 
 session_set_cookie_params($sessionLifetime, '/'.$cfg['core_name'].'/', $_SERVER['SERVER_NAME'],
     !empty($_SERVER['HTTPS']), true);
+session_set_cookie_params($sessionLifetime, '/oauth2callback/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
 
 $SESSION_NAME = str_replace(
         array(

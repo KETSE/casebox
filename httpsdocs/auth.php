@@ -12,12 +12,9 @@
  * @package CaseBox
  *
  * */
-
 namespace CB;
 
 require_once 'init.php';
-
-// die(print_r($_SESSION, true));
 
 if (Oauth2Utils::isOauth2Login()) {
 
@@ -26,6 +23,7 @@ if (Oauth2Utils::isOauth2Login()) {
         header('Location: '.Config::get('core_url'));
     } else {
         $errors[] = $Check['message'];
+        $_SESSION['message'] = array_shift($errors);
     }
 }
 
@@ -56,6 +54,7 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
             $cfg = $user->getTSVConfig();
             if (!empty($cfg['method'])) {
                 $_SESSION['check_TSV'] = time();
+                $_SESSION['user']['TSV_checked'] = false;
             } else {
                 $_SESSION['user']['TSV_checked'] = true;
             }

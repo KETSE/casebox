@@ -80,12 +80,17 @@ if (empty($_SESSION['check_TSV'])) {
                         </label>
                         <a style="margin-top: 30px;" class="pull-right" href="<?php echo '/'.$coreName; ?>/recover/forgot-password/"><?php echo L\get('ForgotPassword'); ?></a>
                         <?php
-                        $googleProvider = Oauth2Utils::getGoogleProvider();
-                        $googleAuthUrl  = Oauth2Utils::getLoginUrl($googleProvider);
-                        if (isset($googleAuthUrl)) {
-                            echo "<a style='margin-top:25px;margin-right:25px;' class='pull-right' href='".$googleAuthUrl."'><img src='/css/i/gplus_signin_button.png' style='height:35px' /></a>";
-                        }
-                        ?>
+                        
+                            $Oauth2Providers = Config::get('oauth2_providers', null);
+                            if (isset($Oauth2Providers) && in_array('google', explode(',', $Oauth2Providers))) {
+                                $googleProvider = Oauth2Utils::getGoogleProvider();
+                                $googleAuthUrl = Oauth2Utils::getLoginUrl($googleProvider);
+                                if (isset($googleAuthUrl)) {
+                                    echo "<a style='margin-top:25px;margin-right:25px;' class='pull-right' href='" . $googleAuthUrl . "'><img src='/css/i/gplus_signin_button.png' style='height:35px' /></a>";
+                                }
+                            }
+
+                            ?>
                         <input type="submit" name="s" id="s" value="<?php echo L\get('Login'); ?>" class="btn btn-info" style="margin-top: 26px;" disabled>
                         <?php
                     } else {
@@ -120,7 +125,6 @@ if (empty($_SESSION['check_TSV'])) {
         <div class="footer" style="right: 0px;">
             <a href="https://www.casebox.org/">www.casebox.org</a> <span style="color: #AAA; padding-left: 2px; padding-right: 5px">&bull;</span>  <a href="http://forum.casebox.org/">Support forum</a>
         </div>
-
     </body>
 </html>
 <?php
