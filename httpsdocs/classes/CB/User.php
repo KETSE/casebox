@@ -130,10 +130,8 @@ class User
             $rez['user']['groups']      = UsersGroups::getGroupIdsForUser();
             $_SESSION['user']['groups'] = $rez['user']['groups'];
 
-            if (empty($_SESSION['check_TSV'])) {
-                $_SESSION['user']['TSV_checked'] = true;
-            }
-            
+            $_SESSION['user']['TSV_checked'] = true;
+
         }
 
         return $rez;

@@ -56,6 +56,7 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
             $cfg = $user->getTSVConfig();
             if (!empty($cfg['method'])) {
                 $_SESSION['check_TSV'] = time();
+                $_SESSION['user']['TSV_checked'] = false;
             } else {
                 $_SESSION['user']['TSV_checked'] = true;
             }
