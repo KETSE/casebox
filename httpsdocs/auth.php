@@ -20,7 +20,21 @@ if (Oauth2Utils::isOauth2Login()) {
 
     $Check = Oauth2Utils::checkLogined();
     if ($Check['success']) {
-        header('Location: '.Config::get('core_url'));
+        
+         $r = User::setAsLoged($Check['user_id'], $Check['session_id']);
+
+                    if ($r['success'] == false) {
+                        $errors[] = L\get('Auth_fail');
+                    } else {
+                        $cfg = User::getTSVConfig();
+                        if (!empty($cfg['method'])) {
+                            $_SESSION['check_TSV'] = time();
+                            $_SESSION['user']['TSV_checked'] = false;
+                        } else {
+                            $_SESSION['user']['TSV_checked'] = true;
+                        }
+                    }
+       // header('Location: '.Config::get('core_url'));
     } else {
         $errors[] = $Check['message'];
         $_SESSION['message'] = array_shift($errors);

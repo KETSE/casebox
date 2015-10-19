@@ -61,7 +61,7 @@ class Oauth2Utils
 
             $state = [
                 'core' => Config::get('core_name'),
-                'state' => $random_state
+                'state' => session_id()
             ];
 
             $authUrl = $provider->getAuthorizationUrl(['state' => strtr(base64_encode(json_encode($state)), '+/=', '-_,')]);
@@ -87,17 +87,15 @@ class Oauth2Utils
      */
     static function checkLogined()
     {
+
         $result = [ 'success' => true];
         if (static::isOauth2Login()) {
-            $state_json         = base64_decode(strtr($_GET['state'], '-_,', '+/='));
-            $state              = json_decode($state_json, true);
-            $session_state_json = base64_decode(strtr($_SESSION['oauth2state'], '-_,', '+/='));
-            $session_state      = json_decode($session_state_json, true);
+            $state = self::decodeState($_GET['state']);
+           
+            $session_state      = self::decodeState($_SESSION['oauth2state']);
             
             if (isset($session_state['state']) && isset($state['state']) && $session_state['state'] == $state['state'] && isset($state['email'])) {
 
-                DB\connect();
-                
                 $QueryUser = 'select id,enabled from users_groups where email like  $1 ';
 
                 $res = DB\dbQuery(
@@ -114,23 +112,9 @@ class Oauth2Utils
 
                 if ($user_id > 0) {
 
-                    $r = User::setAsLoged($user_id, $session_state['state']);
-
-                    if ($r['success'] == false) {
-                        $errors[] = L\get('Auth_fail');
-                    } else {
-                        $cfg = User::getTSVConfig();
-                        if (!empty($cfg['method'])) {
-                            $_SESSION['check_TSV'] = time();
-                            $_SESSION['user']['TSV_checked'] = false;
-                        } else {
-                            $_SESSION['user']['TSV_checked'] = true;
-                        }
-                    }
-
                     // die('<pre>'.print_r($_SESSION, true).'</pre>');
 
-                    return [ 'success' => true];
+                    return [ 'success' => true, 'user_id' => $user_id , 'session_id' => $session_state['state'] ];
                 }
             } else {
                 return [ 'success' => false, 'message' => 'WRONG STATE!!!'];
@@ -233,7 +217,10 @@ class Oauth2Utils
 
         $updateEncodedState = null;
         $token              = static::getToken($provider, $encodedState, $code);
-
+        
+        // save token for futher 
+        $_SESSION['oauth2_token'] = $token;
+        
         if (isset($token)) {
 
             $ownerDetails = static::getOwner($provider, $token);

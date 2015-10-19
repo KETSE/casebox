@@ -264,3 +264,21 @@ function raiseErrorIf($result, $translationIndex = 'Error')
         );
     }
 }
+
+/**
+ * return session name, 
+ * for returned value $SESSION_NAME in $_COOKE[$SESION_NAME] contain id of session
+ * @return string
+ */
+function getSessionName()
+{
+    $SESSION_NAME = str_replace(
+            array(
+            '.casebox.org'
+            , '.'
+            , '-'
+            ), '', $_SERVER['SERVER_NAME']
+        ) . \CB\Config::get('core_name');
+
+    return $SESSION_NAME;
+}
