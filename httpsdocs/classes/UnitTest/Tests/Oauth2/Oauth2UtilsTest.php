@@ -78,7 +78,7 @@ class Oauth2UtilsTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(isset($url), 'ERROR checkLogined getGoogleLoginUrl '.$url);
 
         $uri = parse_url($url);
-
+        $Oauth2Query = [];
         parse_str($uri['query'], $Oauth2Query);
         $_GET = $Oauth2Query;
 
@@ -86,9 +86,18 @@ class Oauth2UtilsTest extends \PHPUnit_Framework_TestCase
         $state['email'] = $this->email;
         $_GET['state']  = \CB\Oauth2Utils::encodeState($state);
 
-        \CB\Oauth2Utils::checkLogined();
+        $check = \CB\Oauth2Utils::checkLogined();
 
-        $this->assertTrue(\CB\User::isLoged(),
-            'ERROR \CB\Users::isLoged = false GET: '.print_r($_GET, true).' SESSIONS:'.print_r($_SESSION, true));
+        $this->assertTrue($check['success'],'\CB\Oauth2Utils::checkLogined() return success false');
+        
+        $this->assertTrue($check['user_id'] == 1, '\CB\Oauth2Utils::checkLogined() WRONG USER ID');
+        
+        $this->assertTrue($check['session_id']  == $state['state'] , '\CB\Oauth2Utils::checkLogined() WRON SESSION ID');
+        
+        $r = \CB\User::setAsLoged($check['user_id'], $check['session_id']);
+        
+        $this->assertTrue($r['success'], ' User can\'t be set as logined');
+        
+        
     }
 }

@@ -131,6 +131,7 @@ class User
             $_SESSION['user']['groups'] = $rez['user']['groups'];
 
             $_SESSION['user']['TSV_checked'] = true;
+
         }
 
         return $rez;
