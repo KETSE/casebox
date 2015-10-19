@@ -219,7 +219,7 @@ class Oauth2Utils
         $token              = static::getToken($provider, $encodedState, $code);
         
         // save token for futher 
-        $_SESSION['oauth2_token'] = $token;
+        // $_SESSION['oauth2_token'] = $token;
         
         if (isset($token)) {
 
