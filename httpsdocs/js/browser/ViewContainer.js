@@ -1310,7 +1310,7 @@ Ext.define('CB.browser.ViewContainer', {
     ,processRestore: function(r, e) {
         this.getEl().unmask();
 
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             Ext.Msg.alert(L.ErrorOccured);
             return;
         }

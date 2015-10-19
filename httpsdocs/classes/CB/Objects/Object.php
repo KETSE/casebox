@@ -455,6 +455,7 @@ class Object
         //load current object from db into a variable to be passed to log and events
         $this->oldObject = clone $this;
         $od = $this->oldObject->load($this->id);
+        $wasDraft = !empty($od['draft']);
 
         \CB\fireEvent('beforeNodeDbUpdate', $this);
 
@@ -525,7 +526,9 @@ class Object
         \CB\fireEvent('nodeDbUpdate', $this);
 
         $this->logAction(
-            'update',
+            $wasDraft
+            ? 'create'
+            : 'update',
             array(
                 'old' => $this->oldObject
                 ,'mentioned' => $this->lastMentionedUserIds

@@ -115,7 +115,7 @@ Ext.define('CB.notifications.View', {
     ,onStoreLoad: function(store, records, successful, eOpts) {
         var rd = store.proxy.reader.rawData;
 
-        if(rd.success === true) {
+        if(rd && (rd.success === true)) {
             this.lastSeenActionId = rd.lastSeenActionId;
             this.updateSeenRecords();
         }
@@ -265,7 +265,7 @@ Ext.define('CB.notifications.View', {
     }
 
     ,onMarkAsRead: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -288,7 +288,7 @@ Ext.define('CB.notifications.View', {
             CB_Notifications.updateLastSeenId(
                 lastId
                 ,function(r, e) {
-                    if(r.success === true) {
+                    if(r && (r.success === true)) {
                         this.lastSeenActionId = lastId;
                         this.updateSeenRecords();
                     }
@@ -342,7 +342,7 @@ Ext.define('CB.notifications.View', {
     }
 
     ,processGetNew: function(r, e) {
-        if(Ext.isEmpty(r) || (r.success !== true)) {
+        if(!r || (r.success !== true)) {
             return;
         }
 

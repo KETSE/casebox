@@ -548,10 +548,10 @@ Ext.define('CB.browser.view.Calendar', {
                 ,date_end: date_local_to_ISO_string(dateEnd)
             }
             ,function(r, e){
-                if(r.success === true) {
-                    this.commit();
-                } else {
+                if(!r || (r.success !== true)) {
                     this.reject();
+                } else {
+                    this.commit();
                 }
             }
             ,record

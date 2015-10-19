@@ -34,7 +34,7 @@ Ext.define('CB.state.DBProvider', {
     }
 
     ,onLoad: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -57,7 +57,7 @@ Ext.define('CB.state.DBProvider', {
                 ,'value': value
             }
             ,function(r, e) {
-                if(r.success !== true) {
+                if(!r || (r.success !== true)) {
                     return;
                 }
                 CB.state.DBProvider.superclass[method].call(this, name, value);

@@ -1,3 +1,9 @@
+CaseBox 1.9.534 (2015-10-19)
+==============================
+- #9088 Trouble with "word" file preview
+- #8988 Misleading activity log entry 'updated' instead of 'created' in activity stream
+- #9034 SOLR error on sorting multiValued SOLR columns & UI broken
+
 CaseBox 1.9.533 (2015-10-14)
 ==============================
 ~ #8818 Favorites vFolder

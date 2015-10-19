@@ -1554,6 +1554,7 @@ class User
     public static function canSendNotifications($userId = false)
     {
         $rez = static::isIdle($userId);
+
         if ($rez) {
             $rez = false;
             $s   = static::getNotificationSettings($userId)['data'];

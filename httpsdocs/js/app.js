@@ -52,7 +52,7 @@ Ext.onReady(function(){
     }, 10);
 
     CB_User.getLoginInfo( function(r, e){
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -1143,7 +1143,7 @@ function initApp() {
     };
 
     App.successResponse = function(r){
-        if(r.success === true) {
+        if(r && (r.success === true)) {
             return true;
         }
         Ext.Msg.alert(L.Error, Ext.valueFrom(r.msg, L.ErrorOccured));
@@ -1308,7 +1308,7 @@ function initApp() {
                         ,name: text
                     }
                     ,function(r, e){
-                        if(r.success !== true){
+                        if(!r || (r.success !== true)) {
                             return;
                         }
 

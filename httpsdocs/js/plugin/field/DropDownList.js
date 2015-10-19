@@ -330,7 +330,7 @@ Ext.define('CB.plugin.field.DropDownList', {
     }
 
     ,onSearchUsersProcess: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 

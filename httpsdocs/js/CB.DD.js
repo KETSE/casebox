@@ -108,7 +108,7 @@ Ext.define('CB.DD', {
      */
     ,processExecute: function(r, e){
 
-        if(r.success !== true){
+        if(!r || (r.success !== true)) {
             if(r.confirm === true) {
                 Ext.Msg.confirm(L.Confirmation, r.msg, function(b){
                     if(b == 'yes'){

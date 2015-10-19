@@ -592,20 +592,27 @@ class Base
             ,'sort' => array()
         );
 
+        $ip = &$this->inputParams;
+
         $defaultColumns = array_keys(Config::getDefaultGridViewColumns());
         $displayColumns = $this->getDC();
+        $DC = empty($displayColumns['data'])
+            ? array()
+            : $displayColumns['data'];
 
-        if (!empty($displayColumns['data'])) {
-            foreach ($displayColumns['data'] as $columnName => $column) {
+        if (!empty($DC)) {
+            foreach ($DC as $columnName => $column) {
                 if (is_array($column) && !empty($column['solr_column_name'])) {
                     $rez['fields'][$column['solr_column_name']] = 1;
 
-                    if ((@$this->inputParams['sort'][0]['property'] == $columnName) &&
-                        !empty($this->inputParams['sort'][0]['direction'])
-                    ) {
-                        $rez['sort'][] = $column['solr_column_name'] . ' ' . strtolower($this->inputParams['sort'][0]['direction']);
-                    } elseif (!empty($column['sort'])) {
-                        $rez['sort'][] = $column['solr_column_name'] . ' ' . $column['sort'];
+                    if (empty($column['localSort'])) {
+                        if ((@$ip['sort'][0]['property'] == $columnName) &&
+                            !empty($ip['sort'][0]['direction'])
+                        ) {
+                            $rez['sort'][] = $column['solr_column_name'] . ' ' . strtolower($ip['sort'][0]['direction']);
+                        } elseif (!empty($column['sort'])) {
+                            $rez['sort'][] = $column['solr_column_name'] . ' ' . $column['sort'];
+                        }
                     }
 
                 } elseif (is_scalar($column)) {
@@ -621,17 +628,22 @@ class Base
         $property = null;
         $dir = 'asc';
 
-        if (!empty($this->inputParams['userSort'])) {
-            $dir = strtolower($this->inputParams['sort'][0]['direction']);
+        if (!empty($ip['userSort'])) {
+            $dir = strtolower($ip['sort'][0]['direction']);
 
             if (in_array($dir, array('asc', 'desc')) &&
-                preg_match('/^[a-z_0-9]+$/i', $this->inputParams['sort'][0]['property'])
+                preg_match('/^[a-z_0-9]+$/i', $ip['sort'][0]['property'])
             ) {
-                if (!empty($displayColumns['data'][$property]['solr_column_name'])) {
-                    $property = $displayColumns['data'][$property]['solr_column_name'];
+                $prop = $ip['sort'][0]['property'];
+                if (!empty($DC[$prop]['solr_column_name'])) {
+                    $col = $DC[$prop];
+                    //also check if not marked as localSort
+                    if (empty($col['localSort'])) {
+                        $property = $col['solr_column_name'];
+                    }
 
-                } elseif (in_array($this->inputParams['sort'][0]['property'], $defaultColumns)) {
-                    $property = $this->inputParams['sort'][0]['property'];
+                } elseif (in_array($prop, $defaultColumns)) {
+                    $property = $prop;
                 }
             }
 
@@ -647,8 +659,8 @@ class Base
                 $property = $state['sort']['property'];
                 $dir = strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'));
 
-                if (!empty($displayColumns['data'][$property]['solr_column_name'])) {
-                    $property = $displayColumns['data'][$property]['solr_column_name'];
+                if (!empty($DC[$property]['solr_column_name']) && empty($DC[$property]['localSort'])) {
+                    $property = $DC[$property]['solr_column_name'];
                 } elseif (!in_array($property, $defaultColumns)) {
                     $property = null;
                 }

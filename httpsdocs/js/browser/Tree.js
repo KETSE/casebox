@@ -492,7 +492,7 @@ Ext.define('CB.browser.Tree', {
 
     ,processCreateInlineObject: function(r, e){
         this.getEl().unmask();
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -832,7 +832,7 @@ Ext.define('CB.browser.Tree', {
 
     ,processRename: function(r, e){
         this.getEl().unmask();
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 

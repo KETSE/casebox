@@ -94,7 +94,11 @@ Ext.define('CB.Account', {
     }
 
     ,onGetData: function(r, e){
-        if(r.success !== true){
+        if(!r) {
+            return;
+        }
+
+        if(r.success !== true) {
             if(r.verify === true){
                 // show verification form
                 var w = new CB.VerifyPassword({
@@ -110,7 +114,7 @@ Ext.define('CB.Account', {
                     }
                 });
                 w.show();
-            }else {
+            } else {
                 this.destroy();
             }
             return;
@@ -455,6 +459,10 @@ Ext.define('CB.ProfileForm', {
     }
 
     ,onSaveProcess: function(r, e){
+        if (!r) {
+            return;
+        }
+
         if(r.success !== true) {
             if(r.verify) {
                 this.fireEvent('verify', this);
@@ -815,7 +823,10 @@ Ext.define('CB.SecurityForm', {
     }
 
     ,onSaveProcess: function(r, e){
-        if(r.success !== true) return;
+        if(!r || (r.success !== true)) {
+            return;
+        }
+
         this.setDirty(false);
     }
 
@@ -884,12 +895,15 @@ Ext.define('CB.SecurityForm', {
             ,scope: this
             ,fn: function(b, e){
                 if(b == 'yes'){
-                    CB_User.disableTSV( function(r, e){
-                        if(r.success === true){
-                            delete this.data.TSV.method;
-                            this.updateTSVStatus();
+                    CB_User.disableTSV(
+                        function(r, e){
+                            if(r && (r.success === true)) {
+                                delete this.data.TSV.method;
+                                this.updateTSVStatus();
+                            }
                         }
-                    }, this);
+                        ,this
+                    );
                 }
             }
         });
@@ -1001,7 +1015,8 @@ Ext.define('CB.TSVWindow', {
 
     ,processEnableTSV: function(r, e){
         this.getEl().unmask();
-        if(r.success === true){
+
+        if(r && (r.success === true)) {
             this.fireEvent('tsvchange', this, this.TSVmethod);
             this.destroy();
         } else {
@@ -1105,7 +1120,11 @@ Ext.define('CB.TSVgaForm', {
 
     ,processGetTSVTemplateData: function(r, e){
         this.getEl().unmask();
-        if(r.success !== true) return;
+
+        if(!r || (r.success !== true)) {
+            return;
+        }
+
         p = this.items.getAt(1);
         p.data = r;
         p.update(r);

@@ -346,7 +346,7 @@ Ext.define('CB.browser.view.Grid', {
                                 ,name: context.value
                             }
                             ,function(r, e){
-                                if(r.success !== true){
+                                if(!r || (r.success !== true)) {
                                     this.renamedRecord.set('name', this.renamedOriginalValue);
                                     delete this.renamedOriginalValue;
                                     delete this.renamedRecord;

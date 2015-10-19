@@ -490,7 +490,7 @@ Ext.define('CB.object.edit.Window', {
      * @return void
      */
     ,processLoadPreviewData: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -545,7 +545,7 @@ Ext.define('CB.object.edit.Window', {
      * @return void
      */
     ,processLoadEditData: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -805,7 +805,7 @@ Ext.define('CB.object.edit.Window', {
                 ,type: type
             }
             ,function(r, e) {
-                if(r.success !== true) {
+                if(!r || (r.success !== true)) {
                     return;
                 }
 
@@ -875,8 +875,8 @@ Ext.define('CB.object.edit.Window', {
 
         var r = action.result;
 
-        if(r.success !== true) {
-            App.showException(action.result);
+        if(!r || (r.success !== true)) {
+            App.showException(r);
         } else {
             this._isDirty = false;
             App.fireEvent('objectchanged', r.data, this);
@@ -1161,7 +1161,7 @@ Ext.define('CB.object.edit.Window', {
     }
 
     ,processSaveDraft: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 

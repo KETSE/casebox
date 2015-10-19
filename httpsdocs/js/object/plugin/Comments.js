@@ -173,7 +173,7 @@ Ext.define('CB.object.plugin.Comments', {
      * @return void
      */
     ,processLoadMore: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             App.showException(r);
             return;
         }
@@ -254,7 +254,7 @@ Ext.define('CB.object.plugin.Comments', {
     ,onAddCommentProcess: function(r, e) {
         this.addCommentField.enable();
 
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             // show error
             Ext.Msg.alert(L.Error, L.AddCommentError);
 
@@ -350,7 +350,7 @@ Ext.define('CB.object.plugin.Comments', {
     }
 
     ,processEditComment: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -385,7 +385,7 @@ Ext.define('CB.object.plugin.Comments', {
     }
 
     ,onEditCommentProcess: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -433,7 +433,7 @@ Ext.define('CB.object.plugin.Comments', {
     }
 
     ,processRemoveComment: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 

@@ -446,7 +446,7 @@ Ext.define('CB.controller.Browsing', {
             CB_Path.getPidPath(
                 params.id
                 ,function(r, e){
-                    if(r.success !== true) {
+                    if(!r || (r.success !== true)) {
                         return ;
                     }
                     this.locateObject(r);
@@ -489,7 +489,7 @@ Ext.define('CB.controller.Browsing', {
         CB_Objects.getBasicInfoForId(
             id
             ,function(r, e) {
-                if(r.success !== true) {
+                if(!r || (r.success !== true)) {
                     Ext.Msg.alert(
                         L.Error
                         ,L.RecordIdNotFound.replace('{id}', '#' + r.id)

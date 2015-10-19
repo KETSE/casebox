@@ -126,7 +126,7 @@ Ext.define('CB.notifications.SettingsWindow', {
     }
 
     ,processGetNotificationSettings: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
         var d = r.data;

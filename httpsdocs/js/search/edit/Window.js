@@ -73,8 +73,9 @@ Ext.define('CB.search.edit.Window', {
         this.editForm.save(
             //callback function
             function(component, form, action){
-                if(action.result.success !== true) {
-                    App.showException(action.result);
+                var r = action.result;
+                if(!r || (r.success !== true)) {
+                    App.showException(r);
                 } else {
                     this.actions.save.setDisabled(true);
                     this.close();

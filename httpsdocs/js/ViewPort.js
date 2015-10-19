@@ -562,12 +562,12 @@ Ext.define('CB.ViewPort', {
             , msg: L.ExitConfirmationMessage
             , fn: function (btn, text) {
                 if (btn == 'yes') {
-                    CB_User.logout(function (response, e) {
-                        if (response.success === true) {
+                    CB_User.logout(function (r, e) {
+                        if (r && (r.success === true)) {
                             App.confirmLeave = false;
                             window.location.reload();
-                        } else if(response.msg) {
-                            Ext.Msg.show({title: 'error', msg: response.msg});
+                        } else if(r.msg) {
+                            Ext.Msg.show({title: 'error', msg: r.msg});
                         }
                     });
                 }
@@ -776,7 +776,7 @@ Ext.define('CB.ViewPort', {
     }
 
     ,processSetUserOption: function(r, e){
-        if(r.success === true) {
+        if(r && (r.success === true)) {
             App.confirmLeave = false;
             document.location.reload();
         } else {
@@ -809,7 +809,7 @@ Ext.define('CB.ViewPort', {
     }
 
     ,onProcessObjectsDeleted: function(r, e){
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
         if(!Ext.isEmpty(r.ids)) {

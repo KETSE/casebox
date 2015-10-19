@@ -114,7 +114,7 @@ Ext.define('CB.Uploader', {
 
             var r = Ext.util.JSON.decode(e.target.response);
 
-            if(r.success === true){
+            if(r && (r.success === true)) {
                 this.uploadingFile.set('status', this.targetStatus);
 
                 if(Ext.isEmpty(this.uploadingFile.data.draftPid)) {
@@ -230,7 +230,7 @@ Ext.define('CB.Uploader', {
     }
 
     ,onConfirmResponseProcess: function(r, e){
-        if(r.success === true){
+        if(r && (r.success === true)) {
             this.uploadingFile.set('status', 5); //uploaded
 
             if(Ext.isEmpty(r.data.draftPid)) {
@@ -348,7 +348,7 @@ Ext.define('CB.Uploader', {
     }
 
     ,processCheckExistentContents: function(r, e){
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
