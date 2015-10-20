@@ -9,7 +9,8 @@ Ext.define('CB.browser.view.Interface', {
     ,viewName: 'none'
 
     ,initComponent: function(){
-        CB.browser.view.Interface.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
 
         this.enableBubble([
             'changeparams'
@@ -41,7 +42,7 @@ Ext.define('CB.browser.view.Interface', {
         var rez = null;
 
         if(params && params.sort) {
-            var sortersGroup = CB.Facet.prototype.sorters[params.sort];
+            var sortersGroup = CB.facet.Base.prototype.sorters[params.sort];
             if(sortersGroup) {
                 var dir = Ext.valueFrom(params.direction, 'asc');
 

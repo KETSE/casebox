@@ -33,18 +33,23 @@ class DBProvider
      */
     public function set($p)
     {
-        $rez = array('success' => true);
 
-        $state = User::getUserConfigParam('state', array());
+        if (User::isLoged()) {
+            $rez = array('success' => true);
 
-        if (!empty($p['value']) || isset($state[$p['name']])) {
-            if (empty($p['value'])) {
-                unset($state[$p['name']]);
-            } else {
-                $state[$p['name']] = $p['value'];
+            $state = User::getUserConfigParam('state', array());
+
+            if (!empty($p['value']) || isset($state[$p['name']])) {
+                if (empty($p['value'])) {
+                    unset($state[$p['name']]);
+                } else {
+                    $state[$p['name']] = $p['value'];
+                }
+
+                User::setUserConfigParam('state', $state);
             }
-
-            User::setUserConfigParam('state', $state);
+        } else {
+            $rez = array('success' => false);
         }
 
         return $rez;
@@ -82,6 +87,10 @@ class DBProvider
 
         if (!empty($p['params']['search']['template_id'])) {
             $guid = 'template_' . $p['params']['search']['template_id'];
+
+        } elseif (!empty($p['params']['query'])) {
+            $guid = 'search';
+
         } else {
             $path = empty($p['params']['path'])
                 ? $p['params']['id']

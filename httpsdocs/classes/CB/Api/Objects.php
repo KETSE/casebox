@@ -130,7 +130,7 @@ class Objects
 
             $p['oid'] = is_numeric($p['owner'])
                 ? $p['owner']
-                : DM\User::getIdByName($p['owner']);
+                : DM\Users::getIdByName($p['owner']);
         }
 
         if (!is_numeric($p['oid'])) {

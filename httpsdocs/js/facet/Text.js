@@ -1,7 +1,11 @@
-Ext.namespace('CB');
+Ext.namespace('CB.facet');
 
-Ext.define('CB.FacetText', {
-    extend: 'CB.Facet'
+Ext.define('CB.facet.Text', {
+    extend: 'CB.facet.Base'
+
+    ,xtype: 'CBFacetText'
+    ,alias: 'CB.Facet.Text'
+
     ,autoHeight: true
     ,layout: 'fit'
     ,bodyStyle: 'padding: 5px 5px 0px 5px'
@@ -22,7 +26,7 @@ Ext.define('CB.FacetText', {
 
         Ext.apply(this, { items: this.editor });
 
-        CB.FacetText.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
 
     ,setValue: function(value){

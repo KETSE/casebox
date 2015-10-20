@@ -244,7 +244,7 @@ Ext.define('CB.file.edit.Window', {
     }
 
     ,onLoadContent: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             plog('Error loading file content ', this.data);
             return;
         }
@@ -379,8 +379,8 @@ Ext.define('CB.file.edit.Window', {
 
         var r = action.result;
 
-        if(r.success !== true) {
-            App.showException(action.result);
+        if(!r || (r.success !== true)) {
+            App.showException(r);
         } else {
             this._isDirty = false;
             App.fireEvent('objectchanged', r.data, this);

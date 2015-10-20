@@ -1,9 +1,12 @@
-Ext.namespace('CB');
+Ext.namespace('CB.facet');
 
 xtemplate_facetList = new Ext.XTemplate(
     '<ul class="filter_list">'
         ,'<tpl for=".">'
-        ,'<li class="item {[ (values.active == 1) ? \'active\' : ""]} {[ (xindex > 10) ? \'more\' : ""]}">'
+        ,'<li class="item {[ (xindex > 10) ? \'more\' : ""]}">'
+        ,   '<b class="tick {[ (values.active == 1) ? \'active\' : ""]} {cls}"'
+        ,   ' style="{[ (values.color) ? \'background-color: \' + values.color : ""]}"'
+        ,       '></b>'
         ,   '<span class="{[ (values.active == 1) ? "b" : "t"]}">{items}</span>'
         ,   '<a href="#">{[Ext.valueFrom(values.name, "-")]}</a>'
         ,'</li>'
@@ -14,12 +17,17 @@ xtemplate_facetList = new Ext.XTemplate(
 );
 xtemplate_facetList.compile();
 
-Ext.define('CB.FacetList', {
-    extend: 'CB.Facet'
+Ext.define('CB.facet.List', {
+    extend: 'CB.facet.Base'
+
+    ,xtype: 'CBFacetList'
+    ,alias: 'CB.Facet.List'
+
     ,title: 'List facet'
     ,autoHeight: true
     ,layout: 'fit'
     ,listMode: 'checklist' //radio
+    ,itemsTemplate: xtemplate_facetList
 
     ,initComponent: function(){
         this.store = new Ext.data.JsonStore({
@@ -39,7 +47,7 @@ Ext.define('CB.FacetList', {
                 autoHeight: true
                 ,store: this.store
                 ,itemSelector: 'li.item'
-                ,tpl: xtemplate_facetList
+                ,tpl: this.itemsTemplate
                 ,listeners: {
                     scope: this
                     ,itemclick: this.onItemClick
@@ -183,12 +191,20 @@ Ext.define('CB.FacetList', {
                 Ext.iterate(
                     serverData
                     ,function(k, v){
-                        data.push({
+                        var d = {
                             id: k
                             ,name: Ext.isPrimitive(v) ? k : v['name']
                             ,active: (values.indexOf(k + '') >= 0) ? 1 : 0
                             ,items: Ext.isPrimitive(v) ? v : v.count
-                        });
+                        };
+                        if(!Ext.isEmpty(v.color)) {
+                            d.color = v.color;
+                        }
+                        if(!Ext.isEmpty(v.cls)) {
+                            d.cls = v.cls;
+                        }
+
+                        data.push(d);
                     }
                     ,this
                 );

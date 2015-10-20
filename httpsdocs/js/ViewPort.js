@@ -95,8 +95,12 @@ Ext.define('CB.ViewPort', {
                 ,arrowVisible: false
                 ,cls: 'user-menu-button'
                 ,iconCls: 'bgs32'
+                ,menuAlign: 'bl-br'
                 ,menu: []
                 ,name: 'userMenu'
+                ,listeners: {
+                    menushow: this.onButtonMenuShow
+                }
             }
             ,{
                 text: '<span style="margin-right: 10px">&nbsp;</span>'
@@ -282,8 +286,12 @@ Ext.define('CB.ViewPort', {
                 ,iconCls: 'im-create-negative'
                 ,disabled: true
                 ,scale: 'large'
+                ,menuAlign: 'tl-tr'
                 ,menu: [
                 ]
+                ,listeners: {
+                    menushow: this.onButtonMenuShow
+                }
             })
         };
 
@@ -491,7 +499,11 @@ Ext.define('CB.ViewPort', {
                     ,arrowVisible: false
                     ,hideOnClick: false
                     ,scale: 'large'
+                    ,menuAlign: 'bl-br'
                     ,menu: managementItems
+                    ,listeners: {
+                        menushow: this.onButtonMenuShow
+                    }
                 }
             );
         }
@@ -543,19 +555,22 @@ Ext.define('CB.ViewPort', {
         App.openPath(b.path);
     }
 
-    ,logout: function(){
+    ,logout: function () {
         return Ext.Msg.show({
             buttons: Ext.Msg.YESNO
-            ,title: L.ExitConfirmation
-            ,msg: L.ExitConfirmationMessage
-            ,fn: function(btn, text){
-                if (btn == 'yes')
-                    CB_User.logout(function(response, e){
-                        if(response.success === true) {
+            , title: L.ExitConfirmation
+            , msg: L.ExitConfirmationMessage
+            , fn: function (btn, text) {
+                if (btn == 'yes') {
+                    CB_User.logout(function (r, e) {
+                        if (r && (r.success === true)) {
                             App.confirmLeave = false;
                             window.location.reload();
+                        } else if(r.msg) {
+                            Ext.Msg.show({title: 'error', msg: r.msg});
                         }
                     });
+                }
             }
         });
     }
@@ -761,7 +776,7 @@ Ext.define('CB.ViewPort', {
     }
 
     ,processSetUserOption: function(r, e){
-        if(r.success === true) {
+        if(r && (r.success === true)) {
             App.confirmLeave = false;
             document.location.reload();
         } else {
@@ -794,7 +809,7 @@ Ext.define('CB.ViewPort', {
     }
 
     ,onProcessObjectsDeleted: function(r, e){
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
         if(!Ext.isEmpty(r.ids)) {
@@ -840,5 +855,13 @@ Ext.define('CB.ViewPort', {
             if(Ext.isArray(ids)) ids = ids.join(',');
             App.downloadFile(ids, true);
         }
+    }
+
+    ,onButtonMenuShow: function(btn, menu, eOpts) {
+        menu.showBy(
+            btn
+            ,Ext.valueFrom(btn.menuAlign, 'tl-tr')
+            ,[2, 0]
+        );
     }
 });

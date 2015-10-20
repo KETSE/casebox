@@ -47,7 +47,7 @@ class CreateMenu
         //get db menu into variable
         $menu = static::getMenuRules();
 
-        $ugids = $_SESSION['user']['groups'];
+        $ugids = isset($_SESSION['user']['groups']) ? $_SESSION['user']['groups']:[];
         $ugids[] = $_SESSION['user']['id'];
 
         // we have 3 main criterias for detecting needed menu:

@@ -132,6 +132,9 @@ if (!function_exists(__NAMESPACE__.'\dbQuery')) {
     {
         if (empty($dbh)) {
             $dbh = \CB\Cache::get('dbh');
+            if(empty($dbh)) {
+                trigger_error('Error Database connections:'.__DIR__.' '.__FILE__.'('.__LINE__.')',E_USER_ERROR);
+            }
         }
 
         // Escape parameters as required & build parameters for callback function

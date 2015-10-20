@@ -850,7 +850,7 @@ function getReferencedUsers($text)
         $names = array();
         foreach ($matches as $match) {
             if (!isset($names[$match[1]])) {
-                $names[$match[1]] = DM\User::getIdByName($match[1]);
+                $names[$match[1]] = DM\Users::getIdByName($match[1]);
 
                 if (is_numeric($names[$match[1]])) {
                     $rez[] = intval($names[$match[1]]);
@@ -868,13 +868,11 @@ function getReferencedUsers($text)
  */
 function is_cli()
 {
-    if( defined('STDIN') )
-    {
+    if ( defined('STDIN') ) {
         return true;
     }
 
-    if( empty($_SERVER['REMOTE_ADDR']) and !isset($_SERVER['HTTP_USER_AGENT']) and count($_SERVER['argv']) > 0)
-    {
+    if ( empty($_SERVER['REMOTE_ADDR']) and !isset($_SERVER['HTTP_USER_AGENT']) and count($_SERVER['argv']) > 0) {
         return true;
     }
 

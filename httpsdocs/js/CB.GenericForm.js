@@ -129,7 +129,7 @@ Ext.define('CB.GenericForm', {
     ,processLoadResponse: function(f, e){
         this.getEl().unmask();
         r = e.result;
-        if(r.success !== true){
+        if (!r || (r.success !== true)) {
             if(App.hideFailureAlerts){
                 this.doClose();
                 return;

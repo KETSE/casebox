@@ -15,21 +15,6 @@ Ext.define('CB.browser.view.CalendarPanel', {
         });
 
         this.callParent(arguments);
-
-        this.view.setParams({
-            path:'/'
-            ,descendants: true
-            ,filters: {
-                "task_status":[{
-                    "mode":"OR"
-                    ,"values":["1","2"]
-                }]
-                ,"assigned":[{
-                    "mode":"OR"
-                    ,"values":[App.loginData.id]
-                }]
-            }
-        });
     }
 });
 
@@ -46,19 +31,10 @@ Ext.define('CB.Calendar', {
         ,showWeekLinks: true
         ,showWeekNumbers: false
     }
-    // Some optional CalendarPanel configs to experiment with:
-    //showDayView: false,
-    //showWeekView: false,
-    //showMonthView: false,
     ,showNavBar: true
-    //showTodayText: false,
-    //showTime: false,
-    //title: 'My Calendar', // the header of the calendar, could be a subtitle for the app
-
     ,params: {
     }
-    // Once this component inits it will set a reference to itself as an application
-    // member property for easy reference in other functions within App.
+
     ,initComponent: function(){
         // This is an example calendar store that enables event color-coding
         this.calendarStore = Ext.create('Ext.calendar.data.MemoryCalendarStore', {
@@ -71,30 +47,6 @@ Ext.define('CB.Calendar', {
         this.eventStore = Ext.create('Ext.calendar.data.MemoryEventStore', {
             autoLoad: false
             ,autoDestroy: true
-            ,listeners: {
-                scope: this
-                ,load: function(st, recs, opt){
-                    Ext.each(
-                        recs
-                        , function(r){
-                            cls = 'cal-cat-'+ Ext.valueFrom(r.get('cls'), 'default') +
-                                ( (r.get('task_status') == 3) ? ' cal-status-c' : '');
-                            if(r.get('template_id') == App.config.default_task_template) {
-                                r.set('iconCls', '');
-                            } else {
-                                r.set('iconCls', getItemIcon(r.data));
-                            }
-                            if(!Ext.isEmpty(r.get('iconCls'))) {
-                                cls = cls + ' icon-padding '+ r.get('iconCls');
-                            }
-                            r.set('cls', cls);
-                            r.commit();
-                        }
-                        ,this
-                    );
-                    // this.getLayout().activeItem.syncSize();
-                }
-            }
         });
 
         this.eventsReloadTask = new Ext.util.DelayedTask( this.doReloadEventsStore, this);
@@ -161,7 +113,8 @@ Ext.define('CB.Calendar', {
                 }
             }
         });
-        CB.Calendar.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
 
         this.enableBubble(['objectopen', 'changeparams', 'reload']);
     }
@@ -282,6 +235,29 @@ Ext.define('CB.browser.view.Calendar', {
         });
         var viewGroup = Ext.id();
 
+        this.coloringCombo = new Ext.form.ComboBox({
+            xtype: 'combo'
+            ,itemId: 'coloringCombo'
+            ,selectedFacetIndex: 0
+            ,forceSelection: true
+            ,editable: false
+            ,triggerAction: 'all'
+            ,lazyRender: true
+            ,queryMode: 'local'
+            ,fieldLabel: L.ColoringBy
+            ,labelWidth: 'auto'
+            ,style: 'margin-right: 10px'
+            ,store: new Ext.data.JsonStore({
+                model: 'Generic2'
+            })
+            ,displayField: 'name'
+            ,valueField: 'id'
+            ,listeners: {
+                scope: this
+                ,select: this.onColoringComboChange
+            }
+        });
+
         this.calendar = new CB.Calendar({
             titleItem: this.titleItem
             ,region: 'center'
@@ -300,7 +276,11 @@ Ext.define('CB.browser.view.Calendar', {
                 ,eventresize: function(vw, rec){
                     this.updateRecordDatesRemotely(rec);
                 }
+                ,viewchange: function(cmp, view) {
+                    var BC = this.refOwner.buttonCollection;
 
+                    BC.get(view.xtype).setPressed(true);
+                }
             }
         });
 
@@ -363,6 +343,7 @@ Ext.define('CB.browser.view.Calendar', {
             })
 
             ,this.titleItem
+            ,this.coloringCombo
         );
 
         Ext.apply(this, {
@@ -376,14 +357,16 @@ Ext.define('CB.browser.view.Calendar', {
 
         this.callParent(arguments);
 
-        this.enableBubble(['createobject']);
+        this.enableBubble(['createobject', 'reload']);
     }
 
     ,getViewParams: function() {
         var p = {
             from: 'calendar'
+            ,selectedColoring: this.selectedColoring
         };
         Ext.apply(p, this.calendar.params);
+
         return p;
     }
 
@@ -394,10 +377,16 @@ Ext.define('CB.browser.view.Calendar', {
             return;
         }
 
+        this.loadColoringFacets();
+
         var data = [];
+
         store.each(
             function(r) {
                 var d = r.data;
+
+                d.date = Ext.valueFrom(d.date, d.date_end);
+
                 var sd = App.customRenderers.datetime(d.date);
                 var ed = App.customRenderers.datetime(d.date_end);
                 var ad = ((sd.length < 11) && (ed.length < 11));
@@ -413,6 +402,7 @@ Ext.define('CB.browser.view.Calendar', {
                         ,template_id: d.template_id
                         ,Title: d.name //title
                         ,cls: d.cls
+                        ,style: d.style
                     });
                 }
             }
@@ -420,6 +410,45 @@ Ext.define('CB.browser.view.Calendar', {
         );
 
         this.calendar.eventStore.loadData(data);
+
+    }
+
+    ,loadColoringFacets: function() {
+        var rawData = this.store.proxy.reader.rawData
+            ,vp = Ext.valueFrom(rawData.view, {})
+            ,coloring = Ext.valueFrom(vp.coloring, [])
+            ,data = [];
+
+        if(Ext.isEmpty(this.selectedColoring)) {
+            this.selectedColoring = vp.defaultColoring;
+        }
+
+        Ext.iterate(
+            rawData.facets
+            ,function(key, val, o) {
+                if(coloring.indexOf(val.f) > -1) {
+                    data.push({
+                        id: val.f
+                        ,name: val.title
+                    });
+
+                    if(Ext.isEmpty(this.selectedColoring)) {
+                        this.selectedColoring = val.f;
+                    }
+                }
+            }
+            ,this
+        );
+
+        this.coloringCombo.store.loadData(data);
+        this.coloringCombo.setValue(this.selectedColoring);
+        this.coloringCombo.setHidden(this.coloringCombo.store.getCount() < 2);
+    }
+
+    ,onColoringComboChange: function(c, rec, eOpts) {
+        this.selectedColoring = c.getValue();
+
+        this.fireEvent('reload', this);
     }
 
     ,onChangeViewClick: function() {
@@ -474,6 +503,7 @@ Ext.define('CB.browser.view.Calendar', {
                 ,'calnext'
                 ,'caltitle'
                 ,'->'
+                ,'coloringCombo'
                 ,'dayview'
                 ,'weekview'
                 ,'monthview'
@@ -518,10 +548,10 @@ Ext.define('CB.browser.view.Calendar', {
                 ,date_end: date_local_to_ISO_string(dateEnd)
             }
             ,function(r, e){
-                if(r.success === true) {
-                    this.commit();
-                } else {
+                if(!r || (r.success !== true)) {
                     this.reject();
+                } else {
+                    this.commit();
                 }
             }
             ,record

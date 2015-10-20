@@ -10,7 +10,6 @@ Ext.define('CB.object.plugin.CurrentVersion', {
             title: L.CurrentVersion
         });
 
-        // CB.object.plugin.CurrentVersion.superclass.initComponent.apply(this, arguments);
         this.callParent(arguments);
     }
 

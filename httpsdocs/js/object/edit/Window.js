@@ -23,13 +23,6 @@ Ext.define('CB.object.edit.Window', {
         this.data = Ext.apply({}, this.config.data);
         delete this.data.html;
 
-        if(Ext.isEmpty(this.data.template_id)) {
-            return Ext.Msg.alert(
-                'Error opening object'
-                ,'Template should be specified for object window to load.'
-            );
-        }
-
         this.updateWindowTitle();
 
         this.objectsStore = new CB.DB.DirectObjectsStore({
@@ -497,7 +490,7 @@ Ext.define('CB.object.edit.Window', {
      * @return void
      */
     ,processLoadPreviewData: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -552,7 +545,7 @@ Ext.define('CB.object.edit.Window', {
      * @return void
      */
     ,processLoadEditData: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -812,7 +805,7 @@ Ext.define('CB.object.edit.Window', {
                 ,type: type
             }
             ,function(r, e) {
-                if(r.success !== true) {
+                if(!r || (r.success !== true)) {
                     return;
                 }
 
@@ -882,8 +875,8 @@ Ext.define('CB.object.edit.Window', {
 
         var r = action.result;
 
-        if(r.success !== true) {
-            App.showException(action.result);
+        if(!r || (r.success !== true)) {
+            App.showException(r);
         } else {
             this._isDirty = false;
             App.fireEvent('objectchanged', r.data, this);
@@ -1168,12 +1161,14 @@ Ext.define('CB.object.edit.Window', {
     }
 
     ,processSaveDraft: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
         var id = r.data.id;
         this.data.id = id;
+        this.data.pid = r.data.pid;
+        // this.data.draft = true;
 
         //update loadedData.id of the plugins container so it will reload automaticly
         //on fileuploaded event

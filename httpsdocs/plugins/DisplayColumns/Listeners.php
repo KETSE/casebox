@@ -27,11 +27,17 @@ class Listeners
                 $class= new FormEditor();
                 break;
 
-            case 'charts':
             case 'calendar':
+                $class= new Calendar();
+                unset($p['params']['sort']);
+                break;
+
+            case 'charts':
+            case 'pivot':
                 //unset sort params for other views
                 //because other views (chart, calendar) dont need sorting
                 //and would result in error if sorted by a custom column and not processed
+                $p['rows'] = 0;
                 unset($p['params']['sort']);
 
                 return;
@@ -89,6 +95,10 @@ class Listeners
 
             case 'formEditor':
                 $class= new FormEditor();
+                break;
+
+            case 'calendar':
+                $class= new Calendar();
                 break;
 
             default:

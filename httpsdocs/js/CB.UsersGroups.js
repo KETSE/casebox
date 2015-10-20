@@ -499,7 +499,7 @@ Ext.define('CB.UsersGroupsTree', {
 
     ,processRenameGroup: function(r, e){
         this.getEl().unmask();
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
         this.editor.editNode.data.title = r.title;
@@ -542,6 +542,9 @@ Ext.define('CB.UsersGroupsTree', {
     }
 
     ,processAddUser: function(r, e){
+        if(!r) {
+            return;
+        }
         if(r.success !== true) {
             if(!Ext.isEmpty(r.msg)) {
                 Ext.Msg.alert(L.Error, r.msg);
@@ -610,6 +613,9 @@ Ext.define('CB.UsersGroupsTree', {
     }
 
     ,processDeassociate: function(r, e){
+        if(!r) {
+            return;
+        }
         if(r.success !== true) {
             if(r.verify) {
                 this.fireEvent('verify', this);
@@ -638,6 +644,10 @@ Ext.define('CB.UsersGroupsTree', {
     }
 
     ,processAssociate: function(r, e){
+        if(!r) {
+            return;
+        }
+
         if(r.success !== true) {
             if(r.verify) {
                 this.fireEvent('verify', this);
@@ -686,6 +696,10 @@ Ext.define('CB.UsersGroupsTree', {
     }
 
     ,processDestroyUserGroup: function(r, e){
+        if(!r) {
+            return;
+        }
+
         if(r.success !== true) {
             if(r.verify) {
                 this.fireEvent('verify', this);
@@ -697,6 +711,10 @@ Ext.define('CB.UsersGroupsTree', {
     }
 
     ,processDelNode: function(r, e){
+        if(!r) {
+            return;
+        }
+
         if(r.success !== true) {
             if(r.verify) {
                 this.fireEvent('verify', this);
@@ -818,13 +836,18 @@ Ext.define('CB.UserEditWindow', {
     }
     ,onLoadProfileData: function(r, e){
         this.getEl().unmask();
-        if(r.success !== true) {
+        if(!r) {
+            return;
+        }
+
+        if (r.success !== true) {
             if(r.verify) {
                 this.fireEvent('verify', this);
             }
             this.destroy();
             return;
         }
+
         this.profileForm.loadData(r);
     }
 });
@@ -1050,6 +1073,10 @@ Ext.define('CB.UsersGroupsForm', {
     }
 
     ,processLoadedData: function(response, e){
+        if(!response) {
+            return;
+        }
+
         if(response.success !== true) {
             if(response.verify) {
                 this.fireEvent('verify', this);
@@ -1127,6 +1154,9 @@ Ext.define('CB.UsersGroupsForm', {
         CB_UsersGroups.saveAccessData(
             params,
             function(r, e){
+                if(!r) {
+                    return;
+                }
                 if(r.success !== true) {
                     if(r.verify) {
                         this.fireEvent('verify', this);
@@ -1187,6 +1217,10 @@ Ext.define('CB.UsersGroupsForm', {
                 CB_UsersGroups.renameUser(
                     {id: this.data.id, name: text},
                     function(r, e){
+                        if(!r) {
+                            return;
+                        }
+
                         if(r.success !== true) {
                             if(r.verify) {
                                 this.fireEvent('verify', this);
@@ -1206,10 +1240,12 @@ Ext.define('CB.UsersGroupsForm', {
         CB_UsersGroups.sendResetPassMail(
             this.data.id
             ,function(r, e) {
-                Ext.Msg.alert(
-                    L.Info
-                    ,r.success ? L.EmailSent: L.ErrorOccured
-                );
+                if(r) {
+                    Ext.Msg.alert(
+                        L.Info
+                        ,r.success ? L.EmailSent: L.ErrorOccured
+                    );
+                }
             }
             ,this
         );
@@ -1237,9 +1273,10 @@ Ext.define('CB.UsersGroupsForm', {
         );
     }
     ,processDisableTSV: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
+
         this.loadData(this.data.id);
     }
 
@@ -1256,7 +1293,7 @@ Ext.define('CB.UsersGroupsForm', {
     }
 
     ,processToggleUserEnable: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -1611,7 +1648,7 @@ Ext.define('CB.ChangePasswordWindow', {
             }
         });
 
-        CB.ChangePasswordWindow.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
     ,onSubmitSuccess: function(r, e){
         this.fireEvent('passwordchanged');

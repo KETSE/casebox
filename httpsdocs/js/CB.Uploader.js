@@ -26,7 +26,8 @@ Ext.define('CB.Uploader', {
         this.config = config || {};
         Ext.applyIf(this.config, this.defaultConfig);
 
-        CB.Uploader.superclass.constructor.call(this, config);
+        this.callParent(arguments);
+        // CB.Uploader.superclass.constructor.call(this, config);
     }
 
     ,init: function(){
@@ -113,7 +114,7 @@ Ext.define('CB.Uploader', {
 
             var r = Ext.util.JSON.decode(e.target.response);
 
-            if(r.success === true){
+            if(r && (r.success === true)) {
                 this.uploadingFile.set('status', this.targetStatus);
 
                 if(Ext.isEmpty(this.uploadingFile.data.draftPid)) {
@@ -229,7 +230,7 @@ Ext.define('CB.Uploader', {
     }
 
     ,onConfirmResponseProcess: function(r, e){
-        if(r.success === true){
+        if(r && (r.success === true)) {
             this.uploadingFile.set('status', 5); //uploaded
 
             if(Ext.isEmpty(r.data.draftPid)) {
@@ -347,7 +348,7 @@ Ext.define('CB.Uploader', {
     }
 
     ,processCheckExistentContents: function(r, e){
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -709,7 +710,7 @@ Ext.define('CB.UploadWindow', {
         });
 
 
-        CB.UploadWindow.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
 
     ,onAfterRender: function(){
@@ -857,7 +858,9 @@ Ext.define('CB.UploadWindowButton', {
             ,handler: this.showUploadWindow
             ,scope: this
         });
-        CB.UploadWindowButton.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
+
         this.uploader.on('progresschange', this.onProgressChange, this);
     }
     ,showUploadWindow: function(b, e){

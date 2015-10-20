@@ -19,7 +19,7 @@ Ext.define('Ext.calendar.view.DayBody', {
         'Ext.calendar.dd.DayDragZone',
         'Ext.calendar.dd.DayDropZone'
     ],
-    
+
     //private
     dayColumnElIdDelimiter: '-day-col-',
 
@@ -36,7 +36,7 @@ Ext.define('Ext.calendar.view.DayBody', {
      * Fires after the user clicks within the day view container and not on an event element
      * @param {Ext.calendar.view.DayBody} this
      * @param {Date} dt The date/time that was clicked on
-     * @param {Boolean} allday True if the day clicked on represents an all-day box, else false. Clicks within the 
+     * @param {Boolean} allday True if the day clicked on represents an all-day box, else false. Clicks within the
      * DayBodyView always return false for this param.
      * @param {Ext.core.Element} el The Element that was clicked on
      */
@@ -88,8 +88,8 @@ Ext.define('Ext.calendar.view.DayBody', {
     /**
      * Scrolls the container to the specified vertical position. If the view is large enough that
      * there is no scroll overflow then this method will have no effect.
-     * @param {Number} y The new vertical scroll position in pixels 
-     * @param {Boolean} defer (optional) <p>True to slightly defer the call, false to execute immediately.</p> 
+     * @param {Number} y The new vertical scroll position in pixels
+     * @param {Boolean} defer (optional) <p>True to slightly defer the call, false to execute immediately.</p>
      * <p>This method will automatically defer itself for IE and Opera (even if you pass false) otherwise
      * the scroll position will not update in those browsers. You can optionally pass true, however, to
      * force the defer in all browsers, or use your own custom conditions to determine whether this is needed.</p>
@@ -176,13 +176,13 @@ Ext.define('Ext.calendar.view.DayBody', {
         if (!this.eventTpl) {
             this.eventTpl = !(Ext.isIE || Ext.isOpera) ?
             new Ext.XTemplate(
-                '<div id="{_elId}" class="{_selectorCls} {_colorCls} ext-cal-evt ext-cal-evr" style="left: {_left}%; width: {_width}%; top: {_top}px; height: {_height}px;">',
+                '<div id="{_elId}" class="{_selectorCls} {_colorCls} ext-cal-evt ext-cal-evr {cls}" style="left: {_left}%; width: {_width}%; top: {_top}px; height: {_height}px;{style}">',
                 '<div class="ext-evt-bd">', this.getEventBodyMarkup(), '</div>',
                 '<div class="ext-evt-rsz"><div class="ext-evt-rsz-h">&#160;</div></div>',
                 '</div>'
             )
             : new Ext.XTemplate(
-                '<div id="{_elId}" class="ext-cal-evt {_selectorCls} {_colorCls}-x" style="left: {_left}%; width: {_width}%; top: {_top}px;">',
+                '<div id="{_elId}" class="ext-cal-evt {_selectorCls} {_colorCls}-x {cls}" style="left: {_left}%; width: {_width}%; top: {_top}px;{style}">',
                 '<div class="ext-cal-evb">&#160;</div>',
                 '<dl style="height: {_height}px;" class="ext-cal-evdm">',
                 '<dd class="ext-evt-bd">',
@@ -200,12 +200,12 @@ Ext.define('Ext.calendar.view.DayBody', {
 
     /**
      * <p>Returns the XTemplate that is bound to the calendar's event store (it expects records of type
-     * {@link Ext.calendar.EventRecord}) to populate the calendar views with <strong>all-day</strong> events. 
-     * Internally this method by default generates different markup for browsers that support CSS border radius 
+     * {@link Ext.calendar.EventRecord}) to populate the calendar views with <strong>all-day</strong> events.
+     * Internally this method by default generates different markup for browsers that support CSS border radius
      * and those that don't. This method can be overridden as needed to customize the markup generated.</p>
      * <p>Note that this method calls {@link #getEventBodyMarkup} to retrieve the body markup for events separately
      * from the surrounding container markup.  This provdes the flexibility to customize what's in the body without
-     * having to override the entire XTemplate. If you do override this method, you should make sure that your 
+     * having to override the entire XTemplate. If you do override this method, you should make sure that your
      * overridden version also does the same.</p>
      * @return {Ext.XTemplate} The event XTemplate
      */

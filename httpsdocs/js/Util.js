@@ -178,12 +178,6 @@ function getFileIcon(filename){
     return 'file- file-'+ Ext.util.Format.lowercase(a.pop());
 }
 
-function getVersionsIcon(versionsCount){
-    if(isNaN(versionsCount)) return '';
-    if(versionsCount > 20) return 'vc21';
-    return 'vc'+versionsCount;
-}
-
 function getFileIcon32(filename){
     if(Ext.isEmpty(filename)) return 'file-unknown32';
     a = String(filename).split('.');

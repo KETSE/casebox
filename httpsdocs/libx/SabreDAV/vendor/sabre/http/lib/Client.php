@@ -279,7 +279,7 @@ class Client extends EventEmitter {
 
         } while ($messagesInQueue > 0);
 
-        return $stillRunning;
+        return count($this->curlMultiMap) > 0;
 
     }
 

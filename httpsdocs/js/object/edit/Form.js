@@ -146,7 +146,7 @@ Ext.define('CB.object.edit.Form', {
 
     ,processLoadData: function(r, e) {
         this.getEl().unmask();
-        if(r.success !== true) {
+        if (!r || (r.success !== true)) {
             return;
         }
         this.data = r.data;
@@ -406,7 +406,7 @@ Ext.define('CB.object.edit.Form', {
     ,processSave: function(form, action) {
         this.getEl().unmask();
         var r = action.result;
-        if(r.success !== true) {
+        if (!r || (r.success !== true)) {
             delete this.saveCallback;
             return;
         }

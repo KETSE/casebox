@@ -197,6 +197,11 @@ class Object
         ) or die(DB\dbQueryError());
 
         $this->id = DB\dbLastInsertId();
+
+        if (!isset($this->id) || ! (intval($this->id) > 0)) {
+            trigger_error('Error on create object : '.\CB\Cache::get('lastSql'), E_USER_ERROR);
+        }
+
         $p['id'] = $this->id;
 
         $this->createCustomData();
@@ -450,6 +455,7 @@ class Object
         //load current object from db into a variable to be passed to log and events
         $this->oldObject = clone $this;
         $od = $this->oldObject->load($this->id);
+        $wasDraft = !empty($od['draft']);
 
         \CB\fireEvent('beforeNodeDbUpdate', $this);
 
@@ -519,7 +525,15 @@ class Object
 
         \CB\fireEvent('nodeDbUpdate', $this);
 
-        $this->logAction('update', array('old' => $this->oldObject));
+        $this->logAction(
+            $wasDraft
+            ? 'create'
+            : 'update',
+            array(
+                'old' => $this->oldObject
+                ,'mentioned' => $this->lastMentionedUserIds
+            )
+        );
 
         return true;
     }
@@ -545,7 +559,7 @@ class Object
 
         $this->filterHTMLFields($d['data']);
 
-        $this->setFollowers();
+        $this->lastMentionedUserIds = $this->setFollowers();
 
         $this->collectSolrData();
 
@@ -1876,12 +1890,12 @@ class Object
                 $obj = &$params['new'];
             }
 
-            $logActionId = Log::add($params);
-
             $uid = User::getId();
 
             //add action to object sys_data
             $data = $obj->getData();
+            $params['data'] = $data;
+            $logActionId = Log::add($params);
 
             $lastAction = $obj->getLastActionData();
 

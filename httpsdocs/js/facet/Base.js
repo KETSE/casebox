@@ -1,6 +1,9 @@
-Ext.namespace('CB');
-Ext.define('CB.Facet', {
-    extend: 'Ext.Panel'
+Ext.namespace('CB.facet');
+Ext.define('CB.facet.Base', {
+    xtype: 'CBFacetBase'
+    ,alias: 'CB.Facet.Base'
+
+    ,extend: 'Ext.Panel'
     ,title: 'facet'
     ,autoHeight: true
     ,closable: false
@@ -153,6 +156,10 @@ Ext.define('CB.Facet', {
 
     }
 
+    ,processServerData: function(serverData, options){
+
+    }
+
     /**
      * get buttons to be set in top right side of the facet
      * @return array
@@ -230,6 +237,10 @@ Ext.define('CB.Facet', {
         this.store.loadData(data);
 
         this.lastSort = 'count' + sortDir;
+    }
+
+    ,updateVisibility: function() {
+        this.setVisible(this.store.getCount() > 0);
     }
 
     ,setModeVisible: function(visible){

@@ -49,18 +49,19 @@ class Query extends Base
      */
     protected function getChildNodes()
     {
+        $p = $this->requestParams;
+        unset($p['facets']);
+
         $fq = empty($this->config['fq'])
             ? array()
             : $this->config['fq'];
 
         $this->replaceFilterVars($fq);
 
+        $p['fq'] = $fq;
+
         $s = new \CB\Search();
-        $rez = $s->query(
-            array(
-                'fq' => $fq
-            )
-        );
+        $rez = $s->query($p);
 
         return $rez;
     }

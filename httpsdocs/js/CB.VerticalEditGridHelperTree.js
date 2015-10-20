@@ -27,7 +27,7 @@ Ext.define('CB.VerticalEditGridHelperTree', {
             }
         });
 
-        CB.VerticalEditGridHelperTree.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
     ,onBeforeNodeAppend: function(parent, node){
         node.set('id', Ext.id());

@@ -83,6 +83,8 @@ class Purify
 
         $value = static::$purifier->purify($value, $config);
 
+        Cache::remove('memory');
+
         return $value;
     }
 

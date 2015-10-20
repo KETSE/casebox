@@ -119,7 +119,7 @@ do {
 DB\dbQuery("use `$dbName`") or die(DB\dbQueryError());
 
 if (!empty($email) || !empty($pass)) {
-    DM\User::updateByName(
+    DM\Users::updateByName(
         array(
             'name' => 'root'
             ,'password' => $pass
@@ -143,7 +143,6 @@ $languages = readParam('core_languages', $language);
 DB\dbQuery($sql, array('languages', $languages)) or die(DB\dbQueryError());
 
     createSolrCore($cfg, $coreName);
-
 
 echo 'Creating language files .. ';
 exec('php "' . $binDirectorty . 'languages_update_js_files.php"');

@@ -60,7 +60,8 @@ Ext.define('CB.plugin.field.DropDownList', {
 
         Ext.apply(this, defaultConfig);
 
-        CB.plugin.field.DropDownList.superclass.constructor.call(defaultConfig);
+        this.callParent(arguments);
+        // CB.plugin.field.DropDownList.superclass.constructor.call(defaultConfig);
     }
 
     ,init: function(owner) {
@@ -329,7 +330,7 @@ Ext.define('CB.plugin.field.DropDownList', {
     }
 
     ,onSearchUsersProcess: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 

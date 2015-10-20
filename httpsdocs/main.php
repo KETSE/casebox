@@ -3,6 +3,8 @@ namespace CB;
 
 require_once 'init.php';
 
+//die('<pre>'.print_r($_SESSION,true).'</pre>');
+
 $coreName = Config::get('core_name');
 
 $coreUrl = Config::get('core_url');
@@ -53,7 +55,13 @@ if (!empty($css)) {
 }
 
 echo '<title>' . $projectTitle . '</title>' . "\n";
-
+$colors = Users::getColors();
+$rez = array();
+foreach ($colors as $id => $c) {
+    $rez[] = '.user-color-' . $id . "{background-color: $c}";
+}
+$rez = implode("\n", $rez);
+echo "<style>$rez</style>";
 ?>
 <style>
 #loading {

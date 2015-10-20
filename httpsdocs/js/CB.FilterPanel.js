@@ -31,25 +31,31 @@ Ext.define('CB.FilterPanel', {
                 ,facetchange: this.onFacetChange
             }
         });
-        CB.FilterPanel.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
     }
 
-    ,updateFacets: function(data, options){
-        //hide all facets by default
+    ,hideAllFacets: function() {
         this.items.each(
             function(i){
                 i.setVisible(false);
             }
             ,this
         );
+    }
 
+    ,updateFacets: function(data, options){
+        this.hideAllFacets();
         this.facetIndex = 1;
         Ext.iterate(
             data
             ,function(key, value, obj){
                 var facet = this.query('panel[facetId="' + key + '"]')[0];
+
                 if(Ext.isEmpty(facet)){
-                    facet = new CB.FacetList({
+                    var type = Ext.String.capitalize(Ext.valueFrom(value.type, 'List'));
+
+                    facet = Ext.create('CB.facet.' + type, {
                         modeToggle: Ext.valueFrom(value.boolMode, true)
                         ,facetId: key
                         ,title: value.title
@@ -57,11 +63,12 @@ Ext.define('CB.FilterPanel', {
                         ,manualPeriod: value.manualPeriod
                         ,defaultSort: value.sort
                     });
+
                     this.insert(this.facetIndex, facet);
                 }
 
                 facet.processServerData(value.items, options);
-                facet.setVisible(facet.store.getCount() > 0) ;
+                facet.updateVisibility();
                 this.facetIndex++;
             }
             ,this
@@ -207,7 +214,8 @@ Ext.define('CB.FacetActiveFilters', {
                 }
             })
         });
-        CB.FacetActiveFilters.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
     }
 
     ,loadData: function(data){

@@ -67,7 +67,6 @@ Ext.define('CB.object.plugin.ContentItems', {
             }
         });
 
-        // CB.object.plugin.ContentItems.superclass.initComponent.apply(this, arguments);
         this.callParent(arguments);
 
         App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);

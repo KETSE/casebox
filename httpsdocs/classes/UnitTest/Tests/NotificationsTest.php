@@ -76,7 +76,8 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
             )
         );
 
-        $_SESSION['user']['id'] = $firstUserId;
+        //$_SESSION['user']['id'] = $firstUserId;
+        \CB\User::setAsLoged($firstUserId, $_SESSION['key']);
 
         /* make a check - user should be denied to add comments */
         try {
@@ -87,13 +88,15 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue($msg == 'Access is denied', $msg);
         }
 
-        $_SESSION['user']['id'] = $rootUserId;
+        //$_SESSION['user']['id'] = $rootUserId;
+         \CB\User::setAsLoged($rootUserId, $_SESSION['key']);
 
         $this->addAllowSecurityRule();
 
         // try again adding a comment,
         // now it should work without access exceptions
-        $_SESSION['user']['id'] = $firstUserId;
+        //$_SESSION['user']['id'] = $firstUserId;
+        \CB\User::setAsLoged($firstUserId, $_SESSION['key']);
 
         $commentId = $this->createObject($commentData);
 
@@ -101,16 +104,18 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
 
         //check notifications for user bow,
         //he should receive 2 new notifications from root and andrew
+        $lastNotification = [
+            'user_id' => $firstUserId
+            , 'object_id' => $pid
+            , 'read' => 0
+        ];
+
         $this->assertTrue(
             $this->checkLastNotification(
                 $secondUserId,
-                array(
-                    'user_id' => $firstUserId
-                    ,'object_id' => $pid
-                    ,'read' => 0
-                )
-            ),
-            'Wrong last notification'
+                $lastNotification
+              ),
+            'Wrong last notification : Last ('. print_r($lastNotification,true).')'
         );
 
         //check notifications for root user, he also should receive a new notification from andrew
@@ -305,6 +310,8 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         $rez = null;
         //save current user id
         $currentUser = $_SESSION['user']['id'];
+
+        \CB\User::setAsLoged($userId, $_SESSION['key']);
         $api = new \CB\Api\Notifications;
 
         $result = $api->getList(array('limit' => 900));
@@ -314,8 +321,8 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         }
 
         //restore previous user id
-        $_SESSION['user']['id'] = $currentUser;
-
+        //$_SESSION['user']['id'] = $currentUser;
+        \CB\User::setAsLoged($currentUser, $_SESSION['key']);
         return $rez;
     }
 
@@ -332,12 +339,14 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         //save current user id
         $currentUser = $_SESSION['user']['id'];
 
-        $_SESSION['user']['id'] = $userId;
+        \CB\User::setAsLoged($userId, $_SESSION['key']);
+        //$_SESSION['user']['id'] = $userId;
         $api = new \CB\Api\Notifications;
 
         //check if counts are not empty
         $countResult = $api->getNew(array());
         if (($countResult['success'] !== true) || empty($countResult['data'])) {
+            trigger_error(print_r($countResult,true),E_USER_ERROR);
             return $rez;
         }
 
@@ -352,8 +361,11 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         }
 
         //restore previous user id
-        $_SESSION['user']['id'] = $currentUser;
-
+        //$_SESSION['user']['id'] = $currentUser;
+         \CB\User::setAsLoged($currentUser, $_SESSION['key']);
+        if(!$rez) {
+            trigger_error(print_r($n,true),E_USER_ERROR);
+        }
         return $rez;
     }
 

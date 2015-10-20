@@ -259,7 +259,7 @@ class Notifications extends Base
      * @param  int  $id
      * @return void
      */
-    public static function markAsSeen($userId, $upToId)
+    public static function markAsSeenUpToId($userId, $upToId)
     {
         //validate params
         \CB\raiseErrorIf(
@@ -273,6 +273,32 @@ class Notifications extends Base
                 SET `seen` = 1
                 WHERE user_id = $1 AND id <= $2 AND seen = 0',
                 array($userId, $upToId)
+            ) or die(DB\dbQueryError());
+        }
+    }
+
+    /**
+     * mark user notifications as seen
+     * @param  int             $userId
+     * @param  varchar | array $id
+     * @return void
+     */
+    public static function markAsSeen($userId, $ids)
+    {
+        \CB\raiseErrorIf(
+            !is_numeric($userId),
+            'ErroneousInputData'
+        );
+
+        $ids = Util\toNumericArray($ids);
+        if (!empty($ids)) {
+            DB\dbQuery(
+                'UPDATE `' . static::getTableName() . '`
+                SET `seen` = 1
+                WHERE user_id = $1
+                    AND id IN (' . implode(',', $ids) . ')
+                    AND seen = 0',
+                $userId
             ) or die(DB\dbQueryError());
         }
     }

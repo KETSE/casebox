@@ -33,6 +33,7 @@ class Helpers
 
         L\initTranslations();
         Config::setEnvVar('user_language_index', 1);
+        \CB\User::setAsLoged(1, 'AbrACadaBraK333y');
     }
 
     /**

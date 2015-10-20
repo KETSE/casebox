@@ -41,7 +41,8 @@ class Comments extends Base
             return $rez;
         }
 
-        $limit = Config::get('max_load_comments', 4);
+        $limit = empty($p['beforeId']) ? 4 : 10;
+        $limit = Config::get('max_load_comments', $limit);
 
         $params = array(
             'pid' => $this->id

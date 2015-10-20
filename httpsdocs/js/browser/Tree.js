@@ -232,7 +232,8 @@ Ext.define('CB.browser.Tree', {
             // ,plugins: [ new CB.DD.Tree({idProperty: 'nid'}) ]
         });
 
-        CB.browser.Tree.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
+
         if(!isNaN(this.rootId)) {
             CB_BrowserTree.getRootProperties(
                 this.rootId
@@ -491,7 +492,7 @@ Ext.define('CB.browser.Tree', {
 
     ,processCreateInlineObject: function(r, e){
         this.getEl().unmask();
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -831,7 +832,7 @@ Ext.define('CB.browser.Tree', {
 
     ,processRename: function(r, e){
         this.getEl().unmask();
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 

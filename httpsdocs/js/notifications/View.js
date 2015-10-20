@@ -115,7 +115,7 @@ Ext.define('CB.notifications.View', {
     ,onStoreLoad: function(store, records, successful, eOpts) {
         var rd = store.proxy.reader.rawData;
 
-        if(rd.success === true) {
+        if(rd && (rd.success === true)) {
             this.lastSeenActionId = rd.lastSeenActionId;
             this.updateSeenRecords();
         }
@@ -125,7 +125,8 @@ Ext.define('CB.notifications.View', {
         var visible = this.getEl().isVisible(true);
         this.store.each(
             function(r) {
-                r.set('seen', visible || (r.get('action_id') <= this.lastSeenActionId));
+                var seen = visible || (r.get('action_id') <= this.lastSeenActionId);
+                r.set('seen', seen);
             }
             ,this
         );
@@ -264,7 +265,7 @@ Ext.define('CB.notifications.View', {
     }
 
     ,onMarkAsRead: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -278,13 +279,16 @@ Ext.define('CB.notifications.View', {
 
     ,onActivateEvent: function() {
         var fr = this.store.first()
-            ,lastId = fr.get('action_id');
+            ,lastId = (fr && fr.get) ? fr.get('action_id') : 0;
+
+        this.grid.getView().refresh();
+        this.grid.view.scrollTo(0, 0);
 
         if (this.lastSeenActionId != lastId) {
             CB_Notifications.updateLastSeenId(
                 lastId
                 ,function(r, e) {
-                    if(r.success === true) {
+                    if(r && (r.success === true)) {
                         this.lastSeenActionId = lastId;
                         this.updateSeenRecords();
                     }
@@ -334,11 +338,11 @@ Ext.define('CB.notifications.View', {
             ,this
         );
 
-        this.checkNotificationsTask.delay(1000* 20); //2 minutes
+        this.checkNotificationsTask.delay(1000 * 20); //20 seconds
     }
 
     ,processGetNew: function(r, e) {
-        if(Ext.isEmpty(r) || (r.success !== true)) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -357,11 +361,19 @@ Ext.define('CB.notifications.View', {
                 );
             }
 
+            this.grid.getView().refresh();
+            this.grid.view.scrollTo(0, 0);
+
             if(this.getEl().isVisible(true)) {
                 this.onActivateEvent();
             } else {
                 this.updateSeenRecords();
             }
+        }
+
+        if(r.lastSeenId && (r.lastSeenId > this.lastSeenActionId)) {
+            this.lastSeenActionId = r.lastSeenId;
+            this.updateSeenRecords();
         }
     }
 

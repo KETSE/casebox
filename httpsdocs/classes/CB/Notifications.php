@@ -46,20 +46,30 @@ class Notifications
      */
     public function getNew($p)
     {
-        $rez = array(
-            'success' => true
-            ,'data' => array()
-        );
+        if (User::isLoged()) {
+            $rez = array(
+                'success' => true
+                , 'data' => array()
+            );
 
-        $this->prepareParams($p);
+            $this->prepareParams($p);
 
-        $p['user_id'] = User::getId();
+            $p['user_id'] = User::getId();
 
-        $fromId = empty($p['fromId'])
-            ? false
-            : intval($p['fromId']);
+            $fromId = empty($p['fromId'])
+                ? false
+                : intval($p['fromId']);
 
-        $rez['data'] = $this->getRecords($p);
+            $rez['data'] = $this->getRecords($p);
+            $rez['lastSeenId'] = User::getUserConfigParam('lastSeenActionId', 0);
+
+            User::setUserConfigParam('lastNotifyTime', Util\dateISOToMysql('now'));
+
+        } else {
+            $rez = array(
+                'success' => false
+            );
+        }
 
         return $rez;
     }
@@ -79,7 +89,7 @@ class Notifications
 
         if (is_numeric($id)) {
             User::setUserConfigParam('lastSeenActionId', $id, $userId);
-            DM\Notifications::markAsSeen($userId, $id);
+            DM\Notifications::markAsSeenUpToId($userId, $id);
             $rez = array('success' => true);
         }
 

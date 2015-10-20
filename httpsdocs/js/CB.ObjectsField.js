@@ -367,7 +367,7 @@ Ext.define('CB.ObjectsTriggerField', {
             }
         });
 
-        CB.ObjectsTriggerField.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
     ,afterrender: function(){
         this.setValue(this.value);
@@ -680,7 +680,8 @@ Ext.define('CB.ObjectsSelectionForm', {
                 ,{text: Ext.MessageBox.buttonText.ok, iconCls: 'icon-tick', scope: this, handler: this.onOkClick}
                 ,{text: Ext.MessageBox.buttonText.cancel, iconCls: 'icon-cancel', scope: this, handler: this.destroy}]
         });
-        CB.ObjectsSelectionForm.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
 
         this.store.on('load', this.onLoad, this);
 
@@ -1045,7 +1046,8 @@ Ext.define('CB.ObjectsSelectionPopupList', {
                 ,{text: Ext.MessageBox.buttonText.cancel, handler: this.doClose, scope: this, tabIndex: 4}
             ]
         });
-        CB.ObjectsSelectionPopupList.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
 
         this.on('beforeshow', this.onBeforeShowEvent, this);
         this.on('resize', function(win, w, h){this.trigger.setWidth(w - 17);});

@@ -196,7 +196,7 @@ class Base implements \CB\Interfaces\TreeNode
                     }
 
                     $rez['sort'] = null;
-                    $rez['rows'] = 0;
+                    // $rez['rows'] = 0;
                     break;
 
                 default: // grid
@@ -292,21 +292,28 @@ class Base implements \CB\Interfaces\TreeNode
         foreach ($cfg['data'] as $k => $v) {
             $name = $k;
             $config = null;
-            if (is_scalar($v)) {
-                $name = $v;
-                if (!empty($facetsDefinitions[$name])) {
-                    $config = $facetsDefinitions[$name];
-                }
-            } else {
+
+            if (!empty($v)) {
                 $config = $v;
+
+                if (is_scalar($v)) {
+                    if (!empty($facetsDefinitions[$v])) {
+                        $config = $facetsDefinitions[$v];
+                    } else {
+                        $config = array('type' => $v);
+                    }
+                    $name = $v;
+                    $config['name'] = $v;
+                }
+
+            } else {
+                $config = array(
+                    'name' => $k
+                    ,'type' => $k
+                );
             }
 
-            if (is_null($config)) {
-                \CB\debug('Cannot find facet config:' . var_export($name, 1) . var_export($v, 1));
-            } else {
-                $config['name'] = $name;
-                $facets[$name] = \CB\Facets::getFacetObject($config);
-            }
+            $facets[$name] = \CB\Facets::getFacetObject($config);
         }
 
         if (!empty($rp['view']['type'])) {
@@ -316,11 +323,11 @@ class Base implements \CB\Interfaces\TreeNode
             $rows = false;
             $cols = false;
 
-            if (!empty($v['rows']['facet'])) {
-                $rows = $v['rows']['facet'];
+            if (!empty($v['rows']['facet']) && !empty($facets[$v['rows']['facet']])) {
+                $rows = $facets[$v['rows']['facet']];
             }
-            if (!empty($v['cols']['facet'])) {
-                $cols = $v['cols']['facet'];
+            if (!empty($v['cols']['facet']) && !empty($facets[$v['cols']['facet']])) {
+                $cols = $facets[$v['cols']['facet']];
             }
 
             if (($rp['view']['type'] == 'pivot') && (sizeof($facets) > 1)) {
@@ -467,11 +474,7 @@ class Base implements \CB\Interfaces\TreeNode
 
         //its a config reference, get it from config
         if (!empty($rez['data']) && is_scalar($rez['data'])) {
-            $conf = \CB\Config::get('DCConfigs');
-
-            $rez['data'] = empty($conf[$rez['data']])
-                ? array()
-                : $conf[$rez['data']];
+            $rez['data'] = \CB\Config::getDCConfig($rez['data']);
         }
 
         return $rez;

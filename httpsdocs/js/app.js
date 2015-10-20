@@ -52,7 +52,7 @@ Ext.onReady(function(){
     }, 10);
 
     CB_User.getLoginInfo( function(r, e){
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -584,6 +584,13 @@ function initApp() {
             return;
         }
 
+        if(Ext.isEmpty(config.template_id)) {
+            return Ext.Msg.alert(
+                'Error opening object'
+                ,'Template should be specified for object window to load.'
+            );
+        }
+
         config.id = Ext.valueFrom(config.target_id, config.id);
 
         var templateType = CB.DB.templates.getType(config.template_id)
@@ -604,21 +611,23 @@ function initApp() {
         var w = App.openWindow(wndCfg)
             ,winHeight = window.innerHeight;
 
-        if((winHeight > 0) && (w.getHeight() > winHeight)) {
-            w.setHeight(winHeight - 20);
-        }
-
-        if(templateType == 'file') {
-            w.center();
-
-            if(config.name && (detectFileEditor(config.name) !== false)) {
-                w.maximize();
+        if(w) {
+            if((winHeight > 0) && (w.getHeight() > winHeight)) {
+                w.setHeight(winHeight - 20);
             }
-        } else if(!w.existing) {
-            App.alignWindowNext(w);
-        }
 
-        delete w.existing;
+            if(templateType == 'file') {
+                w.center();
+
+                if(config.name && (detectFileEditor(config.name) !== false)) {
+                    w.maximize();
+                }
+            } else if(!w.existing) {
+                App.alignWindowNext(w);
+            }
+
+            delete w.existing;
+        }
     };
 
     App.openWindow = function(wndCfg) {
@@ -1134,7 +1143,7 @@ function initApp() {
     };
 
     App.successResponse = function(r){
-        if(r.success === true) {
+        if(r && (r.success === true)) {
             return true;
         }
         Ext.Msg.alert(L.Error, Ext.valueFrom(r.msg, L.ErrorOccured));
@@ -1299,7 +1308,7 @@ function initApp() {
                         ,name: text
                     }
                     ,function(r, e){
-                        if(r.success !== true){
+                        if(!r || (r.success !== true)) {
                             return;
                         }
 

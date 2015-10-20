@@ -137,7 +137,7 @@ Ext.define('CB.Favorites.Panel', {
     }
 
     ,processSetStarred: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -163,7 +163,7 @@ Ext.define('CB.Favorites.Panel', {
     }
 
     ,processSetUnstarred: function(r, e){
-        if (r.success !== true) {
+        if (!r || (r.success !== true)) {
             return;
         }
 
