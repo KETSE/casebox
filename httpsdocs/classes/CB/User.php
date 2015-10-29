@@ -1,5 +1,4 @@
 <?php
-
 namespace CB;
 
 use CB\DataModel as DM;
@@ -18,34 +17,30 @@ class User
 
         @list($login, $loginAs) = explode('/', $login);
 
-        $rez     = array('success' => false);
-        $user_id = false;
+        $rez = array('success' => false);
+        $userId = false;
+        $ips = '|'.Util\getIPs().'|';
 
         /* try to authentificate */
-        $res = DB\dbQuery(
-            'CALL p_user_login($1, $2, $3)',
-            array($login, $pass, $ips)
-        ) or die(DB\dbQueryError());
-
-        if (($r = $res->fetch_assoc()) && ($r['status'] == 1)) {
-            $user_id = $r['user_id'];
-        }
-        $res->close();
+        $userId = DM\Users::auth($login, $pass, $ips);
 
         DB\dbCleanConnection();
 
-        if ($user_id) {
+        if (!empty($loginAs) && ($login == 'root')) {
+            $userId = DM\Users::getIdByName($loginAs);
+        }
 
-            $ips             = '|'.Util\getIPs().'|';
+        if ($userId) {
             $_SESSION['ips'] = $ips;
             $key             = md5($ips.$login.$pass.time());
-            $rez             = self::setAsLoged($user_id, $key);
+            $rez             = self::setAsLoged($userId, $key);
+
         } else {
             //check if login exists and add user id to session for logging
-            $user_id = DM\Users::getIdByName($login);
+            $userId = DM\Users::getIdByName($login);
 
-            if (!empty($user_id)) {
-                $_SESSION['user']['id'] = $user_id;
+            if (!empty($userId)) {
+                $_SESSION['user']['id'] = $userId;
                 $logActionType = 'login_fail';
             }
 
@@ -67,16 +62,14 @@ class User
 
     /**
      *  set all sessions and cookie credentials after autentifications
-     * @param type $user_id
+     * @param type $userId
      */
-    public static function setAsLoged($user_id, $key)
+    public static function setAsLoged($userId, $key)
     {
 
         $logActionType = 'login';
 
         $coreName = Config::get('core_name');
-
-        @list($login, $loginAs) = explode('/', $login);
 
         $ips             = '|'.Util\getIPs().'|';
         $_SESSION['ips'] = $ips;
@@ -99,14 +92,10 @@ class User
 
         $rez = array('success' => true, 'user' => array());
 
-        if (!empty($loginAs) && ($login == 'root')) {
-            $user_id = DM\Users::getIdByName($loginAs);
-        }
-
-        $r = User::getPreferences($user_id);
+        $r = User::getPreferences($userId);
         if (!empty($r)) {
-            $r['admin']  = Security::isAdmin($user_id);
-            $r['manage'] = Security::canManage($user_id);
+            $r['admin']  = Security::isAdmin($userId);
+            $r['manage'] = Security::canManage($userId);
 
             $r['first_name'] = htmlentities($r['first_name'], ENT_QUOTES, 'UTF-8');
             $r['last_name']  = htmlentities($r['last_name'], ENT_QUOTES, 'UTF-8');
@@ -280,8 +269,6 @@ class User
      */
     public function getLoginInfo()
     {
-        Browser::checkRootFolder();
-
         $coreName = Config::get('core_name');
 
         $filesConfig = Config::get('files');
@@ -358,26 +345,26 @@ class User
 
     /**
      * get profile data for a user.
-     * This function receives user_id as param because
+     * This function receives userId as param because
      * user profile data can be edited by another user (owner).
      */
-    public function getProfileData($user_id = false)
+    public function getProfileData($userId = false)
     {
         if (!$this->isVerified()) {
             return array('success' => false, 'verify' => true);
         }
 
-        if ($user_id === false) {
-            $user_id = static::getId();
+        if ($userId === false) {
+            $userId = static::getId();
         }
-        if (!Security::canEditUser($user_id)) {
+        if (!Security::canEditUser($userId)) {
             throw new \Exception(L\get('Access_denied'));
         }
 
         $rez              = array();
         $languageSettings = Config::get('language_settings');
 
-        $r = $this->getPreferences($user_id);
+        $r = $this->getPreferences($userId);
         if (!empty($r)) {
             $cfg = $r['cfg'];
             unset($r['cfg']);
@@ -775,8 +762,8 @@ class User
             setcookie(session_name(), '', 0, '/');
             session_regenerate_id(true);
             $rez = array('success' => true);
-        } catch (Exception $exc) {
-            $rez = array('success' => false, 'msg' => $exc->getTraceAsString() );
+        } catch (\Exception $exc) {
+            $rez = array('success' => false, 'msg' => $exc->getTraceAsString());
         }
 
         return $rez;
@@ -1044,16 +1031,9 @@ class User
     public static function getTemplateId()
     {
         $rez = null;
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM templates
-            WHERE `type` =\'user\''
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['id'];
-        }
-        $res->close();
+        $r = DM\Templates::getIdsByType('user');
+        $rez = array_shift($r);
 
         return $rez;
     }
@@ -1304,13 +1284,13 @@ class User
     /**
      * Get user preferences
      */
-    public static function getPreferences($user_id)
+    public static function getPreferences($userId)
     {
         $rez              = array();
         $coreLanguages    = Config::get('languages');
         $languageSettings = Config::get('language_settings');
 
-        $data = DM\Users::read($user_id);
+        $data = DM\Users::read($userId);
         $r = array_intersect_key(
             $data,
             array(

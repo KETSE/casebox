@@ -1,9 +1,8 @@
 <?php
 namespace CB\TreeNode;
 
-use CB\DB;
-use CB\Util;
 use CB\L;
+use CB\DataModel as DM;
 
 class RecycleBin extends Base
 {
@@ -102,26 +101,21 @@ class RecycleBin extends Base
             for ($i=0; $i < sizeof($rez['data']); $i++) {
                 $d = &$rez['data'][$i];
 
-                $res = DB\dbQuery(
-                    'SELECT cfg
-                      , (SELECT 1
-                         FROM tree
-                         WHERE pid = $1'.
-                    ((@$p['from'] == 'tree')
-                        ? ' AND `template_id` IN (0'.implode(',', $folderTemplates).')'
-                        : ''
-                    )
-                    .' LIMIT 1) has_childs
-                    FROM tree
-                    WHERE id = $1',
-                    $d['id']
-                ) or die(DB\dbQueryError());
+                $r = DM\Tree::read($d['id']);
 
-                if ($r = $res->fetch_assoc()) {
-                    $d['cfg'] = Util\toJSONArray($r['cfg']);
-                    $d['has_childs'] = !empty($r['has_childs']);
+                if (!empty($r)) {
+                    $d['cfg'] = $r['cfg'];
+
+                    $r = DM\Tree::getChildCount(
+                        $d['id'],
+                        ((@$p['from'] == 'tree')
+                            ? $folderTemplates
+                            : false
+                        )
+                    );
+
+                    $d['has_childs'] = !empty($r[$d['id']]);
                 }
-                $res->close();
             }
         }
 

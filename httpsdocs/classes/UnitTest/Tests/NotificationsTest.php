@@ -274,7 +274,6 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
     public function createObject($data)
     {
         $class = new \CB\Objects();
-
         $data = $class->create($data);
 
         return $data['data']['id'];
@@ -323,6 +322,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         //restore previous user id
         //$_SESSION['user']['id'] = $currentUser;
         \CB\User::setAsLoged($currentUser, $_SESSION['key']);
+
         return $rez;
     }
 
@@ -347,6 +347,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         $countResult = $api->getNew(array());
         if (($countResult['success'] !== true) || empty($countResult['data'])) {
             trigger_error(print_r($countResult,true),E_USER_ERROR);
+
             return $rez;
         }
 
@@ -363,9 +364,10 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         //restore previous user id
         //$_SESSION['user']['id'] = $currentUser;
          \CB\User::setAsLoged($currentUser, $_SESSION['key']);
-        if(!$rez) {
+        if (!$rez) {
             trigger_error(print_r($n,true),E_USER_ERROR);
         }
+
         return $rez;
     }
 

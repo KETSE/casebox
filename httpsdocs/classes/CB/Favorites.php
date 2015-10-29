@@ -59,7 +59,7 @@ class Favorites
             ,'data' => array()
         );
 
-        $rez['data'] = DM\Favorites::readAll(User::getId());
+        $rez['data'] = DM\Favorites::readAll();
 
         return $rez;
     }

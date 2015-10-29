@@ -4,6 +4,7 @@ namespace CB\Import;
 
 use CB\Config;
 use CB\DB;
+use CB\DataModel as DM;
 use CB\Templates;
 use CB\Browser;
 use CB\Objects;
@@ -102,7 +103,7 @@ class UpgradeMenuModel extends Base
         ) or die(DB\dbQueryError());
 
         // set templates template id in config
-        $ids = Templates::getIdsByType('template');
+        $ids = DM\Templates::getIdsByType('template');
         $id = array_shift($ids);
 
         BBM::$cfg['templatesTemplateId'] = $id;
@@ -110,7 +111,7 @@ class UpgradeMenuModel extends Base
         $this->cfg['templates']['Menu rule']['fields']['menu']['cfg']['templates'] = $id;
 
         // detect fields template id
-        $ids = Templates::getIdsByType('field');
+        $ids = DM\Templates::getIdsByType('field');
         $id = array_shift($ids);
 
         BBM::$cfg['fieldTemplateId'] = $id;

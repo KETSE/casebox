@@ -134,7 +134,7 @@ foreach ($mailServers as $mailConf) {
         include $site_path.DIRECTORY_SEPARATOR.'config.php';
         include $site_path.DIRECTORY_SEPARATOR.'lib/language.php';
 
-        $templateIds = Templates::getIdsByType('comment');
+        $templateIds = DM\Templates::getIdsByType('comment');
 
         if (empty($templateIds)) {
             \CB\debug('receive comments cron: no comment template defined');

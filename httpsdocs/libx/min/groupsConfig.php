@@ -203,6 +203,7 @@ return array_merge(
             ,'//js/overrides/calendar/view/Month.js'
             ,'//js/overrides/calendar/CalendarPanel.js'
 
+            // ,'//js/overrides/direct/JsonProvider.js'
             ,'//js/overrides/data/Store.js'
 
             ,'//js/overrides/grid/plugin/CellEditing.js'

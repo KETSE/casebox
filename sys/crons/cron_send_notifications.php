@@ -172,7 +172,7 @@ function sendUserMails($u)
                     $mail['body']
                 );
             } else {
-                DM\Notifications::markAsSeen($uid, $mail['nId']);
+                DM\Notifications::markAsSeen($mail['nId'], $uid);
             }
         }
 

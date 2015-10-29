@@ -149,7 +149,7 @@ function setOwnershipForApacheUser(&$cfg)
     }
 
     return ;
-    
+
     $files = array(
         \CB\LOGS_DIR,
         \CB\DATA_DIR,
@@ -227,7 +227,7 @@ function createSolrConfigsetsSymlinks(&$cfg)
             $r = $r && symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $logLinkName);
         }
 
-        if (\CB\Util\getOS() == "LINUX" && \CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') ) {
+        if (\CB\Util\getOS() == "LINUX" && \CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
                 shell_exec("chown -R ".fileowner($CBCSPath).":".filegroup($CBCSPath)." ".$CBCSPath);
         }
 
@@ -239,7 +239,7 @@ function createSolrConfigsetsSymlinks(&$cfg)
             // symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR. 'conf', $logCore . DIRECTORY_SEPARATOR . 'conf' );
         }
 
-        if (\CB\Util\getOS() == "LINUX" && \CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') ) {
+        if (\CB\Util\getOS() == "LINUX" && \CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
                 // set owner of core folder for solr
                 shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$logCore);
         }
@@ -265,9 +265,9 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
     $askReindex   = true;
     $fullCoreName = $cfg['prefix'].'_'.$coreName;
 
-       $status =  json_decode(file_get_contents('http://' . $solrHost. ':' . $solrPort . '/solr/admin/cores?action=STATUS&wt=json'),true);
+       $status =  json_decode(file_get_contents('http://' . $solrHost. ':' . $solrPort . '/solr/admin/cores?action=STATUS&wt=json'), true);
 
-    if (isset($status['status']) && isset($status['status'][$fullCoreName]) && !\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') ) {
+    if (isset($status['status']) && isset($status['status'][$fullCoreName]) && !\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
         return true;
     }
 
@@ -350,8 +350,8 @@ function solrUnloadCore($host, $port, $coreName)
 function solrCreateCore($host, $port, $coreName, $cfg = array())
 {
     $rez = true;
-   
-    if ( isset($cfg['solr_home']) ) {
+
+    if (isset($cfg['solr_home'])) {
 
         $CB_CORE_SOLR_PATH = $cfg['solr_home'].$coreName;
 
@@ -655,7 +655,7 @@ function defineBackupDir(&$cfg)
     }
 
     $dir = empty($cfg['backup_dir'])
-        ? \CB\APP_DIR . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR
+        ? \CB\APP_DIR . 'backup' . DIRECTORY_SEPARATOR
         : $cfg['backup_dir'];
 
     \CB\Cache::set('RUN_INSTALL_BACKUP_DIR', $dir);

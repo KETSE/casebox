@@ -2,7 +2,6 @@
 
 namespace CB\DataModel;
 
-use CB\Config;
 use CB\DB;
 
 class GUID extends Base
@@ -70,7 +69,7 @@ class GUID extends Base
 
     public static function getTableName()
     {
-        $dbName = Config::get('prefix') . '__casebox';
+        $dbName = \CB\Config::get('prefix') . '__casebox';
 
         return "`$dbName`.`" . static::$tableName . '`';
     }

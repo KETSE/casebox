@@ -4,6 +4,7 @@ namespace CB\Objects;
 use CB\Cache;
 use CB\Config;
 use CB\DB;
+use CB\DataModel as DM;
 use CB\Util;
 use CB\L;
 use CB\Log;
@@ -111,94 +112,11 @@ class Object
         //     throw new \Exception("No template_id specified for object creation", 1);
         // }
 
-        if (empty($p['pid'])) {
-            $p['pid'] = null;
-        }
+        $this->id = DM\Tree::create(
+            $this->collectModelData()
+        );
 
-        $draftPid = empty($p['draftPid']) ? null : $p['draftPid'];
-        $isDraft = intval(!empty($draftPid) || !empty($p['draft']));
-
-        if (empty($p['date_end'])) {
-            $p['date_end'] = null;
-        }
-
-        if (empty($p['tag_id'])) {
-            $p['tag_id'] = null;
-        }
-
-        if (empty($p['cid'])) {
-            $p['cid'] = User::getId();
-        }
-        if (empty($p['oid'])) {
-            $p['oid'] = $p['cid'];
-        }
-
-        if (empty($p['cdate'])) {
-            $p['cdate'] = null;
-        }
-
-        DB\dbQuery(
-            'INSERT INTO tree (
-                id
-                ,pid
-                ,draft
-                ,draft_pid
-                ,template_id
-                ,tag_id
-                ,target_id
-                ,name
-                ,date
-                ,date_end
-                ,size
-                ,cfg
-                ,cid
-                ,oid
-                ,cdate
-                ,`system`
-                ,updated
-            )
-            VALUES (
-                $1
-                ,$2
-                ,$3
-                ,$4
-                ,$5
-                ,$6
-                ,$7
-                ,$8
-                ,$9
-                ,$10
-                ,$11
-                ,$12
-                ,$13
-                ,$14
-                ,COALESCE($15, CURRENT_TIMESTAMP)
-                ,$16
-                ,1
-            )',
-            array(
-                $this->id
-                ,$p['pid']
-                ,$isDraft
-                ,$draftPid
-                ,$p['template_id']
-                ,$p['tag_id']
-                ,@$p['target_id']
-                ,$p['name']
-                ,@$p['date']
-                ,@$p['date_end']
-                ,@$p['size']
-                ,@Util\jsonEncode($p['cfg'])
-                ,@$p['cid']
-                ,@$p['oid']
-                ,@$p['cdate']
-                ,@intval($p['system'])
-            )
-        ) or die(DB\dbQueryError());
-
-        $this->id = DB\dbLastInsertId();
-
-        if (!isset($this->id) || ! (intval($this->id) > 0)) {
+        if (!isset($this->id) || !(intval($this->id) > 0)) {
             trigger_error('Error on create object : '.\CB\Cache::get('lastSql'), E_USER_ERROR);
         }
 
@@ -225,6 +143,96 @@ class Object
     }
 
     /**
+     * internal function to collect data for data model update
+     * @return array
+     */
+    protected function collectModelData()
+    {
+        $p = &$this->data;
+
+        if (empty($p['pid'])) {
+            $p['pid'] = null;
+        }
+
+        $draftPid = empty($p['draftPid'])
+            ? null
+            : $p['draftPid'];
+
+        $isDraft = intval(!empty($draftPid) || !empty($p['draft']));
+
+        if (empty($p['date_end'])) {
+            $p['date_end'] = null;
+        }
+
+        if (empty($p['tag_id'])) {
+            $p['tag_id'] = null;
+        }
+
+        if (empty($p['cid'])) {
+            $p['cid'] = User::getId();
+        }
+        if (empty($p['oid'])) {
+            $p['oid'] = $p['cid'];
+        }
+
+        if (empty($p['cdate'])) {
+            $p['cdate'] = null;
+        }
+
+        $r = DM\Tree::collectData($p);
+
+        $r = array_merge(
+            $r,
+            array(
+                'id' => $this->id
+                ,'draft' => $isDraft
+                ,'draft_pid' => $draftPid
+                ,'cdate' => Util\coalesce(@$r['cdate'], 'CURRENT_TIMESTAMP')
+                ,'system' => @intval($r['system'])
+                ,'updated' => 1
+            )
+        );
+
+        return $r;
+    }
+
+    protected function collectCustomModelData()
+    {
+        $rez = array();
+
+        if (!empty($this->tableFields)) {
+            $p = &$this->data;
+
+            foreach ($this->tableFields as $fieldName) {
+                $field = null;
+
+                if (!empty($this->template)) {
+                    $field = $this->template->getField($fieldName);
+                }
+
+                if (isset($p[$fieldName])) {
+                    $rez[$fieldName] = $p[$fieldName];
+
+                } elseif (!empty($field)) {
+                    $rez[$fieldName] = @$this->getFieldValue($fieldName, 0)['value'];
+
+                } elseif (!empty($p['data'][$fieldName])) {
+                    $rez[$fieldName] = $p['data'][$fieldName];
+                }
+
+                if (isset($rez[$fieldName]) &&
+                    !is_scalar($rez[$fieldName]) &&
+                    !is_null($rez[$fieldName])
+                ) {
+                    $rez[$fieldName] = Util\jsonEncode($rez[$fieldName]);
+                }
+            }
+        }
+
+        return $rez;
+    }
+
+    /**
      * internal function used by create method for creating custom data
      * @return void
      */
@@ -243,18 +251,15 @@ class Object
 
         $this->collectSolrData();
 
-        DB\dbQuery(
-            'INSERT INTO objects (id ,`data`, `sys_data`)
-            VALUES($1, $2, $3)
-            ON DUPLICATE KEY
-            UPDATE  `data` = $2,`sys_data` = $3',
-            array(
-                $this->id
-                ,Util\jsonEncode($p['data'])
-                ,Util\jsonEncode($p['sys_data'])
-            )
-        ) or die(DB\dbQueryError());
+        $data = array(
+            'id' => $this->id
+            ,'data' => Util\jsonEncode($p['data'])
+            ,'sys_data' => Util\jsonEncode($p['sys_data'])
+        );
 
+        if (!DM\Objects::update($data)) {
+            DM\Objects::create($data);
+        }
     }
 
     /**
@@ -321,37 +326,10 @@ class Object
             return;
         }
 
-        $cildren = array();
-
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE draft = 1
-                AND draft_pid = $1
-                AND cid = $2
-                AND (cdate > (CURRENT_TIMESTAMP - INTERVAL 1 HOUR))',
-            array(
-                $this->data['draftId']
-                ,User::getId()
-            )
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $children[] = $r['id'];
-        }
-        $res->close();
-
-        if (!empty($children)) {
-            DB\dbQuery(
-                'UPDATE tree
-                SET draft = 0
-                    ,draft_pid = null
-                    ,pid = $1
-                    ,updated = 1
-                WHERE id in (' . implode(',', $children) . ')',
-                $this->id
-            ) or die(DB\dbQueryError());
-        }
+        DM\Tree::assignChildDrafts(
+            $this->data['draftId'],
+            $this->id
+        );
     }
 
     /**
@@ -374,28 +352,20 @@ class Object
         $this->template = null;
         unset($this->linearData);
 
-        $res = DB\dbQuery(
-            'SELECT t.*
-                ,ti.pids
-                ,ti.path
-                ,ti.case_id
-                ,ti.acl_count
-                ,ti.security_set_id
-            FROM tree t
-            JOIN tree_info ti
-                ON t.id = ti.id
-            WHERE t.id = $1',
-            $id
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $r['cfg'] = Util\toJSONArray($r['cfg']);
+        $r = DM\Tree::read($id);
+        if (!empty($r)) {
             $this->data = $r;
+
+            $r = DM\TreeInfo::read($id);
+            if (!empty($r)) {
+                unset($r['updated']);
+                $this->data = array_merge($this->data, $r);
+            }
+
             if (!empty($this->data['template_id']) && $this->loadTemplate) {
                 $this->template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($this->data['template_id']);
             }
         }
-        $res->close();
 
         $this->loadCustomData();
 
@@ -413,20 +383,13 @@ class Object
      */
     protected function loadCustomData()
     {
-        /* load custom data from objects table */
-        $res = DB\dbQuery(
-            'SELECT data, sys_data
-            FROM objects
-            WHERE id = $1',
-            $this->id
-        ) or die(DB\dbQueryError());
+        $r = DM\Objects::read($this->id);
 
-        if ($r = $res->fetch_assoc()) {
+        if (!empty($r)) {
             $this->data['data'] = Util\toJSONArray($r['data']);
             $this->data['sys_data'] = Util\toJSONArray($r['sys_data']);
             unset($this->linearData);
         }
-        $res->close();
     }
 
     /**
@@ -455,19 +418,12 @@ class Object
         //load current object from db into a variable to be passed to log and events
         $this->oldObject = clone $this;
         $od = $this->oldObject->load($this->id);
+
         $wasDraft = !empty($od['draft']);
 
         \CB\fireEvent('beforeNodeDbUpdate', $this);
 
         $p = &$this->data;
-
-        if (empty($p['cid'])) {
-            $p['cid'] = $_SESSION['user']['id'];
-        }
-
-        if (empty($p['oid'])) {
-            $p['oid'] = $p['cid'];
-        }
 
         $tableFields = array(
             'pid'
@@ -485,38 +441,21 @@ class Object
             ,'did'
             ,'dstatus'
         );
-        $saveFields = array();
-        $saveValues = array($this->id, $_SESSION['user']['id']);
-        $params = array(
-            '`uid` = $2'
-            ,'`udate` = CURRENT_TIMESTAMP'
-            ,'`draft` = 0'
-            ,'updated = 1'
-        );
-        $i = 3;
-        foreach ($tableFields as $fieldName) {
-            if (array_key_exists($fieldName, $p) && ($p[$fieldName] !== 'id')) {
-                $saveFields[] = $fieldName;
-                $saveValues[] = (is_scalar($p[$fieldName]) || is_null($p[$fieldName]))
-                    ? $p[$fieldName]
-                    : Util\jsonEncode($p[$fieldName]);
-                $params[] = "`$fieldName` = \$$i";
-                $i++;
-            }
-        }
-        if (!empty($saveFields)) {
-            DB\dbQuery(
-                'UPDATE tree
-                SET '.implode(',', $params).'
-                WHERE id = $1',
-                $saveValues
-            ) or die(DB\dbQueryError());
-        }
 
-        DB\dbQuery(
-            'call `p_mark_all_child_drafts_as_active`($1)',
-            $this->id
-        ) or die(DB\dbQueryError());
+        $data =  $this->collectModelData($p);
+
+        $data = array_merge(
+            $data,
+            array(
+                'draft' => 0
+                ,'uid' => User::getId()
+                ,'udate' => 'CURRENT_TIMESTAMP'
+            )
+        );
+
+        DM\Tree::update($data);
+
+        DM\Tree::activateChildDrafts($this->id);
 
         $this->updateCustomData();
 
@@ -565,20 +504,15 @@ class Object
 
         unset($this->linearData);
 
-        @DB\dbQuery(
-            'INSERT INTO objects
-            (id, `data`, sys_data)
-            VALUES ($1, $2, $3)
-            ON DUPLICATE KEY UPDATE
-                `data` = $2
-                ,sys_data = $3',
-            array(
-                $d['id']
-                ,Util\jsonEncode($d['data'])
-                ,Util\jsonEncode($d['sys_data'])
-            )
-        ) or die(DB\dbQueryError());
-        /* end of updating object properties into the db */
+        $data = array(
+            'id' => $d['id']
+            ,'data' => Util\jsonEncode($d['data'])
+            ,'sys_data' => Util\jsonEncode($d['sys_data'])
+        );
+
+        if (!DM\Objects::update($data)) {
+            DM\Objects::create($data);
+        }
 
         return true;
     }
@@ -596,16 +530,11 @@ class Object
         if ($this->loaded) {
             $rez = Util\toJSONArray(@$this->data['sys_data']);
         } else {
-            $res = DB\dbQuery(
-                'SELECT sys_data
-                FROM objects
-                WHER id = $1',
-                $this->data['id']
-            ) or die(DB\dbQueryError());
-            if ($r = $res->fetch_assoc()) {
-                $rez = Util\toJSONArray($r['sys_data']);
+            $r = DM\Objects::read($this->data['id']);
+
+            if (!empty($r)) {
+                $rez = $r['sys_data'];
             }
-            $res->close();
         }
 
         return $rez;
@@ -630,25 +559,22 @@ class Object
 
         $this->collectSolrData();
 
-        @DB\dbQuery(
-            'INSERT INTO objects
-            (id, sys_data)
-            VALUES ($1, $2)
-            ON DUPLICATE KEY UPDATE
-                sys_data = $2',
-            array(
-                $d['id']
-                ,Util\jsonEncode($d['sys_data'])
-            )
-        ) or die(DB\dbQueryError());
+        $data = array(
+            'id' => $d['id']
+            ,'sys_data' => Util\jsonEncode($d['sys_data'])
+        );
+
+        if (!DM\Objects::update($data)) {
+            DM\Objects::create($data);
+        }
 
         //mark the item as updated so that it'll be reindexed into solr
-        DB\dbQuery(
-            'UPDATE tree
-            SET updated = (updated | 1)
-            WHERE id = $1',
-            $d['id']
-        ) or die(DB\dbQueryError());
+        DM\Tree::update(
+            array(
+                'id' => $d['id']
+                ,'updated' => 1
+            )
+        );
 
         return true;
     }
@@ -896,11 +822,11 @@ class Object
 
     /**
      * delete an object from tree or marks it as deleted
-     * @param boolean $permanent Specify true to delete the object permanently.
+     * @param boolean $persistent Specify true to delete the object permanently.
      *                            Default to false.
      * @return void
      */
-    public function delete($permanent = false)
+    public function delete($persistent = false)
     {
         // we need to load this object before delete
         // for passing it to log and/or events
@@ -914,41 +840,20 @@ class Object
         }
         \CB\fireEvent('beforeNodeDbDelete', $this);
 
-        if ($permanent) {
-            DB\dbQuery(
-                'DELETE from tree WHERE id = $1',
-                $this->id
-            ) or die(DB\dbQueryError());
+        DM\Tree::delete($this->id, $persistent);
+
+        if ($persistent) {
             $solrClient = new \CB\Solr\Client();
             $solrClient->deleteByQuery('id:' . $this->id);
-        } else {
-            DB\dbQuery(
-                'UPDATE tree
-                SET did = $2
-                    ,dstatus = 1
-                    ,ddate = CURRENT_TIMESTAMP
-                    ,updated = (updated | 1)
-                WHERE id = $1',
-                array(
-                    $this->id
-                    ,$_SESSION['user']['id']
-                )
-            ) or die(DB\dbQueryError());
-            DB\dbQuery(
-                'CALL p_mark_all_childs_as_deleted($1, $2)',
-                array(
-                    $this->id
-                    ,$_SESSION['user']['id']
-                )
-            ) or die(DB\dbQueryError());
+
         }
 
-        $this->deleteCustomData($permanent);
+        $this->deleteCustomData($persistent);
 
         \CB\fireEvent('nodeDbDelete', $this);
 
-        //dont add log action if permanently deleted
-        if (!$permanent) {
+        //dont add log action if persistent deleted
+        if (!$persistent) {
             $this->logAction('delete', array('old' => &$this));
         }
     }
@@ -973,17 +878,7 @@ class Object
     {
         \CB\fireEvent('beforeNodeDbRestore', $this);
 
-        DB\dbQuery(
-            'UPDATE tree
-            SET did = NULL
-                ,dstatus = 0
-                ,ddate = NULL
-                ,updated = (updated | 1)
-            WHERE id = $1',
-            $this->id
-        ) or die(DB\dbQueryError());
-
-        DB\dbQuery('CALL p_mark_all_childs_as_active($1)', $this->id) or die(DB\dbQueryError());
+        DM\Tree::restore($this->id);
 
         $this->restoreCustomData();
 
@@ -1046,7 +941,7 @@ class Object
         $d = &$this->data;
 
         if ($userId === false) {
-            $userId = $_SESSION['user']['id'];
+            $userId = User::getId();
         }
 
         return ($d['cid'] == $userId);
@@ -1381,29 +1276,22 @@ class Object
                 return false;
             }
             /* end of target security check */
+
             // marking overwriten object with dstatus = 3
-            DB\dbQuery(
-                'UPDATE tree
-                SET  updated = 1
-                    ,dstatus = 3
-                    ,did = $2
-                WHERE id = $1',
+            DM\Tree::update(
                 array(
-                    $targetId
-                    ,$_SESSION['user']['id']
+                    'id' => $targetId
+                    ,'updated' => 1
+                    ,'dstatus' => 3
+                    ,'did' => User::getId()
                 )
-            ) or die(DB\dbQueryError());
+            );
 
-            //get pid from target if not specified
-            $res = DB\dbQuery(
-                'SELECT pid FROM tree WHERE id = $1',
-                $targetId
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
+            $r = DM\Tree::read($targetId);
+            if (!empty($r)) {
                 $pid = $r['pid'];
             }
-            $res->close();
+
         } else {
             /* pid security check */
             if (!\CB\Security::canWrite($pid)) {
@@ -1421,67 +1309,10 @@ class Object
 
         // copying the object to $pid
 
-        DB\dbQuery(
-            'INSERT INTO `tree`
-                (`id`
-                ,`pid`
-                ,`user_id`
-                ,`system`
-                ,`type`
-                ,`template_id`
-                ,`tag_id`
-                ,`target_id`
-                ,`name`
-                ,`date`
-                ,`date_end`
-                ,`size`
-                ,`is_main`
-                ,`cfg`
-                ,`inherit_acl`
-                ,`cid`
-                ,`cdate`
-                ,`uid`
-                ,`udate`
-                ,`updated`
-                ,`oid`
-                ,`did`
-                ,`ddate`
-                ,`dstatus`)
-            SELECT
-                NULL
-                ,$2
-                ,`user_id`
-                ,`system`
-                ,`type`
-                ,`template_id`
-                ,`tag_id`
-                ,`target_id`
-                ,`name`
-                ,`date`
-                ,`date_end`
-                ,`size`
-                ,`is_main`
-                ,`cfg`
-                ,`inherit_acl`
-                ,`cid`
-                ,`cdate`
-                ,$3
-                ,CURRENT_TIMESTAMP
-                ,1
-                ,`oid`
-                ,`did`
-                ,`ddate`
-                ,`dstatus`
-            FROM `tree` t
-            WHERE id = $1',
-            array(
-                $this->id
-                ,$pid
-                ,$_SESSION['user']['id']
-            )
-        ) or die(DB\dbQueryError());
-
-        $objectId = DB\dbLastInsertId();
+        $objectId = DM\Tree::copy(
+            $this->id,
+            $pid
+        );
 
         /* we have now object created, so we start copy all its possible data:
             - tree_info is filled automaticly by trigger
@@ -1497,41 +1328,23 @@ class Object
         // move childs from overwriten targetId (which has been marked with dstatus = 3)
         // to newly copied object
         if (is_numeric($targetId)) {
-            DB\dbQuery(
-                'UPDATE tree
-                SET updated = 1
-                    ,pid = $2
-                WHERE pid = $1 AND
-                    dstatus = 0',
-                array(
-                    $targetId
-                    ,$this->id
-                )
-            ) or die(DB\dbQueryError());
+            // DM\Tree::update(
+
+            // )
+            DM\Tree::moveActiveChildren($targetId, $this->id);
         }
 
         return $objectId;
     }
 
+    /**
+     * copy data from objects table
+     * @param  int  $targetId
+     * @return void
+     */
     protected function copyCustomDataTo($targetId)
     {
-        // copy data from objects table
-        DB\dbQuery(
-            'INSERT INTO `objects`
-                (`id`
-                ,`data`
-                ,`sys_data`)
-            SELECT
-                $2
-                ,`data`
-                ,`sys_data`
-            FROM `objects`
-            WHERE id = $1',
-            array(
-                $this->id
-                ,$targetId
-            )
-        ) or die(DB\dbQueryError());
+        DM\Objects::copy($this->id, $targetId);
     }
 
     /**
@@ -1569,28 +1382,20 @@ class Object
             }
             /* end of target security check */
             // marking overwriten object with dstatus = 3
-            DB\dbQuery(
-                'UPDATE tree
-                SET updated = 1
-                    ,dstatus = 3
-                    ,did = $2
-                WHERE id = $1',
+            DM\Tree::update(
                 array(
-                    $targetId
-                    ,$_SESSION['user']['id']
+                    'id' => $targetId
+                    ,'updated' => 1
+                    ,'dstatus' => 3
+                    ,'did' => User::getId()
                 )
-            ) or die(DB\dbQueryError());
+            );
 
-            //get pid from target if not specified
-            $res = DB\dbQuery(
-                'SELECT pid FROM tree WHERE id = $1',
-                $targetId
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
+            $r = DM\Tree::read($targetId);
+            if (!empty($r)) {
                 $pid = $r['pid'];
             }
-            $res->close();
+
         } else {
             /* pid security check */
             if (!\CB\Security::canWrite($pid)) {
@@ -1607,31 +1412,20 @@ class Object
         }
 
         // moving the object to $pid
-
-        DB\dbQuery(
-            'UPDATE tree
-            SET updated = 1
-                ,pid = $2
-            WHERE id = $1',
-            array($this->id, $pid)
-        ) or die(DB\dbQueryError());
+        DM\Tree::update(
+            array(
+                'id' => $this->id
+                ,'pid' => $pid
+                ,'updated' => 1
+            )
+        );
 
         $this->moveCustomDataTo($pid);
 
         // move childs from overwriten targetId (which has been marked with dstatus = 3)
         // to newly copied object
         if (is_numeric($targetId)) {
-            DB\dbQuery(
-                'UPDATE tree
-                SET updated = 1
-                    ,pid = $2
-                WHERE pid = $1 AND
-                    dstatus = 0',
-                array(
-                    $targetId
-                    ,$this->id
-                )
-            ) or die(DB\dbQueryError());
+            DM\Tree::moveActiveChildren($targetId, $this->id);
         }
 
         $this->load();

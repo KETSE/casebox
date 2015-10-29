@@ -158,16 +158,6 @@ class Base
      */
     protected function execute()
     {
-        /*$sdb = $this->cfg['source_db_name'];
-
-        $res = DB\dbQuery(
-            'SELECT * from ' . $sdb. '.table_name ',
-            array(null, null)
-        ) or die(DB\dbQueryError());
-        while ($r = $res->fetch_assoc()) {
-
-        }
-        $res->close();/**/
     }
 
     /**

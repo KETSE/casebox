@@ -285,7 +285,7 @@ Ext.define('CB.notifications.View', {
         this.grid.view.scrollTo(0, 0);
 
         if (this.lastSeenActionId != lastId) {
-            CB_Notifications.updateLastSeenId(
+            CB_Notifications.updateLastSeenActionId(
                 lastId
                 ,function(r, e) {
                     if(r && (r.success === true)) {

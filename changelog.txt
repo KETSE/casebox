@@ -1,3 +1,13 @@
+CaseBox 1.9.535 (2015-10-29)
+==============================
+- template fields are no more saved/updated from its data['fields'] property
+- set ntsc to 1 for folder templates
+- removed upgrade_task_data.php
+
+Fixed Bugs:
+----------
+- mark notifications as seen by action id not by notification id
+
 CaseBox 1.9.534 (2015-10-19)
 ==============================
 - #9088 Trouble with "word" file preview

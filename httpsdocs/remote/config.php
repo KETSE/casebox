@@ -8,13 +8,11 @@ $API = array_merge(
     array(
         'CB_Browser' => array(
             'methods' => array(
-                'createFolder'          => array('len' => 1)
-                ,'paste'                => array('len' => 1)
+                'paste'                => array('len' => 1)
                 ,'saveFile'             => array('len' => 1, 'formHandler' => true)
                 ,'confirmUploadRequest' => array('len' => 1)
                 ,'delete'               => array('len' => 1)
                 ,'restore'              => array('len' => 1)
-                ,'toggleFavorite'       => array('len' => 1)
                 ,'takeOwnership'        => array('len' => 1)
                 ,'getObjectsForField'   => array('len' => 1)
             )
@@ -31,7 +29,6 @@ $API = array_merge(
         ,'CB_BrowserTree' => array(
             'methods' => array(
                 'getChildren'       => array('len' => 1)
-                ,'createFolder'     => array('len' => 1)
                 ,'delete'           => array('len' => 1)
                 ,'rename'           => array('len' => 1)
                 ,'getRootProperties'=> array('len' => 1)
@@ -41,7 +38,6 @@ $API = array_merge(
         ,'CB_BrowserView' => array(
             'methods' => array(
                 'getChildren'       => array('len' => 1)
-                ,'createFolder'     => array('len' => 1)
                 ,'delete'           => array('len' => 1)
                 ,'rename'           => array('len' => 1)
             )
@@ -62,7 +58,6 @@ $API = array_merge(
                 ,'saveContent'          =>  array('len'=>1)
                 ,'restoreVersion'       =>  array('len'=>1)
                 ,'deleteVersion'        =>  array('len'=>1)
-                ,'getDuplicates'        =>  array('len'=>1)
                 ,'checkExistentContents'=>  array('len'=>1)
                 ,'saveProperties'       =>  array('len'=>1)
             )
@@ -72,7 +67,7 @@ $API = array_merge(
             'methods'=>array(
                 'getList'=> array('len' => 1)
                 ,'getNew'=> array('len' => 1)
-                ,'updateLastSeenId'=> array('len' => 1)
+                ,'updateLastSeenActionId'=> array('len' => 1)
                 ,'markAsRead'=> array('len' => 1)
                 ,'markAllAsRead'=> array('len' => 0)
             )

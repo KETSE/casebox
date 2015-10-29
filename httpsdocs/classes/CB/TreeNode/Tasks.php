@@ -3,6 +3,7 @@ namespace CB\TreeNode;
 
 use CB\L;
 use CB\Templates;
+use CB\DataModel as DM;
 
 class Tasks extends Base
 {
@@ -12,7 +13,7 @@ class Tasks extends Base
         $this->fq = array();
 
         //select only task templates
-        $taskTemplates = Templates::getIdsByType('task');
+        $taskTemplates = DM\Templates::getIdsByType('task');
         if (!empty($taskTemplates)) {
             $this->fq[] = 'template_id:('.implode(' OR ', $taskTemplates).')';
         }

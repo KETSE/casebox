@@ -2,7 +2,7 @@
 namespace CB\TreeNode;
 
 use CB\DB;
-use CB\Util;
+use CB\DataModel as DM;
 use CB\Browser;
 use CB\Objects;
 use CB\Search;
@@ -64,29 +64,18 @@ class Dbnode extends Base
             for ($i=0; $i < sizeof($rez['data']); $i++) {
                 $d = &$rez['data'][$i];
 
-                $res = DB\dbQuery(
-                    'SELECT cfg
-                    FROM tree
-                    WHERE id = $1',
-                    $d['id']
-                ) or die(DB\dbQueryError());
-
-                if ($r = $res->fetch_assoc()) {
-                    $d['cfg'] = Util\toJSONArray($r['cfg']);
-
-                    if (!empty($d['cfg']) && ($p['from'] == 'tree')) {
-                        if (isset($d['cfg']['loaded'])) {
-                            $d['loaded'] = $d['cfg']['loaded'];
-                        }
-                        if (isset($d['cfg']['expanded'])) {
-                            $d['expanded'] = $d['cfg']['expanded'];
-                        }
-                        if (isset($d['cfg']['leaf'])) {
-                            $d['leaf'] = $d['cfg']['leaf'];
-                        }
+                $r = DM\Tree::read($d['id']);
+                if (!empty($r['cfg']) && ($p['from'] == 'tree')) {
+                    if (isset($d['cfg']['loaded'])) {
+                        $d['loaded'] = $d['cfg']['loaded'];
+                    }
+                    if (isset($d['cfg']['expanded'])) {
+                        $d['expanded'] = $d['cfg']['expanded'];
+                    }
+                    if (isset($d['cfg']['leaf'])) {
+                        $d['leaf'] = $d['cfg']['leaf'];
                     }
                 }
-                $res->close();
             }
             \CB\Tasks::setTasksActionFlags($rez['data']);
         }
@@ -116,28 +105,7 @@ class Dbnode extends Base
 
     public function getData()
     {
-        $rez = array();
-        $res = DB\dbQuery(
-            'SELECT t.id
-                ,t.name
-                ,t.`system`
-                ,ti.`case_id`
-                ,t.`template_id`
-                ,t.`dstatus`
-                ,tt.`type` template_type
-            FROM tree t
-            JOIN tree_info ti on t.id = ti.id
-            LEFT JOIN templates tt ON t.template_id = tt.id
-            WHERE t.id = $1',
-            $this->id
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r;
-        }
-        $res->close();
-
-        return $rez;
+        return DM\Tree::getBasicInfo($this->id);
     }
 
     /**
@@ -168,56 +136,49 @@ class Dbnode extends Base
             return Cache::get($cacheParam);
         }
 
-        //select configs from tree and template of the current node
-        $sql = 'SELECT t.cfg, t.template_id, tt.cfg `templateCfg`
-            FROM tree t
-            LEFT JOIN templates tt
-                ON (t.template_id = tt.id)
-                    OR ((tt.id = $2) AND (t.template_id IS NULL))
-            WHERE t.id = $1';
+        $cfg = array();
 
-        //if template_id specified in config then select directly from templates table
-        if (empty($from) && !empty($this->config['template_id'])) {
-            $from = 'template_' . $this->config['template_id'];
+        $templateId = null;
 
-            $sql = 'SELECT null `cfg`, t.id template_id, t.cfg `templateCfg`
-                FROM templates t
-                WHERE t.id = $2';
+        $tplCfg = array();
+
+        $r = DM\Tree::read($this->id);
+        if (!empty($r)) {
+            $cfg = $r['cfg'];
+            $templateId = $r['template_id'];
         }
 
-        //check node configuration and/or its template for facets definitions
-        $res = DB\dbQuery(
-            $sql,
-            array(
-                $this->id
-                ,@$this->config['template_id']
-            )
-        ) or die(DB\dbQueryError());
+        if (!empty($this->config['template_id'])) {
+            $templateId = $this->config['template_id'];
+        }
 
-        if ($r = $res->fetch_assoc()) {
-            $cfg = Util\toJSONArray($r['cfg']);
+        if (empty($from) && !empty($templateId)) {
+            $from = 'template_' . $templateId;
 
-            if (isset($cfg[$param])) {
-                $rez = $cfg[$param];
-            } else {
-                $cfg = Util\toJSONArray($r['templateCfg']);
-                if (isset($cfg[$param])) {
-                    $rez = $cfg[$param];
-                    $from = 'template_'.$r['template_id'];
-                }
-            }
-
-            //add grouping param for DC
-            if (($param == 'DC') && ($rez !== false)) {
-                if (!empty($cfg['view']['group'])) {
-                    $rez['group'] = $cfg['view']['group'];
-
-                } elseif (!empty($cfg['group'])) {
-                    $rez['group'] = $cfg['group'];
-                }
+            $r = DM\Templates::read($templateId);
+            if (!empty($r)) {
+                $tplCfg = $r['cfg'];
             }
         }
-        $res->close();
+
+        if (isset($cfg[$param])) {
+            $rez = $cfg[$param];
+
+        } elseif (isset($tplCfg[$param])) {
+            $cfg = $tplCfg;
+            $rez = $cfg[$param];
+            $from = 'template_' . $templateId;
+        }
+
+        //add grouping param for DC
+        if (($param == 'DC') && ($rez !== false)) {
+            if (!empty($cfg['view']['group'])) {
+                $rez['group'] = $cfg['view']['group'];
+
+            } elseif (!empty($cfg['group'])) {
+                $rez['group'] = $cfg['group'];
+            }
+        }
 
         if ($rez === false) {
             $rez = parent::getNodeParam($param);

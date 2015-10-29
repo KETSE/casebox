@@ -1387,19 +1387,19 @@ window.ondragend = function(e){
     delete window.dragFromWindow;
 };
 
-// window.onerror = function(message, url, linenumber)
-// {
-//    var errors = {};
-//    errors.message    = message;
-//    errors.url        = url;
-//    errors.linenumber = linenumber;
-//    clog('ERROR:', errors);
-//   // jQuery.ajax({
-//   //     type: "POST",
-//   //     url: "/scripts/error_report.php",
-//   //     dataType: "json",
-//   //     data: errors
-//   //  });
+window.onerror = function(message, url, linenumber)
+{
+   var errors = {};
+   errors.message    = message;
+   errors.url        = url;
+   errors.linenumber = linenumber;
+   clog('ERROR:', errors);
+  // jQuery.ajax({
+  //     type: "POST",
+  //     url: "/scripts/error_report.php",
+  //     dataType: "json",
+  //     data: errors
+  //  });
 
-//   return true;
-// };
+  return true;
+};

@@ -131,6 +131,7 @@ class SearchResults extends Dbnode
         if (!empty($rp['search']['template_id'])) {
             // searching from a search form
             $so->setData($rp['search']);
+
         } else {
             // should/will be reviewed for saved searches
             $searchId = $this->lastNode->id;

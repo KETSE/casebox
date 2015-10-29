@@ -5,6 +5,7 @@ namespace Demosrc\TreeNode;
 use CB\Templates;
 use CB\DB;
 use CB\L;
+use CB\DataModel as DM;
 
 class OfficeCases extends \CB\TreeNode\Base
 {
@@ -33,7 +34,7 @@ class OfficeCases extends \CB\TreeNode\Base
         $this->fq = array();
 
         //select only case templates
-        $templates = Templates::getIdsByType('case');
+        $templates = DM\Templates::getIdsByType('case');
         if (!empty($templates)) {
             $this->fq[] = 'template_id:('.implode(' OR ', $templates).')';
         }

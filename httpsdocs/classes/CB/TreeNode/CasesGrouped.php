@@ -6,6 +6,7 @@ use CB\L;
 use CB\Templates;
 use CB\Search;
 use CB\Objects;
+use CB\DataModel as DM;
 
 class CasesGrouped extends Base
 {
@@ -40,7 +41,7 @@ class CasesGrouped extends Base
         $this->fq = array();
 
         //select only case templates
-        $caseTemplates = Templates::getIdsByType('case');
+        $caseTemplates = DM\Templates::getIdsByType('case');
         if (!empty($caseTemplates)) {
             $this->fq[] = 'template_id:('.implode(' OR ', $caseTemplates).')';
         }

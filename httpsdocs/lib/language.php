@@ -20,14 +20,6 @@ if (!isset($languageSettings[$coreLanguage])) {
     \CB\Config::setEnvVar('language_settings', $languageSettings);
 }
 
-//define language fields
-$fields = array();
-for ($i=0; $i < sizeof($coreLanguages); $i++) {
-    $fields[] = 'l'.getIndex(trim($coreLanguages[$i]));
-}
-
-\CB\Config::setEnvVar('language_fields', implode(',', $fields));
-
 // index for default core language
 \CB\Config::setEnvVar('language_index', getIndex(\CB\Config::get('language')));
 

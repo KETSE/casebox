@@ -23,20 +23,14 @@ class UsersGroups
         }
         $path = explode('/', $p['path']);
         $id = array_pop($path);
-        $node_type = null;
+        $nodeType = null;
 
         if (is_numeric($id)) {
-            $res = DB\dbQuery(
-                'SELECT type
-                FROM users_groups
-                WHERE id = $1',
-                $id
-            ) or die(DB\dbQueryError());
+            $r = DM\UsersGroups::read($id);
 
-            if ($r = $res->fetch_assoc()) {
-                $node_type = $r['type'];
+            if (!empty($r)) {
+                $nodeType = $r['type'];
             }
-            $res->close();
         }
 
         // users out of a group
@@ -65,7 +59,7 @@ class UsersGroups
             }
             $res->close();
 
-        } elseif (is_null($node_type)) { /* root node childs*/
+        } elseif (is_null($nodeType)) { /* root node childs*/
             $res = DB\dbQuery(
                 'SELECT
                     id

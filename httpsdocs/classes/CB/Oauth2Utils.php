@@ -1,16 +1,17 @@
 <?php
-
 namespace CB;
+
+use CB\DataModel as DM;
 
 class Oauth2Utils
 {
 
     /**
      *
-     * @param array $GPlus
+     * @param  array                                 $GPlus
      * @return \League\OAuth2\Client\Provider\Google
      */
-    static function getGoogleProvider($GPlus = null)
+    public static function getGoogleProvider($GPlus = null)
     {
 
         if (empty($GPlus)) {
@@ -22,12 +23,15 @@ class Oauth2Utils
             && count($GPlus['web']['redirect_uris'])) {
             require_once realpath(__DIR__.'/../../../vendor/').'/autoload.php';
 
-            $provider = new \League\OAuth2\Client\Provider\Google([
-                'clientId' => $GPlus['web']['client_id'],
-                'clientSecret' => $GPlus['web']['client_secret'],
-                'redirectUri' => $GPlus['web']['redirect_uris'][0],
-            ]);
+            $provider = new \League\OAuth2\Client\Provider\Google(
+                array(
+                    'clientId' => $GPlus['web']['client_id'],
+                    'clientSecret' => $GPlus['web']['client_secret'],
+                    'redirectUri' => $GPlus['web']['redirect_uris'][0],
+                )
+            );
         }
+
         return $provider;
     }
 
@@ -35,21 +39,22 @@ class Oauth2Utils
      *
      * @return array with google credentials
      */
-    static function getGoogleConfig()
+    public static function getGoogleConfig()
     {
         $useGoogleOauth2_json = Config::get('oauth2_credentials_google');
         if ($useGoogleOauth2_json && $GPlus                = Util\jsonDecode($useGoogleOauth2_json, true)) {
             return $GPlus;
         }
+
         return null;
     }
 
     /**
      *
-     * @param type $provider
-     * @return string url to login 
+     * @param  type   $provider
+     * @return string url to login
      */
-    static function getLoginUrl($provider = null)
+    public static function getLoginUrl($provider = null)
     {
 
         $authUrl = null;
@@ -76,7 +81,7 @@ class Oauth2Utils
      * return true if current request is for oaut2callback script
      * @return boolean
      */
-    static function isOauth2Login()
+    public static function isOauth2Login()
     {
         return isset($_GET['state']) && isset($_SESSION['oauth2state']);
     }
@@ -85,49 +90,52 @@ class Oauth2Utils
      *
      * @return array
      */
-    static function checkLogined()
+    public static function checkLogined()
     {
+        $result = array(
+            'success' => false
+        );
 
-        $result = [ 'success' => true];
         if (static::isOauth2Login()) {
             $state = self::decodeState($_GET['state']);
-           
-            $session_state      = self::decodeState($_SESSION['oauth2state']);
-            
-            if (isset($session_state['state']) && isset($state['state']) && $session_state['state'] == $state['state'] && isset($state['email'])) {
 
-                $QueryUser = 'select id,enabled from users_groups where email like  $1 ';
+            $session_state = self::decodeState($_SESSION['oauth2state']);
 
-                $res = DB\dbQuery(
-                    $QueryUser, array($state['email'])
-                    ) or die(DB\dbQueryError());
-                
-                if (($r = $res->fetch_assoc()) && ($r['enabled'] == 1)) {
-                    $user_id = $r['id'];
+            if (isset($session_state['state']) &&
+                isset($state['state']) &&
+                $session_state['state'] == $state['state'] &&
+                isset($state['email'])
+            ) {
+                $userId = DM\Users::getIdByEmail($state['email']);
+
+                if (empty($userId)) {
+                    $result['message'] = 'Email ' . $state['email'] .
+                        ' not authorized for this core. ' .
+                        L\get('Specify_username') . ' ';
+
                 } else {
-                    return [ 'success' => false, 'message' => 'Email '.$state['email'].' not authorized for this core. '.L\get('Specify_username').' '];
+                    $result = array(
+                        'success' => true,
+                        'user_id' => $userId,
+                        'session_id' => $session_state['state']
+                    );
                 }
 
-                $res->close();
-
-                if ($user_id > 0) {
-
-                    // die('<pre>'.print_r($_SESSION, true).'</pre>');
-
-                    return [ 'success' => true, 'user_id' => $user_id , 'session_id' => $session_state['state'] ];
-                }
             } else {
-                return [ 'success' => false, 'message' => 'WRONG STATE!!!'];
+                $result['message'] = 'WRONG STATE!!!';
             }
+
         } else {
-            return [ 'success' => false, 'message' => 'Is not Oauth login'];
+            $result['message'] = 'Is not Oauth login';
         }
+
+        return $result;
     }
 
     /**
      *
      */
-    static function getToken($provider, $state, $code)
+    public static function getToken($provider, $state, $code)
     {
         $token = null;
 
@@ -163,7 +171,7 @@ class Oauth2Utils
     /**
      *
      */
-    static function getOwner($provider, $token)
+    public static function getOwner($provider, $token)
     {
 
         $ownerDetails = null;
@@ -180,47 +188,49 @@ class Oauth2Utils
             // Failed to get user details
             trigger_error('Something went wrong: '.$e->getMessage(), E_USER_ERROR);
         }
+
         return $ownerDetails;
     }
 
     /**
      *
-     * @param type $state
+     * @param  type   $state
      * @return string
      */
-    static function encodeState($state)
+    public static function encodeState($state)
     {
         return strtr(base64_encode(json_encode($state)), '+/=', '-_,');
     }
 
     /**
-     * 
-     * @param type $encodedState
+     *
+     * @param  type $encodedState
      * @return type
      */
-    static function decodeState($encodedState)
+    public static function decodeState($encodedState)
     {
         $state_json = base64_decode(strtr($encodedState, '-_,', '+/='));
         $state      = json_decode($state_json, true);
+
         return $state;
     }
 
     /**
      *
-     * @param type $provider
-     * @param type $encodedState
-     * @param type $code
+     * @param  type     $provider
+     * @param  type     $encodedState
+     * @param  type     $code
      * @return provider
      */
-    static function getLocalState($provider, $encodedState, $code)
+    public static function getLocalState($provider, $encodedState, $code)
     {
 
         $updateEncodedState = null;
         $token              = static::getToken($provider, $encodedState, $code);
-        
-        // save token for futher 
+
+        // save token for futher
         // $_SESSION['oauth2_token'] = $token;
-        
+
         if (isset($token)) {
 
             $ownerDetails = static::getOwner($provider, $token);
@@ -230,6 +240,7 @@ class Oauth2Utils
                 $updateEncodedState = static::encodeState($state);
             }
         }
+
         return $updateEncodedState;
     }
 }

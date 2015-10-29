@@ -146,7 +146,7 @@ class Objects
             return $this->create($d);
         }
 
-/*        if (empty($d['id']) ||
+        /*if (empty($d['id']) ||
             !is_numeric($d['id'])// ||
             // (!empty($d['draft']) &&
             //     DM\Objects::isDraft($d['id'])
@@ -296,21 +296,18 @@ class Objects
 
     /**
      * updates udate and uid for a case
-     * @param  int  $case_or_caseObject_id
+     * @param  int  $caseOrCaseObjectId
      * @return void
      */
-    public static function updateCaseUpdateInfo($case_or_caseObject_id)
+    public static function updateCaseUpdateInfo($caseOrCaseObjectId)
     {
-        DB\dbQuery(
-            'UPDATE tree
-            SET uid = $2
-                ,udate = CURRENT_TIMESTAMP
-            WHERE id = (select case_id from tree_info where id = $1)',
+        DM\Tree::update(
             array(
-                $case_or_caseObject_id
-                ,$_SESSION['user']['id']
+                'id' => $caseOrCaseObjectId
+                ,'uid' => User::getId()
+                ,'udate' => 'CURRENT_TIMESTAMP'
             )
-        ) or die(DB\dbQueryError());
+        );
     }
 
     //--------------------- new refactoring methods
@@ -320,7 +317,7 @@ class Objects
      * @param  int   $objectId
      * @return array
      */
-    public static function getPids($objectId)
+    public static function getPids($objectId, $excludeItself = true)
     {
         $rez = array();
 
@@ -328,18 +325,15 @@ class Objects
             return $rez;
         }
 
-        $res = DB\dbQuery(
-            'SELECT pids FROM tree_info WHERE id = $1',
-            $objectId
-        ) or die(DB\dbQueryError());
+        $r = DM\TreeInfo::read($objectId);
 
-        if ($r = $res->fetch_assoc()) {
+        if (!empty($r)) {
             $rez = Util\toNumericArray($r['pids']);
 
-            //exclude itself from pids
-            array_pop($rez);
+            if ($excludeItself) {
+                array_pop($rez);
+            }
         }
-        $res->close();
 
         return $rez;
     }
@@ -356,14 +350,11 @@ class Objects
             return $rez;
         }
 
-        $res = DB\dbQuery(
-            'SELECT template_id FROM tree WHERE id = $1',
-            $objectId
-        ) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
+        $r = DM\Tree::read($objectId);
+
+        if (!empty($r)) {
             $rez = $r['template_id'];
         }
-        $res->close();
 
         return $rez;
     }
@@ -442,7 +433,7 @@ class Objects
 
         if (!empty($toLoad)) {
             $tc = Templates\SingletonCollection::getInstance();
-            $data = DataModel\Objects::read($toLoad);
+            $data = DataModel\Objects::readAllData($toLoad);
 
             foreach ($data as $objData) {
                 $varName = 'Objects[' . $objData['id'] . ']';
@@ -577,23 +568,7 @@ class Objects
         $name = implode('.', $a);
 
         /* get similar names*/
-        $names = array();
-        $res = DB\dbQuery(
-            'SELECT name
-            FROM tree
-            WHERE pid = $1
-                AND name like $2
-                AND dstatus = 0',
-            array(
-                $pid
-                ,$name . '%' . '.'.$ext
-            )
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $names[] = $r['name'];
-        }
-        $res->close();
+        $names = DM\Tree::getChildNames($pid, $name, $ext);
 
         $i = 1;
         while (in_array($newName, $names)) {
@@ -615,11 +590,9 @@ class Objects
         if (empty($id)) {
             return $rez;
         }
-        $res = DB\dbQuery('SELECT id FROM tree WHERE id = $1', $id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            $rez = true;
-        }
-        $res->close();
+
+        $r = DM\Tree::read($id);
+        $rez = !empty($r);
 
         return $rez;
     }
@@ -641,26 +614,8 @@ class Objects
             return $rez;
         }
 
-        $res = DB\dbQuery(
-            'SELECT t.id
-                ,t.name
-                ,t.`system`
-                ,t.`type`
-                ,ti.pids
-                ,t.`template_id`
-                ,tt.`type` template_type
-            FROM tree t
-            JOIN tree_info ti on t.id = ti.id
-            LEFT JOIN templates tt ON t.template_id = tt.id
-            WHERE t.id = $1',
-            $id
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $rez['success'] = true;
-            $rez['data'] = $r;
-        }
-        $res->close();
+        $rez['success'] = true;
+        $rez['data'] = DM\Tree::getBasicInfo($id);
 
         return $rez;
     }
@@ -674,22 +629,11 @@ class Objects
     public static function getChildId($pid, $name)
     {
         $rez = null;
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE pid = $1
-                AND name = $2
-                AND dstatus = 0',
-            array(
-                $pid
-                ,$name
-            )
-        ) or die(DB\dbQueryError());
+        $r = DM\Tree::getChildByName($pid, $name);
 
-        if ($r = $res->fetch_assoc()) {
+        if (!empty($r)) {
             $rez = $r['id'];
         }
-        $res->close();
 
         return $rez;
     }
@@ -871,7 +815,7 @@ class Objects
             throw new \Exception(L\get('Access_denied'));
         }
 
-        $commentTemplates = Templates::getIdsByType('comment');
+        $commentTemplates = DM\Templates::getIdsByType('comment');
         if (empty($commentTemplates)) {
             $rez['msg'] = 'No comment templates found';
 

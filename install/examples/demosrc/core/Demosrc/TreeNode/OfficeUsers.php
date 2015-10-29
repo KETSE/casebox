@@ -5,6 +5,7 @@ namespace Demosrc\TreeNode;
 use CB\Templates;
 use CB\DB;
 use CB\L;
+use CB\DataModel as DM;
 
 class OfficeUsers extends \CB\TreeNode\Base
 {
@@ -32,7 +33,7 @@ class OfficeUsers extends \CB\TreeNode\Base
         $this->fq = array();
 
         //select only task templates
-        $taskTemplates = Templates::getIdsByType('task');
+        $taskTemplates = DM\Templates::getIdsByType('task');
         if (!empty($taskTemplates)) {
             $this->fq[] = 'template_id:('.implode(' OR ', $taskTemplates).')';
         }
