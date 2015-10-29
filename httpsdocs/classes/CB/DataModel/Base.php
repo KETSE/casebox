@@ -307,6 +307,7 @@ class Base
         $rez = null;
 
         if (!is_numeric($idOrName)) {
+            
             $sql = 'SELECT id
                 FROM ' . static::getTableName() .
                 ' WHERE ' . $nameField . ' = $1';
@@ -320,6 +321,11 @@ class Base
             if ($r = $res->fetch_assoc()) {
                 $rez = $r['id'];
             }
+            
+            if(empty($rez)) {
+              //  trigger_error(" Error on find ID : ".$sql.' $1 = '.$idOrName, E_USER_WARNING);
+            }
+            
             $res->close();
 
         } else {

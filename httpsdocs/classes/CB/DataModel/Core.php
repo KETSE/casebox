@@ -48,6 +48,10 @@ class Core extends Base
     public static function read($idOrName)
     {
         $id = static::toId($idOrName);
+        
+        if(!$id) {
+            trigger_error('can\'t get core id from name:'.$idOrName, E_USER_WARNING);
+        }
 
         $rez = parent::read($id);
 

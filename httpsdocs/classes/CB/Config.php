@@ -145,7 +145,10 @@ class Config extends Singleton
             $rez['core_status'] = $r['active'];
 
         } else {
-            throw new \Exception('Error getting core config', 1);
+            trigger_error(
+                "ERROR: Config::getPlatformConfigForCore(" . $coreName . ") cfg=" . print_r($r, true), E_USER_WARNING
+            );
+            // throw new \Exception('Error getting core config', 1);
         }
 
         return $rez;

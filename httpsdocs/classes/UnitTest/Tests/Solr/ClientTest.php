@@ -15,6 +15,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
+        
+       $config['solr_port'] = \CB\Config::get('solr_port');
+       $config['solr_host'] = \CB\Config::get('solr_host');
+       $config['solr_core'] = \CB\Config::get('prefix').'_'.\CB\Config::get('core_name');
+     // print_r($config);
         $layer = new \Apache_Solr_Compatibility_Solr4CompatibilityLayer;
         $this->solr = $solr = new \Apache_Solr_Service($this->config['solr_host'], $this->config['solr_port'], "/solr/".$this->config['solr_core']."/", false, $layer);
 
@@ -22,7 +27,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function testConnection()
     {
-        $this->assertTrue(is_numeric($this->solr->ping()));
+        $this->assertTrue($this->solr->ping()!==false);
     }
 
     public function testAddDocument()

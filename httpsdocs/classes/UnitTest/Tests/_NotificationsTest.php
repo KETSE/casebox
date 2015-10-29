@@ -136,8 +136,13 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         //code for 3 and more users notifications grouping
         //and check root notifications with each comment
         for ($i = 0; $i < 4; $i++) {
-            $_SESSION['user']['id'] = $this->userIds[$i];
+            
+            //$_SESSION['user']['id'] = $this->userIds[$i];
+            \CB\User::setAsLoged($this->userIds[$i], $_SESSION['key']);
             $commentData['data']['_title'] = 'Comment from user #' . $i .'.';
+            
+        print_r($commentData);
+        
             $this->createObject($commentData);
 
             $this->assertTrue(
@@ -153,7 +158,8 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
             );
         }
 
-        $_SESSION['user']['id'] = $rootUserId;
+        // $_SESSION['user']['id'] = $rootUserId;
+        \CB\User::setAsLoged($rootUserId, $_SESSION['key']);
 
         /*-------- answer back to previous comment with root and see if notifications are created */
         $commentData['data']['_title'] = 'Reply to Hellow comment.';

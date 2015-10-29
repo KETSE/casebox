@@ -16,7 +16,7 @@ define('TEST_PATH', __DIR__ . DIRECTORY_SEPARATOR);
 define('TEST_PATH_TEMP', TEST_PATH . 'tmp' . DIRECTORY_SEPARATOR);
 
 define('DEFAULT_TEST_CBPREFIX', 'cbtest');
-define('DEFAULT_TEST_CORENAME', 'test_core');
+define('DEFAULT_TEST_CORENAME', 'test');
 define('DEFAULT_TEST_USERNAME', 'root');
 define('DEFAULT_TEST_USERPASS', 'devel');
 
