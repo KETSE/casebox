@@ -84,7 +84,7 @@ if [ $coverage ];
       cp $DIR/../httpsdocs/config.ini $DIR/tmp/config.ini.old
 
         php $DIR/auto_install.php
-        $DIR/../vendor/bin/phpunit --colors --verbose --debug --bootstrap $DIR/init.php $DIR/../httpsdocs/classes/UnitTest
+        $DIR/../vendor/bin/phpunit --colors --configuration $DIR/phpunit-travis.xml --verbose --debug --bootstrap $DIR/init.php
 
      bash $DIR/server/solr/solr5-stop.sh
 

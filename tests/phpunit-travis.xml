@@ -18,5 +18,16 @@
     <logging>
         <log type="coverage-clover" target="../build/logs/clover.xml"/>
     </logging>
+    
+    
+<testsuites>
+    <testsuite name="MAIN">
+        <directory suffix=".php">../httpsdocs/classes/UnitTest/Tests/</directory>
+        <exclude>../httpsdocs/classes/UnitTest/Tests/NotificationsTest.php</exclude>
+    </testsuite>
+</testsuites>
+
+    
+    
         
 </phpunit>
