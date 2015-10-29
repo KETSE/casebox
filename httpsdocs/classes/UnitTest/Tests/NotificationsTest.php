@@ -140,9 +140,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
             //$_SESSION['user']['id'] = $this->userIds[$i];
             \CB\User::setAsLoged($this->userIds[$i], $_SESSION['key']);
             $commentData['data']['_title'] = 'Comment from user #' . $i .'.';
-            
-        print_r($commentData);
-        
+         
             $this->createObject($commentData);
 
             $this->assertTrue(
