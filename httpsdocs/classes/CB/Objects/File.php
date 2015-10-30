@@ -91,7 +91,7 @@ class File extends Object
             $d['md5'] = $cd['md5'];
         }
 
-        $this->data['versions'][] = DM\FilesVersions::getFileVersions($this->id);
+        $this->data['versions'] = DM\FilesVersions::getFileVersions($this->id);
     }
 
     /**

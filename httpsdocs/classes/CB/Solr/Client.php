@@ -206,10 +206,10 @@ class Client extends Service
 
         \CB\Cache::set($cache_var_name, time());
 
-        $id = \DM\Crons::toId($cronId);
-        \DM\Crons::update(
+        $id = DM\Crons::toId($cronId, 'cron_id');
+        DM\Crons::update(
             array(
-                'id' => $cronId
+                'id' => $id
                 ,'last_action' => 'CURRENT_TIMESTAMP'
             )
         );

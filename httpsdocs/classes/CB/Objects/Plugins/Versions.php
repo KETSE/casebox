@@ -23,9 +23,10 @@ class Versions extends Base
 
         if (!empty($data['versions'])) {
             $rez['data'] = $data['versions'];
+
             foreach ($rez['data'] as &$version) {
-                $version['ago_text'] = Util\formatAgoTime(Util\coalesce($version['udate'], $version['cdate']));
-                $version['user'] = User::getDisplayName(Util\coalesce($version['uid'], $version['uid']), true);
+                $version['ago_text'] = @Util\formatAgoTime(Util\coalesce($version['udate'], $version['cdate']));
+                $version['user'] = @User::getDisplayName(Util\coalesce($version['uid'], $version['uid']), true);
             }
         }
 

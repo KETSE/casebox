@@ -276,6 +276,15 @@ Ext.define('CB.object.ViewContainer', {
                 ,handler: this.onPermalinkClick
             }
 
+            ,'setOwner': {
+                text: L.SetOwner
+                ,itemId: 'setOwner'
+                ,menu: getMenuUserItems(
+                    this.onSetOwnershipClick
+                    ,this
+                )
+            }
+
             ,'new': {
                 text: L.New
                 ,itemId: 'newItem'
@@ -1076,6 +1085,25 @@ Ext.define('CB.object.ViewContainer', {
      */
     ,onCloseClick: function() {
         this.collapse();
+    }
+
+    ,onSetOwnershipClick: function(b, e) {
+        if(!Ext.isEmpty(this.loadedData.id)) {
+            CB_Objects.setOwnership(
+                {
+                    ids: this.loadedData.id
+                    ,userId: b.userId
+                }
+                ,this.processSetOwnership
+                ,this
+            );
+        }
+    }
+
+    ,processSetOwnership: function(r, e) {
+        if(r && r.success) {
+            App.fireEvent('objectchanged', this.loadedData, this);
+        }
     }
 
     ,onStarClick: function(b, e) {

@@ -247,7 +247,7 @@ class Users extends UsersGroups
         return $rez;
     }
 
-    public static function auth($userId, $pass, $info)
+    public static function auth($login, $pass, $info)
     {
         $rez = false;
 
