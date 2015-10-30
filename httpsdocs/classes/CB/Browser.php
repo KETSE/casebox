@@ -901,31 +901,6 @@ class Browser
         return $rez;
     }
 
-    public function takeOwnership($ids)
-    {
-        $ids = Util\toNumericArray($ids);
-
-        $rez = array('success' => true, 'data' => $ids);
-
-        if (empty($ids)) {
-            return $rez;
-        }
-
-        //check if user has rights to take ownership on each object
-        foreach ($ids as $id) {
-            if (!Security::canTakeOwnership($id)) {
-                throw new \Exception(L\get('Access_denied'));
-            }
-        }
-
-        DM\Tree::updateOwner($ids, User::getId());
-
-        //TODO: view if needed to mark all childs as updated, for security to be changed ....
-        Solr\Client::runCron();
-
-        return $rez;
-    }
-
     public static function getRootFolderId()
     {
         if (defined('CB\\ROOT_FOLDER_ID')) {

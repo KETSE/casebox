@@ -310,7 +310,33 @@ class Objects
         );
     }
 
-    //--------------------- new refactoring methods
+    public function setOwnership($p)
+    {
+        $ids = Util\toNumericArray($p['ids']);
+
+        $rez = array('success' => true, 'data' => $ids);
+
+        if (empty($ids)) {
+            return $rez;
+        }
+        $userId = (empty($p['userId']) || !is_numeric($p['userId']))
+            ? User::getId()
+            : $p['userId'];
+
+        //check if user has rights to take ownership on each object
+        foreach ($ids as $id) {
+            if (!Security::canTakeOwnership($id)) {
+                throw new \Exception(L\get('Access_denied'));
+            }
+        }
+
+        DM\Tree::updateOwner($ids, $userId);
+
+        //TODO: view if needed to mark all childs as updated, for security to be changed ....
+        Solr\Client::runCron();
+
+        return $rez;
+    }
 
     /**
      * get pids of a given object id

@@ -1,3 +1,17 @@
+CaseBox 1.9.536 (2015-10-30)
+==============================
+- #9184 Transfer ownership feature
+
+Fixed Bugs:
+----------
+- separators not set correctly in create menus
+- misspelled variable name in DataModel\Users.php
+- removed remained resource reference in Files.php
+- wrong versions assignment in File.php
+- misspelled namespace in Solr\Client.php
+- misspelled variable name in TemplatesStructure.php
+- wrong variable name in DBNode.php
+
 CaseBox 1.9.535 (2015-10-29)
 ==============================
 - template fields are no more saved/updated from its data['fields'] property

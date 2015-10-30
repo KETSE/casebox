@@ -364,6 +364,7 @@ class Security
             DM\UsersGroups::getMemberGroupIds($user_group_id)
         );
         $user_group_ids = array_unique($user_group_ids);
+        $user_group_ids = Util\toNumericArray($user_group_ids);
 
         /* end of getting group ids where passed $user_group_id is a member*/
 

@@ -279,6 +279,28 @@ setsHaveIntersection = function(set1, set2){
     return !Ext.isEmpty(setsGetIntersection(set1, set2));
 };
 
+function getMenuUserItems(handler, scope, excludeId){
+    var rez = [];
+
+    CB.DB.usersStore.each(
+        function(u) {
+            var d = u.data;
+            if(d.id != excludeId) {
+                rez.push({
+                    text: d.name
+                    ,iconCls: d.iconCls
+                    ,userId: d.id
+                    ,handler: handler
+                    ,scope: scope
+                });
+            }
+        }
+        ,this
+    );
+
+    return rez;
+}
+
 function updateMenu(menuButton, menuConfig, handler, scope){
     if(Ext.isEmpty(menuButton)) {
         return;
@@ -301,7 +323,7 @@ function updateMenu(menuButton, menuConfig, handler, scope){
                 idx = CB.DB.templates.findExact('id', parseInt(menuConfig[i], 10));
                 if(idx >= 0){
                     var tr = CB.DB.templates.getAt(idx)
-                        ,title = tr.get('title');
+                        ,title = tr.get('name');
 
                     if(['-', '- Menu separator -'].indexOf(title) >= 0) {
                         menu.push('-');

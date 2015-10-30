@@ -227,10 +227,14 @@ class Tree extends Base
             DB\dbQuery(
                 'UPDATE tree
                 SET oid = $1
-                    ,uid = $1
+                    ,uid = $2
+                    ,updated = 1
                 WHERE id IN (' . implode(',', $ids) . ')
                     AND `system` = 0',
-                $ownerId
+                array(
+                    $ownerId
+                    ,User::getId()
+                )
             ) or die(DB\dbQueryError());
         }
     }

@@ -78,6 +78,7 @@ Ext.define('CB.browser.ViewContainer', {
                 ,scope: this
                 ,handler: this.onDownloadClick
             })
+
             ,contextPreview: new Ext.Action({
                 text: L.Preview
                 ,hidden: true
@@ -115,15 +116,6 @@ Ext.define('CB.browser.ViewContainer', {
                 ,scope: this
                 ,disabled: true
                 ,handler: this.onPasteShortcutClick
-            })
-
-            ,takeOwnership: new Ext.Action({
-                text: L.TakeOwnership
-                ,itemId: 'takeownership'
-                ,iconCls: 'icon-user-gray'
-                ,disabled: true
-                ,scope: this
-                ,handler: this.onTakeOwnershipClick
             })
 
             ,'delete': new Ext.Action({
@@ -307,8 +299,6 @@ Ext.define('CB.browser.ViewContainer', {
                     ,this.actions.copy
                     ,this.actions.paste
                     ,this.actions.pasteShortcut
-                    ,'-'
-                    ,this.actions.takeOwnership
                 ]
             })
             ,new Ext.Button(this.actions.preview)
@@ -1037,7 +1027,6 @@ Ext.define('CB.browser.ViewContainer', {
             this.actions.edit.setDisabled(true);
             this.actions.cut.setDisabled(true);
             this.actions.copy.setDisabled(true);
-            this.actions.takeOwnership.setDisabled(true);
 
             this.actions.download.setDisabled(true);
             this.actions.download.hide();
@@ -1059,6 +1048,7 @@ Ext.define('CB.browser.ViewContainer', {
             this.actions.restore.setDisabled(true);
             this.actions.restore.hide();
             this.actions.permissions.setDisabled(isNaN(fp.id));
+
         } else {
             var firstObjId = Ext.valueFrom(selection[0].nid, selection[0].id)
                 ,firstObjType = CB.DB.templates.getType(selection[0].template_id)
@@ -1126,6 +1116,19 @@ Ext.define('CB.browser.ViewContainer', {
      */
     ,getSelection: function() {
         return this.getActiveView().currentSelection;
+    }
+
+    ,getSelectionIds: function() {
+        var rez = []
+            ,selection = this.getSelection();
+
+        if(!Ext.isEmpty(selection)) {
+            for (var i = 0; i < selection.length; i++) {
+                rez.push(selection[i].nid);
+            }
+        }
+
+        return rez;
     }
 
     ,onObjectsSelectionChange: function(objectsDataArray){
@@ -1205,6 +1208,27 @@ Ext.define('CB.browser.ViewContainer', {
         this.changeSomeParams({query: query});
     }
 
+    ,onSetOwnerClick: function(b, e) {
+        var ids = this.getSelectionIds();
+
+        if(!Ext.isEmpty(ids)) {
+            CB_Objects.setOwnership(
+                {
+                    ids: ids
+                    ,userId: b.userId
+                }
+                ,this.processSetOwnership
+                ,this
+            );
+        }
+    }
+
+    ,processSetOwnership: function(r, e) {
+        if(r && r.success) {
+            this.onReloadClick();
+        }
+    }
+
     ,onCreateObjectClick: function(b, e) {
         var ep = this.store.proxy.extraParams
             ,fp = Ext.valueFrom(this.folderProperties, {});
@@ -1238,15 +1262,11 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onDownloadClick: function(b, e) {
-        var ids = [];
-        var selection = this.getSelection();
-        if(Ext.isEmpty(selection)) {
-            return;
+        var ids = this.getSelectionIds();
+
+        if(!Ext.isEmpty(ids)) {
+            this.fireEvent('filedownload', ids, false, e);
         }
-        for (var i = 0; i < selection.length; i++) {
-            ids.push(selection[i].nid);
-        }
-        this.fireEvent('filedownload', ids, false, e);
     }
 
     ,onContextPreviewClick: function(b, e) {
@@ -1291,20 +1311,13 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onRestoreClick: function() {
-        var s = this.getSelection();
-        var ids = [];
+        var ids = this.getSelectionIds();
 
-        if(Ext.isEmpty(s)) {
-            return;
+        if(!Ext.isEmpty(ids)) {
+            this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
+
+            CB_Browser.restore(ids, this.processRestore, this);
         }
-
-        for (var i = 0; i < s.length; i++) {
-            ids.push(Ext.valueFrom(s[i].nid, s[i].id));
-        }
-
-        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-
-        CB_Browser.restore(ids, this.processRestore, this);
     }
 
     ,processRestore: function(r, e) {
@@ -1331,13 +1344,13 @@ Ext.define('CB.browser.ViewContainer', {
             return;
         }
 
-        var selection = this.getSelection();
+        var rez = []
+            ,selection = this.getSelection();
 
         if(Ext.isEmpty(selection)) {
             return;
         }
 
-        var rez = [];
 
         for (var i = 0; i < selection.length; i++) {
             rez.push({
@@ -1348,6 +1361,7 @@ Ext.define('CB.browser.ViewContainer', {
                 ,iconCls: selection[i].iconCls
             });
         }
+
         App.clipboard.set(rez, 'copy');
     }
 
@@ -1373,8 +1387,8 @@ Ext.define('CB.browser.ViewContainer', {
         var selection = this.getSelection()
             ,id = Ext.isEmpty(selection)
                 ? this.folderProperties.id
-
                 : Ext.valueFrom(selection[0].nid, selection[0].id);
+
         App.mainViewPort.openPermissions(id);
     }
 
@@ -1462,6 +1476,15 @@ Ext.define('CB.browser.ViewContainer', {
                 ,menu:[]
             });
 
+            this.setOwnerItem = new Ext.menu.Item({
+                text: L.SetOwner
+                ,hideOnClick: false
+                ,menu: getMenuUserItems(
+                    this.onSetOwnerClick
+                    ,this
+                )
+            });
+
             this.createItemSeparator = new Ext.menu.Separator();
 
             this.contextMenu = new Ext.menu.Menu({
@@ -1482,6 +1505,7 @@ Ext.define('CB.browser.ViewContainer', {
                     ,this.actions.unstar
                     ,this.actions.webdavlink
                     ,this.actions.permalink
+                    ,this.setOwnerItem
                     ,'-'
                     ,this.createItem
                     ,this.createItemSeparator
@@ -1491,12 +1515,14 @@ Ext.define('CB.browser.ViewContainer', {
         }
 
         var s = this.getSelection()
-            ,visible = Ext.isEmpty(s);
+            ,hasSelection = !Ext.isEmpty(s);
 
-        this.createItem.setHidden(!visible);
-        this.createItemSeparator.setHidden(!visible);
+        this.setOwnerItem.setHidden(!hasSelection);
 
-        if(visible) {
+        this.createItem.setHidden(hasSelection);
+        this.createItemSeparator.setHidden(hasSelection);
+
+        if(!hasSelection) {
             updateMenu(
                 this.createItem
                 ,this.folderProperties.menu

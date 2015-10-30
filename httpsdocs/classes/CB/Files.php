@@ -158,7 +158,6 @@ class Files
         } else {
             throw new \Exception(L\get('Object_not_found'));
         }
-        $res->close();
     }
 
     /**
@@ -651,7 +650,7 @@ class Files
                 ,'date' => Util\dateISOToMysql($p['date'])
                 ,'title' => @$p['title']
                 ,'uid' => User::getId()
-                ,'udate' => CURRENT_TIMESTAMP
+                ,'udate' => 'CURRENT_TIMESTAMP'
             )
         );
 
@@ -799,7 +798,7 @@ class Files
             $file['version_id'] = $versionId;
             $file['id'] = $id;
         } else {
-            $file = DM\Files::read($versionId);
+            $file = DM\Files::read($id);
         }
 
         if (empty($file)) {

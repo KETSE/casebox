@@ -33,7 +33,7 @@ class TemplatesStructure extends Base
         ,'solr_column_name' => 'varchar'
     );
 
-    protected static $decodedJsonFields = array('cfg');
+    protected static $decodeJsonFields = array('cfg');
 
     /**
      * get only active (not deleted fields) for given template

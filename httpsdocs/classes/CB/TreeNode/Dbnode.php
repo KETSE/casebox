@@ -66,14 +66,14 @@ class Dbnode extends Base
 
                 $r = DM\Tree::read($d['id']);
                 if (!empty($r['cfg']) && ($p['from'] == 'tree')) {
-                    if (isset($d['cfg']['loaded'])) {
-                        $d['loaded'] = $d['cfg']['loaded'];
+                    if (isset($r['cfg']['loaded'])) {
+                        $d['loaded'] = $r['cfg']['loaded'];
                     }
-                    if (isset($d['cfg']['expanded'])) {
-                        $d['expanded'] = $d['cfg']['expanded'];
+                    if (isset($r['cfg']['expanded'])) {
+                        $d['expanded'] = $r['cfg']['expanded'];
                     }
-                    if (isset($d['cfg']['leaf'])) {
-                        $d['leaf'] = $d['cfg']['leaf'];
+                    if (isset($r['cfg']['leaf'])) {
+                        $d['leaf'] = $r['cfg']['leaf'];
                     }
                 }
             }
