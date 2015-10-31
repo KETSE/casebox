@@ -1,3 +1,9 @@
+CaseBox 1.9.536 (2015-10-31)
+==============================
+Fixed Bugs:
+----------
+- fail creating core from script
+
 CaseBox 1.9.536 (2015-10-30)
 ==============================
 - #9184 Transfer ownership feature

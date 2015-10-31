@@ -207,12 +207,22 @@ class Client extends Service
         \CB\Cache::set($cache_var_name, time());
 
         $id = DM\Crons::toId($cronId, 'cron_id');
-        DM\Crons::update(
-            array(
-                'id' => $id
-                ,'last_action' => 'CURRENT_TIMESTAMP'
-            )
-        );
+        if (empty($id)) {
+            DM\Crons::create(
+                array(
+                    'cron_id' => $cronId
+                    ,'last_action' => 'CURRENT_TIMESTAMP'
+                )
+            );
+
+        } else {
+            DM\Crons::update(
+                array(
+                    'id' => $id
+                    ,'last_action' => 'CURRENT_TIMESTAMP'
+                )
+            );
+        }
     }
 
     /**
