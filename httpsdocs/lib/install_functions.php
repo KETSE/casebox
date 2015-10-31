@@ -725,5 +725,5 @@ function showMessage($msg = 'OK', $color = 32)
 
 function showError($msg = "ERROR")
 {
-    displayMessage($msg, 31);
+    showMessage($msg, 31);
 }
