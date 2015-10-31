@@ -95,7 +95,7 @@ class Object
         $p = &$this->data;
 
         if (!Security::canCreateActions($p['pid'])) {
-            // throw new \Exception(L\get('Access_denied'));
+             throw new \Exception(L\get('Access_denied'));
         }
 
         // check input params
