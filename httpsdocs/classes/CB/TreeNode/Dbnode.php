@@ -142,7 +142,10 @@ class Dbnode extends Base
 
         $tplCfg = array();
 
-        $r = DM\Tree::read($this->id);
+        if (!empty($this->id) && is_numeric($this->id)) {
+            $r = DM\Tree::read($this->id);
+        }
+
         if (!empty($r)) {
             $cfg = $r['cfg'];
             $templateId = $r['template_id'];

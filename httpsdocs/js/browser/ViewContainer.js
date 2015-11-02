@@ -693,6 +693,7 @@ Ext.define('CB.browser.ViewContainer', {
 
         if(Ext.isNumeric(indexOrName)) {
             rez = this.cardContainer.items.getAt(indexOrName);
+
         } else {
             var viewName = 'CBBrowserView' + Ext.util.Format.capitalize(indexOrName);
 
@@ -713,24 +714,22 @@ Ext.define('CB.browser.ViewContainer', {
                 }
 
                 rez = layout.setActiveItem(rez);
+
+                //check if need to show objectPanel for selected view
+                var showObjPanel = (
+                        rez &&
+                        (rez.showObjectPropertiesPanel === true)
+                    )
+                    ,showPreviewButton = showObjPanel && (this.objectPanel.getCollapsed() !== false);
+
+                this.actions.preview.setDisabled(!showPreviewButton);
+                this.actions.preview.setHidden(!showPreviewButton);
+                this.objectPanel.setVisible(showObjPanel);
+
+                App.mainViewPort.onToggleFilterPanelClick({
+                    pressed: (rez.showFilterPanel === true)
+                });
             }
-
-            //check if need to show objectPanel for selected view
-            var showObjPanel = (
-                    rez &&
-                    (rez.showObjectPropertiesPanel === true)
-                )
-                ,showFilterPanel = (
-                    rez &&
-                    (rez.showFilterPanel === true)
-                )
-                ,showPreviewButton = showObjPanel && (this.objectPanel.getCollapsed() !== false);
-
-            this.actions.preview.setDisabled(!showPreviewButton);
-            this.actions.preview.setHidden(!showPreviewButton);
-            this.objectPanel.setVisible(showObjPanel);
-
-            App.mainViewPort.onToggleFilterPanelClick({pressed: showFilterPanel});
         }
 
         return rez;
@@ -819,8 +818,8 @@ Ext.define('CB.browser.ViewContainer', {
         Ext.apply(options, vp);
 
         //workaround to set from param for search by template
-        if(this.requestParams && this.requestParams.from && (this.requestParams.from != 'tree')) {
-            options.from = this.requestParams.from;
+        if(this.params && this.params.from && (this.params.from != 'tree')) {
+            options.from = this.params.from;
         }
 
 
@@ -877,8 +876,6 @@ Ext.define('CB.browser.ViewContainer', {
             }
             ,this
         );
-
-        this.requestParams = {};
     }
 
     ,sameParams: function(params1, params2){
@@ -969,7 +966,9 @@ Ext.define('CB.browser.ViewContainer', {
             return;
         }
 
-        this.params = Ext.apply({}, this.requestParams);
+        this.params = Ext.clone(this.requestParams);
+
+        delete this.requestParams;
 
         delete this.params.forceLoad;
 

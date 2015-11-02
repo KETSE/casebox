@@ -168,10 +168,16 @@ Ext.define('CB.VerticalEditGrid', {
                     meta.css ='vgh';
                 } else {
                     meta.css = 'bgcLG vaT';
-                    meta.style = 'margin-left: ' + (n.getDepth()-1)+'0px';
+                    meta.style = 'margin-left: ' + (n.getDepth()-1) + '0px';
                     if(tr.get('cfg').readOnly === true) {
                         meta.css += ' cG';
                     }
+
+                    if(tr.get('cfg').required && Ext.isEmpty(record.data.value)) {
+                        meta.css += ' cRequired';
+                        v += ' *';
+                    }
+
                 }
 
                 if(!Ext.isEmpty(tr.get('cfg').hint)) {
@@ -719,6 +725,7 @@ Ext.define('CB.VerticalEditGrid', {
             if(!Ext.isEmpty(validator)) {
                 if(!Ext.isDefined(CB.Validators[validator])) {
                     plog('Undefined field validator: ' + validator);
+
                 } else {
                     node.data.valid = CB.Validators[validator](context.value);
                 }
@@ -832,6 +839,8 @@ Ext.define('CB.VerticalEditGrid', {
      */
     ,isValid: function() {
         var rez = true;
+        delete this.invalidRecord;
+
         this.store.each(
             function(r) {
                 var n = this.helperTree.getNode(r.get('id'));
@@ -840,6 +849,7 @@ Ext.define('CB.VerticalEditGrid', {
                     Ext.isEmpty(r.get('value'))
                     )
                 ) {
+                    this.invalidRecord = r;
                     rez = false;
                 }
                 return rez;
@@ -848,5 +858,20 @@ Ext.define('CB.VerticalEditGrid', {
         );
 
         return rez;
+    }
+
+    ,focusInvalidRecord: function() {
+        var view = this.getView();
+
+        if (this.invalidRecord) {
+            Ext.get(view.getRow(this.invalidRecord)).scrollIntoView(view.getEl(), null, true);
+
+            clog('this.invalidRecord', this.invalidRecord);
+
+            Ext.Msg.alert(
+                L.Error,
+                L.FillFieldMsg.replace('{fieldName}', this.invalidRecord.get('title'))
+            );
+        }
     }
 });

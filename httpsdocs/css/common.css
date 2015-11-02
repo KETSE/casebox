@@ -33,6 +33,7 @@
 .cGR, .cGR *{ color: green !important }
 .cLG{ color:#CCCCCC }
 .cR{ color: red }
+.cRequired{ color: #C00 }
 .cM, .cM *{ color: maroon !important }
 .cDB, .cDB *{ color: #356AA0 !important } /*DiggBlue*/
 .bgcLG{ background-color: #eee }
