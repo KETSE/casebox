@@ -35,7 +35,7 @@ class ActivityStream extends Base
         foreach ($data as &$doc) {
             $la = Objects::getCachedObject($doc['id'])->getLastActionData();
             $la['agoText'] = Util\formatAgoTime($la['time']);
-            $la['uids'] = array_keys($la['users']);
+            $la['uids'] = array_reverse(array_keys($la['users']));
             $doc['lastAction'] = $la;
 
             $actionLogId = $la['users'][$la['uids'][sizeof($la['uids']) - 1]];

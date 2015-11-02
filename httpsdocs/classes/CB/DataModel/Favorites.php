@@ -1,9 +1,7 @@
 <?php
-
 namespace CB\DataModel;
 
 use CB\DB;
-use CB\User;
 
 class Favorites extends Base
 {
@@ -38,7 +36,7 @@ class Favorites extends Base
             'SELECT *
             FROM ' . static::getTableName() .
             ' WHERE user_id = $1',
-            User::getId()
+            \CB\User::getId()
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
@@ -53,7 +51,7 @@ class Favorites extends Base
     public static function deleteByNodeId($nodeId, $userId = false)
     {
         if ($userId == false) {
-            $userId = User::getId();
+            $userId = \CB\User::getId();
         }
 
         DB\dbQuery(

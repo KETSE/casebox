@@ -1,3 +1,14 @@
+CaseBox 1.9.538 (2015-11-02)
+==============================
+- #9258 Last user that did action should be shown in Activity Stream for the object
+- #9183 Color field names for required fields instead of underline in field Value & Save button always enabled
+- #9083 Clean field types list
+
+Fixed Bugs:
+----------
+- #9202 Fast clicks in Tree doesn't correctly select node
+- #9241 Filter panel closes after selecting a facet & button remains ON
+
 CaseBox 1.9.536 (2015-10-31)
 ==============================
 Fixed Bugs:

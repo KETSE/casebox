@@ -60,8 +60,8 @@ CB.DB.templateTypes = new Ext.data.ArrayStore({
 $data = array(
     array(null, '-')
     ,array('_auto_title', L\get('ftAutoTitle')) //Auto title (uses title_template)
-    ,array('checkbox', L\get('ftCheckbox')) //CheckBox
-    ,array('combo', L\get('ftCombo')) //ComboBox
+    // ,array('checkbox', L\get('ftCheckbox')) //CheckBox
+    // ,array('combo', L\get('ftCombo')) //ComboBox
     ,array('date', L\get('ftDate')) //Date
     ,array('datetime', L\get('ftDatetime')) //Datetime
     ,array('float', L\get('ftFloat')) //Float
@@ -73,13 +73,13 @@ $data = array(
     ,array('_language', L\get('ftLanguage')) //Language
     ,array('memo', L\get('ftMemo')) //Memo
     ,array('_objects', L\get('ftObjects')) //Objects
-    ,array('_sex', L\get('ftSex')) //Sex
+    // ,array('_sex', L\get('ftSex')) //Sex
     ,array('_short_date_format', L\get('ftShortDateFormat')) //Short date format combo
     ,array('_fieldTypesCombo', L\get('ftFieldTypesCombo')) //Template field types combo
     ,array('_templateTypesCombo', L\get('ftTemplateTypesCombo')) //Template types combo
     ,array('text', L\get('ftText')) //Text
     ,array('time', L\get('ftTime')) //Time
-    ,array('timeunits', L\get('ftTimeunits')) //Time units
+    // ,array('timeunits', L\get('ftTimeunits')) //Time units
     ,array('varchar', L\get('ftVarchar')) //Varchar
 );
 ?>

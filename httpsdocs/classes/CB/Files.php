@@ -369,7 +369,7 @@ class Files
             $id = DM\FilesContent::toId($v, 'md5');
 
             if (!empty($id)) {
-                $r = DM\FilesContents::read($id);
+                $r = DM\FilesContent::read($id);
                 //give affirmative result only if the correspondig file content exists
                 $p[$k] = file_exists($filesDir . $r['path'] . DIRECTORY_SEPARATOR . $r['id'])
                     ? $r['id']
@@ -806,6 +806,7 @@ class Files
 
             return array('html' => '');
         }
+
         $content = DM\FilesContent::read($file['content_id']);
         $preview = DM\FilePreviews::read($content['id']);
 
@@ -970,7 +971,7 @@ class Files
                 break;
 
             default:
-                if ((substr($file['type'], 0, 5) == 'image') && (substr($file['type'], 0, 9) !== 'image/svg')) {
+                if ((substr($content['type'], 0, 5) == 'image') && (substr($content['type'], 0, 9) !== 'image/svg')) {
                     file_put_contents(
                         $previewFilename,
                         '<div style="padding: 5px 10px"><img src="/' . $coreName . '/download/'.
