@@ -57,7 +57,7 @@ function getDefaultConfigValues()
 /**
  * get question / phrase to be displayed for a given paramName
  */
-function getParamPhrase($paramName)
+function getParamPhrase($paramName = null )
 {
     $phrases = array(
         'apache_user' => 'Specify apache user {default}:' . "\n"
@@ -115,10 +115,12 @@ function getParamPhrase($paramName)
         ,'overwrite_existing_core_db' => "Core database exists. Would you like to backup it and overwrite with dump from current installation [Y/n]: "
         ,'solr_create_cores' => "solr aucreate cores ?"
     );
-
-    return empty($phrases[$paramName])
-        ? $paramName
-        : $phrases[$paramName];
+    
+    if (empty($paramName)) {
+            return $phrases;
+        } else {
+            return empty($phrases[$paramName]) ? $paramName : $phrases[$paramName];
+        }
 }
 
 /**
@@ -726,4 +728,109 @@ function showMessage($msg = 'OK', $color = 32)
 function showError($msg = "ERROR")
 {
     showMessage($msg, 31);
+}
+
+/**
+ * 
+ * @return array 
+ */
+function cliGetAllOptions()
+{
+    
+    $longopts = array_keys(\CB\Install\getParamPhrase());
+    foreach ($longopts as &$optName) {
+        $optName .= '::';
+    }
+    
+    array_push($longopts, 'config::');
+    array_push($longopts, 'file:');
+    
+
+    
+    $cliOptions = getopt('f:',$longopts);
+    
+        return $cliOptions;
+    
+}
+
+/**
+ * 
+ * @param array $cliOptions
+ */
+function cliGetConfigFile($cliOptions = null)
+{
+
+    $configFile = null;
+    $keyFiles = array('f', 'file', 'config');
+    if (isset($cliOptions)) {
+        if (\CB\Util\checkKeyExists( $keyFiles, $cliOptions )) {
+            $keys = array_intersect(array_keys($cliOptions), $keyFiles);
+            foreach ($keys as $k) {
+                if (isset($cliOptions[$k]) && trim($cliOptions[$k])) {
+                    $configFile = $cliOptions[$k];
+                }
+            }
+        }
+    }
+    return $configFile;
+}
+
+/**
+ * load config from CLI parameters and set respective FLAGS fro install
+ * @param array $options
+ */
+function cliLoadConfig($options = null)
+{
+
+    $cfg = null;
+
+    if (empty($options)) {
+        $options = \CB\Install\cliGetAllOptions();
+    }
+
+    $configFile = \CB\Install\cliGetConfigFile($options);
+    // echo $configFile.'!!!!!'.PHP_EOL;
+
+    if (!empty($configFile) && file_exists($configFile)) {
+        $cfg = \CB\Config::loadConfigFile($configFile);
+        if (\CB\Util\checkKeyExists( array_keys($options), $cfg)) {
+            foreach ($cfg as $OptKey => $OptValue) {
+                $cfg[$OptKey] = isset($options[$OptKey]) ? $options[$OptKey] : $OptValue;
+            }
+          // if any options is defined from CLI then run setup without interasctive mode  
+        }
+        if(count($cfg)) {
+          //  echo "\CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);";
+          \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
+        }
+        \CB\Cache::set('RUN_SETUP_CFG', $cfg);
+        if (isset($cfg['overwrite_create_backups']) && $cfg['overwrite_create_backups'] == 'n') {
+            \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', false);
+        } else {
+            \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', true);
+        }
+    } else {
+        \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', true);
+    }
+
+    //define working mode
+    if (!empty($cfg)) {
+        // define('CB\\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')', false);
+        \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
+       // $cfg = $cfg + $options['config'];
+    } else {
+        \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
+    }
+
+    // initialize default values in cofig if not detected
+
+    $defaultValues = getDefaultConfigValues();
+    
+        if(is_array($cfg)) {
+           $cfg = $cfg + $defaultValues;
+       } else {
+            $cfg = $defaultValues;
+       }
+       
+    return $cfg;
 }

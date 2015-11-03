@@ -315,7 +315,7 @@ class Helpers
             if (is_array($data)) {
                 extract($data);
             }
-
+            
             ob_start();
 
             include $filename;
