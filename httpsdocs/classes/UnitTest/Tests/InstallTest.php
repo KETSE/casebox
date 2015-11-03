@@ -31,7 +31,8 @@ class InstallTest extends \PHPUnit_Framework_TestCase
 
         // $this->assertEquals('no core specified or invalid options set.', $content);
         $content = array_filter(explode("\n", $content));
-        $this->assertEquals('no core specified or invalid options set.', trim(end($content)));
+        $expectedResults = [ 'no core specified or invalid options set.', 'Core not found or inactive.' ];
+        $this->assertArraySubset($options, $expectedResults);
 
         $options = array(
             'c' => DEFAULT_TEST_CORENAME,
@@ -43,6 +44,7 @@ class InstallTest extends \PHPUnit_Framework_TestCase
         $content = array_filter(explode("\n", $content));
 
         $this->assertEquals('optimizing', end($content));
+        
     }
 
     public function testcliGetConfigFile()

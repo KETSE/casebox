@@ -82,8 +82,6 @@ require_once \CB\LIB_DIR.'install_functions.php';
 $cfg = \CB\Install\cliLoadConfig($options);
 
     \CB\Install\displaySystemNotices();
-    
-    echo "RUN SETUP MODE:".\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE').PHP_EOL;
 
 if (\CB\Util\getOS() != "WIN") {
     //ask for apache user and set ownership for some folders
