@@ -79,7 +79,7 @@ try {
 
 require_once \CB\LIB_DIR.'install_functions.php';
 
-$cfg = \CB\Install\cliLoadConfig($options);
+$cfg = \CB\Install\cliLoadConfig(isset($options) ? $options:null);
 
     \CB\Install\displaySystemNotices();
 

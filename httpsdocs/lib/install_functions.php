@@ -738,6 +738,7 @@ function cliGetAllOptions()
 {
     
     $longopts = array_keys(\CB\Install\getParamPhrase());
+     
     foreach ($longopts as &$optName) {
         $optName .= '::';
     }
@@ -793,12 +794,6 @@ function cliLoadConfig($options = null)
 
     if (!empty($configFile) && file_exists($configFile)) {
         $cfg = \CB\Config::loadConfigFile($configFile);
-        if (\CB\Util\checkKeyExists( array_keys($options), $cfg)) {
-            foreach ($cfg as $OptKey => $OptValue) {
-                $cfg[$OptKey] = isset($options[$OptKey]) ? $options[$OptKey] : $OptValue;
-            }
-          // if any options is defined from CLI then run setup without interasctive mode  
-        }
         if(count($cfg)) {
           //  echo "\CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);";
           \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
@@ -831,6 +826,13 @@ function cliLoadConfig($options = null)
        } else {
             $cfg = $defaultValues;
        }
+
+       if (\CB\Util\checkKeyExists(  array_keys($options), \CB\Install\getParamPhrase()) ) {
+            foreach ($options as $OptKey => $OptValue) {
+                $cfg[$OptKey] = $OptValue;
+            }
+        }
+        
        
     return $cfg;
 }

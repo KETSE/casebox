@@ -886,6 +886,7 @@ function is_cli()
  * @return boolean
  */
 function checkKeyExists($keys, $array) {
+    
     $result = false;
     foreach($keys as $key) {
         if(array_key_exists($key, $array)) {
