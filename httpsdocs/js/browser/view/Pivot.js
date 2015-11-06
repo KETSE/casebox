@@ -268,7 +268,7 @@ Ext.define('CB.browser.view.Pivot',{
             );
 
             //get stats value if set
-            value = this.getFacetCount(this.pivot);
+            var value = this.getFacetCount(this.pivot);
 
             html += '<tr>' + r + '<td class="total">' + Ext.util.Format.number(value ? value : total, '0.##') + '</td></tr>';
 
@@ -285,7 +285,7 @@ Ext.define('CB.browser.view.Pivot',{
                     scope: this
                     ,afterrender: function(p) {
                         var a = p.getEl().query('td');
-                        for (i = 0; i < a.length; i++) {
+                        for (var i = 0; i < a.length; i++) {
                             Ext.get(a[i]).on('click', this.onTableCellClick, this);
                         }
                     }
@@ -364,9 +364,9 @@ Ext.define('CB.browser.view.Pivot',{
             ,this
         );
 
-        var chartItems = [];
+        var chartItems = []
+            ,i = 0;
 
-        i = 0;
         // for (i = 0; i < series.length; i++) {
             var serie = series[i];
 

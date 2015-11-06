@@ -8,7 +8,7 @@ Ext.define('CB.facet.Text', {
 
     ,autoHeight: true
     ,layout: 'fit'
-    ,bodyStyle: 'padding: 5px 5px 0px 5px'
+    ,bodyStyle: 'padding: 5px 5px 0 5px'
 
     ,initComponent: function(){
         this.editor = new Ext.form.field.Text({
@@ -18,9 +18,16 @@ Ext.define('CB.facet.Text', {
             ,enableKeyEvents: true
             ,scope: this
             ,anchor: '100%'
-            ,onTriggerClick: function(ev){ this.scope.fireEvent('facetchange', this, ev); }
+            ,onTriggerClick: function(ev){
+                this.scope.fireEvent('facetchange', this, ev);
+            }
             ,listeners: {
-                specialkey: {scope: this, fn: function(ed, ev){ if(ev.getKey() == ev.ENTER) ed.onTriggerClick(ev); } }
+                scope: this
+                ,specialkey: function(ed, ev) {
+                    if(ev.getKey() == ev.ENTER) {
+                        ed.onTriggerClick(ev);
+                    }
+                }
             }
         });
 

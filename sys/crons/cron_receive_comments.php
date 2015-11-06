@@ -200,12 +200,10 @@ function processMails(&$mailServer)
 
     $dids = array (); //array for deleted ids
 
-    $i = 0;
     $newMails = 0;
 
     //iterate and process each mail
     foreach ($mailServer['mailbox'] as $k => $mail) {
-        $i++;
         try {
             if ($mail->hasFlag(\Zend\Mail\Storage::FLAG_SEEN) || empty($mail->subject)) {
                 continue;
@@ -259,6 +257,7 @@ function processMails(&$mailServer)
             $dids[] = $mailServer['mailbox']->getUniqueId($k);
         }
     }
+
     $rez .= (
         ($newMails > 0)
         ? ("\nnew mails: " . $newMails . "\n")

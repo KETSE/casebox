@@ -58,7 +58,7 @@ Ext.define('CB.AddUserForm', {
             ,data: data
         });
 
-        items = [{
+        var items = [{
                 xtype: 'textfield'
                 ,allowBlank: false
                 ,fieldLabel: L.Username
@@ -594,7 +594,9 @@ Ext.define('CB.UsersGroupsTree', {
 
     ,deassociateNode: function(){
         var n = this.getSelectionModel().getSelection()[0];
-        if(!n) return;
+        if(!n) {
+            return;
+        }
         Ext.Msg.confirm(
             L.ExtractUser
             ,L.ExtractUserMessage.replace('{user}', n.data.name).replace('{group}', n.parentNode.data.text)
@@ -629,7 +631,7 @@ Ext.define('CB.UsersGroupsTree', {
         this.store.remove(n);
 
         if(r.outOfGroup){
-            p = this.getRootNode().findChild( 'nid', '-1');
+            var p = this.getRootNode().findChild( 'nid', '-1');
             if(p.loaded){
                 p.appendChild(attr);
                 p.sort(this.sortTree);
@@ -667,31 +669,43 @@ Ext.define('CB.UsersGroupsTree', {
                 ,this.targetNode.data.text.split('<')[0] + ' <span class="cG">(' + this.targetNode.data.users + ')</span>'
             );
         }
-        if(this.sourceNode.parentNode.data.nid == '-1') this.sourceNode.remove(true);
+        if(this.sourceNode.parentNode.data.nid == '-1') {
+            this.sourceNode.remove(true);
+        }
     }
 
     ,delNode: function(){
-        n = this.getSelectionModel().getSelection()[0];
-        if(!n) return;
+        var n = this.getSelectionModel().getSelection()[0];
+
+        if(!n) {
+            return;
+        }
+
         switch(n.getDepth()){
-        case 2:
-            this.deletedUserData = n.data;
-            Ext.MessageBox.confirm(L.Confirmation, L.DeleteUser + ' "'+n.data.text+'"?',
-            function(btn, text){
-                if(btn == 'yes'){
-                    n = this.getSelectionModel().getSelection()[0];
-                    CB_UsersGroups.deleteUser(n.data.nid, this.processDelNode, this);
+            case 2:
+                this.deletedUserData = n.data;
+                Ext.MessageBox.confirm(L.Confirmation, L.DeleteUser + ' "'+n.data.text+'"?',
+                function(btn, text){
+                    if(btn == 'yes'){
+                        n = this.getSelectionModel().getSelection()[0];
+                        CB_UsersGroups.deleteUser(n.data.nid, this.processDelNode, this);
+                    }
                 }
-            }
-            , this);
-            break;
-        case 1:
-            Ext.MessageBox.confirm(L.Confirmation, L.DeleteGroupConfirmationMessage + ' "'+n.data.text+'"?',
-            function(btn, text){
-                if(btn == 'yes') CB_Security.destroyUserGroup(n.data.nid, this.processDestroyUserGroup, this);
-            }
-            , this);
-            break;
+                , this);
+                break;
+            case 1:
+                Ext.MessageBox.confirm(L.Confirmation, L.DeleteGroupConfirmationMessage + ' "'+n.data.text+'"?',
+                function(btn, text){
+                    if(btn == 'yes') {
+                        CB_Security.destroyUserGroup(
+                            n.data.nid
+                            ,this.processDestroyUserGroup
+                            ,this
+                        );
+                    }
+                }
+                , this);
+                break;
         }
     }
 
@@ -732,7 +746,10 @@ Ext.define('CB.UsersGroupsTree', {
             ,scope: this
         });
 
-        for(i = 0; i< deleteNodes.length; i++) deleteNodes[i].remove(true);
+        for(var i = 0; i < deleteNodes.length; i++) {
+            deleteNodes[i].remove(true);
+        }
+
         if(this.deletedUserData){
             App.mainViewPort.fireEvent('userdeleted', this.deletedUserData);
             delete this.deletedUserData;
@@ -1043,7 +1060,7 @@ Ext.define('CB.UsersGroupsForm', {
                 }
                 ,show: function() {
                     var f = function(){
-                        a = this.down('[isFormField=true]');
+                        var a = this.down('[isFormField=true]');
                         a.focus();
                     };
 
@@ -1092,7 +1109,7 @@ Ext.define('CB.UsersGroupsForm', {
 
             this.grid.setDisabled(response.data.id == App.loginData.id);//disable editing access for self
 
-            accessData = [];
+            var accessData = [];
             CB.DB.groupsStore.each(
                 function(r){
                     if(parseInt(r.get('system'), 10) === 0) {
@@ -1141,7 +1158,11 @@ Ext.define('CB.UsersGroupsForm', {
     ,saveData: function(){
         this.fireEvent('beforesave');
         this.getEl().mask(L.SavingChanges + ' ...');
-        params = { groups: [] };
+
+        var params = {
+            groups: []
+        };
+
         this.grid.getStore().each(
             function(r){
                 if(r.get('active') == 1) {
@@ -1150,7 +1171,9 @@ Ext.define('CB.UsersGroupsForm', {
             },
             this
         );
+
         params.id = this.data.id;
+
         CB_UsersGroups.saveAccessData(
             params,
             function(r, e){
@@ -1203,20 +1226,33 @@ Ext.define('CB.UsersGroupsForm', {
     }
 
     ,updatePhoto: function(name){
-        if(Ext.isEmpty(name)) return;
-            del = this.userInfo.getEl().query('img.user-photo-field')[0];
-            del.src = '/' + App.config.coreName + '/photo/' + name;
+        if(Ext.isEmpty(name)) {
+            return;
+        }
+
+        var del = this.userInfo.getEl().query('img.user-photo-field')[0];
+        del.src = '/' + App.config.coreName + '/photo/' + name;
     }
 
     ,onEditUsernameClick: function(){
         Ext.Msg.prompt(L.ChangeUsername, L.ChangeUsernameMessage, function(btn, text){
             if (btn == 'ok'){
-                if(Ext.isEmpty(text)) return Ext.Msg.alert(L.Error, L.UsernameCannotBeEmpty);
-                r = /^[a-z0-9\._]+$/i;
-                if(Ext.isEmpty(r.exec(text))) return Ext.Msg.alert(L.Error, L.UsernameInvalid);
+                if(Ext.isEmpty(text)) {
+                    return Ext.Msg.alert(L.Error, L.UsernameCannotBeEmpty);
+                }
+
+                var r = /^[a-z0-9\._]+$/i;
+
+                if(Ext.isEmpty(r.exec(text))) {
+                    return Ext.Msg.alert(L.Error, L.UsernameInvalid);
+                }
+
                 CB_UsersGroups.renameUser(
-                    {id: this.data.id, name: text},
-                    function(r, e){
+                    {
+                        id: this.data.id
+                        ,name: text
+                    }
+                    ,function(r, e){
                         if(!r) {
                             return;
                         }
@@ -1231,7 +1267,9 @@ Ext.define('CB.UsersGroupsForm', {
                         this.data.name = r.name;
                         this.userInfo.data.name = r.name;
                         this.userInfo.update(this.userInfo.data);
-                    }, this);
+                    }
+                    ,this
+                );
             }
         }, this, false, this.data.name);
     }
@@ -1252,7 +1290,7 @@ Ext.define('CB.UsersGroupsForm', {
     }
 
     ,onEditUserPasswordClick: function(){
-        w = new CB.ChangePasswordWindow({data: this.data});
+        var w = new CB.ChangePasswordWindow({data: this.data});
         w.show();
     }
 
@@ -1600,17 +1638,21 @@ Ext.define('CB.ChangePasswordWindow', {
                 ,listeners: {
                     scope: this
                     ,clientvalidation: function(form, valid){
-                        label = this.down('[id="msgTarget"]');
+                        var label = this.down('[id="msgTarget"]');
+
                         if(!valid && this.hasInvalidFields){
                             label.setValue(L.EmptyRequiredFields);
                             return;
                         }
+
                         var a = this.query('[shouldMatch=true]');
+
                         if(a[0].getValue() != a[1].getValue()){
                             this.down('form').buttons[0].setDisabled(true);
                             label.setValue(L.PasswordMissmatch);
                             return;
                         }
+
                         label.setValue('&nbsp;');
                     }
                 }
@@ -1642,7 +1684,7 @@ Ext.define('CB.ChangePasswordWindow', {
 
             ,listeners: {
                 afterrender: function(){
-                    f = this.down('form');
+                    // var f = this.down('form');
                     // App.focusFirstField(f);
                 }
             }

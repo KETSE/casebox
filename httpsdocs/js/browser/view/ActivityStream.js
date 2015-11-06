@@ -105,7 +105,7 @@ Ext.define('CB.browser.view.ActivityStream',{
 
                 ,getNextButton: Ext.bind(
                     function() {
-                        rez = '<div class="asNext click" style="display:none"><span>' +
+                        var rez = '<div class="asNext click" style="display:none"><span>' +
                             L.Next +
                             ' </span><span class="dIB i16 i-arrow-right"></span></div>';
 

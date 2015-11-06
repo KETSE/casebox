@@ -399,7 +399,7 @@ Ext.define('CB.VerticalEditGridHelperTree', {
     ,getParentValue: function (nodeId, field_id){
         var node = this.getNode(nodeId);
         if(node && node.data.templateRecord) {
-            pn = node.parentNode;
+            var pn = node.parentNode;
             while(pn &&
                 pn.data.templateRecord &&
                 (pn.data.templateRecord.get('id') != field_id)

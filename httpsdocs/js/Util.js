@@ -94,7 +94,7 @@ function displayDateTime(date){
  * @return varchar
  */
 function dateToDateString(date) {
-    rez = null;
+    var rez = null;
     if(Ext.isPrimitive(date)) {
         rez = date;
     } else if(Ext.isDate(date)) {
@@ -109,7 +109,10 @@ function getItemIcon(d){
         return d.iconCls;
     }
     if(Ext.isEmpty(d.template_id)){
-        if(d['type'] == 2) return 'icon-shortcut';
+        if(d['type'] == 2) {
+            return 'icon-shortcut';
+        }
+
         return d.iconCls;
     }
 
@@ -124,8 +127,11 @@ function getItemIcon(d){
             //if not completed task - do default
 
         default:
-            tr = CB.DB.templates.getById(d.template_id);
-            if(tr) return tr.get('iconCls');
+            var tr = CB.DB.templates.getById(d.template_id);
+            if(tr) {
+                return tr.get('iconCls');
+            }
+
             return d.iconCls;
     }
 
@@ -172,27 +178,51 @@ function getFileExtension(filename)
 }
 
 function getFileIcon(filename){
-    if(Ext.isEmpty(filename)) return 'file-';
-    a = String(filename).split('.');
-    if(a.length <2 ) return 'file-';
+    if(Ext.isEmpty(filename)) {
+        return 'file-';
+    }
+
+    var a = String(filename).split('.');
+
+    if(a.length <2 ) {
+        return 'file-';
+    }
+
     return 'file- file-'+ Ext.util.Format.lowercase(a.pop());
 }
 
 function getFileIcon32(filename){
-    if(Ext.isEmpty(filename)) return 'file-unknown32';
-    a = String(filename).split('.');
-    if(a.length <2 ) return 'file-unknown32';
+    if(Ext.isEmpty(filename)) {
+        return 'file-unknown32';
+    }
+
+    var a = String(filename).split('.');
+
+    if(a.length <2 ) {
+        return 'file-unknown32';
+    }
+
     return 'file-unknown32 file-'+ Ext.util.Format.lowercase(a.pop())+'32';
 }
 
 function getStoreTitles(v){
-    if(Ext.isEmpty(v)) return '';
-    ids = String(v).split(',');
-    texts = [];
-    Ext.each(ids, function(id){
-         idx = this.findExact('id', parseInt(id, 10));
-        if(idx >= 0) texts.push(this.getAt(idx).get('title'));
-    }, this);
+    if(Ext.isEmpty(v)) {
+        return '';
+    }
+    var ids = String(v).split(',')
+        ,texts = [];
+
+    Ext.each(
+        ids
+        ,function(id){
+            var idx = this.findExact('id', parseInt(id, 10));
+            if(idx >= 0) {
+                texts.push(this.getAt(idx).get('title'));
+            }
+        }
+        ,this
+    );
+
     return texts.join(',');
 }
 function getStoreNames(v){
@@ -200,8 +230,9 @@ function getStoreNames(v){
         return '';
     }
 
-    var ids = String(v).split(',');
-    var texts = [];
+    var ids = String(v).split(',')
+        ,texts = [];
+
     Ext.each(
         ids
         ,function(id){
@@ -253,25 +284,38 @@ function toNumericArray(v, delimiter){
 
 setsGetIntersection = function(set1, set2){
     var i, rez = [];
-    if(Ext.isEmpty(set1) || Ext.isEmpty(set2)) return rez;
-    if(!Ext.isArray(set1)) set1 = String(set1).split(',');
-    if(!Ext.isArray(set2)) set2 = String(set2).split(',');
+    if(Ext.isEmpty(set1) || Ext.isEmpty(set2)) {
+        return rez;
+    }
+
+    if(!Ext.isArray(set1)) {
+        set1 = String(set1).split(',');
+    }
+
+    if(!Ext.isArray(set2)) {
+        set2 = String(set2).split(',');
+    }
+
     for (i = 0; i < set1.length; i++) {
         set1[i] = String(set1[i]);
     }
+
     for (i = 0; i < set2.length; i++) {
         set2[i] = String(set2[i]);
     }
+
     for (i = 0; i < set1.length; i++) {
         if( (set2.indexOf(set1[i]) >= 0) && (rez.indexOf(set1[i]) < 0 )) {
             rez.push(set1[i]);
         }
     }
+
     for (i = 0; i < set2.length; i++) {
         if( (set1.indexOf(set2[i]) >= 0) && (rez.indexOf(set2[i]) < 0 )) {
             rez.push(set2[i]);
         }
     }
+
     return rez;
 };
 
@@ -305,11 +349,14 @@ function updateMenu(menuButton, menuConfig, handler, scope){
     if(Ext.isEmpty(menuButton)) {
         return;
     }
+
     menuButton.menu.removeAll();
     menuConfig = String(menuConfig).split(',');
-    menu = [];
-    for (var i = 0; i < menuConfig.length; i++)
-        switch(menuConfig[i]){
+
+    var menu = [];
+
+    for (var i = 0; i < menuConfig.length; i++) {
+        switch (menuConfig[i]) {
             case 'case': break;
             case 'task': break;
             case 'event': break;
@@ -320,10 +367,10 @@ function updateMenu(menuButton, menuConfig, handler, scope){
                 break;
 
             default:
-                idx = CB.DB.templates.findExact('id', parseInt(menuConfig[i], 10));
+                var idx = CB.DB.templates.findExact('id', parseInt(menuConfig[i], 10));
                 if(idx >= 0){
                     var tr = CB.DB.templates.getAt(idx)
-                        ,title = tr.get('name');
+                        ,title = Ext.valueFrom(tr.get('title'), tr.get('name'));
 
                     if(['-', '- Menu separator -'].indexOf(title) >= 0) {
                         menu.push('-');
@@ -350,8 +397,11 @@ function updateMenu(menuButton, menuConfig, handler, scope){
             break;
 
         }
+    }
 
-    for(i = 0; i < menu.length; i++) menuButton.menu.add(menu[i]);
+    for(i = 0; i < menu.length; i++) {
+        menuButton.menu.add(menu[i]);
+    }
 }
 
 /**

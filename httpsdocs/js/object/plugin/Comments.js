@@ -137,7 +137,7 @@ Ext.define('CB.object.plugin.Comments', {
         var el  = this.getEl();
 
         if(el) {
-            lm = el.down('div.load-more');
+            var lm = el.down('div.load-more');
 
             if(lm && !lm.hasListener('click')) {
                 lm.on('click', this.onLoadMoreClick, this);
@@ -189,7 +189,8 @@ Ext.define('CB.object.plugin.Comments', {
         this.loadedData.data = r.data.concat(this.loadedData.data);
 
         var panel = this.up('panel')
-            ,scrollable = false;
+            ,scrollable = false
+            ,scrollPosition;
 
         while(!scrollable && panel) {
             scrollable = panel.getScrollable();

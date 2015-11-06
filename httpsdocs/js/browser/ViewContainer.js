@@ -564,10 +564,14 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,getProperty: function(propertyName){
-        if(propertyName == 'nid') propertyName = 'id';
+        if(propertyName == 'nid') {
+            propertyName = 'id';
+        }
+
         if(this.folderProperties && this.folderProperties[propertyName]) {
             return this.folderProperties[propertyName];
         }
+
         return null;
     }
 
@@ -879,30 +883,78 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,sameParams: function(params1, params2){
-        if(Ext.isEmpty(params1) && Ext.isEmpty(params2)) return true;
+        if(Ext.isEmpty(params1) && Ext.isEmpty(params2)) {
+            return true;
+        }
 
-        if(Ext.isEmpty(params1)) params1 = {};
-        if(Ext.isEmpty(params2)) params2 = {};
-        path1 = Ext.valueFrom(params1.path, '');
-        path2 = Ext.valueFrom(params2.path, '');
-        while( (path1.length > 0) && (path1[0] == '/') ) path1 = path1.substr(1);
-        while( (path2.length > 0) && (path2[0] == '/') ) path2 = path2.substr(1);
-        if ((params1.path != params2.path) || !Ext.isDefined(params1.path) ) return false;
-        if ((Ext.Number.from(params1.start, 0) != Ext.Number.from(params2.start, 0))) return false;
-        if ((Ext.Number.from(params1.page, 0) != Ext.Number.from(params2.page, 0))) return false;
-        if ((!Ext.isEmpty(params1.descendants) || !Ext.isEmpty(params2.descendants) ) && (params1.descendants != params2.descendants) ) return false;
-        if ((!Ext.isEmpty(params1.query) || !Ext.isEmpty(params2.query) ) && (params1.query != params2.query) ) return false;
-        if ((!Ext.isEmpty(params1.filters) || !Ext.isEmpty(params2.filters) ) && (params1.filters != params2.filters) ) return false;
-        if ((!Ext.isEmpty(params1.dateStart) || !Ext.isEmpty(params2.dateStart) ) && (params1.dateStart != params2.dateStart) ) return false;
-        if ((!Ext.isEmpty(params1.dateEnd) || !Ext.isEmpty(params2.dateEnd) ) && (params1.dateEnd != params2.dateEnd) ) return false;
-        if ((!Ext.isEmpty(params1.view) || !Ext.isEmpty(params2.view) ) && (params1.view != params2.view) ) return false;
-        if ((!Ext.isEmpty(params1.search) || !Ext.isEmpty(params2.search) ) && (Ext.encode(params1.search) != Ext.encode(params2.search)) ) return false;
+        if(Ext.isEmpty(params1)) {
+            params1 = {};
+        }
+
+        if(Ext.isEmpty(params2)) {
+            params2 = {};
+        }
+
+        var path1 = Ext.valueFrom(params1.path, '')
+            ,path2 = Ext.valueFrom(params2.path, '');
+
+        while ((path1.length > 0) && (path1[0] == '/')) {
+            path1 = path1.substr(1);
+        }
+
+        while ((path2.length > 0) && (path2[0] == '/')) {
+            path2 = path2.substr(1);
+        }
+
+        if ((params1.path != params2.path) || !Ext.isDefined(params1.path) ) {
+            return false;
+        }
+
+        if ((Ext.Number.from(params1.start, 0) != Ext.Number.from(params2.start, 0))) {
+            return false;
+        }
+
+        if ((Ext.Number.from(params1.page, 0) != Ext.Number.from(params2.page, 0))) {
+            return false;
+        }
+
+        if ((!Ext.isEmpty(params1.descendants) || !Ext.isEmpty(params2.descendants)) && (params1.descendants != params2.descendants)) {
+            return false;
+        }
+
+        if ((!Ext.isEmpty(params1.query) || !Ext.isEmpty(params2.query)) && (params1.query != params2.query)) {
+            return false;
+        }
+
+        if ((!Ext.isEmpty(params1.filters) || !Ext.isEmpty(params2.filters)) && (params1.filters != params2.filters)) {
+            return false;
+        }
+
+        if ((!Ext.isEmpty(params1.dateStart) || !Ext.isEmpty(params2.dateStart)) && (params1.dateStart != params2.dateStart)) {
+            return false;
+        }
+
+        if ((!Ext.isEmpty(params1.dateEnd) || !Ext.isEmpty(params2.dateEnd)) && (params1.dateEnd != params2.dateEnd)) {
+            return false;
+        }
+
+        if ((!Ext.isEmpty(params1.view) || !Ext.isEmpty(params2.view)) && (params1.view != params2.view)) {
+            return false;
+        }
+
+        if ((!Ext.isEmpty(params1.search) || !Ext.isEmpty(params2.search)) && (Ext.encode(params1.search) != Ext.encode(params2.search))) {
+            return false;
+        }
+
         return true;
     }
 
     // fired by internal view
     ,changeParams: function(params, e){
-        if(e && e.stopPropagation) e.stopPropagation();
+        if(e && e.stopPropagation) {
+            e.stopPropagation();
+        }
+
         this.setParams(params);
     }
 

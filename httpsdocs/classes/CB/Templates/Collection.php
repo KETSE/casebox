@@ -34,8 +34,8 @@ class Collection
 
         $this->reset();
         /* collecting template_fields */
-        $templateFields = array();
-        $templateFieldsByIndex = array();
+        $fields = array();
+        $fieldsByIndex = array();
 
         $recs = DM\TemplatesStructure::getFields();
 
@@ -43,20 +43,20 @@ class Collection
             $templateId = $r['template_id'];
             unset($r['template_id']);
 
-            $templateFields[$templateId][$r['id']] = &$r;
-            $templateFieldsByIndex[$templateId][] = &$r;
+            $fields[$templateId][$r['id']] = &$r;
+            $fieldsByIndex[$templateId][] = &$r;
             unset($r);
         }
 
         /* loading templates */
         $recs = DM\Templates::readAllWithData();
         foreach ($recs as $r) {
-            $r['fields'] = empty($templateFields[$r['id']])
+            $r['fields'] = empty($fields[$r['id']])
                 ? array()
-                : $templateFields[$r['id']];
-            $r['fieldsByIndex'] = empty($templateFieldsByIndex[$r['id']])
+                : $fields[$r['id']];
+            $r['fieldsByIndex'] = empty($fieldsByIndex[$r['id']])
                 ? array()
-                : $templateFieldsByIndex[$r['id']];
+                : $fieldsByIndex[$r['id']];
 
             /* store template in collection */
             $this->templates[$r['id']] = new \CB\Objects\Template($r['id'], false);

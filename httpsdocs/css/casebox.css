@@ -41,7 +41,7 @@ a {color: #15C}
     display: none;
 }
 .mainTabPanel > div.x-panel-body {
-    top: 0px !important;
+    top: 0 !important;
 }
 
 ul.caselist2 {margin-top: 3px; list-style: disc outside none !important}

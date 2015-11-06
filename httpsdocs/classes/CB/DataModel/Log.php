@@ -37,8 +37,8 @@ class Log extends Base
 
     /**
      * update a record
-     * @param  array   $p array with properties
-     * @return boolean
+     * @param  array $p array with properties
+     * @return array
      */
     public static function getRecords($ids)
     {

@@ -30,8 +30,12 @@ Ext.define('CB.search.Field', {
             listeners: {
                 scope: this
                 ,keyup: function(ed, e){
-                    if(Ext.isEmpty(this.getValue())) this.triggers.clear.hide();
-                    else this.triggers.clear.show();
+                    if(Ext.isEmpty(this.getValue())) {
+                        this.triggers.clear.hide();
+
+                    } else {
+                        this.triggers.clear.show();
+                    }
                 }
                 ,specialkey: function(ed, e){
                     switch(e.getKey()){
@@ -56,15 +60,18 @@ Ext.define('CB.search.Field', {
     ,setValue: function(value) {
         this.callParent(arguments);
 
-        if(Ext.isEmpty(value)){
+        if (Ext.isEmpty(value)){
             this.triggers.clear.hide();
-        }else{
+        } else {
             this.triggers.clear.show();
         }
     }
 
     ,onTrigger1Click : function(e){
-        if(Ext.isEmpty(this.getValue())) return;
+        if(Ext.isEmpty(this.getValue())) {
+            return;
+        }
+
         this.setValue('');
         this.triggers.clear.hide();
         this.fireEvent('search', '', e);
@@ -73,6 +80,7 @@ Ext.define('CB.search.Field', {
     ,onTrigger2Click : function(e){
         this.fireEvent('search', this.getValue(), this, e);
     }
+
     ,clear: function(){
         this.setValue('');
         this.triggers.clear.hide();

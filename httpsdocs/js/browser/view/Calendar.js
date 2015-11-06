@@ -121,7 +121,11 @@ Ext.define('CB.Calendar', {
 
     ,doReloadEventsStore: function(){
         this.allowedReload = true;
-        if(Ext.isEmpty(this.getLayout().activeItem)) return;
+
+        if(Ext.isEmpty(this.getLayout().activeItem)) {
+            return;
+        }
+
         var bounds =  this.getLayout().activeItem.getViewBounds();
         var p = {};
 

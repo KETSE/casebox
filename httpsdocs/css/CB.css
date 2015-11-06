@@ -306,7 +306,7 @@ font-size: 12px;
 
 /*  Grouping ---------------------------- */
 .x-grid-group-hd {
-    border-width: 0px 0 2px 0;
+    border-width: 0 0 2px 0;
     border-style: solid;
     border-color: #ccc;
     padding: 7px 4px 7px 4px;
@@ -414,16 +414,16 @@ a:hover{ text-decoration: underline }
 .icon-user-f { background-image: url(i/ico/user-female.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-user-plus { background-image: url(i/ico/user--plus.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-user-minus { background-image: url(i/ico/user--minus.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.icon-user-role0-, .icon-user-role0-m, .icon-user-white, .icon-user-white-m { background-image: url(i/ico/user-white.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
-.icon-user-role0-f, .icon-user-white-f { background-image: url(i/ico/user-white-female.png) !important; background-position: 0px 50%; background-repeat: no-repeat  }
-.icon-user-role1-, .icon-user-role1-m, .icon-user-role1-f, .icon-user-admin, .icon-user-admin-m, .icon-user-admin-f { background-image: url(i/ico/user-administrator.png)  !important; background-position: 0px 50%; background-repeat: no-repeat  }
-.icon-user-role2-, .icon-user-role2-m, .icon-user-manager, .icon-user-manager-m { background-image: url(i/ico/user-red.png)  !important; background-position: 0px 50%; background-repeat: no-repeat  }
-.icon-user-role2-f, .icon-user-manager-f { background-image: url(i/ico/user-red-female.png)  !important; background-position: 0px 50%; background-repeat: no-repeat  }
-.icon-user-role3-, .icon-user-role3-m, .icon-user-lawyer, .icon-user-lawyer-m { background-image: url(i/ico/user-yellow.png)  !important; background-position: 0px 50%; background-repeat: no-repeat }
-.icon-user-role3-f, .icon-user-lawyer-f { background-image: url(i/ico/user-yellow-female.png)  !important; background-position: 0px 50%; background-repeat: no-repeat  }
-.icon-user-role4-, .icon-user-role4-m, .icon-user-gray, .icon-user-gray-m { background-image: url(i/ico/_user-gray.png)  !important; background-position: 0px 50%; background-repeat: no-repeat  }
-.icon-user-role4-f, .icon-user-gray-f { background-image: url(i/ico/user-gray-female.png)  !important; background-position: 0px 50%; background-repeat: no-repeat  }
-.icon-user-black, .icon-user-black-m { background-image: url(i/ico/user-black.png)  !important; background-position: 0px 50%; background-repeat: no-repeat  }
+.icon-user-role0-, .icon-user-role0-m, .icon-user-white, .icon-user-white-m { background-image: url(i/ico/user-white.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-user-role0-f, .icon-user-white-f { background-image: url(i/ico/user-white-female.png) !important; background-position: 0 50%; background-repeat: no-repeat  }
+.icon-user-role1-, .icon-user-role1-m, .icon-user-role1-f, .icon-user-admin, .icon-user-admin-m, .icon-user-admin-f { background-image: url(i/ico/user-administrator.png)  !important; background-position: 0 50%; background-repeat: no-repeat  }
+.icon-user-role2-, .icon-user-role2-m, .icon-user-manager, .icon-user-manager-m { background-image: url(i/ico/user-red.png)  !important; background-position: 0 50%; background-repeat: no-repeat  }
+.icon-user-role2-f, .icon-user-manager-f { background-image: url(i/ico/user-red-female.png)  !important; background-position: 0 50%; background-repeat: no-repeat  }
+.icon-user-role3-, .icon-user-role3-m, .icon-user-lawyer, .icon-user-lawyer-m { background-image: url(i/ico/user-yellow.png)  !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-user-role3-f, .icon-user-lawyer-f { background-image: url(i/ico/user-yellow-female.png)  !important; background-position: 0 50%; background-repeat: no-repeat  }
+.icon-user-role4-, .icon-user-role4-m, .icon-user-gray, .icon-user-gray-m { background-image: url(i/ico/_user-gray.png)  !important; background-position: 0 50%; background-repeat: no-repeat  }
+.icon-user-role4-f, .icon-user-gray-f { background-image: url(i/ico/user-gray-female.png)  !important; background-position: 0 50%; background-repeat: no-repeat  }
+.icon-user-black, .icon-user-black-m { background-image: url(i/ico/user-black.png)  !important; background-position: 0 50%; background-repeat: no-repeat  }
 .icon-user-arrow { background-image: url(i/ico/user--arrow.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-exit { background-image:url(i/ico/sign-out.png) !important }
 .icon-expand, .icon-expand-all{background-image:url(i/tree/expand-all.gif) !important;}
@@ -494,7 +494,7 @@ img.icon-arrow3 {width:8px; height:8px; margin-left:5px;}
 .icon-sort-alphabet{ background-image: url(i/ico/sort-alphabet.png) !important; background-position: 0 50%; background-repeat: no-repeat !important; padding-left: 16px }
 .icon-sort-alphabet-descending{ background-image: url(i/ico/sort-alphabet-descending.png) !important; background-position: 0 50%; background-repeat: no-repeat !important; padding-left: 16px }
 .icon-shortcut{ background-image: url(i/ico/shortcut-small.png) !important; background-position: 0 50%; background-repeat: no-repeat !important; padding-left: 16px }
-.generic-object { padding: 5px 5px 0px 5px; font-size: 12px !important }
+.generic-object { padding: 5px 5px 0 5px; font-size: 12px !important }
 
 .generic-object a, .generic-object a:link, .generic-object a:visited, .generic-object a:hover{ color: #555 !important; text-decoration: none }
 .generic-object .hover{ color: #286bcc; text-decoration: underline }
@@ -509,7 +509,7 @@ span.icon-right{ float: right; width: 18px; display: inline-block !important }
 .icon-obiective_part, .obiective-parts .generic-object ul li{ background-image: url(i/ico/document-horizontal-text.png) !important; background-position: 0 50%; background-repeat: no-repeat;}
 .committee-phases .generic-object ul li{ background-image: url(i/ico/document-horizontal-text.png) !important; background-position: 0 50%; background-repeat: no-repeat;}
 .committee-phases .closed_case{ background: none !important; color: red }
-.infocard-small { background-image:url(i/ico/infocard-small.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
+.infocard-small { background-image:url(i/ico/infocard-small.png) !important; background-position: 0 50%; background-repeat: no-repeat }
 .case_object{ color: #555; text-decoration: none; line-height: 20px; cursor: pointer; cursor: hand }
 .hover{ color: #286bcc; text-decoration: underline !important }
 
@@ -521,7 +521,7 @@ span.icon-right{ float: right; width: 18px; display: inline-block !important }
 .icon-bullet_gray	{ background-image:url(i/ico/bullet_gray.png) !important; background-repeat: no-repeat}
 
 .icon-padding16 { padding-left: 16px !important; min-height: 16px !important }
-.icon-pin		{ background-image:url(i/ico/pin.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
+.icon-pin		{ background-image:url(i/ico/pin.png) !important; background-position: 0 50%; background-repeat: no-repeat }
 
 .thesauri_set li{ padding-left: 20px }
 .icon-element, .thesauri_set li { background-image: url(i/ico/element.png) !important; background-position: 0 2px; background-repeat: no-repeat}
@@ -545,17 +545,17 @@ img.duplicate-plus {width:11px; height: 11px; background: url(i/duplication/ui-c
 .trigger-auto{ background-image: url(i/ico/trigger-auto.png) !important; background-position: -32px 0 !important; background-repeat: no-repeat !important; width: 32px !important; border-right: 1px solid #7eadd9 !important }
 .trigger-auto .x-form-trigger-over{ background-position: -64px 0 !important }
 .title-readonly{ color: gray }
-.panel-header-nobg{ background: none; border: 0px !important/*; border-bottom: 1px solid #EEE !important/**/}
-.panel-header-nobg .x-panel-header{ background: none; border: 0px}
+.panel-header-nobg{ background: none; border: 0 !important/*; border-bottom: 1px solid #EEE !important/**/}
+.panel-header-nobg .x-panel-header{ background: none; border: 0}
 .panel-header-nobg1{ background: none; border-bottom: 1px solid #DFE8F6 !important }
 .panel-header-nobg1 * { text-decoration: none !important}
 .panel-header-nobg1 .x-tool{ display: none}
 .over .panel-header-nobg1 .x-tool{ display: block}
 
-.panel-header-nobg2{ background: none; border-width: 0px !important}
+.panel-header-nobg2{ background: none; border-width: 0 !important}
 .thesauri-header-row{ font-weight: bold !important; padding: 5px 0 3px 0 !important; color: #15428B !important }
 .tabpanel-header-nobg{ border-top: 0; border-right:0 ; border-left: 0 padding: 0;
-	background-image: url(i/tb-bg.png) !important; background-position: 0px bottom !important; background-repeat: repeat-x !important;
+	background-image: url(i/tb-bg.png) !important; background-position: 0 bottom !important; background-repeat: repeat-x !important;
 	background-color: #fff !important
 }
 .tabpanel-header-nobg ul.x-tab-strip-top{ background: transparent}
@@ -635,10 +635,10 @@ em.hl {
 color: #333;
 background-color: #FDFDB0;
 display: inline-block;
-padding: 0px 2px;
+padding: 0 2px;
 }
 .icon-highlighter-text{ background-image: url(i/ico/highlighter-text.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.icon-trigger-arrow-right{ background-image: url(i/ico/navigation-000-button.png) !important; background-position: 0 0; background-repeat: no-repeat; border-bottom: 0px !important }
+.icon-trigger-arrow-right{ background-image: url(i/ico/navigation-000-button.png) !important; background-position: 0 0; background-repeat: no-repeat; border-bottom: 0 !important }
 .icon-trigger-arrow-split-090{ background-image: url(i/ico/trigger-arrow-split-090.gif) !important }
 .icon-trigger-information-white{ background-image: url(i/ico/trigger-information-white.gif) !important }
 .icon-information-white{ background-image: url(i/ico/information-white.png) !important; background-repeat: no-repeat }
@@ -661,21 +661,21 @@ padding: 0px 2px;
 .icon-locale{ background-image: url(i/ico/locale.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-language{ background-image: url(i/ico/language.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-bug{ background-image: url(i/ico/bug.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.icon-lightning{ background-image:url(i/ico/lightning.png); background-position: 0px 50%; background-repeat: no-repeat }
-.icon-lightning-small{ background-image:url(i/ico/lightning-small.png); background-position: 0px 50%; background-repeat: no-repeat }
-.icon-mail-medium{ background-image:url(i/ico/mail-medium.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
-.icon-mail-recive{ background-image:url(i/ico/mail-recive.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
-.icon-cross-script{ background-image:url(i/ico/cross-script.png); background-position: 0px 50%; background-repeat: no-repeat }
-.icon-funnel{ background-image:url(i/ico/funnel.png); background-position: 0px 50%; background-repeat: no-repeat }
-.icon-funnel-small{ background-image:url(i/ico/funnel-small.png); background-position: 0px 50%; background-repeat: no-repeat }
-.icon-star{ background-image:url(i/ico/star.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
-.icon-star-empty{ background-image:url(i/ico/star-empty.png); background-position: 0px 50%; background-repeat: no-repeat }
-.icon-star-plus{ background-image:url(i/ico/star-plus.png); background-position: 0px 50%; background-repeat: no-repeat }
-.icon-star-minus{ background-image:url(i/ico/star--minus.png); background-position: 0px 50%; background-repeat: no-repeat }
-.icon-casebox{ background-image:url(i/casebox.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
-.icon-briefcase{ background-image:url(i/ico/briefcase.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
-.icon-briefcase-plus{ background-image:url(i/ico/briefcase--plus.png); background-position: 0px 50%; background-repeat: no-repeat }
-.icon-chain{ background-image:url(i/ico/chain.png); background-position: 0px 50%; background-repeat: no-repeat }
+.icon-lightning{ background-image:url(i/ico/lightning.png); background-position: 0 50%; background-repeat: no-repeat }
+.icon-lightning-small{ background-image:url(i/ico/lightning-small.png); background-position: 0 50%; background-repeat: no-repeat }
+.icon-mail-medium{ background-image:url(i/ico/mail-medium.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-mail-recive{ background-image:url(i/ico/mail-recive.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-cross-script{ background-image:url(i/ico/cross-script.png); background-position: 0 50%; background-repeat: no-repeat }
+.icon-funnel{ background-image:url(i/ico/funnel.png); background-position: 0 50%; background-repeat: no-repeat }
+.icon-funnel-small{ background-image:url(i/ico/funnel-small.png); background-position: 0 50%; background-repeat: no-repeat }
+.icon-star{ background-image:url(i/ico/star.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-star-empty{ background-image:url(i/ico/star-empty.png); background-position: 0 50%; background-repeat: no-repeat }
+.icon-star-plus{ background-image:url(i/ico/star-plus.png); background-position: 0 50%; background-repeat: no-repeat }
+.icon-star-minus{ background-image:url(i/ico/star--minus.png); background-position: 0 50%; background-repeat: no-repeat }
+.icon-casebox{ background-image:url(i/casebox.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-briefcase{ background-image:url(i/ico/briefcase.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-briefcase-plus{ background-image:url(i/ico/briefcase--plus.png); background-position: 0 50%; background-repeat: no-repeat }
+.icon-chain{ background-image:url(i/ico/chain.png); background-position: 0 50%; background-repeat: no-repeat }
 
 .rg-ct{ padding: 4px 1px !important; float: left !important }
 .icon-hammer-screwdriver{ background-image: url(i/ico/hammer-screwdriver.png) !important; background-position: 0 50%; background-repeat: no-repeat}
@@ -724,8 +724,8 @@ padding: 0px 2px;
 .icon-document-zipper{ background-image: url(i/ico/document-zipper.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-document-zipper{ background-image: url(i/ico/document-zipper.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-locate-right{ background-image: url(i/ico/locate.gif) right 50% no-repeat !important }
-.icon-newspaper{ background-image:url(i/ico/newspaper.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
-.icon-newspaper-exclamation{ background-image:url(i/ico/newspaper-exclamation.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
+.icon-newspaper{ background-image:url(i/ico/newspaper.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-newspaper-exclamation{ background-image:url(i/ico/newspaper-exclamation.png) !important; background-position: 0 50%; background-repeat: no-repeat }
 .icon-shield {background-image: url(i/ico/shield.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-document-bookmark {background-image: url(i/ico/document-bookmark.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-inbox-document {background-image: url(i/ico/inbox-document.png) !important; background-position: 0 50%; background-repeat: no-repeat;}
@@ -744,8 +744,8 @@ a.viewFiles {float: right; cursor: pointer; cursor: hand; line-height: 16px}
 ul.tags li {padding: 5px 0 0 0; white-space: normal; cursor: pointer; cursor: hand}
 ul.tags li:first-child {padding: 0 0 0}
 ul.tags li:hover span:first-child, a.viewFiles:hover{color: #286bcc !important; text-decoration: underline}
-img.icon{width: 16px; height: 16px; padding: 0; border: 0; margin: 0 0 -3px 0; background-position: 0px 50%; background-repeat: no-repeat}
-img.icon-small{width: 14px; height: 11px; padding: 0; border: 0; margin: 0 0 -3px 0; background-position: 0px 50%; background-repeat: no-repeat}
+img.icon{width: 16px; height: 16px; padding: 0; border: 0; margin: 0 0 -3px 0; background-position: 0 50%; background-repeat: no-repeat}
+img.icon-small{width: 14px; height: 11px; padding: 0; border: 0; margin: 0 0 -3px 0; background-position: 0 50%; background-repeat: no-repeat}
 img.small-open-object{display: inline-block; width: 14px; height: 11px; padding: 0; border: 0; margin-bottom: -3px; background-position: -1000px 50%; background-repeat: no-repeat}
 img.open-object{display: inline-block; width: 16px; height: 16px; padding: 0; border: 0; margin-bottom: -1px; background-position: -1000px 50%; background-repeat: no-repeat}
 .x-grid3-row-over img.small-open-object, .x-grid3-row-over img.open-object{display: inline-block;  background-position: 0 50%}
@@ -886,7 +886,7 @@ div.grid-drop-zone-over{
     background-image: url(i/ico/32/newspaper.png);
 }
 .node-has-acl .x-tree-node-text{
-    background: url(i/ico/lock-small.png) 0px 1px no-repeat !important;
+    background: url(i/ico/lock-small.png) 0 1px no-repeat !important;
     margin-left: -11px;
     padding-left: 15px;
 }

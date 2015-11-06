@@ -598,7 +598,7 @@ class UsersGroups
             FROM users_groups_association
             WHERE user_id = $1',
             $user_id
-        ) or die( DB\dbQueryError() );
+        ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
             $groups[] = $r['group_id'];

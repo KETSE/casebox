@@ -196,6 +196,7 @@ class Base
         DB\startTransaction();
 
         echo "\nInitializing .. \n____________________________\n";
+
         $this->init();
         echo "\nOk\n";
 
@@ -314,6 +315,7 @@ class Base
 
                 $data = array(
                     'name' => $fn
+                    ,'_title' => $fn
                     ,'en' => $name
                     ,'type' => $type
                     ,'order' => $order
@@ -332,6 +334,7 @@ class Base
                 }
 
                 if (!empty($cfg)) {
+                    $fv['cfg'] = $cfg;
                     $data['cfg'] = Util\jsonEncode($cfg);
                 }
 

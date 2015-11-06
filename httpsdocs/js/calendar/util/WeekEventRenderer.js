@@ -1,12 +1,12 @@
 /* @private
  * This is an internal helper class for the calendar views and should not be overridden.
- * It is responsible for the base event rendering logic underlying all views based on a 
+ * It is responsible for the base event rendering logic underlying all views based on a
  * box-oriented layout that supports day spanning (MonthView, MultiWeekView, DayHeaderView).
  */
 Ext.define('Ext.calendar.util.WeekEventRenderer', {
 
     requires: ['Ext.calendar.util.Date'],
-    
+
     statics: {
         // private
         getEventRow: function(id, week, index) {
@@ -32,7 +32,8 @@ Ext.define('Ext.calendar.util.WeekEventRenderer', {
                 max = o.maxEventsPerDay != undefined ? o.maxEventsPerDay: 999,
                 weekCount = o.weekCount < 1 ? 6: o.weekCount,
                 dayCount = o.weekCount == 1 ? o.dayCount: 7,
-                cellCfg;
+                cellCfg,
+                row;
 
             for (; w < weekCount; w++) {
                 if (!grid[w] || grid[w].length == 0) {
@@ -52,8 +53,7 @@ Ext.define('Ext.calendar.util.WeekEventRenderer', {
                     }
                     dt = Ext.calendar.util.Date.add(dt, {days: 7});
                 } else {
-                    var row,
-                        d = 0,
+                    var d = 0,
                         wk = grid[w],
                         startOfWeek = Ext.Date.clone(dt),
                         endOfWeek = Ext.calendar.util.Date.add(startOfWeek, {days: dayCount, millis: -1});

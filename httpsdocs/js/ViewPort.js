@@ -671,7 +671,10 @@ Ext.define('CB.ViewPort', {
     }
 
     ,openCalendar: function(ev){
-        if(ev && ev. stopPropagation) ev.stopPropagation();
+        if(ev && ev. stopPropagation) {
+            ev.stopPropagation();
+        }
+
         App.openUniqueTabbedWidget('CBCalendarPanel');
     }
 
@@ -849,12 +852,29 @@ Ext.define('CB.ViewPort', {
     }
 
     ,onFilesDownload: function(ids, zipped, e){
-        if(e) e.stopPropagation();
+        if(e) {
+            e.stopPropagation();
+        }
+
         if(zipped !== true){
-            if(!Ext.isArray(ids)) ids = String(ids).split(',');
-            Ext.each(ids, function(id){if(isNaN(id)) return false; App.downloadFile(id);}, this);
+            if(!Ext.isArray(ids)) {
+                ids = String(ids).split(',');
+            }
+
+            Ext.each(
+                ids
+                ,function(id){
+                    if(isNaN(id)) {
+                        return false;
+                    }
+                    App.downloadFile(id);
+                }
+                ,this
+            );
         } else {
-            if(Ext.isArray(ids)) ids = ids.join(',');
+            if(Ext.isArray(ids)) {
+                ids = ids.join(',');
+            }
             App.downloadFile(ids, true);
         }
     }

@@ -35,7 +35,7 @@ class PreviewExtractor
 
     public function removeFromQueue($id)
     {
-        dbQuery('delete from file_previews where id = $1', $id) or die( DB\dbQueryError() );
+        dbQuery('delete from file_previews where id = $1', $id) or die(DB\dbQueryError());
     }
 
     public function purify($html, $options = array())

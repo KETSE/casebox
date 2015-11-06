@@ -81,10 +81,12 @@ Ext.define('CB.Login', {
     }
 
     ,doLogin: function(){
-        user = this.child('[name="username"]');
-        pass = this.child('[name="password"]');
-        if(!user.isValid() || !pass.isValid()) return false;
-        //Ext.util.Cookies.set('lastUser', user.getValue());
+        var user = this.child('[name="username"]')
+            ,pass = this.child('[name="password"]');
+
+        if(!user.isValid() || !pass.isValid()) {
+            return false;
+        }
 
         CB_User.login(user.getValue(), pass.getValue(), this.processLoginResponse);
     }
@@ -211,7 +213,9 @@ Ext.define('CB.VerifyPassword', {
     }
 
     ,processVerifyResponse: function(response, e){
-        var r = e.result;
+        var r = e.result
+            ,ip
+            ,pass;
 
         if(r && (r.success === true)) {
             this.success = true;
@@ -221,7 +225,7 @@ Ext.define('CB.VerifyPassword', {
             ip = this.down('[name="infoPanel"]');
             ip.show();
             ip.body.update(response.msg);
-            // this.syncSize();
+
             pass = this.down('[name="password"]');
             pass.reset();
             pass.focus(true, 550);

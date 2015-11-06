@@ -34,7 +34,7 @@ class Security
     public static $CAN_WRITE = 6;
     public static $CAN_DELETE_CHILDS = 7;
     public static $CAN_DELETE = 8;
-    public static $CAN_CHANGE_PERMISSIONS = 9;
+    public static $CAN_CHANGE_PERMS = 9;
     public static $CAN_TAKE_OWNERSHIP = 10;
     public static $CAN_DOWNLOAD = 11;
     /* groups methods */
@@ -669,12 +669,12 @@ class Security
         if ($is_owner) {
             $rez[0][static::$CAN_LIST_FOLDERS] = 1;
             $rez[0][static::$CAN_READ] = 1;
-            $rez[0][static::$CAN_CHANGE_PERMISSIONS] = 1;
+            $rez[0][static::$CAN_CHANGE_PERMS] = 1;
             $rez[0][static::$CAN_TAKE_OWNERSHIP] = 1;
 
             $rez[1][static::$CAN_LIST_FOLDERS] = 0;
             $rez[1][static::$CAN_READ] = 0;
-            $rez[1][static::$CAN_CHANGE_PERMISSIONS] = 0;
+            $rez[1][static::$CAN_CHANGE_PERMS] = 0;
             $rez[1][static::$CAN_TAKE_OWNERSHIP] = 0;
         }
 
@@ -859,7 +859,7 @@ class Security
     {
         return (
             Security::isAdmin() ||
-            (Security::getAccessBitForObject($object_id, static::$CAN_CHANGE_PERMISSIONS, $user_group_id) > 0)
+            (Security::getAccessBitForObject($object_id, static::$CAN_CHANGE_PERMS, $user_group_id) > 0)
         );
     }
 

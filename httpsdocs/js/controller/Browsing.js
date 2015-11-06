@@ -68,7 +68,7 @@ Ext.define('CB.controller.Browsing', {
         vc.on('selectionchange', this.onVCSelectionChange, this);
 
         //add listeners for notifications view
-        nv = vc.notificationsView;
+        var nv = vc.notificationsView;
 
         nv.on('selectionchange', this.onNVSelectionChange, this);
 

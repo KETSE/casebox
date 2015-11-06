@@ -641,7 +641,7 @@ class Config extends Singleton
     public static function getObjectTypePluginsConfig($objectType, $from = '')
     {
         $rez = array();
-        $tmp = Config::get('object_type_plugins');
+        $tmp = static::get('object_type_plugins');
 
         if (!empty($from)) {
             $tmp = @$tmp[$from];
@@ -650,7 +650,7 @@ class Config extends Singleton
         if (!empty($tmp[$objectType])) {
             $rez = $tmp[$objectType];
         } else {
-            $tmp = Config::get('default_object_plugins');
+            $tmp = static::get('default_object_plugins');
 
             if (!empty($from)) {
                 $tmp = @$tmp[$from];

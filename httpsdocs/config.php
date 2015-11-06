@@ -95,9 +95,7 @@ session_set_cookie_params(
     true
 );
 
-$SESSION_NAME = getSessionName();
-
-session_name($SESSION_NAME);
+session_name(setSessionName());
 
 //error reporting params
 error_reporting(IS_DEBUG_HOST ? E_ALL : E_ERROR);

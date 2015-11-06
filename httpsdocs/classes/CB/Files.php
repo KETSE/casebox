@@ -903,6 +903,7 @@ class Files
                 break;
 
             case 'txt':
+            case 'log':
             case 'css':
             case 'js':
             case 'json':

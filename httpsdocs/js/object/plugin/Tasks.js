@@ -103,7 +103,7 @@ Ext.define('CB.object.plugin.Tasks', {
     }
 
     ,getContainerToolbarItems: function() {
-        rez = {
+        var rez = {
             tbar: {}
             ,menu: {}
         };

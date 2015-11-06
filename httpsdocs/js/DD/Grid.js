@@ -220,7 +220,7 @@ Ext.define('CB.DD.Grid', {
             }
 
         } else { //drop over scroller area of the grid
-            callback = this.scope
+            var callback = this.scope
                 ? this.onScrollerDragDrop.bind(this.scope)
                 : this.onScrollerDragDrop;
             callback(el, source, e, data);

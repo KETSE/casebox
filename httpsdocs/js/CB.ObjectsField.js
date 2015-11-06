@@ -55,10 +55,22 @@ CB.ObjectsFieldCommonFunctions = {
                         scope: this
                         ,beforeload: function(store, o ){
                             if(this.data){
-                                if(!Ext.isEmpty(this.data.fieldRecord)) store.proxy.extraParams.fieldId = this.data.fieldRecord.get('id');
-                                if(!Ext.isEmpty(this.data.objectId)) store.proxy.extraParams.objectId = this.data.objectId;
-                                if(!Ext.isEmpty(this.data.pidValue)) store.proxy.extraParams.pidValue = this.data.pidValue;
-                                if(!Ext.isEmpty(this.data.path)) store.proxy.extraParams.path = this.data.path;
+                                if (!Ext.isEmpty(this.data.fieldRecord)) {
+                                    store.proxy.extraParams.fieldId = this.data.fieldRecord.get('id');
+                                }
+
+                                if (!Ext.isEmpty(this.data.objectId)) {
+                                    store.proxy.extraParams.objectId = this.data.objectId;
+                                }
+
+                                if (!Ext.isEmpty(this.data.pidValue)) {
+                                    store.proxy.extraParams.pidValue = this.data.pidValue;
+                                }
+
+                                if (!Ext.isEmpty(this.data.path)) {
+                                    store.proxy.extraParams.path = this.data.path;
+                                }
+
                                 store.proxy.extraParams.objFields = this.data.objFields;
                             }
                         }
@@ -87,8 +99,9 @@ CB.ObjectsFieldCommonFunctions = {
         }
 
         if(this.cfg.sort){
-            field = 'order';
-            dir = 'asc';
+            var field = 'order'
+                ,dir = 'asc';
+
             switch(this.cfg.sort){
                 case 'asc':
                     field = 'name';
@@ -107,12 +120,16 @@ CB.ObjectsFieldCommonFunctions = {
             return this.getThesauriStore();
         }
 
-        if(Ext.isEmpty(this.data)) return;
+        if(Ext.isEmpty(this.data)) {
+            return;
+        }
+
         if(this.data.ownerCt) {
             return this.data.ownerCt.objectsStore;
         }
+
         if(this.data.grid) {
-            a = this.data.grid.refOwner || this.data.grid.findParentByType(CB.Objects);
+            var a = this.data.grid.refOwner || this.data.grid.findParentByType(CB.Objects);
             if(!Ext.isEmpty(a)) {
                 return a.objectsStore;
             }
@@ -120,18 +137,26 @@ CB.ObjectsFieldCommonFunctions = {
     }
     ,getThesauriStore: function(){
         var thesauriId = this.cfg.thesauriId;
+
         if(this.cfg.thesauriId == 'dependent'){
             fieldName = this.data.record.store.fields.findIndex('name', 'field_id');
             fieldName = (fieldName < 0) ? 'id': 'field_id';
+
             var pri = this.data.record.store.findBy(
                 function(r){
                     return ( (r.get(fieldName) == this.data.record.get('pid')) && (r.get('duplicate_id') == this.data.record.get('duplicate_id')) );
                 }
                 ,this
             );
-            if(pri > -1) thesauriId = this.data.pidValue;
+
+            if(pri > -1) {
+                thesauriId = this.data.pidValue;
+            }
         }
-        if(!isNaN(thesauriId)) return getThesauriStore(thesauriId);
+
+        if(!isNaN(thesauriId)) {
+            return getThesauriStore(thesauriId);
+        }
     }
 
 };
@@ -191,9 +216,18 @@ Ext.define('CB.ObjectsComboField', {
             mode = 'remote';
 
             this.store.proxy.extraParams = Ext.clone(this.cfg);
-            if(!Ext.isEmpty(this.data.objectId)) this.store.proxy.extraParams.objectId = this.data.objectId;
-            if(!Ext.isEmpty(this.data.pidValue)) this.store.proxy.extraParams.pidValue = this.data.pidValue;
-            if(!Ext.isEmpty(this.data.path)) this.store.proxy.extraParams.path = this.data.path;
+
+            if(!Ext.isEmpty(this.data.objectId)) {
+                this.store.proxy.extraParams.objectId = this.data.objectId;
+            }
+
+            if(!Ext.isEmpty(this.data.pidValue)) {
+                this.store.proxy.extraParams.pidValue = this.data.pidValue;
+            }
+
+            if(!Ext.isEmpty(this.data.path)) {
+                this.store.proxy.extraParams.path = this.data.path;
+            }
 
             this.store.on('beforeload', this.onBeforeLoadStore, this);
             this.store.on('load', this.onStoreLoad, this);
@@ -317,6 +351,7 @@ Ext.define('CB.ObjectsTriggerField', {
     ,cls: 'x-form-field'
     ,isFormField: true
     ,delimiter: '<br />'
+
     ,initComponent: function(){
         if(Ext.isEmpty(this.config)) {
             this.config = {};
@@ -327,7 +362,8 @@ Ext.define('CB.ObjectsTriggerField', {
             : Ext.valueFrom(this.config.config, {});
 
         this.triggerIconCls = 'icon-element';
-        tpl = '<tpl for=".">{[ (xindex == 0) ? "" : "'+this.delimiter+'"]}{name}</tpl>';
+        var tpl = '<tpl for=".">{[ (xindex == 0) ? "" : "'+this.delimiter+'"]}{name}</tpl>';
+
         switch(this.cfg.renderer){
             case 'listGreenIcons':
                     tpl = '<ul><tpl for="."><li class="icon-padding16 icon-element">{name}</li></tpl></ul>';
@@ -374,30 +410,42 @@ Ext.define('CB.ObjectsTriggerField', {
     }
     ,setValue: function(v){
         this.value = [];
-        var store = this.getObjectsStore();
+
+        var store = this.getObjectsStore()
+            ,data = []
+            ,i;
+
         if(!Ext.isEmpty(v)){
-            if(!Ext.isArray(v)) v = String(v).split(',');
+            if(!Ext.isArray(v)) {
+                v = String(v).split(',');
+            }
+
             for(i = 0; i < v.length; i++) {
                 this.value.push(v[i]);
             }
         }
-        data = [];
-        if(store) //check if store is set cause it could not be determined due to field configuration errors
-        for (var i = 0; i < this.value.length; i++) {
-            var r = store.findRecord('id', this.value[i], 0, false, false, true);
-            if(r){
-                data.push(r.data);
+
+        //check if store is set cause it could not be determined due to field configuration errors
+        if(store) {
+            for (i = 0; i < this.value.length; i++) {
+                var r = store.findRecord('id', this.value[i], 0, false, false, true);
+                if(r){
+                    data.push(r.data);
+                }
             }
         }
+
         if(this.dataView.rendered) {
             this.dataView.update(data);
         } else {
             this.dataView.data = data;
         }
     }
+
     ,getValue: function(){
         return this.value.join(',');
     }
+
     ,onTriggerClick: function(e){
         if(this.cfg.source == 'thesauri'){
             this.form = new CB.ObjectsSelectionPopupList({
@@ -423,7 +471,7 @@ Ext.define('CB.ObjectsTriggerField', {
 
     ,onSetValue: function(data){
         if(!Ext.isString(data)){
-            selectedValue = [];
+            var selectedValue = [];
             Ext.each( data, function(i){
                 selectedValue.push(i.id);
             }, this );
@@ -431,7 +479,7 @@ Ext.define('CB.ObjectsTriggerField', {
 
         }
 
-        oldValue = this.getValue();
+        var oldValue = this.getValue();
         if(data == oldValue) {
             return;
         }
@@ -510,7 +558,7 @@ Ext.define('CB.ObjectsSelectionForm', {
                 this.cfg.fields = this.cfg.fields.split(',');
             }
             for (var i = 0; i < this.cfg.fields.length; i++) {
-                fieldName = this.cfg.fields[i].trim();
+                var fieldName = this.cfg.fields[i].trim();
                 switch(fieldName){
                     case 'name': break;
                     case 'date':
@@ -653,7 +701,11 @@ Ext.define('CB.ObjectsSelectionForm', {
                                     }
                                     ,listeners: {
                                         scope: this
-                                        ,specialkey: function(ed, ev){ if(ev.getKey() == ev.ENTER) this.onGridReloadTask();}
+                                        ,specialkey: function(ed, ev){
+                                            if(ev.getKey() == ev.ENTER) {
+                                                this.onGridReloadTask();
+                                            }
+                                        }
                                     }
                                 }
                             ]
@@ -665,6 +717,7 @@ Ext.define('CB.ObjectsSelectionForm', {
             ]
             ,listeners: {
                 scope: this
+
                 ,show: function(){
                     this.store.removeAll();
                     if((!Ext.isDefined(this.cfg.autoLoad)) || (this.cfg.autoLoad === true)) {
@@ -672,8 +725,15 @@ Ext.define('CB.ObjectsSelectionForm', {
                     }
                     this.triggerField.focus(false, 400);
                 }
-                ,facetchange: function(o, ev){ ev.stopPropagation(); this.onGridReloadTask(); }
-                ,beforedestroy: function(){ if(this.qt) this.qt.destroy();}
+
+                ,facetchange: function(o, ev){
+                    ev.stopPropagation();
+                    this.onGridReloadTask();
+                }
+
+                ,beforedestroy: function(){
+                    if(this.qt) this.qt.destroy();
+                }
             }
             ,buttons:[
                 '->'
@@ -689,7 +749,9 @@ Ext.define('CB.ObjectsSelectionForm', {
     }
 
     ,onGridReloadTask: function(){
-        if(!this.gridReloadTask) this.gridReloadTask = new Ext.util.DelayedTask(this.processGridReload, this);
+        if(!this.gridReloadTask) {
+            this.gridReloadTask = new Ext.util.DelayedTask(this.processGridReload, this);
+        }
         this.gridReloadTask.delay(500);
     }
 
@@ -704,10 +766,17 @@ Ext.define('CB.ObjectsSelectionForm', {
     }
 
     ,getSearchParams: function(){
-        result = Ext.apply({}, this.cfg);
+        var result = Ext.clone(this.cfg);
+
         result.query = this.triggerField.getValue();
-        if(!Ext.isEmpty(this.data.objectId)) result.objectId = this.data.objectId;
-        if(!Ext.isEmpty(this.data.path)) result.path = this.data.path;
+
+        if(!Ext.isEmpty(this.data.objectId)) {
+            result.objectId = this.data.objectId;
+        }
+
+        if(!Ext.isEmpty(this.data.path)) {
+            result.path = this.data.path;
+        }
 
         return result;
     }
@@ -758,7 +827,7 @@ Ext.define('CB.ObjectsSelectionForm', {
 
         var r = g.getStore().getAt(ri);
 
-        if(!this.qt)
+        if(!this.qt) {
             this.qt = new Ext.QuickTip({
                 autoHeight: true
                 ,autoWidth: true
@@ -776,13 +845,15 @@ Ext.define('CB.ObjectsSelectionForm', {
                 ,title: r.get('name')
                 ,html: '<span class="icon-padding icon-loading">' + L.LoadingData + '</span>'
             });
-        else {
+
+        } else {
             this.qt.hide();
             this.qt.setTitle(r.get('name'), r.get('iconCls'));
             if(this.qt.contact_id != r.get('id')) {
                 this.qt.update('<span class="icon-padding icon-loading">'+L.LoadingData+'</span>');
             }
         }
+
         this.qt.showAt(e.getXY());
     }
 
@@ -1056,19 +1127,29 @@ Ext.define('CB.ObjectsSelectionPopupList', {
     ,focusGrid: function(){
         this.grid.focus();
         if(this.grid.getStore().getCount() > 0){
-            r = this.grid.getSelectionModel().getSelected();
-            if(!r) r = this.grid.getStore().getAt(0);
+            var r = this.grid.getSelectionModel().getSelected();
+            if(!r) {
+                r = this.grid.getStore().getAt(0);
+            }
             this.grid.getSelectionModel().select([r]);
             this.grid.getView().focusRow(this.grid.getStore().indexOf(r));
         }
     }
 
     ,toggleElementSelection: function(g, ri, e){
-        r = this.grid.getSelectionModel().getSelected();
-        if(!r || (r.get('header_row') == 1)) return;
-        id = r.get('id') + '';
-        if(this.value.indexOf(id) < 0 ) this.value.push(id);
-        else this.value.remove(id);
+        var r = this.grid.getSelectionModel().getSelected();
+
+        if(!r || (r.get('header_row') == 1)) {
+            return;
+        }
+
+        var id = r.get('id') + '';
+        if(this.value.indexOf(id) < 0) {
+            this.value.push(id);
+        } else {
+            this.value.remove(id);
+        }
+
         this.grid.getView().refresh(false);
         this.grid.getView().focusRow(this.grid.getStore().indexOf(r));
     }

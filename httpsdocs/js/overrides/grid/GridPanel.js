@@ -9,6 +9,7 @@ Ext.override(Ext.grid.GridPanel, {
             ,store = this.store
             ,cols = this.headerCt.getGridColumns()
             ,gs
+            ,c
             ,di;
 
         for(var i = 0; i < cols.length; i++){

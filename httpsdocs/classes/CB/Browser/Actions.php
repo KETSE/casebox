@@ -84,7 +84,6 @@ class Actions
                 }
             }
         }
-        $res->close();
 
         /* end of dummy check if not copying inside a child of sourceIds */
 
@@ -250,18 +249,22 @@ class Actions
 
         //get security sets to which this user has
         //read access for copy or delete access for move
+
         $this->securitySetsFilter = '';
+
         if (!Security::isAdmin()) {
             $ss = array();
             switch ($action) {
                 case 'copy':
                     $ss = \CB\Security::getSecuritySets();
                     break;
+
                 case 'move':
                     //check if the user can move, because it doesnt anctually delete the obj, but just move it
                     $ss = \CB\Security::getSecuritySets(false, 5);
                     break;
             }
+
             $this->securitySetsFilter = 'AND ti.security_set_id in (0'.implode(',', $ss).')';
         }
 

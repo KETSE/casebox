@@ -1,3 +1,12 @@
+CaseBox 1.9.539 (2015-11-06)
+==============================
+- iterate codacy issues
+- #9200 Import Alhaq statements (eStatements2003_be.mdb)
+
+Fixed Bugs:
+----------
+- #9303 Titles of menu items broken
+
 CaseBox 1.9.538 (2015-11-02)
 ==============================
 - #9258 Last user that did action should be shown in Activity Stream for the object
