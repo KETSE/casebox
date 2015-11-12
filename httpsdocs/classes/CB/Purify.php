@@ -106,6 +106,18 @@ class Purify
     }
 
     /**
+     * purify solr field name
+     * @param  varchar $name
+     * @return varchar
+     */
+    final public static function solrFieldName($name)
+    {
+        $name = preg_replace('/[^a-z\d_]/i', '', $name);
+
+        return $name;
+    }
+
+    /**
      * purify human name
      * @param  varchar $fielname
      * @return varchar

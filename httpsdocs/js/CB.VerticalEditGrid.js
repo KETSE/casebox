@@ -725,12 +725,15 @@ Ext.define('CB.VerticalEditGrid', {
 
             //check if field has validator set and notify if validation not passed
             var validator = tr.get('cfg').validator;
+
             if(!Ext.isEmpty(validator)) {
                 if(!Ext.isDefined(CB.Validators[validator])) {
                     plog('Undefined field validator: ' + validator);
 
                 } else {
-                    node.data.valid = CB.Validators[validator](context.value);
+                    //empty values are considered valid by default
+                    node.data.valid = Ext.isEmpty(context.value) || CB.Validators[validator](context.value);
+                    context.record.set('valid', node.data.valid);
                 }
             }
 
@@ -868,8 +871,6 @@ Ext.define('CB.VerticalEditGrid', {
 
         if (this.invalidRecord) {
             Ext.get(view.getRow(this.invalidRecord)).scrollIntoView(view.getEl(), null, true);
-
-            clog('this.invalidRecord', this.invalidRecord);
 
             Ext.Msg.alert(
                 L.Error,

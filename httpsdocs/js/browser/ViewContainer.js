@@ -463,6 +463,13 @@ Ext.define('CB.browser.ViewContainer', {
                     ,showObjectPropertiesPanel: true
                     ,getProperty: getPropertyHandler
                 })
+                ,new CB.browser.view.Map({
+                    border: false
+                    ,refOwner: this
+                    ,store: this.store
+                    ,showObjectPropertiesPanel: false
+                    ,getProperty: getPropertyHandler
+                })
             ]
             ,listeners: {
                 scope: this

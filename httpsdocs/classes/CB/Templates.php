@@ -48,6 +48,10 @@ class Templates
                     $f['type'] = 'varchar';
                 }
 
+                if (($f['type'] == 'geoPoint') && empty($f['cfg']['validator'])) {
+                    $f['cfg']['validator'] = 'geoPoint';
+                }
+
                 if ($f['pid'] == $id) {
                     $f['pid'] = null;
                 }

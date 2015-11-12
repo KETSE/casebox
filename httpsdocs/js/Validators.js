@@ -17,3 +17,21 @@ CB.Validators.json = function (jsonString){
 
     return false;
 };
+
+CB.Validators.geoPoint = function (value){
+    // Point must be in 'lat,​ lon' or 'x y'
+    var re = /^-?\d+\.?\d*\,-?\d+\.?\d*$/;
+
+    rez = !Ext.isEmpty(re.exec(value));
+
+    //check if in correct diapazon
+    if(rez) {
+        var a = value.split(',')
+            ,y = parseFloat(a[0])
+            ,x = parseFloat(a[1]);
+
+        rez = ((y >= -90) && (y <= 90) && (x >= -180) && (x <= 180));
+    }
+
+    return rez;
+};

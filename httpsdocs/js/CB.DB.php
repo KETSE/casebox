@@ -65,6 +65,7 @@ $data = array(
     ,array('date', L\get('ftDate')) //Date
     ,array('datetime', L\get('ftDatetime')) //Datetime
     ,array('float', L\get('ftFloat')) //Float
+    ,array('geoPoint', L\get('ftGeoPoint'))
     ,array('G', L\get('ftGroup')) //Group
     ,array('H', L\get('ftHeader')) //Header
     ,array('html', L\get('ftHtml')) //Html

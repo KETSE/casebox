@@ -862,7 +862,7 @@ function initApp() {
             ,objectId: e.objectId
             ,path: e.path
         };
-        var w, th, ed;
+        var w, th, ed, rez = null;
         var tr = e.fieldRecord;
         var cfg = tr.get('cfg');
         var objectWindow = e.ownerCt
@@ -921,8 +921,9 @@ function initApp() {
                             });
 
                             formEditor.show();
+
                         } else {
-                            return new CB.ObjectsTriggerField({
+                            rez = new CB.ObjectsTriggerField({
                                 enableKeyEvents: true
                                 ,data: objData
                             });
@@ -1011,63 +1012,76 @@ function initApp() {
                 }
 
                 break;
-            case 'checkbox': return new Ext.form.ComboBox({
-                        enableKeyEvents: true
-                        ,triggerAction: 'all'
-                        ,queryMode: 'local'
-                        ,editable: false
-                        ,store: CB.DB.yesno
-                        ,displayField: 'name'
-                        ,valueField: 'id'
-                    });
-            case 'timeunits': return new Ext.form.ComboBox({
-                        enableKeyEvents: true
-                        ,forceSelection: true
-                        ,triggerAction: 'all'
-                        ,lazyRender: true
-                        ,queryMode: 'local'
-                        ,editable: false
-                        ,store: CB.DB.timeUnits
-                        ,displayField: 'name'
-                        ,valueField: 'id'
-                    });
-            case 'importance': return new Ext.form.ComboBox({
-                        enableKeyEvents: true
-                        ,forceSelection: true
-                        ,triggerAction: 'all'
-                        ,lazyRender: true
-                        ,queryMode: 'local'
-                        ,editable: false
-                        ,store: CB.DB.importance
-                        ,displayField: 'name'
-                        ,valueField: 'id'
-                    });
+            case 'checkbox':
+                rez = new Ext.form.ComboBox({
+                    enableKeyEvents: true
+                    ,triggerAction: 'all'
+                    ,queryMode: 'local'
+                    ,editable: false
+                    ,store: CB.DB.yesno
+                    ,displayField: 'name'
+                    ,valueField: 'id'
+                });
+                break;
+
+            case 'timeunits':
+                rez = new Ext.form.ComboBox({
+                    enableKeyEvents: true
+                    ,forceSelection: true
+                    ,triggerAction: 'all'
+                    ,lazyRender: true
+                    ,queryMode: 'local'
+                    ,editable: false
+                    ,store: CB.DB.timeUnits
+                    ,displayField: 'name'
+                    ,valueField: 'id'
+                });
+                break;
+
+            case 'importance':
+                rez = new Ext.form.ComboBox({
+                    enableKeyEvents: true
+                    ,forceSelection: true
+                    ,triggerAction: 'all'
+                    ,lazyRender: true
+                    ,queryMode: 'local'
+                    ,editable: false
+                    ,store: CB.DB.importance
+                    ,displayField: 'name'
+                    ,valueField: 'id'
+                });
+                break;
+
             case 'date':
-                return new Ext.form.DateField({
+                rez = new Ext.form.DateField({
                     enableKeyEvents: true
                     ,format: App.dateFormat
                     ,width: 100
                 });
+                break;
 
             case 'datetime':
-                return new Ext.form.DateField({
+                rez = new Ext.form.DateField({
                     enableKeyEvents: true
                     ,format: App.dateFormat+' ' + App.timeFormat
                     ,width: 130
                 });
+                break;
 
             case 'time':
-                return new Ext.form.field.Time({
+                rez = new Ext.form.field.Time({
                     enableKeyEvents: true
                     ,format: App.timeFormat
                 });
+                break;
 
             case 'int':
-                return new Ext.form.NumberField({
+                rez = new Ext.form.NumberField({
                     enableKeyEvents: true
                     ,allowDecimals: false
                     ,width: 90
                 });
+                break;
 
             case 'float':
                 var fieldCfg = {
@@ -1078,14 +1092,15 @@ function initApp() {
 
                 Ext.copyTo(fieldCfg, cfg, 'decimalPrecision');
 
-                return new Ext.form.NumberField(fieldCfg);
+                rez = new Ext.form.NumberField(fieldCfg);
+                break;
 
             case 'combo':
                 th = cfg.thesauriId;
                 if(th == 'dependent'){
                     th = e.pidValue;
                 }
-                return new Ext.form.ComboBox({
+                rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
                     ,typeAhead: true
@@ -1096,13 +1111,14 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
+                break;
 
             case 'iconcombo':
                 th = cfg.thesauriId;
                 if(th == 'dependent'){
                     th = e.pidValue;
                 }
-                return new Ext.form.ComboBox({
+                rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: false
                     ,typeAhead: true
@@ -1114,8 +1130,10 @@ function initApp() {
                     ,valueField: 'id'
                     ,iconClsField: 'name'
                 });
+                break;
+
             case '_language':
-                return new Ext.form.ComboBox({
+                rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
                     ,typeAhead: true
@@ -1126,8 +1144,10 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
+                break;
+
             case '_sex':
-                return new Ext.form.ComboBox({
+                rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
                     ,typeAhead: true
@@ -1138,8 +1158,10 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
+                break;
+
             case '_templateTypesCombo':
-                return new Ext.form.ComboBox({
+                rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
                     ,typeAhead: true
@@ -1150,8 +1172,10 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
+                break;
+
             case '_fieldTypesCombo':
-                return new Ext.form.ComboBox({
+                rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,autoSelect: true
                     ,forceSelection: true
@@ -1163,8 +1187,10 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
+                break;
+
             case '_short_date_format':
-                return new Ext.form.ComboBox({
+                rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
                     ,typeAhead: true
@@ -1175,6 +1201,8 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
+                break;
+
             case 'memo':
                 var height = Ext.valueFrom(cfg.height, 50);
                 height = parseInt(height, 10);
@@ -1199,11 +1227,12 @@ function initApp() {
 
                 }
 
-                return new Ext.form.TextArea(edConfig);
+                rez = new Ext.form.TextArea(edConfig);
+                break;
 
             case 'text':
                 e.cancel = true;
-                w = new CB.TextEditWindow({
+                rez = new CB.TextEditWindow({
                     title: tr.get('title')
                     ,editor: tr.get('cfg').editor
                     ,mode: tr.get('cfg').mode
@@ -1220,13 +1249,14 @@ function initApp() {
                         }
                     }
                 });
-                w.on('destory', e.grid.gainFocus, e.grid);
-                w.show();
+                rez.on('destory', e.grid.gainFocus, e.grid);
+                rez.show();
+
                 break;
 
             case 'html':
                 e.cancel = true;
-                w = App.getHtmlEditWindow({
+                rez = App.getHtmlEditWindow({
                     title: tr.get('title')
                     ,data: {
                         value: e.record.get('value')
@@ -1248,15 +1278,48 @@ function initApp() {
                 if(!Ext.isEmpty(e.grid)) {
                     w.on('hide', e.grid.gainFocus, e.grid);
                 }
-                w.show();
-                return w;
+                rez.show();
+                break;
+
+            case 'geoPoint':
+                if(tr && (tr.get('cfg').editor == 'form')) {
+                    e.cancel = true;
+
+                    rez = Ext.create('CB.LeafletWindow', {
+                        title: L.Map
+                        ,data: {
+                            value: e.record.get('value')
+                            ,cfg: tr.get('cfg')
+                            ,scope: e
+                            ,callback: function(w, v){
+                                this.originalValue = this.record.get('value');
+                                this.value = v;
+                                this.record.set('value', v);
+                                if(this.grid.onAfterEditProperty) {
+                                    this.grid.onAfterEditProperty(this, this);
+                                }
+                            }
+                        }
+                    });
+                    rez.on('destory', e.grid.gainFocus, e.grid);
+                    rez.show();
+
+                } else {
+                    rez = new Ext.form.TextField({
+                        enableKeyEvents: true
+                        ,maskRe: /[\-\d\.,]/
+                    });
+
+                }
                 break;
 
             default:
-                return new Ext.form.TextField({
+                rez = new Ext.form.TextField({
                     enableKeyEvents: true
                 });
         }
+
+        return rez;
     };
 
     App.successResponse = function(r){

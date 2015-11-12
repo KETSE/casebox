@@ -15,12 +15,12 @@ class Users
 
         $uid = User:: getId();
 
-        $recs = DM\Users::readAll();
+        $recs = DM\UsersGroups::readAll();
 
         $noColors = array();
 
         foreach ($recs as &$r) {
-            if (empty($r['cfg']['color'])) {
+            if (empty($r['cfg']['color']) && ($r['type'] == 2)) {
                 $noColors[] = &$r;
             }
         }

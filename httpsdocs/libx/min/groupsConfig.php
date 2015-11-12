@@ -96,6 +96,7 @@ return array_merge(
             ,'//js/browser/view/Calendar.js'
             ,'//js/browser/view/Charts.js'
             ,'//js/browser/view/Pivot.js'
+            ,'//js/browser/view/Map.js'
 
             ,'//js/CB.VerticalEditGrid.js'
             ,'//js/CB.VerticalSearchEditGrid.js'
@@ -175,6 +176,8 @@ return array_merge(
 
             ,'//js/widget/Breadcrumb.js'
             ,'//js/widget/DataSorter.js'
+            ,'//js/widget/LeafletPanel.js'
+            ,'//js/widget/LeafletWindow.js'
             ,'//js/widget/TaskBar.js'
         )
 
