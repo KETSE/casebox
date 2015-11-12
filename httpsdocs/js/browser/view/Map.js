@@ -73,21 +73,23 @@ Ext.define('CB.browser.view.Map',{
 
         this.store.each(
             function(r) {
-                var v = r.data.value
-                    ,a = v.split(',')
-                    ,marker = LL.marker(
-                        [a[0], a[1]]
-                        ,{
-                            icon: LL.icon({
-                                iconUrl: 'https://www.fosterly.com/assets/maps/marker-3a77f9ac6522a026170f1aed325f2d19.png',
-                                iconSize: [25, 41],
-                                iconAnchor: [12, 40],
-                                popupAnchor: [0, -35]
-                            })
-                        }
-                    ).addTo(this.mapPanel.map);
+                var v = r.data.value;
+                if(Ext.isString(v)) {
+                    var a = v.split(',')
+                        ,marker = LL.marker(
+                            [a[0], a[1]]
+                            ,{
+                                icon: LL.icon({
+                                    iconUrl: 'https://www.fosterly.com/assets/maps/marker-3a77f9ac6522a026170f1aed325f2d19.png',
+                                    iconSize: [25, 41],
+                                    iconAnchor: [12, 40],
+                                    popupAnchor: [0, -35]
+                                })
+                            }
+                        ).addTo(this.mapPanel.map);
 
-                marker.bindPopup(r.get('name'));
+                    marker.bindPopup(r.get('name'));
+                }
             }
             ,this
         );
@@ -112,11 +114,11 @@ Ext.define('CB.browser.view.Map',{
     }
 
     ,onMapReady: function(p) {
-        var vp = this.viewParams
+        var vp = Ext.valueFrom(this.viewParams, {})
             ,dl = Ext.valueFrom(vp.defaultLocation, {})
             ,lat = Ext.valueFrom(dl.lat, 0)
             ,lng = Ext.valueFrom(dl.lng, 0)
-            ,zoom = Ext.valueFrom(dl.zoom, 10);
+            ,zoom = Ext.valueFrom(dl.zoom, 3);
 
 
         p.setView(

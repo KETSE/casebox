@@ -24,6 +24,8 @@ class Map extends Base
                 $p['params']['fq'][] = "-value:[-90,-180 TO 90,180]";
             }
         }
+
+        unset($p['params']['sort']);
     }
 
     public function onSolrQuery(&$p)
