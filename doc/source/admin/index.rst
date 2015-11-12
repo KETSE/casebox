@@ -5,3 +5,7 @@ Administrator Manual describes what's possible to configure directly from Casebo
 
 This includes a set of HOW-TOs for simple form creation and administration, as well as other configurations that help customize Casebox to your organization specific needs.
 
+..
+
+
+
