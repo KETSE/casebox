@@ -108,7 +108,7 @@ class Tasks extends Base
         return array(
             'data' => array(
                 array(
-                    'name' => L\get('Tasks') . $count
+                    'name' => L\get('MyTasks') . $count
                     ,'id' => $this->getId('tasks')
                     ,'iconCls' => 'icon-task'
                     ,'cls' => 'tree-header'
@@ -155,7 +155,7 @@ class Tasks extends Base
             }
             if (!empty($sr['facets']->facet_fields->{'2cid'}->{$_SESSION['user']['id']})) {
                 $rez['data'][] = array(
-                    'name' => L\get('Created') . $this->renderCount($sr['facets']->facet_fields->{'2cid'}->{$_SESSION['user']['id']})
+                    'name' => L\get('CreatedByMe') . $this->renderCount($sr['facets']->facet_fields->{'2cid'}->{$_SESSION['user']['id']})
                     ,'id' => $this->getId(3)
                     ,'iconCls' => 'icon-task'
                     ,'has_childs' => true
