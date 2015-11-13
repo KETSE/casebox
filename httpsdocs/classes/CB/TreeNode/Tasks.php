@@ -311,7 +311,7 @@ class Tasks extends Base
             foreach ($sr['facets']->facet_fields->{'task_u_ongoing'} as $k => $v) {
                 $k = 'au_'.$k;
                 $r = array(
-                    'name' => $this->getName($k).' ('.$v.')'
+                    'name' => $this->getName($k) . $this->renderCount($v)
                     ,'id' => $this->getId($k)
                     ,'iconCls' => 'icon-user'
                 );
