@@ -735,7 +735,7 @@ vertical-align: top;
 padding: 5px 7px;
 border-bottom: 1px solid #DDD;
 }
-.path {text-decoration: none; color: #777; }
+.path {text-decoration: none; color: #777; margin-top: 4px}
 .path:hover {text-decoration: underline; }
 .tasks-msg{color: #777; padding: 0 5px 10px 5px}
 .tasks-msg a{color: #777; text-decoration: underline;}
