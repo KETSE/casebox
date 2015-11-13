@@ -32,10 +32,8 @@ Ext.define('CB.browser.view.ActivityStream',{
             ,'            </td>'
             ,'          </tr>'
             ,'        </table>'
-            ,'        <div class="action-comments" id="as-record-{nid}">'
-            // ,'          <tr><td class="action-comment">Comment</td></tr>'
-            // ,'          <tr><td class="action-comment">Add comment</td></tr>'
-            ,'        </div>'
+            ,'      </div>'
+            ,'      <div class="action-comments" id="as-record-{nid}">'
             ,'      </div>'
             ,'    </td>'
             ,'</tr>'
@@ -121,7 +119,7 @@ Ext.define('CB.browser.view.ActivityStream',{
             tpl: tpl
             ,store: this.store
             ,deferInitialRefresh: false
-            ,itemSelector:'tr.as-record'
+            ,itemSelector: 'div.as-item'//'tr.as-record'
             // ,overItemCls:'as-record-over'
             ,focusCls: ''
             ,scrollable: true
@@ -184,7 +182,10 @@ Ext.define('CB.browser.view.ActivityStream',{
         for (var i = 0; i < selected.length; i++) {
             recs.push(selected[i].data);
         }
-        this.fireEvent('selectionchange', recs);
+
+        if(!Ext.isEmpty(recs)) {
+            this.fireEvent('selectionchange', recs);
+        }
     }
 
     ,onStoreLoad: function(store, records, successful, eOpts) {
@@ -212,6 +213,7 @@ Ext.define('CB.browser.view.ActivityStream',{
                             params: {id: id}
                             ,header: false
                             ,renderTo: 'as-record-' + id
+                            ,showAddLabel: 'label'
                             ,commentFieldConfig: {
                                 xtype: 'CBFieldCommentLight'
                             }

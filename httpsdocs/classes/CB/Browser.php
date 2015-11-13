@@ -209,10 +209,14 @@ class Browser
         $rp = &$this->requestParams;
 
         foreach ($this->treeNodeClasses as $class) {
-            $r = $class->getViewConfig($this->path, $rp);
+            try {
+                $r = $class->getViewConfig($this->path, $rp);
 
-            if (!empty($r)) {
-                $rez = $r;
+                if (!empty($r)) {
+                    $rez = $r;
+                }
+            } catch (\Exception $e) {
+                \CB\debug(get_class($class) . ' exception on getViewConfig', $rp);
             }
         }
 
@@ -250,53 +254,57 @@ class Browser
         $rez = &$this->result;
 
         foreach ($this->treeNodeClasses as $class) {
-            $r = $class->getChildren($this->path, $this->requestParams);
+            try {
+                $r = $class->getChildren($this->path, $this->requestParams);
 
-            //merging all returned records into a single array
-            if (!empty($r['data'])) {
-                $rez['data'] = array_merge($rez['data'], $r['data']);
+                //merging all returned records into a single array
+                if (!empty($r['data'])) {
+                    $rez['data'] = array_merge($rez['data'], $r['data']);
 
-                //set display columns and sorting if present
-                if (isset($r['DC'])) {
-                    $rez['DC'][] = $r['DC'];
+                    //set display columns and sorting if present
+                    if (isset($r['DC'])) {
+                        $rez['DC'][] = $r['DC'];
+                    }
+
+                    if (isset($r['view'])) {
+                        $rez['view'] = array_merge($rez['view'], $r['view']);
+                    }
+
+                    // if (isset($r['sort'])) {
+                    //     $rez['view']['sort'] = $r['sort'];
+                    // }
+
+                    // if (isset($r['group'])) {
+                    //     $rez['view']['group'] = $r['group'];
+                    // }
                 }
 
-                if (isset($r['view'])) {
-                    $rez['view'] = array_merge($rez['view'], $r['view']);
+                $params = array(
+                    'facets'
+                    ,'pivot'
+                    // ,'view'
+                    ,'stats'
+                );
+
+                foreach ($params as $param) {
+                    if (isset($r[$param])) {
+                        $rez[$param] = $r[$param];
+                    }
                 }
 
-                // if (isset($r['sort'])) {
-                //     $rez['view']['sort'] = $r['sort'];
-                // }
-
-                // if (isset($r['group'])) {
-                //     $rez['view']['group'] = $r['group'];
-                // }
-            }
-
-            $params = array(
-                'facets'
-                ,'pivot'
-                // ,'view'
-                ,'stats'
-            );
-
-            foreach ($params as $param) {
-                if (isset($r[$param])) {
-                    $rez[$param] = $r[$param];
+                //calc totals accordingly
+                if (isset($r['total'])) {
+                    $rez['total'] += $r['total'];
+                } elseif (!empty($r['data'])) {
+                    $rez['total'] += sizeof($r['data']);
                 }
-            }
 
-            //calc totals accordingly
-            if (isset($r['total'])) {
-                $rez['total'] += $r['total'];
-            } elseif (!empty($r['data'])) {
-                $rez['total'] += sizeof($r['data']);
-            }
-
-            //if its debug host - search params will be also returned
-            if (isset($r['search'])) {
-                $rez['search'][] = $r['search'];
+                //if its debug host - search params will be also returned
+                if (isset($r['search'])) {
+                    $rez['search'][] = $r['search'];
+                }
+            } catch (\Exception $e) {
+                \CB\debug(get_class($class) . ' exception on getChildren', $this->requestParams);
             }
         }
     }

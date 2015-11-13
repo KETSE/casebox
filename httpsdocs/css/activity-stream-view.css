@@ -36,7 +36,7 @@
     background-color: #efefef;
 }
 
-.activity-stream .x-item-selected .as-item{
+.activity-stream .x-item-selected{
     background-color: #dfe8f6;
 }
 
@@ -66,7 +66,7 @@
     text-decoration: line-through;
 }
 
-.as-item .comment-input .x-form-trigger{
+.action-comments .comment-input .x-form-trigger{
     width: 24px;
     background-position: 50% calc(100% - 10px);
     background-repeat: no-repeat;

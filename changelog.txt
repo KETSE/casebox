@@ -1,4 +1,18 @@
-CaseBox 1.9.540 (2015-11-06)
+CaseBox 1.9.542 (2015-11-13)
+==============================
+- #9045 Can't write comment in Activity Stream view
+- #9151 Remove Comment.textArea in Activity Stream, replace it with "Comment" link
+- #9377 CB should not break if a treeNode instance doesn't work + strange behaviour of treeNodes
+
+Notes:
+----------
+- updated translations in _casebox.sql
+
+CaseBox 1.9.541 (2015-11-12)
+==============================
+- GeoMap view adjustments
+
+CaseBox 1.9.540 (2015-11-12)
 ==============================
 - #9302 Adding GeoMapping
 

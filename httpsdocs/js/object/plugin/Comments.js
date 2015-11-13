@@ -94,6 +94,17 @@ Ext.define('CB.object.plugin.Comments', {
                 }
             }
         );
+        this.addCommentLabel = Ext.create({
+            xtype: 'button'
+            ,html: '<span class="fwB click"> ' + L.AddComment + ' </span>'
+            ,overCls: ''
+            ,border: false
+            ,listeners: {
+                scope: this
+                ,click: this.onAddCommentLabelClick
+            }
+        });
+
         this.addCommentField = Ext.create(cfg);
 
         if(this.initialConfig.header !== false) {
@@ -108,9 +119,15 @@ Ext.define('CB.object.plugin.Comments', {
             ,bodyStyle: 'padding-top: 3px'
             ,items: [
                 this.dataView
-                ,this.addCommentField
+                // ,this.addCommentField
             ]
         });
+
+        if (this.initialConfig.showAddLabel) {
+            this.items.push(this.addCommentLabel);
+        } else {
+            this.items.push(this.addCommentField);
+        }
 
         this.callParent(arguments);
 
@@ -500,5 +517,11 @@ Ext.define('CB.object.plugin.Comments', {
         }
 
         this.updateLayout();
+    }
+
+    ,onAddCommentLabelClick: function() {
+        this.remove(this.addCommentLabel);
+        this.add(this.addCommentField);
+        this.addCommentField.reset();
     }
 });
