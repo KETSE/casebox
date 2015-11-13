@@ -70,6 +70,7 @@ class Favorites extends Base
                     'name' => $this->getName('favorites')
                     ,'id' => $this->getId('favorites')
                     ,'iconCls' => 'i-star'
+                    ,'cls' => 'tree-header'
                     ,'has_childs' => false
                 )
             )
