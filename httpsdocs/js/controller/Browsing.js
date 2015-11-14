@@ -68,13 +68,14 @@ Ext.define('CB.controller.Browsing', {
         vc.on('selectionchange', this.onVCSelectionChange, this);
 
         //add listeners for notifications view
-        nv = vc.notificationsView;
+        var nv = vc.notificationsView;
 
         nv.on('selectionchange', this.onNVSelectionChange, this);
 
 
         //add filter panel listeners
         fp.on('change', this.onFiltersChange, this);
+        fp.on('dateselect', this.onFilterPanelDateSelect, this);
 
         //add object panel listeners
         op.on('expand', this.onOPExpand, this);
@@ -262,6 +263,23 @@ Ext.define('CB.controller.Browsing', {
         this.VC.changeSomeParams({filters: filters});
     }
 
+    ,onFilterPanelDateSelect: function(date){
+        var c = this.VC.getActiveView().calendar
+            ,av = c.getActiveView()
+            ,dt = date.toISOString()
+            ,sameDate = (c.lastClickedDate == dt);
+
+        if(!sameDate || (av.xtype != 'dayview')) {
+            c.onDayClick();
+            c.setStartDate(date);
+        } else {
+            c.onWeekClick();
+            c.setStartDate(date);
+        }
+
+        c.lastClickedDate = dt;
+    }
+
 
     //Search field methods
     ,onSFSearch: function(query, editor, event){
@@ -428,7 +446,7 @@ Ext.define('CB.controller.Browsing', {
             CB_Path.getPidPath(
                 params.id
                 ,function(r, e){
-                    if(r.success !== true) {
+                    if(!r || (r.success !== true)) {
                         return ;
                     }
                     this.locateObject(r);
@@ -471,7 +489,7 @@ Ext.define('CB.controller.Browsing', {
         CB_Objects.getBasicInfoForId(
             id
             ,function(r, e) {
-                if(r.success !== true) {
+                if(!r || (r.success !== true)) {
                     Ext.Msg.alert(
                         L.Error
                         ,L.RecordIdNotFound.replace('{id}', '#' + r.id)

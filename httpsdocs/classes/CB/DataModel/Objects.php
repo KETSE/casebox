@@ -5,14 +5,24 @@ namespace CB\DataModel;
 use CB\DB;
 use CB\Util;
 
-class Objects //extends Base
+class Objects extends Base
 {
+    protected static $tableName = 'objects';
+
+    protected static $tableFields = array(
+        'id' => 'int'
+        ,'data' => 'text'
+        ,'sys_data' => 'text'
+    );
+
+    protected static $decodeJsonFields = array('data', 'sys_data');
+
     /**
-     * read objects data in bulk manner
+     * read all data for given ids in bulk manner
      * @param  array $ids
      * @return array
      */
-    public static function read($ids)
+    public static function readAllData($ids)
     {
         $rez = array();
         $ids = Util\toNumericArray($ids);
@@ -44,5 +54,50 @@ class Objects //extends Base
         }
 
         return $rez;
+    }
+
+    /**
+     * check if the record with given id is marked as draft
+     * @param  int     $id
+     * @return boolean
+     */
+    public static function isDraft($id)
+    {
+        $rez = false;
+
+        $r = static::read($id);
+
+        if (!empty($r[0]['draft']) && ($r[0]['draft'] != 0)) {
+            $rez = true;
+        }
+
+        return $rez;
+    }
+
+    /**
+     * copy a record
+     * @param  int     $id
+     * @return boolean
+     */
+    public static function copy($sourceId, $targetId)
+    {
+        DB\dbQuery(
+            'INSERT INTO `objects`
+                (`id`
+                ,`data`
+                ,`sys_data`)
+            SELECT
+                $2
+                ,`data`
+                ,`sys_data`
+            FROM `objects`
+            WHERE id = $1',
+            array(
+                $sourceId
+                ,$targetId
+            )
+        ) or die(DB\dbQueryError());
+
+        return (DB\dbAffectedRows() > 0);
     }
 }

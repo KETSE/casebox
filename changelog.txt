@@ -1,3 +1,157 @@
+CaseBox 1.9.544 (2015-11-14)
+==============================
+Fixed Bugs:
+----------
+- verify if leaflet namespace is initiated
+- #9440 Getting Error when saving a treeNode config
+
+CaseBox 1.9.543 (2015-11-13)
+==============================
+- Increased space between tree nodes, grid rows
+- showing FacetNav total in gray color
+
+CaseBox 1.9.542 (2015-11-13)
+==============================
+- #9045 Can't write comment in Activity Stream view
+- #9151 Remove Comment.textArea in Activity Stream, replace it with "Comment" link
+- #9377 CB should not break if a treeNode instance doesn't work + strange behaviour of treeNodes
+
+Notes:
+----------
+- updated translations in _casebox.sql
+
+CaseBox 1.9.541 (2015-11-12)
+==============================
+- GeoMap view adjustments
+
+CaseBox 1.9.540 (2015-11-12)
+==============================
+- #9302 Adding GeoMapping
+
+CaseBox 1.9.539 (2015-11-06)
+==============================
+- iterate codacy issues
+- #9200 Import Alhaq statements (eStatements2003_be.mdb)
+
+Fixed Bugs:
+----------
+- #9303 Titles of menu items broken
+
+CaseBox 1.9.538 (2015-11-02)
+==============================
+- #9258 Last user that did action should be shown in Activity Stream for the object
+- #9183 Color field names for required fields instead of underline in field Value & Save button always enabled
+- #9083 Clean field types list
+
+Fixed Bugs:
+----------
+- #9202 Fast clicks in Tree doesn't correctly select node
+- #9241 Filter panel closes after selecting a facet & button remains ON
+
+CaseBox 1.9.536 (2015-10-31)
+==============================
+Fixed Bugs:
+----------
+- fail creating core from script
+
+CaseBox 1.9.536 (2015-10-30)
+==============================
+- #9184 Transfer ownership feature
+
+Fixed Bugs:
+----------
+- separators not set correctly in create menus
+- misspelled variable name in DataModel\Users.php
+- removed remained resource reference in Files.php
+- wrong versions assignment in File.php
+- misspelled namespace in Solr\Client.php
+- misspelled variable name in TemplatesStructure.php
+- wrong variable name in DBNode.php
+
+CaseBox 1.9.535 (2015-10-29)
+==============================
+- template fields are no more saved/updated from its data['fields'] property
+- set ntsc to 1 for folder templates
+- removed upgrade_task_data.php
+
+Fixed Bugs:
+----------
+- mark notifications as seen by action id not by notification id
+
+CaseBox 1.9.534 (2015-10-19)
+==============================
+- #9088 Trouble with "word" file preview
+- #8988 Misleading activity log entry 'updated' instead of 'created' in activity stream
+- #9034 SOLR error on sorting multiValued SOLR columns & UI broken
+
+CaseBox 1.9.533 (2015-10-14)
+==============================
+~ #8818 Favorites vFolder
+- #9029 Emails coming with the same comment for record where notifications==off
+- #9042 Emails not sent to @oburlaca after 15min idle period
+- #9056 Date format not consistent andn "Nan-Nan" displayed
+- #8618 Popup menu for LeftRibbon should appear on the right of buttons, not below
+
+Fixed Bugs:
+----------
+- js error on request more comments in vertical layouted edit window
+
+CaseBox 1.9.532 (2015-10-09)
+==============================
+- #8006 Grid DC config management.
+  Added search_DC config.
+
+Fixed Bugs:
+----------
+- #9033 Opening the Notifications panel when the Red mark appears will not show new notifications
+- #8935 Error with "Sort ascending"
+- #8860 Objects with "defaultPid" in tmpl are not created under that Pid, but directly in Tree
+
+CaseBox 1.9.531 (2015-10-07)
+==============================
+- #8618 Popup menu for LeftRibbon should appear on the right of buttons, not below
+- #8920 Not all comments are shown when clicking "More" + show total number of comments if not all shown
+- #8974 Remove versioning info from grid
+- set limit to 500 elements for calendar veiw
+
+Fixed Bugs:
+----------
+- #8811 Remove Notifications button in objPreviewPanel and add one option in dropdown menu
+- #8620 rows property for pivot view overwritten by getViewConfig method
+- #8913 "Next" button doesn't appear in Stream view footer area
+- #8986 Comments area missing for activity stream & comments not properly displayed in Preview panel
+- #8946 Error copying cb_dev mysql db using SqlYog, trigger problem
+
+CaseBox 1.9.530 (2015-10-06)
+==============================
+- #8887 Notifications doesn't appear & two browser instances not synced
+- #8913 Activity Stream: refresh doesn't set page=1
+- #8621 Adding new treeNode class: vNode. acts like FacetNav but no faceting
+
+Fixed Bugs:
+----------
+- #8892 Email notifications doesn't come when @mentioning
+- #8952 Inconsistent results when sorting the grid in facetedNav & Search tmpl
+- #8984 Pivot table not working for FacetedNav
+- #8920 Not all comments are shown when clicking "More" + show total number of comments if not all shown
+
+CaseBox 1.9.529 (2015-10-05)
+==============================
+- removed debug messages
+
+Fixed Bugs:
+----------
+- wrong class name call in User.php
+
+CaseBox 1.9.528 (2015-10-05)
+==============================
+- #8745 Enable Calendar View/Objects with new requirements
+
+Fixed Bugs:
+----------
+- #8864 CB tries to sort in pivot view and it gives Error
+- saving a search template changes its type from "search" to "template"
+
 CaseBox 1.9.527 (2015-09-28)
 ==============================
 - hide favorites panel

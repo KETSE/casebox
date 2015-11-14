@@ -96,6 +96,7 @@ return array_merge(
             ,'//js/browser/view/Calendar.js'
             ,'//js/browser/view/Charts.js'
             ,'//js/browser/view/Pivot.js'
+            ,'//js/browser/view/Map.js'
 
             ,'//js/CB.VerticalEditGrid.js'
             ,'//js/CB.VerticalSearchEditGrid.js'
@@ -110,9 +111,11 @@ return array_merge(
 
             ,'//js/CB.TextEditWindow.js'
             ,'//js/CB.HtmlEditWindow.js'
-            ,'//js/CB.Facet.js'
-            ,'//js/CB.FacetText.js'
-            ,'//js/CB.FacetList.js'
+            ,'//js/facet/Base.js'
+            ,'//js/facet/Text.js'
+            ,'//js/facet/List.js'
+            ,'//js/facet/Calendar.js'
+            ,'//js/facet/UsersColor.js'
             ,'//js/CB.Clipboard.js'
             ,'//js/CB.FilterPanel.js'
 
@@ -173,6 +176,8 @@ return array_merge(
 
             ,'//js/widget/Breadcrumb.js'
             ,'//js/widget/DataSorter.js'
+            ,'//js/widget/LeafletPanel.js'
+            ,'//js/widget/LeafletWindow.js'
             ,'//js/widget/TaskBar.js'
         )
 
@@ -201,6 +206,7 @@ return array_merge(
             ,'//js/overrides/calendar/view/Month.js'
             ,'//js/overrides/calendar/CalendarPanel.js'
 
+            // ,'//js/overrides/direct/JsonProvider.js'
             ,'//js/overrides/data/Store.js'
 
             ,'//js/overrides/grid/plugin/CellEditing.js'

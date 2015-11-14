@@ -56,6 +56,7 @@ class Reader extends XMLReader {
      */
     function parse() {
 
+        $previousEntityState = libxml_disable_entity_loader(true);
         $previousSetting = libxml_use_internal_errors(true);
 
         // Really sorry about the silence operator, seems like I have no
@@ -70,12 +71,40 @@ class Reader extends XMLReader {
         $errors = libxml_get_errors();
         libxml_clear_errors();
         libxml_use_internal_errors($previousSetting);
+        libxml_disable_entity_loader($previousEntityState);
 
         if ($errors) {
             throw new LibXMLException($errors);
-        } else {
-            return $result;
         }
+
+        return $result;
+    }
+
+
+
+    /**
+     * parseGetElements parses everything in the current sub-tree,
+     * and returns a an array of elements.
+     *
+     * Each element has a 'name', 'value' and 'attributes' key.
+     *
+     * If the the element didn't contain sub-elements, an empty array is always
+     * returned. If there was any text inside the element, it will be
+     * discarded.
+     *
+     * If the $elementMap argument is specified, the existing elementMap will
+     * be overridden while parsing the tree, and restored after this process.
+     *
+     * @param array $elementMap
+     * @return array
+     */
+    function parseGetElements(array $elementMap = null) {
+
+        $result = $this->parseInnerTree($elementMap);
+        if (!is_array($result)) {
+            return [];
+        }
+        return $result;
 
     }
 

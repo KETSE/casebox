@@ -69,6 +69,7 @@ Ext.define('CB.widget.Breadcrumb', {
             ,minNodeWidth = 50
             ,parentNodesWidth
             ,parentNodesMaxWidth
+            ,parentNodesWidthLimit
             ,widthDelta
             ,smallerNodesDelta = 0
             ,store = this.store
@@ -119,7 +120,7 @@ Ext.define('CB.widget.Breadcrumb', {
                     if(r != lastRecord) {
                         node = view.getNode(r);
                         if(parentNodesWidthLimit < minNodeWidth) {
-                            node.setAttribute('style', 'width: 0px; padding: 0');
+                            node.setAttribute('style', 'width: 0; padding: 0');
                         } else {
                             if(node.scrollWidth > parentNodesWidthLimit) {
                                 node.setAttribute('style', 'width: ' + parentNodesWidthLimit + 'px');

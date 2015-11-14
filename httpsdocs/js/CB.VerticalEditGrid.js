@@ -168,10 +168,16 @@ Ext.define('CB.VerticalEditGrid', {
                     meta.css ='vgh';
                 } else {
                     meta.css = 'bgcLG vaT';
-                    meta.style = 'margin-left: ' + (n.getDepth()-1)+'0px';
+                    meta.style = 'margin-left: ' + (n.getDepth()-1) + '0px';
                     if(tr.get('cfg').readOnly === true) {
                         meta.css += ' cG';
                     }
+
+                    if(tr.get('cfg').required && Ext.isEmpty(record.data.value)) {
+                        meta.css += ' cRequired';
+                        v += ' *';
+                    }
+
                 }
 
                 if(!Ext.isEmpty(tr.get('cfg').hint)) {
@@ -185,7 +191,7 @@ Ext.define('CB.VerticalEditGrid', {
                     if(this.helperTree.canDuplicate(id) && this.helperTree.isLastDuplicate(id)) {
                         v = '<img name="add_duplicate" title="'+L.addDuplicateField+'" class="fr duplicate-plus" src="'+Ext.BLANK_IMAGE_URL + '" / >' + v;
                     } else {
-                        idx = this.helperTree.getDuplicateIndex(id) +1;
+                        var idx = this.helperTree.getDuplicateIndex(id) +1;
                         v = '<img title="' + L.duplicate + ' ' + idx +
                             '" class="fr vc' + idx + '" src="' + Ext.BLANK_IMAGE_URL + '" / >' + v;
                     }
@@ -356,21 +362,24 @@ Ext.define('CB.VerticalEditGrid', {
     }
 
     ,showTitlePopupMenu: function(grid, rowIndex, cellIndex, e){
-        r = grid.getStore().getAt(rowIndex);
+        var r = grid.getStore().getAt(rowIndex);
         this.popupForRow = rowIndex;
-        if(!this.titlePopupMenu) this.titlePopupMenu = new Ext.menu.Menu({
-            items: [
-                {
-                    text: L.addDuplicateField
-                    ,scope: this
-                    ,handler: this.onDuplicateFieldClick
-                },{
-                    text: L.delDuplicateField
-                    ,scope: this
-                    ,handler: this.onDeleteDuplicateFieldClick
-                }
-            ]
-        });
+
+        if(!this.titlePopupMenu) {
+            this.titlePopupMenu = new Ext.menu.Menu({
+                items: [
+                    {
+                        text: L.addDuplicateField
+                        ,scope: this
+                        ,handler: this.onDuplicateFieldClick
+                    },{
+                        text: L.delDuplicateField
+                        ,scope: this
+                        ,handler: this.onDeleteDuplicateFieldClick
+                    }
+                ]
+            });
+        }
         this.titlePopupMenu.items.getAt(0).setDisabled(!this.helperTree.canDuplicate(r.get('id')));
         this.titlePopupMenu.items.getAt(1).setDisabled(this.helperTree.isFirstDuplicate(r.get('id')));
         this.titlePopupMenu.showAt(e.getXY());
@@ -552,7 +561,7 @@ Ext.define('CB.VerticalEditGrid', {
 
         this.data = this.helperTree.readValues();
 
-        w = this.getBubbleTarget();
+        var w = this.getBubbleTarget();
         if(Ext.isDefined(w.data)) {
             w.data[this.root] = this.data;
         }
@@ -716,11 +725,15 @@ Ext.define('CB.VerticalEditGrid', {
 
             //check if field has validator set and notify if validation not passed
             var validator = tr.get('cfg').validator;
+
             if(!Ext.isEmpty(validator)) {
                 if(!Ext.isDefined(CB.Validators[validator])) {
                     plog('Undefined field validator: ' + validator);
+
                 } else {
-                    node.data.valid = CB.Validators[validator](context.value);
+                    //empty values are considered valid by default
+                    node.data.valid = Ext.isEmpty(context.value) || CB.Validators[validator](context.value);
+                    context.record.set('valid', node.data.valid);
                 }
             }
 
@@ -757,7 +770,7 @@ Ext.define('CB.VerticalEditGrid', {
 
     ,getFieldValue: function(field_id, duplication_id){
         //TODO: review
-        result = null;
+        var result = null;
 
         this.store.each(
             function(r){
@@ -832,6 +845,8 @@ Ext.define('CB.VerticalEditGrid', {
      */
     ,isValid: function() {
         var rez = true;
+        delete this.invalidRecord;
+
         this.store.each(
             function(r) {
                 var n = this.helperTree.getNode(r.get('id'));
@@ -840,6 +855,7 @@ Ext.define('CB.VerticalEditGrid', {
                     Ext.isEmpty(r.get('value'))
                     )
                 ) {
+                    this.invalidRecord = r;
                     rez = false;
                 }
                 return rez;
@@ -848,5 +864,18 @@ Ext.define('CB.VerticalEditGrid', {
         );
 
         return rez;
+    }
+
+    ,focusInvalidRecord: function() {
+        var view = this.getView();
+
+        if (this.invalidRecord) {
+            Ext.get(view.getRow(this.invalidRecord)).scrollIntoView(view.getEl(), null, true);
+
+            Ext.Msg.alert(
+                L.Error,
+                L.FillFieldMsg.replace('{fieldName}', this.invalidRecord.get('title'))
+            );
+        }
     }
 });

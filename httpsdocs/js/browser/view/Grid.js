@@ -35,13 +35,13 @@ Ext.define('CB.browser.view.Grid', {
                     }
 
                     m.attr = Ext.isEmpty(v) ? '' : "title=\"" + v + "\"";
-                    rez = '<span class="n">' + Ext.valueFrom(r.get('hl'), v) + '</span>';
+
+                    var rez = '<span class="n">' + Ext.valueFrom(r.get('hl'), v) + '</span>';
+
                     if( (this.hideArrows !== true) && r.get('has_childs')) {
                         rez += ' <span class="fs9">&hellip;</span>';
                         // rez += '<img class="click icon-arrow3" src="'+Ext.BLANK_IMAGE_URL+'" />';
                     }
-                    vi = getVersionsIcon(r.get('versions'));
-                    if(!Ext.isEmpty(vi)) rez = '<span class="ver_count ' + vi + '" title="'+L.FileVersionsCount+'">&nbsp;</span>'+ rez;
 
                     return rez;
                 }
@@ -348,7 +348,7 @@ Ext.define('CB.browser.view.Grid', {
                                 ,name: context.value
                             }
                             ,function(r, e){
-                                if(r.success !== true){
+                                if(!r || (r.success !== true)) {
                                     this.renamedRecord.set('name', this.renamedOriginalValue);
                                     delete this.renamedOriginalValue;
                                     delete this.renamedRecord;

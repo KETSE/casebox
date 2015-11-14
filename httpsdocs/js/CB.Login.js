@@ -61,7 +61,8 @@ Ext.define('CB.Login', {
             ,keys: [{key: 13, fn: this.doLogin, scope: this}]
         });
         this.on('afterrender', this.doShow);
-        CB.Login.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
     }
 
     ,doShow: function(w) {
@@ -80,22 +81,29 @@ Ext.define('CB.Login', {
     }
 
     ,doLogin: function(){
-        user = this.child('[name="username"]');
-        pass = this.child('[name="password"]');
-        if(!user.isValid() || !pass.isValid()) return false;
-        //Ext.util.Cookies.set('lastUser', user.getValue());
+        var user = this.child('[name="username"]')
+            ,pass = this.child('[name="password"]');
+
+        if(!user.isValid() || !pass.isValid()) {
+            return false;
+        }
 
         CB_User.login(user.getValue(), pass.getValue(), this.processLoginResponse);
     }
 
     ,processLoginResponse: function(response, e){
-        lw = Ext.getCmp('CBLoginWindow');
-        if(e.result.success === true){
-            if(App.loginData && (App.loginData.id != response.user.id) ) return window.location.reload();
+        var lw = Ext.getCmp('CBLoginWindow')
+            ,r = e.result;
+
+        if (r && (r.success === true)) {
+            if (App.loginData && (App.loginData.id != response.user.id)) {
+                return window.location.reload();
+            }
             App.config = response.config;
             App.loginData = response.user;
             lw.close();
-        }else{
+
+        } else {
             ip = lw.child('[name="infoPanel"]');
             ip.body.update(response.msg);
         }
@@ -185,7 +193,7 @@ Ext.define('CB.VerifyPassword', {
 
         this.on('show', this.doShow, this);
 
-        CB.VerifyPassword.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
 
     ,doShow: function(w) {
@@ -205,18 +213,22 @@ Ext.define('CB.VerifyPassword', {
     }
 
     ,processVerifyResponse: function(response, e){
-        if(e.result.success === true){
+        var r = e.result
+            ,ip
+            ,pass;
+
+        if(r && (r.success === true)) {
             this.success = true;
             this.close();
+
         } else {
             ip = this.down('[name="infoPanel"]');
             ip.show();
             ip.body.update(response.msg);
-            // this.syncSize();
+
             pass = this.down('[name="password"]');
             pass.reset();
             pass.focus(true, 550);
         }
      }
-
 });

@@ -6,7 +6,7 @@ Ext.define('CB.object.TitleView', {
     ,initComponent: function() {
         this.tpl = new Ext.XTemplate(
             '<tpl for=".">'
-            ,'<div class="obj-header"><span class="{titleCls}">{[ Ext.valueFrom(values.name, \'\') ]}</span> &nbsp;'
+            ,'<div class="obj-header"><b class="{titleCls}">{[ Ext.valueFrom(values.name, \'\') ]}</b> &nbsp;'
                 ,'{[ this.getStatusInfo(values) ]}'
                 ,'<div class="path fs12">'
                     ,'{[ this.getPath(values) ]}'
@@ -62,7 +62,7 @@ Ext.define('CB.object.TitleView', {
         }
 
         var rez = '<a class="click" title="' + values.path + '">' +
-            App.shortenStringLeft(values.path, 20) + '</a>';
+            App.shortenStringLeft(values.path, 50) + '</a>';
 
         return rez;
     }
@@ -75,13 +75,16 @@ Ext.define('CB.object.TitleView', {
     ,getTitleInfo: function (values) {
         var rez = [];
 
-        rez.push(CB.DB.templates.getName(values.template_id));
-
+        // #Id
         if(values.id) {
             rez.push('#' + values.id);
         }
 
-        if(values.cid) {
+        // Template
+        rez.push(CB.DB.templates.getName(values.template_id));
+
+        // Creator
+        if (values.cid) {
             rez.push(
                 L.CreatedBy +
                 ' <a class="click">' + CB.DB.usersStore.getName(values.cid) + '</a> ' +
@@ -89,7 +92,8 @@ Ext.define('CB.object.TitleView', {
             );
         }
 
-        if(values.uid) {
+        // Updater
+        if (values.uid) {
             rez.push(
                 L.UpdatedBy +
                 ' <a class="click">' + CB.DB.usersStore.getName(values.uid) + '</a> ' +

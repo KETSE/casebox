@@ -20,56 +20,54 @@
 
 $cnfFilename = realpath(__DIR__.'/../httpsdocs').'/config.ini';
 
-
-if( file_exists($cnfFilename) ) {
+if (file_exists($cnfFilename)) {
 
     $cnf = parse_ini_file($cnfFilename);
 
-$dbConfig = [
-    'host' => $cnf['db_host']
-    ,'dbname' => $cnf['prefix'].'__casebox'
-    ,'user' => $cnf['db_user']
-    ,'pass' => $cnf['db_pass']
-    ,'port' => $cnf['db_port']
-];
+    $dbConfig = [
+        'host' => $cnf['db_host']
+        ,'dbname' => $cnf['prefix'].'__casebox'
+        ,'user' => $cnf['db_user']
+        ,'pass' => $cnf['db_pass']
+        ,'port' => $cnf['db_port']
+    ];
 
-// CSV file as first parameter
-$csv = @$argv[1];
+    // CSV file as first parameter
+    $csv = @$argv[1];
 
-// Language iso code
-$lg = @$argv[2];
+    // Language iso code
+    $lg = @$argv[2];
 
-// optional parameter: CSV column
-$col = @$argv[3];
-if (! $col) {
-    // default column = 2
-    $col = 2;
-}
+    // optional parameter: CSV column
+    $col = @$argv[3];
+    if (! $col) {
+        // default column = 2
+        $col = 2;
+    }
 
-if (! $csv) {
-    echo ("Specify CSV filename\n");
-    die;
-}
+    if (! $csv) {
+        echo ("Specify CSV filename\n");
+        die;
+    }
 
-if (! file_exists($csv)) {
-    echo ("Filename doesn't exist\n");
-    die;
-}
+    if (! file_exists($csv)) {
+        echo ("Filename doesn't exist\n");
+        die;
+    }
 
-if (! $lg) {
-    echo ("Specify language code (example: en, ru, es)\n");
-    die;
+    if (! $lg) {
+        echo ("Specify language code (example: en, ru, es)\n");
+        die;
 
-}
+    }
 
+    // Connect to database
+    $dbh = connectDB($dbConfig);
 
-// Connect to database
-$dbh = connectDB($dbConfig);
-
-importTranslation($dbh, $csv, $lg, $col);
+    importTranslation($dbh, $csv, $lg, $col);
 
 } else {
-   die("ERROR: config not found ".$cnfFilename."\n");
+    die("ERROR: config not found ".$cnfFilename."\n");
 }
 
 function importTranslation($dbh, $csv, $lg, $col)
@@ -82,7 +80,6 @@ function importTranslation($dbh, $csv, $lg, $col)
     $row = 1;
     if (($handle = fopen($csv, "r")) !== false) {
         while (($data = fgetcsv($handle, 0, ",")) !== false) {
-            $num = count($data);
             $row++;
 
             $id = $data[0];
@@ -107,19 +104,16 @@ function importTranslation($dbh, $csv, $lg, $col)
     echo "Language '$lg' imported\n";
 }
 
-
-
 function connectDB($dbConfig)
 {
     $dbh = pdoConnect($dbConfig);
     $dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-    $dbh->exec("SET NAMES 'utf8'");
+    $dbh->set_charset('utf8');
     $dbh->exec("SET AUTOCOMMIT = 0");
 
     return $dbh;
 }
-
 
 function pdoConnect($p)
 {

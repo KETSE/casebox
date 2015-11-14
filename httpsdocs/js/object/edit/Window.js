@@ -23,13 +23,6 @@ Ext.define('CB.object.edit.Window', {
         this.data = Ext.apply({}, this.config.data);
         delete this.data.html;
 
-        if(Ext.isEmpty(this.data.template_id)) {
-            return Ext.Msg.alert(
-                'Error opening object'
-                ,'Template should be specified for object window to load.'
-            );
-        }
-
         this.updateWindowTitle();
 
         this.objectsStore = new CB.DB.DirectObjectsStore({
@@ -121,7 +114,7 @@ Ext.define('CB.object.edit.Window', {
             ,save: new Ext.Action({
                 text: L.Save
                 ,iconCls: 'icon-save'
-                ,disabled: true
+                // ,disabled: true
                 ,hidden: true
                 ,scope: this
                 ,handler: this.onSaveClick
@@ -158,7 +151,6 @@ Ext.define('CB.object.edit.Window', {
                 iconCls: 'i-star'
                 ,qtip: L.Star
                 ,itemId: 'star'
-                ,scale: 'medium'
                 ,hidden: true
                 ,scope: this
                 ,handler: this.onStarClick
@@ -168,7 +160,6 @@ Ext.define('CB.object.edit.Window', {
                 iconCls: 'i-unstar'
                 ,qtip: L.Unstar
                 ,itemId: 'unstar'
-                ,scale: 'medium'
                 ,hidden: true
                 ,scope: this
                 ,handler: this.onUnstarClick
@@ -497,7 +488,7 @@ Ext.define('CB.object.edit.Window', {
      * @return void
      */
     ,processLoadPreviewData: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -552,7 +543,7 @@ Ext.define('CB.object.edit.Window', {
      * @return void
      */
     ,processLoadEditData: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -736,7 +727,7 @@ Ext.define('CB.object.edit.Window', {
         } else {
             this.actions.edit.hide();
             this.actions.save.show();
-            this.actions.save.setDisabled(!this._isDirty);
+            // this.actions.save.setDisabled(!this._isDirty);
             this.actions.cancel.show();
 
             this.actions.rename.hide();
@@ -755,7 +746,7 @@ Ext.define('CB.object.edit.Window', {
     ,onChange: function(fieldName, newValue, oldValue){
         this._isDirty = true;
 
-        this.actions.save.setDisabled(!this.isValid());
+        // this.actions.save.setDisabled(!this.isValid());
 
         if(!Ext.isEmpty(fieldName) && Ext.isString(fieldName)) {
             this.fireEvent('fieldchange', fieldName, newValue, oldValue);
@@ -812,7 +803,7 @@ Ext.define('CB.object.edit.Window', {
                 ,type: type
             }
             ,function(r, e) {
-                if(r.success !== true) {
+                if(!r || (r.success !== true)) {
                     return;
                 }
 
@@ -848,8 +839,21 @@ Ext.define('CB.object.edit.Window', {
     }
 
     ,onSaveClick: function(b, e) {
+        if(!this.isValid()) {
+            var i = this.items.getAt(0)
+                ,g = this.grid
+                ,v = g.getView();
+            if(!i.scrollable) {
+                i = this.items.getAt(1);
+            }
+            Ext.get(v.getRow(g.invalidRecord)).scrollIntoView(i.body, null, false);
+
+            return this.grid.focusInvalidRecord();
+
+        }
+
         if(!this._isDirty) {
-            return;
+            return this.close();
         }
 
         this.readValues();
@@ -882,8 +886,8 @@ Ext.define('CB.object.edit.Window', {
 
         var r = action.result;
 
-        if(r.success !== true) {
-            App.showException(action.result);
+        if(!r || (r.success !== true)) {
+            App.showException(r);
         } else {
             this._isDirty = false;
             App.fireEvent('objectchanged', r.data, this);
@@ -990,6 +994,7 @@ Ext.define('CB.object.edit.Window', {
                         this._confirmedClosing = true;
                         this.onSaveClick();
                         break;
+
                     case 'no':
                         this._confirmedClosing = true;
                         this.close();
@@ -1168,12 +1173,14 @@ Ext.define('CB.object.edit.Window', {
     }
 
     ,processSaveDraft: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
         var id = r.data.id;
         this.data.id = id;
+        this.data.pid = r.data.pid;
+        // this.data.draft = true;
 
         //update loadedData.id of the plugins container so it will reload automaticly
         //on fileuploaded event

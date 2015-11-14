@@ -4,7 +4,7 @@ namespace CB\Objects\Plugins;
 
 use CB\Config;
 use CB\User;
-use CB\DB;
+use CB\DataModel as DM;
 use CB\Util;
 
 class Comments extends Base
@@ -36,12 +36,13 @@ class Comments extends Base
             return $rez;
         }
 
-        $commentTemplateIds = \CB\Templates::getIdsByType('comment');
+        $commentTemplateIds = DM\Templates::getIdsByType('comment');
         if (empty($commentTemplateIds)) {
             return $rez;
         }
 
-        $limit = Config::get('max_load_comments', 4);
+        $limit = empty($p['beforeId']) ? 4 : 10;
+        $limit = Config::get('max_load_comments', $limit);
 
         $params = array(
             'pid' => $this->id
@@ -171,19 +172,9 @@ class Comments extends Base
             $fileIds[] = $d['id'];
         }
 
-        //get file types from db
+        //get file types
         if (!empty($fileIds)) {
-            $res = DB\dbQuery(
-                'SELECT f.id, c.`type`
-                FROM files f
-                JOIN files_content c
-                    ON f.content_id = c.id
-                WHERE f.id in (' . implode(',', $fileIds) . ')'
-            ) or die(DB\dbQueryError());
-            while ($r = $res->fetch_assoc()) {
-                $fileTypes[$r['id']] = $r['type'];
-            }
-            $res->close();
+            $fileTypes = DM\Files::getTypes($fileIds);
         }
 
         foreach ($rez['data'] as &$d) {

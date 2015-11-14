@@ -14,8 +14,12 @@ Ext.define('Ext.ux.plugins.DefaultButton', {
             ,shift: false
             ,alt: false
             ,fn: function(keyCode, e) {
-                if (e.target.type === 'textarea' && !e.ctrlKey)  return true;
+                if (e.target.type === 'textarea' && !e.ctrlKey)  {
+                    return true;
+                }
+
                 this.el.dom.click();
+
                 return false;
             }
             ,scope: this

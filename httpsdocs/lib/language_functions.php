@@ -73,29 +73,6 @@ function getTranslationIfPseudoValue($value)
 }
 
 /**
- * get all defined translation languages in casebox
- */
-function getAvailableTranslationLanguages()
-{
-    $rez = array();
-    $res = DB\dbQuery(
-        'SELECT * FROM ' . \CB\PREFIX . '_casebox.translations LIMIT 1'
-    ) or die(DB\dbQueryError());
-    if ($r = $res->fetch_assoc()) {
-        unset($r['id']);
-        $names = array_keys($r);
-        foreach ($names as $fn) {
-            if (strlen($fn) == 2) {
-                $rez[] = $fn;
-            }
-        }
-    }
-    $res->close();
-
-    return $rez;
-}
-
-/**
  * function to set translations in Cache
  */
 function initTranslations()
@@ -113,7 +90,7 @@ function initTranslations()
         'SELECT name, ' . implode(',', $languages) . '
         FROM ' . \CB\PREFIX . '_casebox.translations
         WHERE `type` < 2'
-    ) or die( DB\dbQueryError() );
+    ) or die(DB\dbQueryError());
 
     // if ($rez = $res->fetch_all(MYSQLI_ASSOC)) {
         // foreach ($rez as &$r) {
@@ -132,7 +109,7 @@ function initTranslations()
         'SELECT *
         FROM translations
         WHERE `type` < 2'
-    ) or die( DB\dbQueryError() );
+    ) or die(DB\dbQueryError());
 
     // if ($rez = $res->fetch_all(MYSQLI_ASSOC)) {
     //     foreach ($rez as &$r) {

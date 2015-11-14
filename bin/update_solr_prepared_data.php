@@ -14,6 +14,7 @@ namespace CB;
     example: php -f upgrade_task_data.php -- -c dev -a -t 23
 */
 use CB\DB;
+use CB\DataModel as DM;
 
 ini_set('max_execution_time', 0);
 
@@ -56,7 +57,7 @@ $where = empty($all)
 if (!empty($template)) {
     $template = is_numeric($template)
         ? array($template)
-        : Templates::getIdsByType($template);
+        : DM\Templates::getIdsByType($template);
 
     if (!empty($template)) {
         $where .= ' AND t.template_id in (' . implode(',', $template) . ') ';

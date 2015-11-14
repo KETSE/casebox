@@ -80,13 +80,13 @@ Ext.define('CB.plugin.Panel', {
             ,params = Ext.valueFrom(this.loadedParams, {});
 
         //check if object was found (success = true)
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             this.update('<div class="x-preview-mask">' + L.RecordIdNotFound.replace('{id}', '#' + params.id) + '</div>');
 
         } else {
             var commonInfo = r.common
-                ? r.common
-                : r.data.systemProperties.data;
+                ? r.common.data
+                : Ext.valueFrom(r.data.systemProperties, {}).data;
 
             Ext.apply(params, commonInfo);
 

@@ -27,6 +27,8 @@ Ext.define('CB.DB.TemplateStore', {
         if(Ext.isEmpty(params.proxy)) {
             params.proxy = new Ext.data.MemoryProxy(params.data || []);
         }
-        CB.DB.TemplateStore.superclass.constructor.call(this, params);
+
+        this.callParent(arguments);
+        // CB.DB.TemplateStore.superclass.constructor.call(this, params);
     }
 });

@@ -125,7 +125,7 @@ foreach ($mailbox as $k => $mail) {
         continue;
     }
 
-    $user_id = DM\User::getIdByEmail($email);
+    $user_id = DM\Users::getIdByEmail($email);
 
     if (!empty($user_id)) {
         if (empty($test_user_id)) {
@@ -154,7 +154,8 @@ foreach ($mailbox as $k => $mail) {
         $path = $matches[2];
     } else {
         /*STORE IN /<USER_ID>/Emails folder*/
-        $pid = User::getEmailFolderId($user_id);
+        die('obsolete email destination detection.');
+        // $pid = User::getEmailFolderId($user_id);
     }
 
     /* end of try to get target folder from subject*/

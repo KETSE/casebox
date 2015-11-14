@@ -2,6 +2,7 @@
 namespace CB;
 
 use CB\Util;
+use CB\DataModel as DM;
 
 class Files
 {
@@ -128,39 +129,21 @@ class Files
     public static function download($id, $versionId = null, $asAttachment = true, $forUseId = false)
     {
 
-        $sql = empty($versionId)
-            ? 'SELECT f.id
-                ,f.content_id
-                ,c.path
-                ,f.name
-                ,c.`type`
-                ,c.size
-            FROM files f
-            LEFT JOIN files_content c ON f.content_id = c.id
-            WHERE f.id = $1'
+        $r = empty($versionId)
+            ? DM\Files::read($id)
+            : DM\FilesVersions::read($versionId);
 
-            : 'SELECT f.file_id `id`
-                ,f.id `version_id`
-                ,f.content_id
-                ,c.path
-                ,f.name
-                ,c.`type`
-                ,c.size
-            FROM files_versions f
-            LEFT JOIN files_content c ON f.content_id = c.id
-            WHERE f.id = $1';
+        if (!empty($r)) {
+            $content = DM\FilesContent::read($r['content_id']);
 
-        $res = DB\dbQuery($sql, Util\coalesce($versionId, $id)) or die( DB\dbQueryError() );
-
-        if ($r = $res->fetch_assoc()) {
             //check if can download file
             if (!Security::canDownload($r['id'], $forUseId)) {
                 throw new \Exception(L\get('Access_denied'));
             }
 
             header('Content-Description: File Transfer');
-            header('Content-Type: '.$r['type'].'; charset=UTF-8');
-            if ($asAttachment || ($r['type'] !== 'application/pdf')) {
+            header('Content-Type: '.$content['type'].'; charset=UTF-8');
+            if ($asAttachment || ($content['type'] !== 'application/pdf')) {
                 //purify filename for cases when we have a wrong filename in the system already
                 header('Content-Disposition: attachment; filename="'.Purify::filename($r['name']).'"');
             }
@@ -169,12 +152,12 @@ class Files
             header('Expires: 0');
             header('Cache-Control: must-revalidate');
             header('Pragma: public');
-            header('Content-Length: '.$r['size']);
-            readfile(Config::get('files_dir') . $r['path'] . DIRECTORY_SEPARATOR . $r['content_id']);
+            header('Content-Length: '.$content['size']);
+            readfile(Config::get('files_dir') . $content['path'] . DIRECTORY_SEPARATOR . $content['id']);
+
         } else {
             throw new \Exception(L\get('Object_not_found'));
         }
-        $res->close();
     }
 
     /**
@@ -194,50 +177,16 @@ class Files
             return false;
         }
 
-        $res = DB\dbQuery(
-            'INSERT INTO files_versions (
-                file_id
-                ,content_id
-                ,`date`
-                ,name
-                ,cid
-                ,uid
-                ,cdate
-                ,udate)
-                SELECT id
-                    ,content_id
-                    ,`date`
-                    ,name
-                    ,cid
-                    ,uid
-                    ,cdate
-                    ,udate
-                FROM files
-                WHERE id = $1',
-            $id
-        ) or die(DB\dbQueryError());
+        $data = DM\Files::read($id);
+
+        $data['file_id'] = $data['id'];
+        unset($data['id']);
+
+        DM\FilesVersions::create($data);
 
         //detect versions exceeding mfvc and delete them
-        $deleteVersionIds = array();
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM files_versions
-            WHERE file_id = $1
-            ORDER BY id DESC
-            LIMIT ' . $mfvc . ', 10',
-            $id
-        ) or die(DB\dbQueryError());
-        while ($r = $res->fetch_assoc()) {
-            $deleteVersionIds[] = $r['id'];
-        }
-        $res->close();
-
-        if (!empty($deleteVersionIds)) {
-            DB\dbQuery(
-                'DELETE
-                FROM files_versions
-                WHERE id in (' . implode(',', $deleteVersionIds) . ')'
-            ) or die(DB\dbQueryError());
+        if ($dIds = DM\FilesVersions::getOldestIds($id, $mfvc)) {
+            DM\FilesVersions::delete($dIds);
         }
 
         return true;
@@ -353,67 +302,44 @@ class Files
         switch (sizeof($rez)) {
             case 0:
                 break;
+
             case 1:
                 //single match: retreive match info for content
                 //(if matches with current version or to an older version)
                 $existentFileId = $this->getFileId($pid, $rez[0]['name'], @$rez[0]['dir']);
                 $rez[0]['existentFileId'] = $existentFileId;
+                $file = DM\Files::read($existentFileId);
+                $content = DM\FilesContent::read($file['content_id']);
 
                 $md5 = $this->getFileMD5($rez[0]);
-                $res = DB\dbQuery(
-                    'SELECT
-                        f.cid
-                        ,f.cdate
-                    FROM files f
-                    JOIN files_content c ON f.content_id = c.id
-                    AND c.md5 = $2
-                    WHERE f.id = $1',
-                    array(
-                        $existentFileId
-                        ,$md5
-                    )
-                ) or die(DB\dbQueryError());
 
-                if ($r = $res->fetch_assoc()) {
-                    $r['user'] = User::getDisplayName($r['cid']);
+                $data = array();
 
-                    $agoTime = Util\formatAgoTime($r['cdate']);
+                if ($md5 == $content['md5']) {
+                    $data = $file;
+                    $data['text'] = L\get('FileContentsIdentical');
+                }
+
+                if (empty($rez[0]['msg'])) {
+                    $version = DM\FilesVersions::getVersionByMD5($existentFileId, $md5);
+
+                    if (!empty($version)) {
+                        $data = $version;
+                        $data['text'] = L\get('FileContentsIdenticalToAVersion');
+                    }
+                }
+
+                if (!empty($data)) {
+                    $user = User::getDisplayName($data['cid']);
+
+                    $agoTime = Util\formatAgoTime($data['cdate']);
 
                     $rez[0]['msg'] = str_replace(
                         array('{timeAgo}', '{user}'),
-                        array($agoTime,$r['user']),
-                        L\get('FileContentsIdentical')
+                        array($agoTime, $user),
+                        $data['text']
                     );
-                }
-                $res->close();
 
-                if (empty($rez[0]['msg'])) {
-                    $res = DB\dbQuery(
-                        'SELECT
-                            f.cid
-                            ,f.cdate
-                        FROM files_versions f
-                        JOIN files_content c ON f.content_id = c.id
-                        AND c.md5 = $2
-                        WHERE f.file_id = $1',
-                        array(
-                            $existentFileId
-                            ,$md5
-                        )
-                    ) or die(DB\dbQueryError());
-
-                    if ($r = $res->fetch_assoc()) {
-                        $r['user'] = User::getDisplayName($r['cid']);
-
-                        $agoTime = Util\formatAgoTime($r['cdate']);
-
-                        $rez[0]['msg'] = str_replace(
-                            array('{timeAgo}', '{user}'),
-                            array($agoTime, $r['user']),
-                            L\get('FileContentsIdenticalToAVersion')
-                        );
-
-                    }
                 }
 
                 /* suggested new filename */
@@ -421,6 +347,7 @@ class Files
                 if (!empty($rez[0]['dir'])) {
                     $subdirId = $this->getFileId($pid, '', $rez[0]['dir']);
                 }
+
                 $rez[0]['suggestedFilename'] = Objects::getAvailableName($subdirId, $rez[0]['name']);
                 /* end of suggested new filename */
                 break;
@@ -432,28 +359,24 @@ class Files
 
         return $rez;
     }
+
     public function checkExistentContents($p)
     {
 
         $filesDir = Config::get('files_dir');
 
         foreach ($p as $k => $v) {
-            $res = DB\dbQuery(
-                'SELECT id, `path`
-                FROM files_content
-                WHERE `md5` = $1',
-                $v
-            ) or die(DB\dbQueryError());
+            $id = DM\FilesContent::toId($v, 'md5');
 
-            if ($r = $res->fetch_assoc()) {
+            if (!empty($id)) {
+                $r = DM\FilesContent::read($id);
                 //give affirmative result only if the correspondig file content exists
-                $p[$k] = file_exists($filesDir.$r['path'].DIRECTORY_SEPARATOR.$r['id'])
+                $p[$k] = file_exists($filesDir . $r['path'] . DIRECTORY_SEPARATOR . $r['id'])
                     ? $r['id']
                     : null;
             } else {
                 unset($p[$k]);
             }
-            $res->close();
         }
 
         return array('success' => true, 'data' => $p);
@@ -474,10 +397,10 @@ class Files
             case 1:
                 reset($FilesArray);
                 $f = current($FilesArray);
-                $d = $this->getDuplicates($f['id']);
+                $d = DM\Files::getDuplicates($f['id']);
                 $paths = array();
-                if (sizeof($d['data']) > 0) {
-                    foreach ($d['data'] as $dup) {
+                if (sizeof($d) > 0) {
+                    foreach ($d as $dup) {
                         $paths[] = $dup['pathtext'];
                     }
                     $paths = array_unique($paths);
@@ -490,10 +413,12 @@ class Files
             default:
                 $filenames = array();
                 foreach ($FilesArray as $f) {
-                    $d = $this->getDuplicates($f['id']);
-                    if (sizeof($d['data']) > 1) {
+                    $d = DM\Files::getDuplicates($f['id']);
+                    if (sizeof($d) > 1) {
                         //msg: Following files have duplicates
-                        $filenames[] = (empty($f['dir']) ? '': $f['dir'].DIRECTORY_SEPARATOR).$f['name'];
+                        $filenames[] = (empty($f['dir'])
+                            ? ''
+                            : $f['dir'] . DIRECTORY_SEPARATOR) . $f['name'];
                     }
                 }
                 if (!emtpy($filenames)) {
@@ -508,65 +433,54 @@ class Files
             $result['prompt_to_open'] = true;
         }
     }
-    //checks if pid id exists in our tree or if filename exists under the pid.
-    //$dir is an optional relative path under pid.
+
+    /**
+     * checks if pid id exists in our tree or if filename exists under the pid.
+     * @param  int    $pid
+     * @param  string $name
+     * @param  string $dir  an optional relative path under pid
+     * @return [type]
+     */
     public static function getFileId($pid, $name = '', $dir = '')
     {
         $rez = null;
         /* check if pid exists /**/
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE id = $1
-                AND dstatus = 0',
-            $pid
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
+        $r = DM\Tree::read($pid);
+
+        if (empty($r['dstatus'])) {
             $rez = $r['id'];
-        } else {
-            $rez = null;
-        }
-        $res->close();
-        /* end of check if pid exists /**/
-
-        if (empty($rez)) {
-            return $rez;
         }
 
-        if (!empty($name)) {
-            $dir.= DIRECTORY_SEPARATOR.$name;
-        }
-
-        if (!empty($dir) && ($dir != '.')) {
-            $dir = str_replace('\\', '/', $dir);
-            $dir = explode('/', $dir);
-            foreach ($dir as $dir_name) {
-                if (empty($dir_name) || ($dir_name == '.')) {
-                    continue;
-                }
-                $res = DB\dbQuery(
-                    'SELECT id
-                    FROM tree
-                    WHERE pid = $1
-                        AND name = $2
-                        AND dstatus = 0',
-                    array($rez, $dir_name)
-                ) or die(DB\dbQueryError());
-
-                if ($r = $res->fetch_assoc()) {
-                    $rez = $r['id'];
-                } else {
-                    $rez = null;
-                }
-                $res->close();
-
-                if (empty($rez)) {
-                    return $rez;
-                }
+        if (!empty($rez)) {
+            if (!empty($name)) {
+                $dir .= DIRECTORY_SEPARATOR . $name;
             }
-        } else {
-            $rez = null;
+
+            if (!empty($dir) && ($dir != '.')) {
+                $dir = str_replace('\\', '/', $dir);
+                $dir = explode('/', $dir);
+
+                foreach ($dir as $dirName) {
+                    if (empty($dirName) || ($dirName == '.')) {
+                        continue;
+                    }
+
+                    $r = DM\Tree::getChildByName($rez, $dirName);
+
+                    if (!empty($r)) {
+                        $rez = $r['id'];
+                    } else {
+                        $rez = null;
+                    }
+
+                    if (empty($rez)) {
+                        return $rez;
+                    }
+                }
+            } else {
+                $rez = null;
+            }
         }
 
         return $rez;
@@ -589,19 +503,15 @@ class Files
     public static function getSize($id)
     {
         $rez = 0;
-        $res = DB\dbQuery(
-            'SELECT fc.size
-            FROM files f
-            JOIN files_content fc
-                ON f.content_id = fc.id
-            WHERE f.id = $1',
-            $id
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            $rez = intval($r['size']);
+        $f = DM\Files::read($id);
+
+        if (!empty($f)) {
+            $c = DM\FilesContent::read($f['content_id']);
+            if (!empty($c['size'])) {
+                $rez = intval($c['size']);
+            }
         }
-        $res->close();
 
         return $rez;
     }
@@ -683,9 +593,10 @@ class Files
                     case 'replace':
                         /* TODO: only mark file as deleted but dont delte it
                             Note: we cant leave the previous file record if we have a given id for file
-
                         */
-                        DB\dbQuery('CALL p_delete_tree_node($1)', $fileId) or die(DB\dbQueryError());
+
+                        DM\Tree::delete($fileId, true);
+
                         $solr = new Solr\Client();
                         $solr->deleteByQuery('id:' . $fileId . ' OR pids: ' . $fileId);
                         break;
@@ -733,20 +644,15 @@ class Files
         }
 
         $p['title'] = strip_tags(@$p['title']);
-        DB\dbQuery(
-            'UPDATE files
-            SET `date` = $2
-            ,title = $3
-            ,uid = $4
-            ,udate = CURRENT_TIMESTAMP
-            WHERE id = $1',
+        DM\Files::update(
             array(
-                $p['id']
-                ,Util\dateISOToMysql($p['date'])
-                ,@$p['title']
-                ,$_SESSION['user']['id']
+                'id' => $p['id']
+                ,'date' => Util\dateISOToMysql($p['date'])
+                ,'title' => @$p['title']
+                ,'uid' => User::getId()
+                ,'udate' => 'CURRENT_TIMESTAMP'
             )
-        ) or die(DB\dbQueryError());
+        );
 
         Objects::updateCaseUpdateInfo($p['id']);
 
@@ -758,45 +664,33 @@ class Files
         if (empty($dir) || ($dir == '.' )) {
             return $pid;
         }
+
         $path = str_replace('\\', '/', $dir);
         $path = explode('/', $path);
+        $userId = User::getId();
+
         foreach ($path as $dir) {
             if (empty($dir)) {
                 continue;
             }
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM tree
-                WHERE pid = $1
-                    AND name = $2
-                    AND dstatus = 0',
-                array(
-                    $pid
-                    ,$dir
-                )
-            ) or die(DB\dbQueryError());
 
-            if ($r = $res->fetch_assoc()) {
+            $r = DM\Tree::getChildByName($pid, $dir);
+
+            if (!empty($r)) {
                 $pid = $r['id'];
+
             } else {
-                DB\dbQuery(
-                    'INSERT INTO tree (pid, `name`, `type`, cid, uid, template_id)
-                    VALUES($1
-                         , $2
-                         , 1
-                         , $3
-                         , $3
-                         , $4)',
+                $pid = DM\Tree::create(
                     array(
-                        $pid
-                        ,$dir
-                        ,$_SESSION['user']['id']
-                        ,Config::get('default_folder_template')
+                        'pid' => $pid
+                        ,'name' => $dir
+                        ,'type' => 1 //?
+                        ,'cid' => $userId
+                        ,'uid' => $userId
+                        ,'template_id' => Config::get('default_folder_template')
                     )
-                ) or die(DB\dbQueryError());
-                $pid = DB\dbLastInsertId();
+                );
             }
-            $res->close();
         }
 
         return $pid;
@@ -808,7 +702,7 @@ class Files
             return null;
         }
 
-        return md5_file($file['tmp_name']).'s'.$file['size'];
+        return md5_file($file['tmp_name']) . 's' . $file['size'];
     }
 
     public function storeContent(&$f, $filePath = false)
@@ -825,17 +719,15 @@ class Files
             return false;
         }
         $md5 = $this->getFileMD5($f);
-        $res = DB\dbQuery(
-            'SELECT id, path FROM files_content WHERE md5 = $1',
-            $md5
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            if (file_exists($filePath.$r['path'].'/'.$r['id'])) {
-                $f['content_id'] = $r['id'];
+        $contentId = DM\FilesContent::toId($md5, 'md5');
+        if (!empty($contentId)) {
+            $content = DM\FilesContent::read($contentId);
+            if (file_exists($filePath . $content['path'] . '/' . $content['id'])) {
+                $f['content_id'] = $content['id'];
             }
+
         }
-        $res->close();
 
         if (!empty($f['content_id'])) {
             unlink($f['tmp_name']);
@@ -854,28 +746,18 @@ class Files
             ? date('Y/m/d', filemtime($f['tmp_name']))
             : date('Y/m/d', $date);
 
-        DB\dbQuery(
-            'INSERT INTO files_content (`size`, `type`, `path`, `md5`)
-            VALUES($1
-                 , $2
-                 , $3
-                 , $4) ON duplicate KEY
-            UPDATE id = last_insert_id(id)
-            ,`size` = $1
-            ,`type` = $2
-            ,`path` = $3
-            ,`md5` = $4',
+        $f['content_id'] = DM\FilesContent::create(
             array(
-                $f['size']
-                ,$f['type']
-                ,$storage_subpath
-                ,$md5
+                'size' => $f['size']
+                ,'type' => $f['type']
+                ,'path' => $storage_subpath
+                ,'md5' => $md5
             )
-        ) or die(DB\dbQueryError());
-        $f['content_id'] = DB\dbLastInsertId();
-        @mkdir($filePath.$storage_subpath.'/', 0777, true);
+        );
 
-        if (copy($f['tmp_name'], $filePath.$storage_subpath.'/'.$f['content_id']) !== true) {
+        @mkdir($filePath . $storage_subpath . '/', 0777, true);
+
+        if (copy($f['tmp_name'], $filePath . $storage_subpath . '/' . $f['content_id']) !== true) {
             throw new \Exception("Error copying file to destination folder, possible permission problems.", 1);
         }
 
@@ -886,42 +768,6 @@ class Files
 
     public function removeContentId($id)
     {
-    }
-
-    public function getDuplicates($id)
-    {
-        $rez = array('success' => true, 'data' => array());
-        if (!is_numeric($id)) {
-            return $rez;
-        }
-        $res = DB\dbQuery(
-            'SELECT
-                 fd.id
-                ,fd.cid
-                ,fd.cdate
-                ,case when(fd.name = f.name) THEN "" ELSE fd.name END `name`
-                ,ti.pids `path`
-                ,ti.path `pathtext`
-            FROM files f
-            JOIN files fd
-                ON f.content_id = fd.content_id
-                AND fd.id <> $1
-            JOIN tree t
-                ON fd.id = t.id
-                and t.dstatus = 0
-            JOIN tree_info ti
-                ON t.id = ti.id
-            WHERE f.id = $1',
-            $id
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $r['path'] = str_replace(',', '/', $r['path']);
-            $rez['data'][] = $r;
-        }
-        $res->close();
-
-        return $rez;
     }
 
     public static function minimizeUploadedFile(&$file)
@@ -937,7 +783,7 @@ class Files
         }
     }
 
-    public static function generatePreview($id, $version_id = false)
+    public static function generatePreview($id, $versionId = false)
     {
         $rez = array();
         $file = array();
@@ -947,39 +793,13 @@ class Files
         $filesDir = Config::get('files_dir');
         $filesPreviewDir = Config::get('files_preview_dir');
 
-        $sql = 'SELECT f.id
-                ,f.content_id
-                ,f.name
-                ,c.path
-                ,c.`type`
-                ,p.status
-            FROM files f
-            LEFT JOIN files_content c ON f.content_id = c.id
-            LEFT JOIN file_previews p ON c.id = p.id
-            WHERE f.id = $1
-                AND c.size > 0';
-
-        if (!empty($version_id)) {
-            $sql = 'SELECT $1 `id`
-                    ,f.id `version_id`
-                    ,f.content_id
-                    ,f.name
-                    ,c.path
-                    ,c.`type`
-                    ,p.status
-                FROM files_versions f
-                LEFT JOIN files_content c ON f.content_id = c.id
-                LEFT JOIN file_previews p ON c.id = p.id
-                WHERE f.file_id = $1
-                    AND f.id = $2
-                    AND c.size > 0';
+        if (!empty($versionId)) {
+            $file = DM\FilesVersions::read($versionId);
+            $file['version_id'] = $versionId;
+            $file['id'] = $id;
+        } else {
+            $file = DM\Files::read($id);
         }
-
-        $res = DB\dbQuery($sql, array($id, $version_id)) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            $file = $r;
-        }
-        $res->close();
 
         if (empty($file)) {
             \CB\debug('Error accessing file preview ('.$id.'). Record not found in DB.');
@@ -987,18 +807,23 @@ class Files
             return array('html' => '');
         }
 
-        switch ($file['status']) {
-            case 1:
-            case 2:
-                return array(
-                    'processing' => true
-                );
+        $content = DM\FilesContent::read($file['content_id']);
+        $preview = DM\FilePreviews::read($content['id']);
 
-            case 3:
-                return array(
-                    'html' => L\get('ErrorCreatingPreview')
-                );
+        if (!empty($preview)) {
+            switch ($preview['status']) {
+                case 1:
+                case 2:
+                    return array(
+                        'processing' => true
+                    );
 
+                case 3:
+                    return array(
+                        'html' => L\get('ErrorCreatingPreview')
+                    );
+
+            }
         }
 
         $ext = explode('.', $file['name']);
@@ -1006,15 +831,15 @@ class Files
         $ext = strtolower($ext);
         $rez['ext'] = $ext;
 
-        $rez['filename'] = $file['content_id'].'_.html';
+        $rez['filename'] = $content['id'].'_.html';
 
-        $preview_filename = $filesPreviewDir.$rez['filename'];
+        $previewFilename = $filesPreviewDir . $rez['filename'];
 
-        $fn = $filesDir.$file['path'].DIRECTORY_SEPARATOR.$file['content_id'];
-        $nfn = $filesPreviewDir.$file['content_id'].'_.'.$ext;
+        $fn = $filesDir . $content['path'] . DIRECTORY_SEPARATOR . $content['id'];
+        $nfn = $filesPreviewDir . $content['id'] . '_.' . $ext;
 
         if (!file_exists($fn)) {
-            \CB\debug('Error accessing file preview ('.$id.'). Its content (id: '.@$file['content_id'].') doesnt exist on the disk.');
+            \CB\debug('Error accessing file preview ('.$id.'). Its content (id: '.@$content['id'].') doesnt exist on the disk.');
 
             return false;
         }
@@ -1031,24 +856,21 @@ class Files
             case 'xlsx':
             case 'pptx':
             case 'odt':
-                DB\dbQuery(
-                    'INSERT INTO file_previews (id, `group`, status, filename, SIZE)
-                        VALUES($1
-                            ,\'office\'
-                            ,1
-                            ,NULL
-                            ,0)
-                        ON DUPLICATE KEY
-                        UPDATE `group` = \'office\'
-                            ,status =1
-                            ,filename = NULL
-                            ,SIZE = 0
-                            ,cdate = CURRENT_TIMESTAMP',
-                    $file['content_id']
-                ) or die(DB\dbQueryError());
+                if (empty($preview)) {
+                    DM\FilePreviews::create(
+                        array(
+                            'id' => $content['id']
+                            ,'group' => 'office'
+                            ,'status' => 1
+                            ,'filename' => null
+                            ,'size' => 0
+                            ,'cdate' => 'CURRENT_TIMESTAMP'
+                        )
+                    );
+                }
 
-                if (file_exists($preview_filename)) {
-                    Files::deletePreview($file['content_id']);
+                if (file_exists($previewFilename)) {
+                    Files::deletePreview($content['id']);
                 }
 
                 $cmd = 'php -f '.LIB_DIR.'PreviewExtractorOffice.php -- -c '.$coreName . ' > '.Config::get('debug_log').'_office &';
@@ -1059,12 +881,13 @@ class Files
 
                 return array('processing' => true);
                 break;
+
             case 'xml':
             case 'htm':
             case 'html':
             case 'dhtml':
             case 'xhtml':
-                //file_put_contents( $preview_filename, Files::purify(file_get_contents($fn)) );
+
                 require_once LIB_DIR.'PreviewExtractor.php';
                 $content = file_get_contents($fn);
                 $pe = new PreviewExtractor();
@@ -1075,10 +898,12 @@ class Files
                         ,'URI.MakeAbsolute' => true
                     )
                 );
-                file_put_contents($preview_filename, $content);
-                //copy($fn, $preview_filename);
+                file_put_contents($previewFilename, $content);
+                //copy($fn, $previewFilename);
                 break;
+
             case 'txt':
+            case 'log':
             case 'css':
             case 'js':
             case 'json':
@@ -1089,10 +914,11 @@ class Files
             case 'sql':
 
                 file_put_contents(
-                    $preview_filename,
+                    $previewFilename,
                     '<pre>' .Util\adjustTextForDisplay(file_get_contents($fn)).'<pre>'
                 );
                 break;
+
             case 'pdf':
                 $html = 'PDF'; //Ext panel - PreviewPanel view
                 if (empty($_SERVER['HTTP_X_REQUESTED_WITH'])) { //full browser window view
@@ -1111,7 +937,7 @@ class Files
             case 'tif':
             case 'tiff':
             case 'svg':
-                $pfn = $filesPreviewDir . $file['content_id'];
+                $pfn = $filesPreviewDir . $content['id'];
                 $convertedImages = array(
                     $pfn . '_.png'
                 );
@@ -1124,7 +950,7 @@ class Files
                         foreach ($images as $image) {
                             $image->setImageFormat('png');
                             $image->writeImage($pfn . $i . '_.png');
-                            $convertedImages[] = $file['content_id'] . $i . '_.png';
+                            $convertedImages[] = $content['id'] . $i . '_.png';
                             $i++;
                         }
                     } catch (\Exception $e) {
@@ -1133,7 +959,7 @@ class Files
                 }
 
                 file_put_contents(
-                    $preview_filename,
+                    $previewFilename,
                     '<img src="/' . $coreName . '/view/'.
                     implode(
                         '" class="fit-img" style="margin: auto" />' .
@@ -1146,10 +972,10 @@ class Files
                 break;
 
             default:
-                if ((substr($file['type'], 0, 5) == 'image') && (substr($file['type'], 0, 9) !== 'image/svg')) {
+                if ((substr($content['type'], 0, 5) == 'image') && (substr($content['type'], 0, 9) !== 'image/svg')) {
                     file_put_contents(
-                        $preview_filename,
-                        '<div style="padding: 5px 10px"><img src="/'.$coreName.'/download/'.
+                        $previewFilename,
+                        '<div style="padding: 5px 10px"><img src="/' . $coreName . '/download/'.
                         $file['id'] .
                         (empty($version_id) ? '' : '/' . $version_id) .
                         '/" class="fit-img" style="margin: auto"></div>'
@@ -1157,17 +983,22 @@ class Files
                 }
         }
 
-        //save generated file reference in db
-        DB\dbQuery(
-            'INSERT INTO file_previews (id, filename)
-                VALUES($1, $2)
-                ON DUPLICATE KEY
-                UPDATE filename = $2',
-            array(
-                $file['content_id']
-                ,$rez['filename']
-            )
-        ) or die(DB\dbQueryError());
+        if (!empty($preview)) {
+            DM\FilePreviews::update(
+                array(
+                    'id' => $content['id']
+                    ,'filename' => $rez['filename']
+                )
+            );
+
+        } else {
+            DM\FilePreviews::create(
+                array(
+                    'id' => $content['id']
+                    ,'filename' => $rez['filename']
+                )
+            );
+        }
 
         return $rez;
     }
@@ -1194,79 +1025,37 @@ class Files
                 ,'pid' => 0
             )
         );
-        $file_id = 0;
+        $fileId = 0;
 
         //detect file id
-        $res = DB\dbQuery(
-            'SELECT file_id
-            FROM files_versions
-            WHERE id = $1',
-            $id
-        ) or die(DB\dbQueryError());
+        $version = DM\FilesVersions::read($id);
 
-        if ($r = $res->fetch_assoc()) {
-            $file_id = $r['file_id'];
-            $rez['data']['id'] = $file_id;
+        if (!empty($version)) {
+            $fileId = $version['file_id'];
+            $rez['data']['id'] = $fileId;
         }
-        $res->close();
 
-        $res = DB\dbQuery(
-            'SELECT pid
-            FROM tree
-            WHERE id = $1',
-            $file_id
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
+        //get its pid
+        $r = DM\Tree::read($fileId);
+        if (!empty($r['pid'])) {
             $rez['data']['pid'] = $r['pid'];
         }
-        $res->close();
 
-        //get restored version data
-        $versionData = array();
-        $res = DB\dbQuery(
-            'SELECT *
-            FROM files_versions v
-            WHERE id = $1',
-            $id
-        ) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            $versionData = $r;
-        }
-        $res->close();
+        $this->saveCurrentVersion($fileId);
 
-        $this->saveCurrentVersion($file_id);
-
-        DB\dbQuery(
-            'INSERT INTO files (
-                id
-                ,content_id
-                ,`date`
-                ,`name`
-                ,cid
-                ,uid
-                ,cdate
-                ,udate)
-                VALUES (
-                    $1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-                )
-            ON DUPLICATE KEY UPDATE
-                content_id = $2
-                ,`date` = $3
-                ,`name` = $4
-                ,cid = $5
-                ,uid = $6
-                ,cdate = CURRENT_TIMESTAMP
-                ,udate = CURRENT_TIMESTAMP',
+        DM\Files::delete($fileId);
+        DM\Files::create(
             array(
-                $versionData['file_id']
-                ,$versionData['content_id']
-                ,$versionData['date']
-                ,$versionData['name']
-                ,$versionData['cid']
-                ,$_SESSION['user']['id']
+                'id' => $fileId
+                ,'content_id' => $version['content_id']
+                ,'date' => $version['date']
+                ,'name' => $version['name']
+                ,'cid' => $version['cid']
+                ,'uid' => User::getId()
+                ,'cdate' => $version['cdate']
+                ,'udate' => $version['udate']
             )
-        ) or die(DB\dbQueryError());
+        );
 
         Objects::updateCaseUpdateInfo($id);
 
@@ -1279,33 +1068,23 @@ class Files
     {
         $rez = array('success' => true, 'id' => $id);
         $content_id = 0;
-        $res = DB\dbQuery(
-            'SELECT content_id
-            FROM files_versions
-            WHERE id = $1',
-            $id
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            $content_id = $r['content_id'];
+        $version = DM\FilesVersions::read($id);
+
+        if (!empty($version)) {
+            $content_id = $version['content_id'];
         }
-        $res->close();
 
-        DB\dbQuery(
-            'DELETE
-            FROM files_versions
-            WHERE id = $1',
-            $id
-        ) or die(DB\dbQueryError());
+        DM\FilesVersions::delete($id);
 
         $this->removeContentId($content_id);
 
-        DB\dbQuery(
-            'UPDATE tree
-            SET `updated` = (updated | 1)
-            WHERE id = $1',
-            $id
-        ) or die(DB\dbQueryError());
+        DM\Tree::update(
+            array(
+                'id' => $version['file_id']
+                ,'updated' => 1
+            )
+        );
 
         Objects::updateCaseUpdateInfo($id);
 
@@ -1314,12 +1093,22 @@ class Files
         return $rez;
     }
     /* end of versions */
+
+    /**
+     * merge files
+     * To be reviewed
+     *
+     * @param  int  $ids
+     * @return json response
+     */
     public function merge($ids)
     {
         if (!is_array($ids)) {
             return array('success' => false);
         }
-        $ids = array_filter($ids, 'is_numeric');
+
+        $ids = Util\toNumericArray($ids);
+
         if (sizeof($ids) < 2) {
             return array('success' => false);
         }
@@ -1347,13 +1136,13 @@ class Files
         $res = DB\dbQuery(
             'INSERT INTO files_versions (file_id, content_id, `date`, name, cid, uid, cdate, udate)
                 SELECT $1
-                     , content_id
-                     , `date`
-                     , name
-                     , cid
-                     , uid
-                     , cdate
-                     , udate
+                    ,content_id
+                    ,`date`
+                    ,name
+                    ,cid
+                    ,uid
+                    ,cdate
+                    ,udate
                 FROM files
                 WHERE id <> $1
                     AND id in('.implode(',', $ids).')',
@@ -1369,16 +1158,16 @@ class Files
                 AND id IN ('.implode(', ', $ids).')',
             array(
                 $to_id
-                ,$_SESSION['user']['id']
+                ,User::getId()
             )
         ) or die(DB\dbQueryError());
 
-        DB\dbQuery(
-            'UPDATE tree
-            SET updated = (updated | 1)
-            WHERE id = $1',
-            $to_id
-        ) or die(DB\dbQueryError());
+        DM\Tree::update(
+            array(
+                'id' => $to_id
+                ,'updated' => 1
+            )
+        );
 
         $ids = array_diff($ids, array($to_id));
 

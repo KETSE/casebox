@@ -37,7 +37,7 @@ Ext.define('CB.object.plugin.ObjectProperties', {
     }
 
     ,attachEvents: function(){
-        a = this.getEl().query('a.click');
+        var a = this.getEl().query('a.click');
         Ext.each(
             a
             ,function(t){
@@ -159,15 +159,15 @@ Ext.define('CB.object.plugin.ObjectProperties', {
             }
             ,this
         );
-
     }
+
     ,onTaskChanged: function(r, e){
         this.getEl().unmask();
         App.fireEvent('objectchanged', this.params, this);
     }
 
     ,getContainerToolbarItems: function() {
-        rez = {
+        var rez = {
             tbar: {}
             ,menu: {}
         };

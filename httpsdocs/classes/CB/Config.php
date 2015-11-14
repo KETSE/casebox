@@ -4,6 +4,7 @@ namespace CB;
 /**
  * Class used for configuration management
  */
+use CB\DataModel as DM;
 
 class Config extends Singleton
 {
@@ -115,17 +116,14 @@ class Config extends Singleton
     public static function getPlatformDBConfig()
     {
         $rez = array();
-        $res = DB\dbQuery(
-            'SELECT param
-                ,`value`
-            FROM ' . PREFIX . '_casebox.config
-            WHERE pid IS NOT NULL'
-        ) or die(DB\dbQueryError());
 
-        while ($r = $res->fetch_assoc()) {
-            $rez[$r['param']] = $r['value'];
+        $recs = DM\GlobalConfig::readAll();
+
+        foreach ($recs as $r) {
+            if (!empty($r['pid'])) {
+                $rez[$r['param']] = $r['value'];
+            }
         }
-        $res->close();
 
         return $rez;
     }
@@ -138,26 +136,20 @@ class Config extends Singleton
     public static function getPlatformConfigForCore($coreName)
     {
         $rez = array();
-        $res = DB\dbQuery(
-            'SELECT id, cfg, active
-            FROM ' . PREFIX . '_casebox.cores
-            WHERE name = $1',
-            $coreName
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            $rez = Util\jsonDecode($r['cfg']);
+        $r = DM\Core::read($coreName);
+
+        if (isset($r['cfg'])) {
+            $rez = $r['cfg'];
+            $rez['core_id'] = $r['id'];
+            $rez['core_status'] = $r['active'];
+
         } else {
-            throw new \Exception('Core not defined in cores table: '.$coreName, 1);
+            trigger_error(
+                "ERROR: Config::getPlatformConfigForCore(" . $coreName . ") cfg=" . print_r($r, true), E_USER_WARNING
+            );
+            // throw new \Exception('Error getting core config', 1);
         }
-        $res->close();
-
-        if ($rez === false) {
-            throw new \Exception('Error decoding core config', 1);
-        }
-
-        $rez['core_id'] = $r['id'];
-        $rez['core_status'] = $r['active'];
 
         return $rez;
     }
@@ -173,31 +165,24 @@ class Config extends Singleton
         $rez = array();
         $ref = array();
 
-        $sql = 'SELECT *
-            FROM config
-            ORDER BY pid';
+        $rows = DM\Config::readAll();
 
-        $res = DB\dbQuery($sql . ', `order`'); //order by 'order' field also
-
-        //backward compatibility
-        if (empty($res)) {
-            $res = DB\dbQuery($sql) or die(DB\dbQueryError());
-        }
-
-        while ($r = $res->fetch_assoc()) {
+        foreach ($rows as $r) {
             $ref[$r['id']] = $r['param'];
 
             if (empty($r['pid'])) {
                 $rez[$r['param']] = $r['value'];
+
             } else {
                 $parent = &$rez[$ref[$r['pid']]];
+
                 if (!is_array($parent)) {
                     $rez[$ref[$r['pid']]] = Util\toJSONArray($parent);
                 }
+
                 $rez[$ref[$r['pid']]][$r['param']] = Util\toJSONArray($r['value']);
             }
         }
-        $res->close();
 
         return $rez;
     }
@@ -408,7 +393,7 @@ class Config extends Singleton
             : $rez['folder_templates'][0];
 
         if (empty($config['default_file_template'])) {
-            $a = Templates::getIdsByType('file');
+            $a = DM\Templates::getIdsByType('file');
             $rez['default_file_template'] = array_shift($a);
         } else {
             $rez['default_file_template'] = $config['default_file_template'];
@@ -416,7 +401,7 @@ class Config extends Singleton
         }
 
         if (empty($config['default_shortcut_template'])) {
-            $a = Templates::getIdsByType('shortcut');
+            $a = DM\Templates::getIdsByType('shortcut');
             $rez['default_shortcut_template'] = array_shift($a);
         } else {
             $rez['default_shortcut_template'] = $config['default_shortcut_template'];
@@ -656,7 +641,7 @@ class Config extends Singleton
     public static function getObjectTypePluginsConfig($objectType, $from = '')
     {
         $rez = array();
-        $tmp = Config::get('object_type_plugins');
+        $tmp = static::get('object_type_plugins');
 
         if (!empty($from)) {
             $tmp = @$tmp[$from];
@@ -665,7 +650,7 @@ class Config extends Singleton
         if (!empty($tmp[$objectType])) {
             $rez = $tmp[$objectType];
         } else {
-            $tmp = Config::get('default_object_plugins');
+            $tmp = static::get('default_object_plugins');
 
             if (!empty($from)) {
                 $tmp = @$tmp[$from];
@@ -909,11 +894,13 @@ class Config extends Singleton
             ,'node_facets'
             ,'node_DC'
             ,'default_DC'
+            ,'search_DC'
             ,'default_object_plugins'
             ,'object_type_plugins'
             ,'treeNodes'
             ,'action_log'
             ,'maintenance'
+            ,'leftRibbonButtons'
         );
 
         foreach ($jsonProperties as $property) {
@@ -989,6 +976,18 @@ class Config extends Singleton
         }
 
         return $defaultValue;
+    }
+
+    public static function getDCConfig($alias)
+    {
+        $rez = array();
+        $conf = static::get('DCConfigs');
+
+        if (!empty($conf[$alias])) {
+            $rez = $conf[$alias];
+        }
+
+        return $rez;
     }
 
     /**

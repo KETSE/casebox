@@ -8,8 +8,8 @@ Ext.define('CB.object.plugin.Comments', {
         xtype: 'CBFieldComment'
     }
 
-    ,initComponent: function(config){
-
+    ,initComponent: function(config)
+{
         this.actions = {
             edit: new Ext.Action({
                 text: L.Edit
@@ -27,7 +27,9 @@ Ext.define('CB.object.plugin.Comments', {
 
         var tpl = new Ext.XTemplate(
             '<table class="block-plugin" style="margin:0">'
-            ,'<div class="load-more click">' + L.ViewMore + '</div>'
+            ,'<div class="load-more click">' + L.MoreCommentsHint
+            ,'  <span class="fr cG">{[this.totalText]}</span>'
+            ,'</div>'
             ,'<tpl for=".">'
             ,'<tr>'
             ,'    <td class="obj">'
@@ -92,6 +94,17 @@ Ext.define('CB.object.plugin.Comments', {
                 }
             }
         );
+        this.addCommentLabel = Ext.create({
+            xtype: 'button'
+            ,html: '<span class="fwB click"> ' + L.AddComment + ' </span>'
+            ,overCls: ''
+            ,border: false
+            ,listeners: {
+                scope: this
+                ,click: this.onAddCommentLabelClick
+            }
+        });
+
         this.addCommentField = Ext.create(cfg);
 
         if(this.initialConfig.header !== false) {
@@ -106,9 +119,15 @@ Ext.define('CB.object.plugin.Comments', {
             ,bodyStyle: 'padding-top: 3px'
             ,items: [
                 this.dataView
-                ,this.addCommentField
+                // ,this.addCommentField
             ]
         });
+
+        if (this.initialConfig.showAddLabel) {
+            this.items.push(this.addCommentLabel);
+        } else {
+            this.items.push(this.addCommentField);
+        }
 
         this.callParent(arguments);
 
@@ -123,7 +142,7 @@ Ext.define('CB.object.plugin.Comments', {
         } else {
             this.removeCls('have-more-items');
         }
-
+        this.dataView.tpl.totalText = r.data.length + ' ' + L.of + ' ' + r.total;
         this.dataView.store.loadData(r.data);
 
         this.attachElementsEvents();
@@ -135,7 +154,7 @@ Ext.define('CB.object.plugin.Comments', {
         var el  = this.getEl();
 
         if(el) {
-            lm = el.down('div.load-more');
+            var lm = el.down('div.load-more');
 
             if(lm && !lm.hasListener('click')) {
                 lm.on('click', this.onLoadMoreClick, this);
@@ -171,7 +190,7 @@ Ext.define('CB.object.plugin.Comments', {
      * @return void
      */
     ,processLoadMore: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             App.showException(r);
             return;
         }
@@ -186,7 +205,24 @@ Ext.define('CB.object.plugin.Comments', {
 
         this.loadedData.data = r.data.concat(this.loadedData.data);
 
+        var panel = this.up('panel')
+            ,scrollable = false
+            ,scrollPosition;
+
+        while(!scrollable && panel) {
+            scrollable = panel.getScrollable();
+            panel = panel.up('panel');
+        }
+
+        if(scrollable) {
+            scrollPosition = scrollable.getPosition();
+        }
+
         this.onLoadData(this.loadedData, e);
+
+        if(scrollable) {
+            scrollable.scrollTo(scrollPosition);
+        }
     }
 
     ,onGetDraftIdCallback: function(draftId) {
@@ -236,7 +272,7 @@ Ext.define('CB.object.plugin.Comments', {
     ,onAddCommentProcess: function(r, e) {
         this.addCommentField.enable();
 
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             // show error
             Ext.Msg.alert(L.Error, L.AddCommentError);
 
@@ -295,9 +331,11 @@ Ext.define('CB.object.plugin.Comments', {
         var el = e.getTarget('.load-more');
 
         if(el) {
-            e.stopEvent();
-            this.onLoadMoreClick(e);
-            return;
+            el = Ext.get(el);
+            if(!el.hasListener('click')) {
+                e.stopEvent();
+                this.onLoadMoreClick(e);
+            }
         }
     }
 
@@ -330,7 +368,7 @@ Ext.define('CB.object.plugin.Comments', {
     }
 
     ,processEditComment: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -365,7 +403,7 @@ Ext.define('CB.object.plugin.Comments', {
     }
 
     ,onEditCommentProcess: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -413,7 +451,7 @@ Ext.define('CB.object.plugin.Comments', {
     }
 
     ,processRemoveComment: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -468,7 +506,6 @@ Ext.define('CB.object.plugin.Comments', {
         if(Ext.isEmpty(el)) {
             return;
         }
-
         var divs = dv.getEl().query('td.comment');
 
         //iterate comments and see if any exceeds default height
@@ -480,5 +517,11 @@ Ext.define('CB.object.plugin.Comments', {
         }
 
         this.updateLayout();
+    }
+
+    ,onAddCommentLabelClick: function() {
+        this.remove(this.addCommentLabel);
+        this.add(this.addCommentField);
+        this.addCommentField.reset();
     }
 });

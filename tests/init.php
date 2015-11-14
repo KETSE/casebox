@@ -9,7 +9,7 @@
 
 include __DIR__.'/config.php';
 
-include TEST_PATH . '../vendor/autoload.php';
+include realpath( TEST_PATH . '/../').'/vendor/autoload.php';
 
 include CB_DOC_ROOT . 'classes/UnitTest/Helpers.php';
 

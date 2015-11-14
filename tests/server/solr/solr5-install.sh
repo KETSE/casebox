@@ -4,10 +4,10 @@ set -e
 
 cd $(dirname $0)
 
-export SOLR_VERSION=${SOLR_VERSION:-5.1.0}
+export SOLR_VERSION=${SOLR_VERSION:-5.2.0}
 export SOLR_NAME="solr-$SOLR_VERSION"
 export SOLR_DIR="`pwd`/${SOLR_NAME}"
-export SOLR_PORT=${SOLR_PORT:-8180}
+export SOLR_PORT=${SOLR_PORT:-8983}
 export SOLR_SOURCE_URL="http://archive.apache.org/dist/lucene/solr/${SOLR_VERSION}/${SOLR_NAME}.tgz"
 
 export SOLR_ARCHIVE="${SOLR_NAME}.tgz"
@@ -45,7 +45,7 @@ if [ -d "${TRAVIS_BUILD_DIR}/sys/solr_configsets" ]; then
     cp -ar "${TRAVIS_BUILD_DIR}/sys/solr_configsets/default_config/conf" "${SOLR_DIR}/server/solr/configsets/cbtest_default_configs/"
     mkdir "${SOLR_DIR}/server/solr/configsets/cbtest_log_configs"
     cp -ar "${TRAVIS_BUILD_DIR}/sys/solr_configsets/log_config/conf" "${SOLR_DIR}/server/solr/configsets/cbtest_log_configs/"
-    ls -la "${SOLR_DIR}/server/solr/configsets/cbtest_log_configs/conf"
+#    ls -la "${SOLR_DIR}/server/solr/configsets/cbtest_log_configs/conf"
 fi
 
 echo "Changing dir into ${SOLR_DIR}"

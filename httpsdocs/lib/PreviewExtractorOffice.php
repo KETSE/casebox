@@ -17,7 +17,7 @@ class PreviewExtractorOffice extends PreviewExtractor
             WHERE `status` = 2
                 AND `group` = $1',
             'office'
-        ) or die( DB\dbQueryError() );
+        ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
             $processing = ($r['count'] > 0);

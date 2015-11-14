@@ -158,16 +158,6 @@ class Base
      */
     protected function execute()
     {
-        /*$sdb = $this->cfg['source_db_name'];
-
-        $res = DB\dbQuery(
-            'SELECT * from ' . $sdb. '.table_name ',
-            array(null, null)
-        ) or die(DB\dbQueryError());
-        while ($r = $res->fetch_assoc()) {
-
-        }
-        $res->close();/**/
     }
 
     /**
@@ -206,6 +196,7 @@ class Base
         DB\startTransaction();
 
         echo "\nInitializing .. \n____________________________\n";
+
         $this->init();
         echo "\nOk\n";
 
@@ -324,6 +315,7 @@ class Base
 
                 $data = array(
                     'name' => $fn
+                    ,'_title' => $fn
                     ,'en' => $name
                     ,'type' => $type
                     ,'order' => $order
@@ -342,6 +334,7 @@ class Base
                 }
 
                 if (!empty($cfg)) {
+                    $fv['cfg'] = $cfg;
                     $data['cfg'] = Util\jsonEncode($cfg);
                 }
 

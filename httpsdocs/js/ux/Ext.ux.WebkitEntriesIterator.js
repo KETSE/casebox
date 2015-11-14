@@ -16,7 +16,8 @@ Ext.ux.WebkitEntriesIterator = {
         if(fromSubfolder) {
             this.direcotoriesCount--;
         }
-        for (i = 0; i < entries.length; i++) {
+
+        for (var i = 0; i < entries.length; i++) {
             if(!Ext.isEmpty(entries[i])) {
                 if (entries[i].isDirectory) {
                     this.direcotoriesCount++;
@@ -61,17 +62,23 @@ Ext.ux.WebkitEntriesIterator = {
     ,errorHandler: function (e) {
         console.log('FileSystem API error code: ' + e.code);
     }
+
     ,convertEntriesToFiles: function(){
         this.convertedFiles = 0;
 
+        var fn = function(f){
+            f.fullPath = this.result[this.convertedFiles].fullPath;
+            this.result[this.convertedFiles] = f;
+            this.convertedFiles++;
+            if(this.convertedFiles == this.result.length) {
+                this.callback(this.result);
+            }
+        };
+
         for (var i = 0; i < this.result.length; i++) {
-            this.result[i].file(function(f){
-                f.fullPath = this.result[this.convertedFiles].fullPath;
-                this.result[this.convertedFiles] = f;
-                this.convertedFiles++;
-                if(this.convertedFiles == this.result.length)
-                    this.callback(this.result);
-            }.bind(this));
+            this.result[i].file(
+                fn.bind(this)
+            );
         }
     }
 

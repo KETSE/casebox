@@ -51,7 +51,7 @@ Ext.define('CB.object.plugin.Versions', {
             ]
         });
 
-        CB.object.plugin.Versions.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
 
         this.enableBubble(['openversion']);
     }

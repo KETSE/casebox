@@ -1,7 +1,6 @@
 <?php
 namespace CB\Objects;
 
-use CB\Config;
 use CB\Util;
 use CB\User;
 use CB\Objects;
@@ -31,11 +30,11 @@ class Comment extends Object
 
         //disable default log from parent Object class
         //we'll set comments add as comment action for parent
-        Config::setFlag('disableActivityLog', true);
+        \CB\Config::setFlag('disableActivityLog', true);
 
         $rez = parent::create($p);
 
-        Config::setFlag('disableActivityLog', false);
+        \CB\Config::setFlag('disableActivityLog', false);
 
         $this->updateParentFollowers();
 
@@ -44,6 +43,7 @@ class Comment extends Object
             array(
                 'new' => $this->getParentObject()
                 ,'comment' => $p['data']['_title']
+                ,'mentioned' => $this->lastMentionedUserIds
             )
         );
 
@@ -59,11 +59,11 @@ class Comment extends Object
     {
         //disable default log from parent Object class
         //we'll set comments add as comment action for parent
-        Config::setFlag('disableActivityLog', true);
+        \CB\Config::setFlag('disableActivityLog', true);
 
         $rez = parent::update($p);
 
-        Config::setFlag('disableActivityLog', false);
+        \CB\Config::setFlag('disableActivityLog', false);
 
         $p = &$this->data;
 
@@ -74,6 +74,7 @@ class Comment extends Object
             array(
                 'new' => Objects::getCachedObject($p['pid'])
                 ,'comment' => $p['data']['_title']
+                ,'mentioned' => $this->lastMentionedUserIds
             )
         );
 
@@ -110,7 +111,8 @@ class Comment extends Object
     {
         $p = &$this->data;
 
-        $posd = $this->getParentObject()->getSysData();
+        $po = $this->getParentObject();
+        $posd = $po->getSysData();
 
         $newUserIds = array();
 
@@ -129,8 +131,8 @@ class Comment extends Object
         }
 
         //analize comment text and get referenced users
-        $uids = Util\getReferencedUsers($p['data']['_title']);
-        foreach ($uids as $uid) {
+        $this->lastMentionedUserIds = Util\getReferencedUsers($p['data']['_title']);
+        foreach ($this->lastMentionedUserIds as $uid) {
             if (!in_array($uid, $wu)) {
                 $newUserIds[] = $uid;
             }
@@ -146,8 +148,7 @@ class Comment extends Object
         }
 
         //always update sys_data to change lastComment date
-        $this->getParentObject()->updateSysData($posd);
-
+        $po->updateSysData($posd);
     }
 
     /**
@@ -199,7 +200,7 @@ class Comment extends Object
         //replace users with their names
         if (in_array('user', $replacements) &&preg_match_all('/@([\w\.\-]+[\w])/', $message, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
-                $userId = DM\User::getIdByName($match[1]);
+                $userId = DM\Users::getIdByName($match[1]);
                 if (is_numeric($userId)) {
                     $userName = $match[1];
                     $message = str_replace(

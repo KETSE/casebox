@@ -30,18 +30,27 @@ Ext.define('CB.GenericForm', {
     }
 
     ,_lockEdit: function(){
-        if(this.lockEdit) return this.lockEdit();
+        if(this.lockEdit) {
+            return this.lockEdit();
+        }
     }
 
     ,_unlockEdit: function(){
-        if(this.unlockEdit) return this.unlockEdit();
+        if(this.unlockEdit) {
+            return this.unlockEdit();
+        }
         this.doClose();
     }
 
     ,onBeforeClose: function(){
         if(this._confirmedClosing || !this._isDirty){
             this.getEl().mask(L.Closing + ' ...', 'x-mask-loading');
-            if(!Ext.isNumber(this.data.id)) this.doClose(); else this._unlockEdit();
+            if(!Ext.isNumber(this.data.id)) {
+                this.doClose();
+            } else {
+                this._unlockEdit();
+            }
+
             return false;
         }
         Ext.Msg.show({
@@ -128,25 +137,55 @@ Ext.define('CB.GenericForm', {
 
     ,processLoadResponse: function(f, e){
         this.getEl().unmask();
-        r = e.result;
-        if(r.success !== true){
+
+        var r = e.result;
+
+        if (!r || (r.success !== true)) {
             if(App.hideFailureAlerts){
                 this.doClose();
                 return;
             }
-            Ext.Msg.confirm( L.Error, Ext.valueFrom(e.msg, L.readDataErrorMessage), function(b){ if(b == 'yes') this.loadData(); else this.doClose(); }, this );
+
+            Ext.Msg.confirm(
+                L.Error
+                ,Ext.valueFrom(e.msg, L.readDataErrorMessage)
+                ,function(b) {
+                    if(b == 'yes') {
+                        this.loadData();
+                    } else {
+                        this.doClose();
+                    }
+                }
+                ,this
+            );
+
             return;
         }
-        if(!Ext.isDefined(r.data)) return;
+
+        if(!Ext.isDefined(r.data)) {
+            return;
+        }
+
         this.data = r.data;
-        if(this.onFormLoaded) this.onFormLoaded(f, e);
+
+        if(this.onFormLoaded) {
+            this.onFormLoaded(f, e);
+        }
 
         if(Ext.isDefined(this.data.already_opened_by)){
             Ext.Msg.show({
                 title: L.ActionOpeningConfirmation
                 ,msg: this.data.already_opened_by
                 ,buttons: Ext.Msg.YESNO
-                ,fn: function(b){ if(b == 'yes'){this.enable(); this._setFormValues(); this._lockEdit(); } else this._unlockEdit(); }
+                ,fn: function(b) {
+                    if (b == 'yes') {
+                        this.enable();
+                        this._setFormValues();
+                        this._lockEdit();
+                    } else {
+                        this._unlockEdit();
+                    }
+                }
                 ,scope: this
                 ,animEl: this.getEl()
                 ,icon: Ext.MessageBox.QUESTION
@@ -158,16 +197,24 @@ Ext.define('CB.GenericForm', {
 
     ,_setFormValues: function(){
         this.updateFormTitle();
-        if(this.setFormValues) this.setFormValues();
+
+        if(this.setFormValues) {
+            this.setFormValues();
+        }
+
         this.setDirty(false);
     }
 
     ,_getFormValues: function(){
-        if(this.getFormValues) this.getFormValues();
+        if(this.getFormValues) {
+            this.getFormValues();
+        }
     }
 
     ,saveForm: function(){
-        if(!this.getForm().isValid()) return ;
+        if(!this.getForm().isValid()) {
+            return ;
+        }
         this.getEl().mask(L.SavingChanges + ' ...', 'x-mask-loading');
         this._getFormValues();
         this.getForm().submit({
@@ -184,12 +231,26 @@ Ext.define('CB.GenericForm', {
     }
 
     ,onSaveSuccess: function(f, a){
-        if(Ext.isDefined(a.result.data)) this.data = a.result.data;
-        if(this.onFormLoaded) this.onFormLoaded(f, a);
-        if(Ext.isDefined(a.result.title)) this.title = a.result.title;
+        if (Ext.isDefined(a.result.data)) {
+            this.data = a.result.data;
+        }
+
+        if (this.onFormLoaded) {
+            this.onFormLoaded(f, a);
+        }
+
+        if (Ext.isDefined(a.result.title)) {
+            this.title = a.result.title;
+        }
+
         this._setFormValues();
+
         this.fireEvent('savesuccess', this, a);
-        if(this._confirmedClosing) return this.doClose();
+
+        if(this._confirmedClosing) {
+            return this.doClose();
+        }
+
         this.getEl().unmask();
     }
 

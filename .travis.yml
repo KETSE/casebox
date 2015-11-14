@@ -36,7 +36,8 @@ install:
 
 before_script:
   # copy and install solr
-   - export SOLR_VERSION="5.1.0"
+   - export SOLR_VERSION="5.2.0"
+   - export SOLR_PORT="8983"
    - bash tests/server/solr/solr5-install.sh
    # may take few seconds to start and may not be available when the script is executed
    - sleep 3
@@ -54,7 +55,7 @@ before_script:
    - php tests/auto_install.php
 
 script:
-   - vendor/bin/phpunit -c tests/phpunit-travis.xml httpsdocs/classes/UnitTest/Tests/
+   - vendor/bin/phpunit -c tests/phpunit-travis.xml 
 
 after_script:
  - if [ -f vendor/bin/coveralls ] ; then php vendor/bin/coveralls -v || true ; fi

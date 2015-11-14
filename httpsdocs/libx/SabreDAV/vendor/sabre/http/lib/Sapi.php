@@ -83,6 +83,10 @@ class Sapi {
             file_put_contents('php://output', $body);
         }
 
+        if (is_resource($body)) {
+            fclose($body);
+        }
+
     }
 
     /**

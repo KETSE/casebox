@@ -229,11 +229,11 @@ class Notifications extends Base
 
     /**
      * mark user notifications as read
-     * @param  int   $userId
      * @param  int[] $ids
+     * @param  int   $userId
      * @return void
      */
-    public static function markAsRead($userId, $ids)
+    public static function markAsRead($ids, $userId)
     {
         //validate params
         \CB\raiseErrorIf(
@@ -255,11 +255,11 @@ class Notifications extends Base
 
     /**
      * mark user notifications as seen
-     * @param  int  $userId
      * @param  int  $id
+     * @param  int  $userId
      * @return void
      */
-    public static function markAsSeen($userId, $upToId)
+    public static function markAsSeenUpToActionId($id, $userId)
     {
         //validate params
         \CB\raiseErrorIf(
@@ -267,12 +267,38 @@ class Notifications extends Base
             'ErroneousInputData'
         );
 
-        if (is_numeric($upToId)) {
+        if (is_numeric($id)) {
             DB\dbQuery(
                 'UPDATE `' . static::getTableName() . '`
                 SET `seen` = 1
-                WHERE user_id = $1 AND id <= $2 AND seen = 0',
-                array($userId, $upToId)
+                WHERE user_id = $1 AND action_id <= $2 AND seen = 0',
+                array($userId, $id)
+            ) or die(DB\dbQueryError());
+        }
+    }
+
+    /**
+     * mark user notifications as seen
+     * @param  varchar | array $id     notification ids
+     * @param  int             $userId
+     * @return void
+     */
+    public static function markAsSeen($ids, $userId)
+    {
+        \CB\raiseErrorIf(
+            !is_numeric($userId),
+            'ErroneousInputData'
+        );
+
+        $ids = Util\toNumericArray($ids);
+        if (!empty($ids)) {
+            DB\dbQuery(
+                'UPDATE `' . static::getTableName() . '`
+                SET `seen` = 1
+                WHERE user_id = $1
+                    AND id IN (' . implode(',', $ids) . ')
+                    AND seen = 0',
+                $userId
             ) or die(DB\dbQueryError());
         }
     }

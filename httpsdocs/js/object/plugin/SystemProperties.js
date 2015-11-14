@@ -36,7 +36,6 @@ Ext.define('CB.object.plugin.SystemProperties', {
             ,items: this.dataView
         });
 
-        // CB.object.plugin.SystemProperties.superclass.initComponent.apply(this, arguments);
         this.callParent(arguments);
 
     }
@@ -55,7 +54,7 @@ Ext.define('CB.object.plugin.SystemProperties', {
     }
 
     ,attachEvents: function(){
-        a = this.getEl().query('a.path');
+        var a = this.getEl().query('a.path');
         Ext.each(
             a
             ,function(t){
@@ -80,10 +79,8 @@ Ext.define('CB.object.plugin.SystemProperties', {
     }
 
     ,getContainerToolbarItems: function() {
-        rez = {
-            tbar: {
-                'subscription': this.data.subscription
-            }
+        var rez = {
+            tbar: {}
             ,menu: {}
         };
 

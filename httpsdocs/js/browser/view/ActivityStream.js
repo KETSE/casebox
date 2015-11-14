@@ -32,10 +32,8 @@ Ext.define('CB.browser.view.ActivityStream',{
             ,'            </td>'
             ,'          </tr>'
             ,'        </table>'
-            ,'        <div class="action-comments" id="as-record-{nid}">'
-            // ,'          <tr><td class="action-comment">Comment</td></tr>'
-            // ,'          <tr><td class="action-comment">Add comment</td></tr>'
-            ,'        </div>'
+            ,'      </div>'
+            ,'      <div class="action-comments" id="as-record-{nid}">'
             ,'      </div>'
             ,'    </td>'
             ,'</tr>'
@@ -105,7 +103,7 @@ Ext.define('CB.browser.view.ActivityStream',{
 
                 ,getNextButton: Ext.bind(
                     function() {
-                        rez = '<div class="asNext click" style="display:none"><span>' +
+                        var rez = '<div class="asNext click" style="display:none"><span>' +
                             L.Next +
                             ' </span><span class="dIB i16 i-arrow-right"></span></div>';
 
@@ -120,8 +118,8 @@ Ext.define('CB.browser.view.ActivityStream',{
         this.dataView = new Ext.DataView({
             tpl: tpl
             ,store: this.store
-            ,deferInitialRefresh: true
-            ,itemSelector:'tr.as-record'
+            ,deferInitialRefresh: false
+            ,itemSelector: 'div.as-item'//'tr.as-record'
             // ,overItemCls:'as-record-over'
             ,focusCls: ''
             ,scrollable: true
@@ -141,9 +139,20 @@ Ext.define('CB.browser.view.ActivityStream',{
             ,items: [
                 this.dataView
             ]
+            ,listeners: {
+                scope: this
+                ,activate: this.onActivate
+            }
         });
 
-        this.store.on('load', this.onStoreLoad, this);
+        this.store.on(
+            'load'
+            ,this.onStoreLoad
+            ,this
+            ,{
+                defer: 300
+            }
+        );
 
         this.callParent(arguments);
     }
@@ -173,31 +182,50 @@ Ext.define('CB.browser.view.ActivityStream',{
         for (var i = 0; i < selected.length; i++) {
             recs.push(selected[i].data);
         }
-        this.fireEvent('selectionchange', recs);
+
+        if(!Ext.isEmpty(recs)) {
+            this.fireEvent('selectionchange', recs);
+        }
     }
 
     ,onStoreLoad: function(store, records, successful, eOpts) {
-        if (this.getEl().isVisible(true)) {
-            this.dataView.scrollTo(0, 0, false);
+        var visible = this.getEl().isVisible(true);
 
-            for (var i = 0; i < records.length; i++) {
-                var id = records[i].get('nid');
+        if (visible) {
+            this.addCommentPlugins();
+        }
+    }
 
-                if(records[i].data.lastAction && !Ext.isEmpty(Ext.get('as-record-' + id))) {
+    ,addCommentPlugins: function() {
+       var ready = (this.store.getCount() === 0);
+
+        this.store.each(
+            function(r) {
+                var id = r.get('nid')
+                    ,recEl = Ext.get('as-record-' + id);
+
+                ready = ready || !Ext.isEmpty(recEl);
+
+                if(r.data.lastAction && !Ext.isEmpty(recEl)) {
                     var c = Ext.create(
                         'CBObjectPluginComments'
                         ,{
                             params: {id: id}
                             ,header: false
                             ,renderTo: 'as-record-' + id
+                            ,showAddLabel: 'label'
                             ,commentFieldConfig: {
                                 xtype: 'CBFieldCommentLight'
                             }
                         }
                     );
-                    c.onLoadData(records[i].data.comments);
+                    c.onLoadData(r.data.comments);
                 }
             }
+            ,this
+        );
+
+        if(ready) {
 
             var el = this.dataView.getEl().down('.asNext')
                 ,s = this.store
@@ -209,6 +237,10 @@ Ext.define('CB.browser.view.ActivityStream',{
             if (el && (total > 0) && (start + s.getCount() < total)) {
                 el.setStyle('display', 'inherit');
             }
+
+            this.dataView.scrollTo(0, 0, false);
+        } else {
+            Ext.defer(this.addCommentPlugins, 200, this);
         }
     }
 
@@ -224,4 +256,27 @@ Ext.define('CB.browser.view.ActivityStream',{
             );
         }
     }
+
+    /**
+     * called from view container when reload is clicked
+     * @return void
+     */
+    ,onContainerReloadClick: function(params) {
+        delete params.start;
+        delete params.page;
+    }
+
+    ,onActivate: function() {
+        this.fireEvent(
+            'settoolbaritems'
+            ,[
+                ,'->'
+                ,'reload'
+                ,'apps'
+                ,'-'
+                ,'more'
+            ]
+        );
+    }
+
 });

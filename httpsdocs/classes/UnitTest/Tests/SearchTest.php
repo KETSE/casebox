@@ -180,7 +180,9 @@ class SearchTest extends \PHPUnit_Framework_TestCase
 
         $this->assertArraySubset(
             json_decode($search['expected_response'], true),
-            $result
+            $result,
+            false,
+            ' Result:'.print_r($result,true).PHP_EOL.' Expected:'.print_r(json_decode($search['expected_response'], true),true)
         );
 
     }

@@ -1,8 +1,8 @@
 <?php
 namespace CB\Plugins;
 
-use CB\DB as DB;
-use CB\Util as Util;
+use CB\DataModel as DM;
+use CB\Util;
 
 /**
  * Templates collection class
@@ -28,21 +28,14 @@ class Collection
 
         $this->items = array();
 
-        $res = DB\dbQuery(
-            'SELECT id
-                ,name
-                ,cfg
-                ,`active`
-                ,`order`
-            FROM ' . \CB\PREFIX . '_casebox.plugins
-            ORDER BY `order`'
-        ) or die(DB\dbQueryError());
+        $recs = DM\Plugins::readAll();
 
-        while ($r = $res->fetch_assoc()) {
-            $r['cfg'] = Util\toJSONArray($r['cfg']);
+        // Util\sortRecordsArray($recs, 'order', 'asc', 'asInt');
+
+        foreach ($recs as $r) {
             $this->items[$r['name']] = $r;
         }
-        $res->close();
+
         $this->loaded = true;
     }
 

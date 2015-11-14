@@ -2,7 +2,6 @@
 namespace CB\TreeNode;
 
 use CB\Config;
-use CB\DB;
 use CB\Util;
 use CB\L;
 use CB\Security;
@@ -114,16 +113,11 @@ class ActionLog extends Base
             default:
 
                 if (!empty($id) && is_numeric($id)) {
-                    $res = DB\dbQuery(
-                        'SELECT data FROM action_log WHERE id = $1',
-                        $id
-                    ) or die(DB\dbQueryError());
+                    $r = DM\Log::read($id);
 
-                    if ($r = $res->fetch_assoc()) {
-                        $j = Util\toJSONArray($r['data']);
-                        $rez = Util\coalesce($j['name'], 'unknown');
+                    if (!empty($r)) {
+                        $rez = Util\coalesce($r['data']['name'], 'unknown');
                     }
-                    $res->close();
                 }
                 break;
         }

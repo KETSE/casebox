@@ -3,6 +3,7 @@
 namespace CB\DataModel;
 
 use CB\DB;
+use CB\Util;
 
 class Base
 {
@@ -23,6 +24,19 @@ class Base
     protected static $tableFields = array(
         'id' => 'int'
     );
+
+    /**
+     * decoded json fields on read operation
+     *
+     * @var array
+     */
+    protected static $decodeJsonFields = array();
+
+    /**
+     * allow read of all records in bulk
+     * avoid setting this flag to true for big tables
+     */
+    protected static $allowReadAll = false;
 
     /**
      * add a record
@@ -106,6 +120,69 @@ class Base
         }
         $res->close();
 
+        static::decodeJsonFields($rez);
+
+        return $rez;
+    }
+
+    /**
+     * read records by ids
+     * @param  array   $ids   comma separated string or numeric array
+     * @param  boolean $assoc to return result as associative array by record id
+     * @return array   records
+     */
+    public static function readByIds($ids, $assoc = false)
+    {
+        $rez = array();
+
+        $ids = Util\toNumericArray($ids);
+
+        if (!empty($ids)) {
+            $res = DB\dbQuery(
+                'SELECT *
+                FROM ' . static::getTableName() . '
+                WHERE id in (' . implode(',', $ids) . ')'
+            ) or die(DB\dbQueryError());
+
+            while ($r = $res->fetch_assoc()) {
+                static::decodeJsonFields($r);
+
+                if ($assoc) {
+                    $rez[$r['id']] = $r;
+                } else {
+                    $rez[] = $r;
+                }
+            }
+            $res->close();
+        }
+
+        return $rez;
+    }
+
+    /**
+     * read all records from the table but only for derived classes that are allowed to
+     * by default this method returns empty array it class doesnt have
+     * allowReadAll flag set to true
+     *
+     * @return array
+     */
+    public static function readAll()
+    {
+        $rez = array();
+
+        if (static::$allowReadAll === true) {
+            $res = DB\dbQuery(
+                'SELECT *
+                FROM ' . static::getTableName()
+            ) or die(DB\dbQueryError());
+
+            while ($r = $res->fetch_assoc()) {
+                static::decodeJsonFields($r);
+                $rez[] = $r;
+            }
+            $res->close();
+        }
+
         return $rez;
     }
 
@@ -173,18 +250,28 @@ class Base
 
     /**
      * delete a record by its id
-     * @param  int     $id
+     * @param  int | array $ids
      * @return boolean
      */
-    public static function delete($id)
+    public static function delete($ids)
     {
-        static::validateParamTypes(array('id' => $id));
+        $sql = 'DELETE from ' . static::getTableName() .
+            ' WHERE id';
 
-        DB\dbQuery(
-            'DELETE from ' . static::getTableName() .
-            ' WHERE id = $1',
-            $id
-        ) or die(DB\dbQueryError());
+        if (is_scalar($ids)) {
+            static::validateParamTypes(array('id' => $ids));
+
+            DB\dbQuery($sql . ' = $1', $ids) or die(DB\dbQueryError());
+
+        } else {
+            $ids = Util\toNumericArray($ids);
+
+            if (!empty($ids)) {
+                DB\dbQuery(
+                    $sql . ' IN (' . implode(',', $ids) . ')'
+                ) or die(DB\dbQueryError());
+            }
+        }
 
         $rez = (DB\dbAffectedRows() > 0);
 
@@ -211,26 +298,60 @@ class Base
     /**
      * get name for given id or return same result if numeric
      * @param  varchar $idOrName
+     * @param  varchar $nameField to search by
+     * @param  int     $pid       filter by pid if set
      * @return int     | null
      */
-    public static function toId($idOrName, $nameField = 'name')
+    public static function toId($idOrName, $nameField = 'name', $pid = false)
     {
-        if (!is_numeric($idOrName)) {
+        $rez = null;
 
-            $res = DB\dbQuery(
-                'SELECT id
+        if (!is_numeric($idOrName)) {
+            
+            $sql = 'SELECT id
                 FROM ' . static::getTableName() .
-                ' WHERE ' . $nameField . ' = $1',
-                $idOrName
-            ) or die(DB\dbQueryError());
+                ' WHERE ' . $nameField . ' = $1';
+
+            if (($pid !== false) && is_numeric($pid)) {
+                $sql .= ' AND pid = ' . intval($pid);
+            }
+
+            $res = DB\dbQuery($sql, $idOrName) or die(DB\dbQueryError());
 
             if ($r = $res->fetch_assoc()) {
-                $idOrName = $r['id'];
+                $rez = $r['id'];
             }
+            
+            if(empty($rez)) {
+              //  trigger_error(" Error on find ID : ".$sql.' $1 = '.$idOrName, E_USER_WARNING);
+            }
+            
             $res->close();
+
+        } else {
+            $rez = $idOrName;
         }
 
-        return $idOrName;
+        return $rez;
+    }
+
+    /**
+     * collect data from a given array corresponding to current table definition
+     * also encodes json fields defined in static::$decodeJsonFields
+     * @param  array $a
+     * @return array associative array of fieldName => value
+     */
+    public static function collectData($a)
+    {
+        $rez = array_intersect_key($a, static::$tableFields);
+
+        foreach (static::$decodeJsonFields as $fn) {
+            if (isset($rez[$fn]) && !is_null($rez[$fn] && !is_scalar($rez[$fn]))) {
+                $rez[$fn] = Util\jsonEncode($rez[$fn]);
+            }
+        }
+
+        return $rez;
     }
 
     /**
@@ -314,6 +435,20 @@ class Base
                 'ErroneousInputData' //' Invalid value for field "' . $fn . '"'
             );
         }
+    }
+
+    /**
+     * decode json fields
+     */
+    protected static function decodeJsonFields(&$record)
+    {
+        foreach (static::$decodeJsonFields as $fn) {
+            if (!empty($record[$fn])) {
+                $record[$fn] = Util\toJSONArray($record[$fn]);
+            }
+        }
+
+        return $record;
     }
 
     /**

@@ -34,7 +34,7 @@ Ext.define('CB.HtmlEditWindow', {
                         ,{text: Ext.MessageBox.buttonText.cancel, handler: this.doClose, scope: this}]
         });
 
-        CB.HtmlEditWindow.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
 
         this.on('show', this.onShow, this);
     }

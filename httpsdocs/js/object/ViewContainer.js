@@ -59,7 +59,8 @@ Ext.define('CB.object.ViewContainer', {
                         ,editobject: this.onEditObjectEvent
                         ,editmeta: this.onEditObjectEvent
 
-                        ,loaded: this.onCardItemLoaded
+                        ,loaded: this.onPluginsContainerLoaded
+                        // ,loaded: this.onCardItemLoaded
                     }
                 },{
                     xtype: 'CBObjectPreview'
@@ -273,6 +274,15 @@ Ext.define('CB.object.ViewContainer', {
                 ,itemId: 'permalink'
                 ,scope: this
                 ,handler: this.onPermalinkClick
+            }
+
+            ,'setOwner': {
+                text: L.SetOwner
+                ,itemId: 'setOwner'
+                ,menu: getMenuUserItems(
+                    this.onSetOwnershipClick
+                    ,this
+                )
             }
 
             ,'new': {
@@ -505,6 +515,10 @@ Ext.define('CB.object.ViewContainer', {
         this.onViewChange();
     }
 
+    ,onPluginsContainerLoaded: function(cmp, params) {
+        this.loadedData.subscription = params.subscription;
+        this.onCardItemLoaded(cmp);
+    }
     /**
      * adjustments on view loaded
      * @param  object item
@@ -601,7 +615,7 @@ Ext.define('CB.object.ViewContainer', {
         ti.tbar.star = {};
         ti.tbar.unstar = {};
 
-        var subscription = Ext.valueFrom(ti.tbar['subscription'], 'ignore');
+        var subscription = Ext.valueFrom(this.loadedData.subscription, 'ignore');
 
         this.actions.notifyOn.setHidden(subscription == 'watch');
         this.actions.notifyOff.setHidden(subscription == 'ignore');
@@ -962,7 +976,7 @@ Ext.define('CB.object.ViewContainer', {
                 ,type: type
             }
             ,function(r, e) {
-                if(r.success !== true) {
+                if(!r || (r.success !== true)) {
                     return;
                 }
 
@@ -1071,6 +1085,25 @@ Ext.define('CB.object.ViewContainer', {
      */
     ,onCloseClick: function() {
         this.collapse();
+    }
+
+    ,onSetOwnershipClick: function(b, e) {
+        if(!Ext.isEmpty(this.loadedData.id)) {
+            CB_Objects.setOwnership(
+                {
+                    ids: this.loadedData.id
+                    ,userId: b.userId
+                }
+                ,this.processSetOwnership
+                ,this
+            );
+        }
+    }
+
+    ,processSetOwnership: function(r, e) {
+        if(r && r.success) {
+            App.fireEvent('objectchanged', this.loadedData, this);
+        }
     }
 
     ,onStarClick: function(b, e) {

@@ -1,7 +1,7 @@
 <?php
 namespace CB;
 
-use CB\Path;
+use CB\DataModel as DM;
 
 class Browser
 {
@@ -125,6 +125,16 @@ class Browser
         $this->requestParams['view'] = $viewConfig;
         $this->result['view'] = $viewConfig;
 
+        //remove sorting for some views
+        if (isset($viewConfig['type'])) {
+            switch ($viewConfig['type']) {
+                case 'pivot':
+                case 'charts':
+                case 'calendar':
+                    $this->requestParams['sort'] = null;
+            }
+        }
+
         $this->requestParams['facets'] = $this->detectFacets();
 
         $this->collectAllChildren();
@@ -199,10 +209,14 @@ class Browser
         $rp = &$this->requestParams;
 
         foreach ($this->treeNodeClasses as $class) {
-            $r = $class->getViewConfig($this->path, $rp);
+            try {
+                $r = $class->getViewConfig($this->path, $rp);
 
-            if (!empty($r)) {
-                $rez = $r;
+                if (!empty($r)) {
+                    $rez = $r;
+                }
+            } catch (\Exception $e) {
+                \CB\debug(get_class($class) . ' exception on getViewConfig', $rp);
             }
         }
 
@@ -240,53 +254,57 @@ class Browser
         $rez = &$this->result;
 
         foreach ($this->treeNodeClasses as $class) {
-            $r = $class->getChildren($this->path, $this->requestParams);
+            try {
+                $r = $class->getChildren($this->path, $this->requestParams);
 
-            //merging all returned records into a single array
-            if (!empty($r['data'])) {
-                $rez['data'] = array_merge($rez['data'], $r['data']);
+                //merging all returned records into a single array
+                if (!empty($r['data'])) {
+                    $rez['data'] = array_merge($rez['data'], $r['data']);
 
-                //set display columns and sorting if present
-                if (isset($r['DC'])) {
-                    $rez['DC'][] = $r['DC'];
+                    //set display columns and sorting if present
+                    if (isset($r['DC'])) {
+                        $rez['DC'][] = $r['DC'];
+                    }
+
+                    if (isset($r['view'])) {
+                        $rez['view'] = array_merge($rez['view'], $r['view']);
+                    }
+
+                    // if (isset($r['sort'])) {
+                    //     $rez['view']['sort'] = $r['sort'];
+                    // }
+
+                    // if (isset($r['group'])) {
+                    //     $rez['view']['group'] = $r['group'];
+                    // }
                 }
 
-                if (isset($r['view'])) {
-                    $rez['view'] = array_merge($rez['view'], $r['view']);
+                $params = array(
+                    'facets'
+                    ,'pivot'
+                    // ,'view'
+                    ,'stats'
+                );
+
+                foreach ($params as $param) {
+                    if (isset($r[$param])) {
+                        $rez[$param] = $r[$param];
+                    }
                 }
 
-                // if (isset($r['sort'])) {
-                //     $rez['view']['sort'] = $r['sort'];
-                // }
-
-                // if (isset($r['group'])) {
-                //     $rez['view']['group'] = $r['group'];
-                // }
-            }
-
-            $params = array(
-                'facets'
-                ,'pivot'
-                // ,'view'
-                ,'stats'
-            );
-
-            foreach ($params as $param) {
-                if (isset($r[$param])) {
-                    $rez[$param] = $r[$param];
+                //calc totals accordingly
+                if (isset($r['total'])) {
+                    $rez['total'] += $r['total'];
+                } elseif (!empty($r['data'])) {
+                    $rez['total'] += sizeof($r['data']);
                 }
-            }
 
-            //calc totals accordingly
-            if (isset($r['total'])) {
-                $rez['total'] += $r['total'];
-            } elseif (!empty($r['data'])) {
-                $rez['total'] += sizeof($r['data']);
-            }
-
-            //if its debug host - search params will be also returned
-            if (isset($r['search'])) {
-                $rez['search'][] = $r['search'];
+                //if its debug host - search params will be also returned
+                if (isset($r['search'])) {
+                    $rez['search'][] = $r['search'];
+                }
+            } catch (\Exception $e) {
+                \CB\debug(get_class($class) . ' exception on getChildren', $this->requestParams);
             }
         }
     }
@@ -321,19 +339,15 @@ class Browser
         $fieldConfig = array();
         // get field config from database
         if (!empty($p['fieldId']) && is_numeric($p['fieldId'])) {
-            $res = DB\dbQuery(
-                'SELECT cfg FROM templates_structure WHERE id = $1',
-                $p['fieldId']
-            ) or die(DB\dbQueryError());
-            if ($r = $res->fetch_assoc()) {
-                $fieldConfig = Util\jsonDecode($r['cfg']);
+            $r = DM\TemplatesStructure::read($p['fieldId']);
 
-                //set "fq" param from database (dont trust user imput)
-                if (!empty($fieldConfig['fq'])) {
-                    $p['fq'] = $fieldConfig['fq'];
+            if (!empty($r['cfg'])) {
+                $fieldConfig = $r['cfg'];
+
+                if (!empty($r['cfg']['fq'])) {
+                    $p['fq'] = $r['cfg']['fq'];
                 }
             }
-            $res->close();
         }
 
         if (!empty($p['source'])) {
@@ -364,7 +378,7 @@ class Browser
 
                     switch ($p['scope']) {
                         case 'project':
-                            $ids = $this->getCaseId(Path::detectRealTargetId($p['path']));
+                            $ids = DM\Tree::getCaseId(Path::detectRealTargetId($p['path']));
                             break;
 
                         case 'parent':
@@ -410,19 +424,24 @@ class Browser
             switch ($scope) {
                 case 'project': /* limiting pid to project. If not in a project then to parent directory */
                     if (!empty($p['objectId']) && is_numeric($p['objectId'])) {
-                        $pids = $this->getCaseId($p['objectId']);
+                        $pids = DM\Tree::getCaseId($p['objectId']);
                     } elseif (!empty($p['path'])) {
-                        $pids = $this->getCaseId(Path::detectRealTargetId($p['path']));
+                        $pids = DM\Tree::getCaseId(Path::detectRealTargetId($p['path']));
                     }
                     break;
+
                 case 'parent':
                     if (!empty($p['objectId']) && is_numeric($p['objectId'])) {
-                        $p['pids'] = $this->getPid($p['objectId']);
+                        $pids = Objects::getPids($p['objectId']);
+                        if (!empty($pids)) {
+                            $p['pids'] = array_pop($pids);
+                        }
                     } elseif (!empty($p['path'])) {
                         $pids = Path::detectRealTargetId($p['path']);
                     }
 
                     break;
+
                 case 'self':
                     if (!empty($p['objectId']) && is_numeric($p['objectId'])) {
                         $p['pids'] = $p['objectId'];
@@ -430,11 +449,13 @@ class Browser
                         $pids = Path::detectRealTargetId($p['path']);
                     }
                     break;
+
                 case 'variable':
                     $pids = empty($p['pidValue'])
                         ? Path::detectRealTargetId($p['path'])
                         : Util\toNumericArray($p['pidValue']);
                     break;
+
                 default:
                     $pids = Util\toNumericArray($scope);
                     break;
@@ -502,24 +523,17 @@ class Browser
         $rez = $search->query($p);
 
         foreach ($rez['data'] as &$doc) {
-            $res = DB\dbQuery(
-                'SELECT cfg
-                FROM tree
-                WHERE id = $1 AND
-                    cfg IS NOT NULL',
-                $doc['id']
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                if (!empty($r['cfg'])) {
-                    $cfg = Util\toJSONArray($r['cfg']);
-                    if (!empty($cfg['iconCls'])) {
-                        $doc['iconCls'] = $cfg['iconCls'];
-                    }
-                }
-            }
-            $res->close();
+            $ids[] = $doc['id'];
         }
+
+        $recs = DM\Tree::readByIds($ids, true);
+
+        foreach ($rez['data'] as &$doc) {
+            if (!empty($recs[$doc['id']]['cfg']['iconCls'])) {
+                $doc['iconCls'] = $recs[$doc['id']]['cfg']['iconCls'];
+            }
+        }
+
 
         if (empty($rez['DC'])) {
             $rez['DC'] = array(
@@ -531,123 +545,6 @@ class Browser
         }
 
         return $rez;
-    }
-
-    public static function getCaseId($objectId)
-    {
-        $rez = null;
-
-        $res = DB\dbQuery(
-            'SELECT coalesce(ti.case_id, t.pid) `pid`
-            FROM tree t
-            JOIN tree_info ti ON t.id = ti.id
-            WHERE t.id = $1',
-            $objectId
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['pid'];
-        }
-        $res->close();
-
-        return $rez;
-    }
-
-    public static function getPId($objectId)
-    {
-        $rez = null;
-
-        $res = DB\dbQuery(
-            'SELECT pid FROM tree WHERE id = $1',
-            $objectId
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['pid'];
-        }
-        $res->close();
-
-        return $rez;
-    }
-
-    public function createFolder($path)
-    {
-        $pid = explode('/', $path);
-        $pid = array_pop($pid);
-        if (!is_numeric($pid)) {
-            return array('success' => false);
-        }
-
-        /* check security access */
-        if (!Security::canCreateFolders($pid)) {
-            throw new \Exception(L\get('Access_denied'));
-        }
-
-        /* find default folder name */
-        $newFolderName = L\get('NewFolder');
-        $existing_names = array();
-        $res = DB\dbQuery(
-            'SELECT name
-            FROM tree
-            WHERE pid = $1
-                AND name LIKE $2',
-            array(
-                $pid
-                ,$newFolderName.'%'
-            )
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $existing_names[] = $r['name'];
-        }
-        $res->close();
-        $i = 1;
-        while (in_array($newFolderName, $existing_names)) {
-            $newFolderName = L\get('NewFolder').' ('.$i.')';
-            $i++;
-        }
-        /* end of find default folder name */
-
-        DB\dbQuery(
-            'INSERT INTO tree
-                (pid
-                ,user_id
-                ,`type`
-                ,`name`
-                ,cid
-                ,uid
-                ,template_id)
-            VALUES ($1
-                ,$2
-                ,$3
-                ,$4
-                ,$2
-                ,$2
-                ,$3)',
-            array(
-                $pid
-                ,$_SESSION['user']['id']
-                ,1
-                ,$newFolderName
-                ,Config::get('default_folder_template')
-            )
-        ) or die(DB\dbQueryError());
-        $id = DB\dbLastInsertId();
-        Solr\Client::runCron();
-
-        return array(
-            'success' => true
-            ,'path' => $path
-            ,'data' => array(
-                'nid' => $id
-                ,'pid' => $pid
-                ,'name' => $newFolderName
-                ,'system' => 0
-                ,'type' => 1
-                ,'iconCls' => 'icon-folder'
-                ,'cid' => $_SESSION['user']['id']
-            )
-        );
     }
 
     public function delete($paths)
@@ -684,7 +581,10 @@ class Browser
 
         Solr\Client::runCron();
 
-        return array('success' => true, 'ids' => $ids);
+        return array(
+            'success' => true,
+            'ids' => $ids
+        );
     }
 
     public function restore($paths)
@@ -754,44 +654,27 @@ class Browser
         $objectType = Objects::getType($id);
 
         if ($objectType == 'shortcut') {
-            $res = DB\dbQuery(
-                'SELECT target_id
-                FROM tree
-                WHERE id = $1',
-                $id
-            ) or die(DB\dbQueryError());
-            if ($r = $res->fetch_assoc()) {
+            $r = DM\Tree::read($id);
+            if (!empty($r['target_id'])) {
                 $id = $r['target_id'];
                 $objectType = Objects::getType($id);
             }
-            $res->close();
         }
 
-        DB\dbQuery(
-            'UPDATE tree
-            SET name = $1
-            WHERE id = $2',
+        DM\Tree::update(
             array(
-                $p['name']
-                ,$id
+                'id' => $id
+                ,'name' => $p['name']
             )
-        ) or die(DB\dbQueryError());
+        );
 
-
-        switch ($objectType) {
-            case 'file':
-
-                DB\dbQuery(
-                    'UPDATE files
-                    SET name = $1
-                    WHERE id = $2',
-                    array(
-                        $p['name']
-                        ,$id
-                    )
-                ) or die(DB\dbQueryError());
-
-                break;
+        if ($objectType == 'file') {
+            DM\Files::update(
+                array(
+                    'id' => $id
+                    ,'name' => $p['name']
+                )
+            );
         }
 
         /*updating renamed document into solr directly (before runing background cron)
@@ -805,14 +688,10 @@ class Browser
         $p['name'] = htmlspecialchars($p['name'], ENT_COMPAT);
 
         //get pid
-        $res = DB\dbQuery(
-            'SELECT pid FROM tree WHERE id = $1',
-            $rez['data']['id']
-        ) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
+        $r = DM\Tree::read($rez['data']['id']);
+        if (!empty($r['pid'])) {
             $rez['data']['pid'] = $r['pid'];
         }
-        $res->close();
 
         return $rez;
     }
@@ -845,20 +724,8 @@ class Browser
         $newName = '';
         do {
             $newName = L\get('CopyOf').' '.$name.( ($i > 0) ? ' ('.$i.')' : '').$ext;
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM tree
-                WHERE pid = $1
-                    AND name = $2',
-                array($pid, $newName)
-            ) or die(DB\dbQueryError());
 
-            if ($r = $res->fetch_assoc()) {
-                $id = $r['id'];
-            } else {
-                $id = null;
-            }
-            $res->close();
+            $id = DM\Tree::toId($newName, 'name', $pid);
             $i++;
         } while (!empty($id));
 
@@ -1042,170 +909,18 @@ class Browser
         return $rez;
     }
 
-    public function toggleFavorite($p)
-    {
-        $favoriteFolderId = $this->getFavoriteFolderId();
-        $p['pid'] = $favoriteFolderId;
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE pid = $1
-                AND `type` = 2
-                AND target_id = $2',
-            array($favoriteFolderId, $p['id'])
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            DB\dbQuery(
-                'DELETE FROM tree WHERE id = $1',
-                $r['id']
-            ) or die(DB\dbQueryError());
-            $res->close();
-            $p['favorite'] = 0;
-        } else {
-            $res->close();
-            /* get objects name */
-            $name = 'Link';
-
-            $name = Objects::getName($p['id']);
-
-            /* end of get objects name */
-            DB\dbQuery(
-                'INSERT INTO tree
-                    (pid
-                    ,user_id
-                    ,`type`
-                    ,name
-                    ,target_id)
-                VALUES($1
-                    ,$2
-                    ,2
-                    ,$3
-                    ,$4)',
-                array(
-                    $favoriteFolderId
-                    ,$_SESSION['user']['id']
-                    ,$name
-                    ,$p['id']
-                )
-            ) or die(DB\dbQueryError());
-            $p['favorite'] = 1;
-        }
-
-        return array('success' => true, 'data' => $p);
-    }
-
-    public function takeOwnership($ids)
-    {
-        $ids = Util\toNumericArray($ids);
-
-        $rez = array('success' => true, 'data' => $ids);
-
-        if (empty($ids)) {
-            return $rez;
-        }
-
-        //check if user has rights to take ownership on each object
-        foreach ($ids as $id) {
-            if (!Security::canTakeOwnership($id)) {
-                throw new \Exception(L\get('Access_denied'));
-            }
-        }
-
-        //set the owner
-        DB\dbQuery(
-            'UPDATE tree
-            SET oid = $1
-                ,uid = $1
-            WHERE id IN (' . implode(',', $ids) . ')
-                AND `system` = 0',
-            $_SESSION['user']['id']
-        ) or die(DB\dbQueryError());
-        //TODO: view if needed to mark all childs as updated, for security to be changed ....
-        Solr\Client::runCron();
-
-        return $rez;
-    }
-
-    public function isChildOf($id, $pid)
-    {
-        $rez = false;
-        $res = DB\dbQuery('SELECT pids from tree_info where id = $1', $id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            $r = ','.$r['pids'].',';
-            $rez = ( strpos($r, ",$pid,") !== false );
-        }
-        $res->close();
-
-        return $rez;
-    }
-
-    public static function checkRootFolder()
-    {
-        $id = null;
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE pid IS NULL
-                AND `system` = 1
-                AND `is_main` = 1'
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $id = $r['id'];
-        }
-        $res->close();
-
-        /* create root folder */
-        if ($id == null) {
-            DB\dbQuery(
-                'INSERT INTO tree
-                    (`system`
-                    , `name`
-                    , is_main
-                    , updated
-                    , template_id)
-                VALUES (1
-                    ,\'root\'
-                    ,1
-                    ,1
-                    ,$1)',
-                Config::get('default_folder_template')
-            ) or die( DB\dbQueryError() );
-
-            $id = DB\dbLastInsertId();
-
-            Solr\Client::runCron();
-        }
-
-        return $id;
-    }
-
     public static function getRootFolderId()
     {
         if (defined('CB\\ROOT_FOLDER_ID')) {
             return constant('CB\\ROOT_FOLDER_ID');
         }
 
-        $id = null;
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE pid IS NULL
-                AND `system` = 1
-                AND `is_main` = 1'
-        ) or die(DB\dbQueryError());
+        $id = DM\Tree::getRootId();
 
-        if ($r = $res->fetch_assoc()) {
-            $id = $r['id'];
+        if (empty($id)) {
+            \CB\debug('Cant find root folder.');
         }
-        $res->close();
 
-        if ($id == null) {
-            Browser::checkRootFolder();
-
-            return Browser::getRootFolderId();
-        }
         define('CB\\ROOT_FOLDER_ID', $id);
 
         return $id;
@@ -1213,50 +928,20 @@ class Browser
 
     public static function getRootProperties($id)
     {
-        $rez = array('success' => true, 'data' => array());
-        $res = DB\dbQuery(
-            'SELECT t.id `nid`
-                ,t.`system`
-                ,t.`type`
-                ,t.`name`
-                ,t.`cfg`
-                ,ti.acl_count
-            FROM tree t
-            JOIN tree_info ti on t.id = ti.id
-            WHERE t.id = $1',
-            $id
-        ) or die(DB\dbQueryError());
+        $rez = array(
+            'success' => true,
+            'data' => array()
+        );
 
-        if ($r = $res->fetch_assoc()) {
-            $r['cfg'] = Util\toJSONArray($r['cfg']);
+        $r = DM\Tree::getProperties($id);
+
+        if (!empty($r)) {
             $rez['data'] = array($r);
             Browser::updateLabels($rez['data']);
             $rez['data'] = $rez['data'][0];
         }
-        $res->close();
 
         return $rez;
-    }
-
-    public static function getFavoriteFolderId()
-    {
-        $id = null;
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE pid IS NULL
-                AND `system` = 1
-                AND `type` = 1
-                AND user_id = $1',
-            $_SESSION['user']['id']
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $id = $r['id'];
-        }
-        $res->close();
-
-        return $id;
     }
 
     public function prepareResult()

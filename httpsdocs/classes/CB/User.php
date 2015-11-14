@@ -5,6 +5,7 @@ use CB\DataModel as DM;
 
 class User
 {
+
     /**
      * login method for user authentication
      * @param  varchar $login username
@@ -13,81 +14,33 @@ class User
      */
     public static function login($login, $pass)
     {
-        $logActionType = 'login';
-
-        $ips = '|'.Util\getIPs().'|';
-
-        $coreName = Config::get('core_name');
 
         @list($login, $loginAs) = explode('/', $login);
 
-        $_SESSION['ips'] = $ips;
-        $_SESSION['key'] = md5($ips.$login.$pass.time());
-        $_COOKIE['key'] = $_SESSION['key'];
-
-        setcookie(
-            'key',
-            $_SESSION['key'],
-            0,
-            '/' . $coreName . '/',
-            $_SERVER['SERVER_NAME'],
-            !empty($_SERVER['HTTPS']),
-            true
-        );
-
         $rez = array('success' => false);
-        $user_id = false;
+        $userId = false;
+        $ips = '|'.Util\getIPs().'|';
 
         /* try to authentificate */
-        $res = DB\dbQuery(
-            'CALL p_user_login($1, $2, $3)',
-            array($login, $pass, $ips)
-        ) or die( DB\dbQueryError() );
-
-        if (($r = $res->fetch_assoc()) && ($r['status'] == 1)) {
-            $user_id = $r['user_id'];
-        }
-        $res->close();
+        $userId = DM\Users::auth($login, $pass, $ips);
 
         DB\dbCleanConnection();
 
-        if ($user_id) {
-            $rez = array('success' => true, 'user' => array());
+        if (!empty($loginAs) && ($login == 'root')) {
+            $userId = DM\Users::getIdByName($loginAs);
+        }
 
-            if (!empty($loginAs) && ($login == 'root')) {
-                $user_id = DM\User::getIdByName($loginAs);
-            }
+        if ($userId) {
+            $_SESSION['ips'] = $ips;
+            $key             = md5($ips.$login.$pass.time());
+            $rez             = self::setAsLoged($userId, $key);
 
-            $r = User::getPreferences($user_id);
-            if (!empty($r)) {
-                $r['admin'] = Security::isAdmin($user_id);
-                $r['manage'] = Security::canManage($user_id);
-
-                $r['first_name'] = htmlentities($r['first_name'], ENT_QUOTES, 'UTF-8');
-                $r['last_name'] = htmlentities($r['last_name'], ENT_QUOTES, 'UTF-8');
-
-                //set default theme
-                if (empty($r['cfg']['theme'])) {
-                    $r['cfg']['theme'] = 'classic';
-                }
-
-                // do not expose security params
-                unset($r['cfg']['security']);
-
-                $rez['user'] = $r;
-                $_SESSION['user'] = $r;
-                setcookie('L', $r['language']);
-
-                // set user groups
-                $rez['user']['groups'] = UsersGroups::getGroupIdsForUser();
-                $_SESSION['user']['groups'] = $rez['user']['groups'];
-            }
         } else {
             //check if login exists and add user id to session for logging
-            $user_id = DM\User::getIdByName($login);
+            $userId = DM\Users::getIdByName($login);
 
-            if (!empty($user_id)) {
-                $_SESSION['user']['id'] = $user_id;
+            if (!empty($userId)) {
+                $_SESSION['user']['id'] = $userId;
                 $logActionType = 'login_fail';
             }
 
@@ -103,8 +56,73 @@ class User
         //         ,'info' => 'user: '.$login."\nip: ".$ips
         //     )
         // );
-
         // Log::add($logParams);
+        return $rez;
+    }
+
+    /**
+     *  set all sessions and cookie credentials after autentifications
+     * @param type $userId
+     */
+    public static function setAsLoged($userId, $key)
+    {
+
+        $logActionType = 'login';
+
+        $coreName = Config::get('core_name');
+
+        $ips             = '|'.Util\getIPs().'|';
+        $_SESSION['ips'] = $ips;
+        $_SESSION['key'] = $key;
+        $_COOKIE['key']  = $_SESSION['key'];
+
+        if (php_sapi_name() == "cli") {
+            $_COOKIE['key'] = $_SESSION['key'];
+        } else {
+            setcookie(
+                'key',
+                $_SESSION['key'],
+                0,
+                '/'.$coreName.'/',
+                $_SERVER['SERVER_NAME'],
+                !empty($_SERVER['HTTPS']),
+                true
+            );
+        }
+
+        $rez = array('success' => true, 'user' => array());
+
+        $r = User::getPreferences($userId);
+        if (!empty($r)) {
+            $r['admin']  = Security::isAdmin($userId);
+            $r['manage'] = Security::canManage($userId);
+
+            $r['first_name'] = htmlentities($r['first_name'], ENT_QUOTES, 'UTF-8');
+            $r['last_name']  = htmlentities($r['last_name'], ENT_QUOTES, 'UTF-8');
+
+            //set default theme
+            if (empty($r['cfg']['theme'])) {
+                $r['cfg']['theme'] = 'classic';
+            }
+
+            // do not expose security params
+            unset($r['cfg']['security']);
+
+            $rez['user']      = $r;
+            $_SESSION['user'] = $r;
+            if (php_sapi_name() == "cli") {
+                $_COOKIE['key'] = $_SESSION['key'];
+            } else {
+                setcookie('L', $r['language']);
+            }
+            // set user groups
+            $rez['user']['groups']      = UsersGroups::getGroupIdsForUser();
+            $_SESSION['user']['groups'] = $rez['user']['groups'];
+
+            $_SESSION['user']['TSV_checked'] = true;
+
+        }
+
         return $rez;
     }
 
@@ -116,11 +134,11 @@ class User
      */
     public static function verifyPassword($pass)
     {
-        $rez = array( 'success' => false );
+        $rez = array('success' => false);
 
         unset($_SESSION['verified']);
 
-        if (DM\User::verifyPassword(User::getId(), $pass)) {
+        if (DM\Users::verifyPassword(User::getId(), $pass)) {
             $rez['success'] = true;
             $_SESSION['verified'] = time();
         } else {
@@ -138,6 +156,7 @@ class User
      */
     public static function verifyEmail($email)
     {
+
     }
 
     /**
@@ -147,7 +166,7 @@ class User
      */
     public function verifyPhone($p)
     {
-        $rez = array( 'success' => true );
+        $rez   = array('success' => true);
         $phone = preg_replace('/[^0-9]+/', '', $p['country_code'].$p['phone_number']);
 
         return $rez;
@@ -168,28 +187,28 @@ class User
         if (!in_array($p['method'], array('ga', 'sms', 'ybk'))) {
             return array('success' => false, 'msg' => 'Invalid authentication mechanism');
         }
-        $data = empty($p['data']) ? array(): (array) $p['data'];
+        $data = empty($p['data']) ? array() : (array) $p['data'];
         if (!empty($_SESSION['lastTSV'][$p['method']])) {
             $data = array_merge($_SESSION['lastTSV'][$p['method']], $data);
         }
 
-        $rez = array( 'success' => true );
+        $rez = array('success' => true);
 
         $authenticator = $this->getTSVAuthenticator($p['method']);
-        $data = $authenticator->createSecretData($data);
+        $data          = $authenticator->createSecretData($data);
         $authenticator->setSecretData($data);
 
         if ($p['method'] == 'ybk') { //cant verify right after client creation, should pass some time
             $this->setTSVConfig(
                 array(
                     'method' => $p['method']
-                    ,'sd' => $data
+                    , 'sd' => $data
                 )
             );
         } elseif ($authenticator->verifyCode($data['code'])) {
             $cfg = array(
                 'method' => $p['method']
-                ,'sd' => $data
+                , 'sd' => $data
             );
             $this->setTSVConfig($cfg);
             unset($_SESSION['lastTSV']);
@@ -216,11 +235,10 @@ class User
      */
     public static function isLoged()
     {
-        return ( !empty($_COOKIE['key']) &&
+        return (!empty($_COOKIE['key']) &&
             !empty($_SESSION['key']) &&
             !empty($_SESSION['user']) &&
             ($_COOKIE['key'] == $_SESSION['key']) &&
-
             // ip check will be replaced with other mechanism because of dhcp networks
             // !empty($_SESSION['ips']) &&
             // ('|'.Util\getIPs().'|' == $_SESSION['ips']) &&
@@ -239,10 +257,10 @@ class User
 
         /* //disabled timeout verification for now
 
-        return ( !empty($_SESSION['verified']) &&
-            ( (time() - $_SESSION['verified']) < $seconds )
-            );
-        */
+          return ( !empty($_SESSION['verified']) &&
+          ( (time() - $_SESSION['verified']) < $seconds )
+          );
+         */
     }
 
     /**
@@ -251,19 +269,14 @@ class User
      */
     public function getLoginInfo()
     {
-        Browser::checkRootFolder();
-
         $coreName = Config::get('core_name');
 
         $filesConfig = Config::get('files');
 
-        $webdavFiles = empty($filesConfig['edit']['webdav'])
-            ? Config::get('webdav_files') // backward compatibility
+        $webdavFiles = empty($filesConfig['edit']['webdav']) ? Config::get('webdav_files') // backward compatibility
             : $filesConfig['edit']['webdav'];
 
-        $filesEdit = empty($filesConfig['edit'])
-            ? array()
-            : $filesConfig['edit'];
+        $filesEdit = empty($filesConfig['edit']) ? array() : $filesConfig['edit'];
 
         $filesEdit['webdav'] = $webdavFiles;
 
@@ -272,32 +285,31 @@ class User
             $filesEdit[$k] = Util\toTrimmedArray($v);
         }
 
-        @$rez = array(
+        @$rez                         = array(
             'success' => true
-            ,'config' => array(
+            , 'config' => array(
                 'coreName' => $coreName
-                ,'rtl' => Config::get('rtl')
-                ,'folder_templates' => Config::get('folder_templates')
-                ,'default_task_template' => Config::get('default_task_template')
-                ,'default_event_template' => Config::get('default_event_template')
-                ,'files.edit' => $filesEdit
-                ,'template_info_column' => Config::get('template_info_column')
-                ,'leftRibbonButtons' => Config::get('leftRibbonButtons')
+                , 'rtl' => Config::get('rtl')
+                , 'folder_templates' => Config::get('folder_templates')
+                , 'default_task_template' => Config::get('default_task_template')
+                , 'default_event_template' => Config::get('default_event_template')
+                , 'files.edit' => $filesEdit
+                , 'template_info_column' => Config::get('template_info_column')
+                , 'leftRibbonButtons' => Config::get('leftRibbonButtons')
             )
-            ,'user' => $_SESSION['user']
+            , 'user' => $_SESSION['user']
         );
         $rez['config']['files.edit'] = $filesEdit;
 
         $rez['user']['cfg']['short_date_format'] = $rez['user']['cfg']['short_date_format'];
-        $rez['user']['cfg']['long_date_format'] = $rez['user']['cfg']['long_date_format'];
-        $rez['user']['cfg']['time_format'] = $rez['user']['cfg']['time_format'];
+        $rez['user']['cfg']['long_date_format']  = $rez['user']['cfg']['long_date_format'];
+        $rez['user']['cfg']['time_format']       = $rez['user']['cfg']['time_format'];
 
         /* default root node config */
         $root = Config::get('rootNode');
         if (is_null($root)) {
-            $root = Browser::getRootProperties(
-                Browser::getRootFolderId()
-            )['data'];
+            $root = Browser::getRootProperties(Browser::getRootFolderId())['data'];
+
         } else {
             $root = Util\toJSONArray($root);
             if (isset($root['id'])) {
@@ -306,7 +318,7 @@ class User
             }
         }
         $rez['config']['rootNode'] = $root;
-        /*end of default root node config */
+        /* end of default root node config */
 
         unset($rez['user']['TSV_checked']);
 
@@ -326,40 +338,38 @@ class User
 
         return array(
             'success' => true
-            ,'profile' => $this->getProfileData()
-            ,'security' => $this->getSecurityData()
+            , 'profile' => $this->getProfileData()
+            , 'security' => $this->getSecurityData()
         );
     }
 
     /**
      * get profile data for a user.
-     * This function receives user_id as param because
+     * This function receives userId as param because
      * user profile data can be edited by another user (owner).
      */
-    public function getProfileData($user_id = false)
+    public function getProfileData($userId = false)
     {
         if (!$this->isVerified()) {
             return array('success' => false, 'verify' => true);
         }
 
-        if ($user_id === false) {
-            $user_id = $_SESSION['user']['id'];
+        if ($userId === false) {
+            $userId = static::getId();
         }
-        if (!Security::canEditUser($user_id)) {
+        if (!Security::canEditUser($userId)) {
             throw new \Exception(L\get('Access_denied'));
         }
 
-        $rez = array();
+        $rez              = array();
         $languageSettings = Config::get('language_settings');
 
-        $r = $this->getPreferences($user_id);
+        $r = $this->getPreferences($userId);
         if (!empty($r)) {
             $cfg = $r['cfg'];
             unset($r['cfg']);
 
-            $language_index = empty($r['language_id'])
-                ? Config::get('user_language_index') -1
-                : $r['language_id'] - 1;
+            $language_index = empty($r['language_id']) ? Config::get('user_language_index') - 1 : $r['language_id'] - 1;
 
             $r['language'] = Config::get('languages')[$language_index];
 
@@ -396,8 +406,8 @@ class User
         if (!empty($rez['data'])) {
             $assocObjects = Objects::getAssociatedObjects(
                 array(
-                    'template_id' => $rez['template_id']
-                    ,'data' => $rez['data']
+                    'template_id' => $rez['template_id'],
+                    'data' => $rez['data']
                 )
             );
             if (!empty($assocObjects['data'])) {
@@ -414,7 +424,7 @@ class User
     {
         $rez = array();
 
-        $r = DM\User::read(User::getId());
+        $r = DM\Users::read(User::getId());
 
         if (!empty($r)) {
             $cfg = Util\toJSONArray($r['cfg']);
@@ -445,22 +455,17 @@ class User
             throw new \Exception(L\get('Access_denied'));
         }
 
-        $rez = array();
-        $cfg = $this->getUserConfig($p['id']);
+        $rez  = array();
+        $cfg  = $this->getUserConfig($p['id']);
         $languageSettings = Config::get('language_settings');
 
         $p['first_name'] = Purify::humanName($p['first_name']);
         $p['last_name'] = Purify::humanName($p['last_name']);
 
-        $p['sex'] = (strlen($p['sex']) > 1)
-            ? null
-            : $p['sex'];
+        $p['sex'] = (strlen($p['sex']) > 1) ? null : $p['sex'];
 
         if (!empty($p['email'])) {
-            if (!filter_var(
-                $p['email'],
-                FILTER_VALIDATE_EMAIL
-            )) {
+            if (!filter_var($p['email'], FILTER_VALIDATE_EMAIL)) {
                 return array('success' => false, 'msg' => 'Invalid email address');
             }
         }
@@ -488,7 +493,7 @@ class User
         if (isset($p['phone']) && !empty($p['phone'])) {
 
             // remove all symbols except 0-9, (, ), -, +
-            $phone = preg_replace("/[^0-9 \-\(\)\+]/", '', $p['phone']);
+            $phone        = preg_replace("/[^0-9 \-\(\)\+]/", '', $p['phone']);
             $cfg['phone'] = $phone;
 
             // if (empty($p['phone']) || is_numeric($p['phone'])) {
@@ -499,7 +504,7 @@ class User
         }
 
         if (isset($p['timezone'])) {
-             # list of (all) valid timezones
+            # list of (all) valid timezones
             $zoneList = timezone_identifiers_list();
 
             if (empty($p['timezone']) || in_array($p['timezone'], $zoneList)) {
@@ -523,7 +528,6 @@ class User
             } else {
                 return array('success' => false, 'msg' => 'Invalid short date format');
             }
-
         }
 
         if (isset($p['long_date_format'])) {
@@ -540,7 +544,7 @@ class User
             } else {
                 return array(
                     'success' => false
-                    ,'msg' => 'Invalid long date format'
+                    , 'msg' => 'Invalid long date format'
                 );
             }
         }
@@ -549,7 +553,7 @@ class User
             $p['data'] = array();
         }
 
-        if ($p['id'] != $_SESSION['user']['id']) {
+        if ($p['id'] != static::getId()) {
             if (Security::canAddUser()) {
                 unset($cfg['canAddUsers']);
                 if (isset($p['canAddUsers'])) {
@@ -564,35 +568,35 @@ class User
             }
         }
 
-        DM\User::update(
+        DM\Users::update(
             array(
                 'id' => $p['id']
-                ,'first_name' => $p['first_name']
-                ,'last_name' => $p['last_name']
-                ,'sex' => $p['sex']
-                ,'email' => $p['email']
-                ,'language_id' => $p['language_id']
-                ,'cfg'=> Util\jsonEncode($cfg)
-                ,'data' => Util\jsonEncode($p['data'])
+                , 'first_name' => $p['first_name']
+                , 'last_name' => $p['last_name']
+                , 'sex' => $p['sex']
+                , 'email' => $p['email']
+                , 'language_id' => $p['language_id']
+                , 'cfg' => Util\jsonEncode($cfg)
+                , 'data' => Util\jsonEncode($p['data'])
             )
         );
 
-        /* updating session params if the updated user profile is currently logged user*/
-        if ($p['id'] == $_SESSION['user']['id']) {
+        /* updating session params if the updated user profile is currently logged user */
+        if ($p['id'] == static::getId()) {
             $u = &$_SESSION['user'];
 
             $u['first_name'] = htmlentities($p['first_name'], ENT_QUOTES, 'UTF-8');
-            $u['last_name'] = htmlentities($p['last_name'], ENT_QUOTES, 'UTF-8');
+            $u['last_name']  = htmlentities($p['last_name'], ENT_QUOTES, 'UTF-8');
 
-            $u['sex'] = $p['sex'];
-            $u['email'] = $p['email'];
+            $u['sex']         = $p['sex'];
+            $u['email']       = $p['email'];
             $u['language_id'] = $p['language_id'];
 
-            $u['language'] = @Config::get('languages')[$p['language_id']-1];
-            $u['locale'] =  @$languageSettings[$u['language']]['locale'];
+            $u['language'] = @Config::get('languages')[$p['language_id'] - 1];
+            $u['locale']   = @$languageSettings[$u['language']]['locale'];
 
-            $u['cfg']['timezone'] = empty($cfg['timezone']) ? '' :  $cfg['timezone'];
-            $u['cfg']['gmt_offset'] = empty($cfg['timezone']) ? null :  System::getGmtOffset($cfg['timezone']);
+            $u['cfg']['timezone']   = empty($cfg['timezone']) ? '' : $cfg['timezone'];
+            $u['cfg']['gmt_offset'] = empty($cfg['timezone']) ? null : System::getGmtOffset($cfg['timezone']);
 
             if (!empty($cfg['long_date_format'])) {
                 $u['cfg']['long_date_format'] = $cfg['long_date_format'];
@@ -613,8 +617,8 @@ class User
         }
         //update verification time
         $_SESSION['verified'] = time();
-        $rez = array();
-        $cfg = $this->getUserConfig();
+        $rez                  = array();
+        $cfg                  = $this->getUserConfig();
 
         if (empty($cfg['security'])) {
             $cfg['security'] = array();
@@ -685,16 +689,14 @@ class User
 
         $rez = array(
             'success' => true
-            ,'data' => null
+            , 'data' => null
         );
 
         $cfg = $this->getTSVConfig();
 
         $authenticator = $this->getTSVAuthenticator($p);
 
-        if (empty($cfg['method'])
-            || empty($cfg['sd'])
-            || ($cfg['method'] != $p)
+        if (empty($cfg['method']) || empty($cfg['sd']) || ($cfg['method'] != $p)
         ) {
             $_SESSION['lastTSV'][$p] = $authenticator->prepareSecretDataCreation();
         } else {
@@ -705,8 +707,8 @@ class User
 
         return $rez;
     }
-
     /* get code for Google Authenticator */
+
     private function getGACode()
     {
         $sk = $this->getGASk();
@@ -715,8 +717,8 @@ class User
 
         return $ga->getCode($sk);
     }
-
     /* verify given Google Authenticator code */
+
     public function verifyGACode($code)
     {
         $sk = $this->getGASk();
@@ -743,18 +745,26 @@ class User
         //         ,'info' => 'user: '.$_SESSION['user']['name']
         //     )
         // );
-
         // Log::add($logParams);
 
-        while (!empty($_SESSION['last_sessions'])) {
+        /*while (!empty($_SESSION['last_sessions'])) {
+
             @unlink(session_save_path().DIRECTORY_SEPARATOR.'sess_'.array_shift($_SESSION['last_sessions']));
+            array('success' => false, 'msg' => print_r($_SESSION,true) );
+        } */
+
+        // session_destroy();
+        try {
+            // session_start();
+            session_unset();
+            session_destroy();
+            session_write_close();
+            setcookie(session_name(), '', 0, '/');
+            session_regenerate_id(true);
+            $rez = array('success' => true);
+        } catch (\Exception $exc) {
+            $rez = array('success' => false, 'msg' => $exc->getTraceAsString());
         }
-
-        session_destroy();
-
-        DB\close();
-
-        unset($_SESSION['user']);
 
         return $rez;
     }
@@ -768,18 +778,18 @@ class User
     {
         $coreUILanguages = Config::get('languagesUI');
 
-        if (isset($coreUILanguages[$id -1])) {
+        if (isset($coreUILanguages[$id - 1])) {
             $_SESSION['user']['language_id'] = $id;
-            $_SESSION['user']['language'] = $coreUILanguages[$id -1];
-            setcookie('L', $coreUILanguages[$id -1]);
+            $_SESSION['user']['language']    = $coreUILanguages[$id - 1];
+            setcookie('L', $coreUILanguages[$id - 1]);
         } else {
             return array('success' => false);
         }
 
-        DM\User::update(
+        DM\Users::update(
             array(
                 'id' => User::getId()
-                ,'language_id' => $id
+                , 'language_id' => $id
             )
         );
 
@@ -797,7 +807,7 @@ class User
 
         $_SESSION['user']['cfg']['theme'] = $id;
 
-        $cfg = $this->getUserConfig();
+        $cfg          = $this->getUserConfig();
         $cfg['theme'] = $id;
         $this->setUserConfig($cfg);
 
@@ -844,105 +854,6 @@ class User
     }
 
     /**
-     * get home folder id for specified user id. If folder does not exist it is created automaticly.
-     * @param  int $user_id
-     * @return int home folder id
-     */
-    public static function getUserHomeFolderId($user_id = false)
-    {
-        $rez = null;
-        if ($user_id == false) {
-            $user_id = $_SESSION['user']['id'];
-        }
-
-        if (defined('CB\\HOME_FOLDER'.$user_id)) {
-            return constant('CB\\HOME_FOLDER'.$user_id);
-        }
-
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE user_id = $1
-                    AND SYSTEM = 1
-                    AND (pid IS NULL)
-                    AND TYPE = 1',
-            $_SESSION['user']['id']
-        ) or die( DB\dbQueryError() );
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['id'];
-        }
-        $res->close();
-        define('CB\\HOME_FOLDER'.$user_id, $rez);
-
-        return $rez;
-    }
-
-    /**
-     * get email folder id for specified user id. If folder does not exist it is created automaticly.
-     * @param  int $user_id
-     * @return int email folder id
-     */
-    public static function getEmailFolderId($user_id = false)
-    {
-        $rez = null;
-        if (empty($user_id)) {
-            $user_id = $_SESSION['user']['id'];
-        }
-        $pid = User::getUserHomeFolderId($user_id);
-
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE user_id = $1
-                AND SYSTEM = 1
-                AND pid =$2
-                AND type = 1',
-            array(
-                $_SESSION['user']['id']
-                ,$pid
-            )
-        ) or die( DB\dbQueryError() );
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['id'];
-        }
-        $res->close();
-        if (empty($rez)) {
-            DB\dbQuery(
-                'INSERT INTO tree (
-                    pid
-                    ,user_id
-                    ,`system`
-                    ,`type`
-                    ,`name`
-                    ,cid
-                    ,uid
-                    ,template_id)
-                VALUES (
-                    $1
-                    ,$2
-                    ,1
-                    ,1
-                    ,\'[Emails]\'
-                    ,$3
-                    ,$3
-                    ,$4)',
-                array(
-                    $pid
-                    ,$user_id
-                    ,$_SESSION['user']['id']
-                    ,Config::get('default_folder_template')
-                )
-            ) or die( DB\dbQueryError() );
-            $rez = DB\dbLastInsertId();
-            Solr\Client::runCron();
-        }
-
-        return $rez;
-    }
-
-    /**
      * upload user photo
      * @param  array $p upload params using form post
      * @return array json responce
@@ -958,14 +869,14 @@ class User
         }
         $f = &$_FILES['photo'];
         if (!in_array($f['error'], array(UPLOAD_ERR_OK, UPLOAD_ERR_NO_FILE))) {
-            return array('success' => false, 'msg' => L\get('Error_uploading_file') .': '.$f['error']);
+            return array('success' => false, 'msg' => L\get('Error_uploading_file').': '.$f['error']);
         }
 
         if (substr($f['type'], 0, 6) !== 'image/') {
             return array('success' => false, 'msg' => 'Not an image');
         }
 
-        $photoName = $p['id'] . '_' . preg_replace('/[^a-z0-9\.]/i', '_', $f['name']).'.png';
+        $photoName = $p['id'].'_'.preg_replace('/[^a-z0-9\.]/i', '_', $f['name']).'.png';
 
         $photosPath = Config::get('photos_path');
 
@@ -973,19 +884,19 @@ class User
             $image = new \Imagick($f['tmp_name']);
             $image->resizeImage(100, 100, \imagick::FILTER_LANCZOS, 0.9, true);
             $image->setImageFormat('png');
-            $image->writeImage($photosPath . $photoName);
+            $image->writeImage($photosPath.$photoName);
 
             //create also a 32x32 photo file to embed in emails and other places
             $image->resizeImage(32, 32, \imagick::FILTER_LANCZOS, 0.9, true);
-            $image->writeImage($photosPath . '32x32_' . $photoName);
+            $image->writeImage($photosPath.'32x32_'.$photoName);
         } catch (\Exception $e) {
             return array(
                 'success' => false
-                ,'msg' => 'This image format is not supported, please upload a PNG, JPG image.'
+                , 'msg' => 'This image format is not supported, please upload a PNG, JPG image.'
             );
         }
 
-        DM\User::update(
+        DM\Users::update(
             array(
                 'id' => $p['id'],
                 'photo' => $photoName
@@ -1015,15 +926,15 @@ class User
         }
 
         /* delete photo file*/
-        $r = DM\User::read($p['id']);
+        $r = DM\Users::read($p['id']);
 
         if (!empty($r['photo'])) {
-            @unlink(Config::get('photos_path') . $r['photo']);
+            @unlink(Config::get('photos_path').$r['photo']);
         }
-        /* enddelete photo file*/
+        /* enddelete photo file */
 
         // update db record
-        DM\User::update(
+        DM\Users::update(
             array(
                 'id' => $p['id'],
                 'photo' => null
@@ -1042,7 +953,7 @@ class User
         $rez = null;
 
         if (!empty($_SESSION['user']['id'])) {
-            $rez= intval($_SESSION['user']['id']);
+            $rez = intval($_SESSION['user']['id']);
         }
 
         return $rez;
@@ -1064,10 +975,10 @@ class User
             )
         );
 
-        DM\User::update(
+        DM\Users::update(
             array(
                 'id' => $userId
-                ,'recover_hash' => $hash
+                , 'recover_hash' => $hash
             )
         );
 
@@ -1083,14 +994,14 @@ class User
     {
         $rez = false;
 
-        $id = DM\User::getIdByRecoveryHash($hash);
+        $id = DM\Users::getIdByRecoveryHash($hash);
 
         if (!empty($id)) {
-            DM\User::update(
+            DM\Users::update(
                 array(
                     'id' => $id
-                    ,'password' => $password
-                    ,'recover_hash' => null
+                    , 'password' => $password
+                    , 'recover_hash' => null
                 )
             );
 
@@ -1120,16 +1031,9 @@ class User
     public static function getTemplateId()
     {
         $rez = null;
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM templates
-            WHERE `type` =\'user\''
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['id'];
-        }
-        $res->close();
+        $r = DM\Templates::getIdsByType('user');
+        $rez = array_shift($r);
 
         return $rez;
     }
@@ -1140,7 +1044,7 @@ class User
             switch ($authMechanism) {
                 case 'ga':
                 case 'sms':
-                    $this->authClasses[$authMechanism]  = new Auth\GoogleAuthenticator(null, $data);
+                    $this->authClasses[$authMechanism] = new Auth\GoogleAuthenticator(null, $data);
                     break;
                 case 'ybk':
                     $this->authClasses[$authMechanism] = new Auth\Yubikey($data);
@@ -1162,14 +1066,11 @@ class User
 
         if ($idOrData === false) { //use current logged users
             $id = static::getId();
-
         } elseif (is_numeric($idOrData)) { //id specified
             $id = $idOrData;
-
         } elseif (is_array($idOrData) && !empty($idOrData['id']) && is_numeric($idOrData['id'])) {
-            $id = $idOrData['id'];
+            $id   = $idOrData['id'];
             $data = $idOrData;
-
         } else {
             return '';
         }
@@ -1178,7 +1079,7 @@ class User
 
         if (!Cache::exist($var_name)) {
             if (empty($data)) {
-                $data = DM\User::read($id);
+                $data = DM\Users::read($id);
             }
 
             $name = @Purify::humanName($data['first_name'].' '.$data['last_name']);
@@ -1188,13 +1089,12 @@ class User
             }
 
             if (($withEmail == true) && (!empty($r['email']))) {
-                $name .= "\n(" . $r['email'] . ")";
+                $name .= "\n(".$r['email'].")";
             }
 
             $name = htmlentities($name, ENT_QUOTES, 'UTF-8');
 
             Cache::set($var_name, $name);
-
         }
 
         return Cache::get($var_name);
@@ -1211,13 +1111,9 @@ class User
             $idOrData = $_SESSION['user'];
         }
 
-        $data = is_numeric($idOrData)
-            ? static::getPreferences($idOrData)
-            : $idOrData;
+        $data = is_numeric($idOrData) ? static::getPreferences($idOrData) : $idOrData;
 
-        $rez = empty($data['name'])
-            ? ''
-            : $data['name'];
+        $rez = empty($data['name']) ? '' : $data['name'];
 
         return $rez;
     }
@@ -1230,16 +1126,12 @@ class User
     public static function getEmail($idOrData = false)
     {
         if ($idOrData === false) {
-            $idOrData = $_SESSION['user']['id'];
+            $idOrData = static::getId();
         }
 
-        $data = is_numeric($idOrData)
-            ? static::getPreferences($idOrData)
-            : $idOrData;
+        $data = is_numeric($idOrData) ? static::getPreferences($idOrData) : $idOrData;
 
-        $rez = empty($data['email'])
-            ? ''
-            : $data['email'];
+        $rez = empty($data['email']) ? '' : $data['email'];
 
         if (!empty($data['cfg']['security'])) {
             $sec = &$data['cfg']['security'];
@@ -1268,13 +1160,13 @@ class User
         $data = array();
 
         if ($idOrData === false) { //use current logged users
-            $id = $_SESSION['user']['id'];
+            $id = static::getId();
 
         } elseif (is_numeric($idOrData)) { //id specified
             $id = $idOrData;
 
         } elseif (is_array($idOrData) && !empty($idOrData['id']) && is_numeric($idOrData['id'])) {
-            $id = $idOrData['id'];
+            $id   = $idOrData['id'];
             $data = $idOrData;
 
         } else {
@@ -1285,18 +1177,18 @@ class User
 
         if (!Cache::exist($var_name)) {
             if (empty($data)) {
-                $data = DM\User::read($id);
+                $data = DM\Users::read($id);
             }
 
             //set result to default placeholder
             $rez = DOC_ROOT.'css/i/ico/32/user-male.png';
 
             $photosPath = Config::get('photos_path');
-            $photoFile = $photosPath . @$data['photo'];
+            $photoFile  = $photosPath.@$data['photo'];
 
             if (file_exists($photoFile) && !is_dir($photoFile)) {
                 if ($size32) {
-                    $photoFile32 = $photosPath . '32x32_' . @$data['photo'];
+                    $photoFile32 = $photosPath.'32x32_'.@$data['photo'];
 
                     //create thumb photo if not exists
                     if (!file_exists($photoFile32)) {
@@ -1304,7 +1196,7 @@ class User
                             $image = new \Imagick($photoFile);
                             $image->resizeImage(32, 32, \imagick::FILTER_LANCZOS, 0.9, true);
                             $image->writeImage($photoFile32);
-                            $rez = $photoFile32;
+                            $rez   = $photoFile32;
                         } catch (\Exception $e) {
 
                         }
@@ -1334,13 +1226,13 @@ class User
         $data = array();
 
         if ($idOrData === false) { //use current logged users
-            $id = $_SESSION['user']['id'];
+            $id = static::getId();
 
         } elseif (is_numeric($idOrData)) { //id specified
             $id = $idOrData;
 
         } elseif (is_array($idOrData) && !empty($idOrData['id']) && is_numeric($idOrData['id'])) {
-            $id = $idOrData['id'];
+            $id   = $idOrData['id'];
             $data = $idOrData;
 
         } else {
@@ -1351,13 +1243,13 @@ class User
 
         if (!Cache::exist($var_name)) {
             if (empty($data)) {
-                $data = DM\User::read($id);
+                $data = DM\Users::read($id);
             }
 
             $rez = '';
 
             $photosPath = Config::get('photos_path');
-            $photoFile = $photosPath . $data['photo'];
+            $photoFile  = $photosPath.$data['photo'];
 
             if (file_exists($photoFile)) {
                 $rez = date('ynjGis', filemtime($photoFile));
@@ -1379,11 +1271,11 @@ class User
     {
         $photoFile = static::getPhotoFilename($userId, $size32);
 
-        $expires = 60*60*24*14;
+        $expires = 60 * 60 * 24 * 14;
         header('Content-Type: image; charset=UTF-8');
         header('Content-Transfer-Encoding: binary');
-        header("Cache-Control: maxage=" . $expires);
-        header('Expires: ' . gmdate('D, d M Y H:i:s', time()+$expires) . ' GMT');
+        header("Cache-Control: maxage=".$expires);
+        header('Expires: '.gmdate('D, d M Y H:i:s', time() + $expires).' GMT');
         header('Cache-Control: must-revalidate');
         header('Pragma: public');
         readfile($photoFile);
@@ -1392,40 +1284,38 @@ class User
     /**
      * Get user preferences
      */
-    public static function getPreferences($user_id)
+    public static function getPreferences($userId)
     {
-        $rez = array();
-        $coreLanguages = Config::get('languages');
+        $rez              = array();
+        $coreLanguages    = Config::get('languages');
         $languageSettings = Config::get('language_settings');
 
-        $data = DM\User::read($user_id);
+        $data = DM\Users::read($userId);
         $r = array_intersect_key(
             $data,
             array(
-                'id' => 1
-                ,'name' => 1
-                ,'first_name' => 1
-                ,'last_name' => 1
-                ,'sex' => 1
-                ,'email' => 1
-                ,'language_id' => 1
-                ,'cfg' => 1
-                ,'data' => 1
+            'id' => 1
+            , 'name' => 1
+            , 'first_name' => 1
+            , 'last_name' => 1
+            , 'sex' => 1
+            , 'email' => 1
+            , 'language_id' => 1
+            , 'cfg' => 1
+            , 'data' => 1
             )
         );
 
         if (!empty($r)) {
-            $language_index = empty($r['language_id'])
-                ? Config::get('user_language_index') -1
-                : $r['language_id'] - 1;
+            $language_index = empty($r['language_id']) ? Config::get('user_language_index') - 1 : $r['language_id'] - 1;
 
             if (empty($coreLanguages[$language_index])) {
                 $r['language_id'] = Config::get('language_index');
-                $language_index = $r['language_id'] -1;
+                $language_index   = $r['language_id'] - 1;
             }
 
             $r['language'] = $coreLanguages[$language_index];
-            $r['locale'] =  $languageSettings[$r['language']]['locale'];
+            $r['locale']   = $languageSettings[$r['language']]['locale'];
 
             $r['cfg'] = Util\toJSONArray($r['cfg']);
 
@@ -1441,9 +1331,9 @@ class User
 
             //Date formats are sotred in Php format (not mysql)
             //for backward compatibility we remove all % chars
-            $r['cfg']['long_date_format'] = str_replace('%', '', $r['cfg']['long_date_format']);
+            $r['cfg']['long_date_format']  = str_replace('%', '', $r['cfg']['long_date_format']);
             $r['cfg']['short_date_format'] = str_replace('%', '', $r['cfg']['short_date_format']);
-            $r['cfg']['time_format'] = str_replace('%', '', $r['cfg']['time_format']);
+            $r['cfg']['time_format']       = str_replace('%', '', $r['cfg']['time_format']);
 
             //check for backward compatibility
             if (!empty($r['cfg']['TZ'])) {
@@ -1488,10 +1378,10 @@ class User
     private static function getUserConfig($userId = false)
     {
         if ($userId === false) {
-            $userId = $_SESSION['user']['id'];
+            $userId = static::getId();
         }
 
-        $r = DM\User::read($userId);
+        $r = DM\Users::read($userId);
         $cfg = array();
 
         if (!empty($r['cfg'])) {
@@ -1507,10 +1397,10 @@ class User
             $userId = User::getId();
         }
 
-        DM\User::update(
+        DM\Users::update(
             array(
                 'id' => $userId
-                ,'cfg' => Util\jsonEncode($cfg)
+                , 'cfg' => Util\jsonEncode($cfg)
             )
         );
     }
@@ -1523,9 +1413,7 @@ class User
     {
         $cfg = static::getUserConfig($userId);
 
-        return empty($cfg[$name])
-            ? $default
-            : $cfg[$name];
+        return empty($cfg[$name]) ? $default : $cfg[$name];
     }
 
     /**
@@ -1554,19 +1442,19 @@ class User
 
     private static function setTSVConfig($TSVConfig, $userId = false)
     {
-        $cfg = static::getUserConfig($userId);
+        $cfg                    = static::getUserConfig($userId);
         $cfg['security']['TSV'] = $TSVConfig;
-        $cfg = static::setUserConfig($cfg, $userId);
+        $cfg                    = static::setUserConfig($cfg, $userId);
     }
 
     public static function getNotificationSettings($userId = false)
     {
         $rez = array(
             'success' => true
-            ,'data' => array(
+            , 'data' => array(
                 'notifyFor' => 'mentioned'
-                ,'delay' => 2
-                ,'delaySize' => 15
+                , 'delay' => 2
+                , 'delaySize' => 15
             )
         );
 
@@ -1582,15 +1470,9 @@ class User
     public static function setNotificationSettings($p, $userId = false)
     {
         $d = array(
-            'notifyFor' => empty($p['notifyFor'])
-                ? 'mentioned'
-                : $p['notifyFor']
-            ,'delay' => empty($p['delay'])
-                ? 2
-                : intval($p['delay'])
-            ,'delaySize' => empty($p['delaySize'])
-                ? 15
-                : intval($p['delaySize'])
+            'notifyFor' => empty($p['notifyFor']) ? 'mentioned' : $p['notifyFor']
+            , 'delay' => empty($p['delay']) ? 2 : intval($p['delay'])
+            , 'delaySize' => empty($p['delaySize']) ? 15 : intval($p['delaySize'])
         );
 
         static::setUserConfigParam('notificationSettings', $d, $userId);
@@ -1598,9 +1480,26 @@ class User
         return array('success' => true);
     }
 
+    public static function getLastActionTime($userId = false)
+    {
+        $rez = null;
+
+        if (!is_numeric($userId)) {
+            $userId = static::getId();
+        }
+
+        $r = DM\Users::read($userId);
+
+        if (!empty($r['last_action_time'])) {
+            $rez = $r['last_action_time'];
+        }
+
+        return $rez;
+    }
+
     public static function updateLastActionTime()
     {
-        return DM\User::update(
+        return DM\Users::update(
             array(
                 'id' => static::getId()
                 ,'last_action_time' => Util\dateISOToMysql('now')
@@ -1612,14 +1511,10 @@ class User
     {
         $rez = true;
 
-        if (!is_numeric($userId)) {
-            $userId = static::getId();
-        }
+        $lat = static::getLastActionTime($userId);
 
-        $r = DM\User::read($userId);
-
-        if (!empty($r['last_action_time'])) {
-            $minutes = Util\getDatesDiff($r['last_action_time']);
+        if (!empty($lat)) {
+            $minutes = Util\getDatesDiff($lat);
             $rez = ($minutes > 2);
         }
 
@@ -1628,15 +1523,22 @@ class User
 
     /**
      * check if reached specified interval for sending emails
-     * @param  int     $userId
-     * @return varchar | false
+     * @param int $userId
+     * @return
+     *         false - if user not idle
+     *         all - if user selected to receive all types of notifications
+     *                 and specified timeout have passed from lastNotifyTime
+     *         mentioned - if user selected to receive only mentioned or assigned notifications;
+     *                 mentioned notifications are sent instantly
+     *                 because are considered important actions
      */
     public static function canSendNotifications($userId = false)
     {
         $rez = static::isIdle($userId);
+
         if ($rez) {
             $rez = false;
-            $s = static::getNotificationSettings($userId)['data'];
+            $s   = static::getNotificationSettings($userId)['data'];
 
             switch ($s['notifyFor']) {
                 case 'all':
@@ -1670,7 +1572,7 @@ class User
      */
     public static function setEnabled($userId, $enabled)
     {
-        return DM\User::update(
+        return DM\Users::update(
             array(
                 'id' => $userId
                 ,'enabled' => intval($enabled)

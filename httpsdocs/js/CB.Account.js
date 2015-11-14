@@ -82,7 +82,8 @@ Ext.define('CB.Account', {
                 ]
             }
         );
-        CB.Account.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
 
         /* autoclose form if no activity in 5 minutes */
         // this.autoCloseTask = new Ext.util.DelayedTask(this.destroy, this);
@@ -93,7 +94,11 @@ Ext.define('CB.Account', {
     }
 
     ,onGetData: function(r, e){
-        if(r.success !== true){
+        if(!r) {
+            return;
+        }
+
+        if(r.success !== true) {
             if(r.verify === true){
                 // show verification form
                 var w = new CB.VerifyPassword({
@@ -109,7 +114,7 @@ Ext.define('CB.Account', {
                     }
                 });
                 w.show();
-            }else {
+            } else {
                 this.destroy();
             }
             return;
@@ -352,7 +357,9 @@ Ext.define('CB.ProfileForm', {
                 ,change: this.onChange
             }
         });
-        CB.ProfileForm.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
+
         this.grid = this.items.getAt(1);
 
         if(CB.DB.countries.getCount() === 0) {
@@ -409,7 +416,8 @@ Ext.define('CB.ProfileForm', {
         if(Ext.isEmpty(this.photoField.getValue())) {
             return;
         }
-        form = this.getForm();
+        var form = this.getForm();
+
         form.api = {submit: CB_User.uploadPhoto};
 
         form.submit({
@@ -446,12 +454,20 @@ Ext.define('CB.ProfileForm', {
         delete this.data.canAddUsers;
         delete this.data.canAddGroups;
         Ext.apply(this.data, this.getForm().getValues());
-        if(this.data.phone == this.down('[name="phone"]').emptyText) this.data.phone = null;
+
+        if (this.data.phone == this.down('[name="phone"]').emptyText) {
+            this.data.phone = null;
+        }
+
         this.grid.readValues();
         CB_User.saveProfileData(this.data, this.onSaveProcess, this);
     }
 
     ,onSaveProcess: function(r, e){
+        if (!r) {
+            return;
+        }
+
         if(r.success !== true) {
             if(r.verify) {
                 this.fireEvent('verify', this);
@@ -740,7 +756,8 @@ Ext.define('CB.SecurityForm', {
             }
             ]
         });
-        CB.SecurityForm.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
 
         this.saveButton = this.down('#saveButton');
         this.resetButton = this.down('#resetButton');
@@ -749,9 +766,11 @@ Ext.define('CB.SecurityForm', {
     ,loadData: function( data ){
         // this.items.getAt(0).update(data)
         this.data = data;
-        if(!Ext.isEmpty(data.password_change)) this.down('[name="passwordchanged"]').setValue(L.PasswordChanged+': '+data.password_change);
+        if(!Ext.isEmpty(data.password_change)) {
+            this.down('[name="passwordchanged"]').setValue(L.PasswordChanged+': '+data.password_change);
+        }
 
-        cb = this.items.getAt(1).items.first().items.first();
+        var cb = this.items.getAt(1).items.first().items.first();
         cb.setValue(data.recovery_mobile === true);
         this.down('[name="country_code"]').setValue( Ext.valueFrom(data.country_code, null) );
         this.down('[name="phone_number"]').setValue( Ext.valueFrom(data.phone_number, null) );
@@ -778,7 +797,7 @@ Ext.define('CB.SecurityForm', {
     }
 
     ,onChangePasswordClick: function(b){
-        pw = new CB.ChangePasswordWindow({
+        var pw = new CB.ChangePasswordWindow({
             data: {id: App.loginData.id}
             ,listeners: {
                 scope: this
@@ -811,7 +830,10 @@ Ext.define('CB.SecurityForm', {
     }
 
     ,onSaveProcess: function(r, e){
-        if(r.success !== true) return;
+        if(!r || (r.success !== true)) {
+            return;
+        }
+
         this.setDirty(false);
     }
 
@@ -830,41 +852,51 @@ Ext.define('CB.SecurityForm', {
     }
 
     ,enableTSV: function(b, e){
-        data = Ext.valueFrom(this.data.TSV, {});
+        var data = Ext.valueFrom(this.data.TSV, {});
+
         data.country_code = Ext.valueFrom(data.country_code, this.data.country_code );
         data.phone_number = Ext.valueFrom(data.phone_number, this.data.phone_number );
-        w = new CB.TSVWindow({
+
+        var w = new CB.TSVWindow({
             data: data
             ,listeners:{
                 scope: this
                 ,tsvchange: this.onTSVChange
             }
         });
+
         w.show();
     }
 
     ,onTSVChange: function(w, tsv){
-        if(Ext.isEmpty(this.data['TSV'])) this.data.TSV = {};
+        if(Ext.isEmpty(this.data['TSV'])) {
+            this.data.TSV = {};
+        }
         this.data.TSV.method = tsv;
         this.updateTSVStatus();
     }
 
     ,updateTSVStatus: function(){
-        text = '<span class="cG">'+ L.Disabled + '</span>';
+        var text = '<span class="cG">'+ L.Disabled + '</span>';
 
-        if(Ext.isEmpty(this.data.TSV)) this.data.TSV = {};
+        if(Ext.isEmpty(this.data.TSV)) {
+            this.data.TSV = {};
+        }
 
         switch(this.data.TSV.method){
             case 'ga':
                 text = 'Mobile Google Aplication';
                 break;
+
             case 'sms':
                 text = 'Google Authentication using SMS';
                 break;
+
             case 'ybk':
                 text = 'Yubikey';
                 break;
         }
+
         this.down('#tsvStatusText').setValue(L.Status+': ' + text);
         this.down('#btnEnableTsv').setVisible(Ext.isEmpty(this.data.TSV.method));
         this.down('#btnDisableTsv').setVisible(!Ext.isEmpty(this.data.TSV.method));
@@ -880,12 +912,15 @@ Ext.define('CB.SecurityForm', {
             ,scope: this
             ,fn: function(b, e){
                 if(b == 'yes'){
-                    CB_User.disableTSV( function(r, e){
-                        if(r.success === true){
-                            delete this.data.TSV.method;
-                            this.updateTSVStatus();
+                    CB_User.disableTSV(
+                        function(r, e){
+                            if(r && (r.success === true)) {
+                                delete this.data.TSV.method;
+                                this.updateTSVStatus();
+                            }
                         }
-                    }, this);
+                        ,this
+                    );
                 }
             }
         });
@@ -969,7 +1004,9 @@ Ext.define('CB.TSVWindow', {
                 }
             }]
         });
-        CB.TSVWindow.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
+
         this.form = this.down('form');
     }
 
@@ -995,7 +1032,8 @@ Ext.define('CB.TSVWindow', {
 
     ,processEnableTSV: function(r, e){
         this.getEl().unmask();
-        if(r.success === true){
+
+        if(r && (r.success === true)) {
             this.fireEvent('tsvchange', this, this.TSVmethod);
             this.destroy();
         } else {
@@ -1099,10 +1137,16 @@ Ext.define('CB.TSVgaForm', {
 
     ,processGetTSVTemplateData: function(r, e){
         this.getEl().unmask();
-        if(r.success !== true) return;
-        p = this.items.getAt(1);
+
+        if(!r || (r.success !== true)) {
+            return;
+        }
+
+        var p = this.items.getAt(1);
+
         p.data = r;
         p.update(r);
+
         this.down('[name="code"]').focus();
         this.fireEvent('loaded', this, e);
     }
@@ -1185,7 +1229,8 @@ Ext.define('CB.TSVsmsForm', {
             }
             ]
         });
-        CB.TSVsmsForm.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
     }
     ,prepareInterface: function(data){
         this.getForm().setValues(data);

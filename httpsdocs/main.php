@@ -3,6 +3,8 @@ namespace CB;
 
 require_once 'init.php';
 
+//die('<pre>'.print_r($_SESSION,true).'</pre>');
+
 $coreName = Config::get('core_name');
 
 $coreUrl = Config::get('core_url');
@@ -40,6 +42,7 @@ loadMinifyUris();
     <meta name="robots" content="noindex">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
 <?php
 
 echo '<link rel="stylesheet" type="text/css" href="/libx/ext/packages/ext-theme-' . $theme . '/build/resources/ext-theme-' . $theme . '-all' . $rtl . '.css" />
@@ -53,7 +56,13 @@ if (!empty($css)) {
 }
 
 echo '<title>' . $projectTitle . '</title>' . "\n";
-
+$colors = Users::getColors();
+$rez = array();
+foreach ($colors as $id => $c) {
+    $rez[] = '.user-color-' . $id . "{background-color: $c}";
+}
+$rez = implode("\n", $rez);
+echo "<style>$rez</style>";
 ?>
 <style>
 #loading {
@@ -121,6 +130,9 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 }
 </style>
 
+<link rel="stylesheet" href="https://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+<script src="https://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+
 <script type="text/javascript">
     window.name = '<?php
         echo substr(str_shuffle(MD5(tempnam(sys_get_temp_dir(), 'pre') . microtime())), 0, rand(15, 50));
@@ -175,6 +187,12 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
         url: window.location.protocol + "//" + window.location.host + "/libx/extjs-ace/Component.js"
     };
     document.write('<script type="text/javascript" src="' + bravojs.url + '"><' + '/script>');
+
+    //move liflet object to LL, because we assign our translations in L object below
+    if(typeof(L) !== 'undefined') {
+      LL = L;
+      delete L;
+    }
 </script>
 
 <?php

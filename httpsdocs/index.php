@@ -8,7 +8,15 @@ if (empty($_GET['uri'])) {
 $uri = explode('/', $_GET['uri']);
 $uri = array_filter($uri, 'strlen');
 
+
+
 $coreName = array_shift($uri);
+
+         if( $coreName == 'oauth2callback') {
+                include 'oauth2callback.php';
+                return 0;
+         }
+
 $_GET['core'] = $coreName;
 
 $command = array_shift($uri);

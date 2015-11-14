@@ -83,6 +83,8 @@ class Purify
 
         $value = static::$purifier->purify($value, $config);
 
+        Cache::remove('memory');
+
         return $value;
     }
 
@@ -101,6 +103,18 @@ class Purify
         $filename = trim($filename);
 
         return $filename;
+    }
+
+    /**
+     * purify solr field name
+     * @param  varchar $name
+     * @return varchar
+     */
+    final public static function solrFieldName($name)
+    {
+        $name = preg_replace('/[^a-z\d_]/i', '', $name);
+
+        return $name;
     }
 
     /**

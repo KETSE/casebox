@@ -232,7 +232,8 @@ Ext.define('CB.browser.Tree', {
             // ,plugins: [ new CB.DD.Tree({idProperty: 'nid'}) ]
         });
 
-        CB.browser.Tree.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
+
         if(!isNaN(this.rootId)) {
             CB_BrowserTree.getRootProperties(
                 this.rootId
@@ -475,7 +476,7 @@ Ext.define('CB.browser.Tree', {
     }
 
     ,onCreateObjectClick: function(b, e) {
-        data = Ext.apply({}, b.config.data);
+        var data = Ext.clone(b.config.data);
         data.pid = this.contextMenu.node.data.nid;
         data.path = this.contextMenu.node.getPath('nid');
         data.pathtext = this.contextMenu.node.getPath('text');
@@ -491,7 +492,7 @@ Ext.define('CB.browser.Tree', {
 
     ,processCreateInlineObject: function(r, e){
         this.getEl().unmask();
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -528,7 +529,7 @@ Ext.define('CB.browser.Tree', {
     }
 
     ,onDblClick: function(b, e){
-        n = this.getSelectionModel().getSelection()[0];
+        var n = this.getSelectionModel().getSelection()[0];
 
         if(Ext.isEmpty(n)) {
             return;
@@ -831,7 +832,7 @@ Ext.define('CB.browser.Tree', {
 
     ,processRename: function(r, e){
         this.getEl().unmask();
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -857,9 +858,16 @@ Ext.define('CB.browser.Tree', {
     }
 
     ,onDelete: function (btn) {
-        if(btn !== 'yes') return;
+        if(btn !== 'yes') {
+            return;
+        }
+
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-        CB_BrowserTree['delete'](this.getSelectionModel().getSelection()[0].getPath('nid'), this.processDelete, this);
+        CB_BrowserTree['delete'](
+            this.getSelectionModel().getSelection()[0].getPath('nid')
+            ,this.processDelete
+            ,this
+        );
     }
 
     ,processDelete: function(r, e){
@@ -875,7 +883,13 @@ Ext.define('CB.browser.Tree', {
             before: function(n){
                 if(ids.indexOf(n.data.nid) >= 0){
                     if(sm.isSelected(n)){
-                        nn = n.isLast() ? ( n.isFirst() ? n.parentNode : n.previousSibling) : n.nextSibling;
+                        var nn = n.isLast()
+                            ? (
+                                n.isFirst()
+                                ? n.parentNode
+                                : n.previousSibling
+                            )
+                            : n.nextSibling;
                         sm.select([nn]);
                     }
                     deleteNodes.push(n);

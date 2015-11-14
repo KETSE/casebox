@@ -269,8 +269,9 @@ Ext.define('CB.object.field.editor.Form', {
 
         //set default sorting
         if(this.cfg.sort){
-            field = 'order';
-            dir = 'asc';
+            var field = 'order'
+                ,dir = 'asc';
+
             switch(this.cfg.sort){
                 case 'asc':
                     field = 'name';

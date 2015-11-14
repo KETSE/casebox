@@ -121,7 +121,7 @@ class StringsFacet
         return $rez;
     }
 
-    public function getClientData()
+    public function getClientData($options = array())
     {
         $rez = array(
             'f' => $this->field

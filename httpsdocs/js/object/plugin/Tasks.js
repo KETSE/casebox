@@ -55,7 +55,6 @@ Ext.define('CB.object.plugin.Tasks', {
             ,items: this.dataView
         });
 
-        // CB.object.plugin.Tasks.superclass.initComponent.apply(this, arguments);
         this.callParent(arguments);
 
         this.enableBubble(['createobject']);
@@ -104,7 +103,7 @@ Ext.define('CB.object.plugin.Tasks', {
     }
 
     ,getContainerToolbarItems: function() {
-        rez = {
+        var rez = {
             tbar: {}
             ,menu: {}
         };

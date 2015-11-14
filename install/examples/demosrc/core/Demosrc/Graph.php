@@ -173,12 +173,13 @@ class Graph
 
         $this->params = $p;
 
-        $this->pathProperties = Path::getPathProperties($p['path']);
-        $pp = &$this->pathProperties;
+        // classes refactored, this should be reviewed
+        // $this->pathProperties = Path::getPathProperties($p['path']);
+        // $pp = &$this->pathProperties;
 
-        if (empty($pp['case_id'])) {
+        // if (empty($pp['case_id'])) {
             return $rez;
-        }
+        // }
 
         /* define graph title */
         $graphTitle = empty($pp['name'])

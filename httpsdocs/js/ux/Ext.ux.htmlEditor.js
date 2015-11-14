@@ -32,7 +32,7 @@ Ext.define('Ext.ux.HtmlEditor', {
                     if(!Ext.isDefined(CB.thePasteFromWordWindow)) {
                         CB.thePasteFromWordWindow = new CB.PasteFromWord();
                     }
-                    pw = CB.thePasteFromWordWindow;
+                    var pw = CB.thePasteFromWordWindow;
                     Ext.apply(pw, {opener: this});
                     pw.show();
                 }

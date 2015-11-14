@@ -79,7 +79,7 @@ Ext.define('CB.Favorites.Panel', {
                                 //set path as title attribute
                                 App.customRenderers.titleAttribute(v.pathText, m);
 
-                                rez = '<span class="n">' + v.name + '</span>';
+                                var rez = '<span class="n">' + v.name + '</span>';
 
                                 return rez;
                             }
@@ -137,7 +137,7 @@ Ext.define('CB.Favorites.Panel', {
     }
 
     ,processSetStarred: function(r, e) {
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -163,7 +163,7 @@ Ext.define('CB.Favorites.Panel', {
     }
 
     ,processSetUnstarred: function(r, e){
-        if (r.success !== true) {
+        if (!r || (r.success !== true)) {
             return;
         }
 

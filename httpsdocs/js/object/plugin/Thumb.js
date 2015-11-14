@@ -29,7 +29,6 @@ Ext.define('CB.object.plugin.Thumb', {
             ,items: this.dataView
         });
 
-        // CB.object.plugin.Thumb.superclass.initComponent.apply(this, arguments);
         this.callParent(arguments);
 
         this.enableBubble(['openpreview']);

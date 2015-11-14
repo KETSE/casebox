@@ -26,7 +26,8 @@ Ext.define('CB.Uploader', {
         this.config = config || {};
         Ext.applyIf(this.config, this.defaultConfig);
 
-        CB.Uploader.superclass.constructor.call(this, config);
+        this.callParent(arguments);
+        // CB.Uploader.superclass.constructor.call(this, config);
     }
 
     ,init: function(){
@@ -113,7 +114,7 @@ Ext.define('CB.Uploader', {
 
             var r = Ext.util.JSON.decode(e.target.response);
 
-            if(r.success === true){
+            if(r && (r.success === true)) {
                 this.uploadingFile.set('status', this.targetStatus);
 
                 if(Ext.isEmpty(this.uploadingFile.data.draftPid)) {
@@ -134,7 +135,8 @@ Ext.define('CB.Uploader', {
         if(r.type == 'filesexist'){
             r.count = this.getGroupPendingFilesCount(this.uploadingFile.get('group'));
             this.serverResponse = r;
-            w = new CB.FilesConfirmationWindow({
+
+            var w = new CB.FilesConfirmationWindow({
                 title: L.FileExists
                 ,icon: Ext.MessageBox.QUESTION
                 ,data:{
@@ -166,11 +168,16 @@ Ext.define('CB.Uploader', {
     }
 
     ,getGroupPendingFilesCount: function(group){
-        rez = 0;
-        this.store.each( function(r){
-            if( (r.get('group') == group) && (r.get('status') < 2) )
-                rez++;
-        }, this);
+        var rez = 0;
+        this.store.each(
+            function(r){
+                if((r.get('group') == group) && (r.get('status') < 2)) {
+                    rez++;
+                }
+            }
+            ,this
+        );
+
         return rez;
     }
 
@@ -211,25 +218,39 @@ Ext.define('CB.Uploader', {
         this.uploadingFile.set('response', w.response);
         if(w.response == 'rename'){
             Ext.Msg.prompt(L.Rename, L.NewFileName, function(btn, text){
-                if( (btn == 'ok') && !Ext.isEmpty(text) ) CB_Browser.confirmUploadRequest({response: 'rename', newName: text}, this.onConfirmResponseProcess, this);
-                else{
+                if ((btn == 'ok') && !Ext.isEmpty(text)) {
+                    CB_Browser.confirmUploadRequest(
+                        {
+                            response: 'rename'
+                            ,newName: text
+                        }
+                        ,this.onConfirmResponseProcess
+                        ,this
+                    );
+                } else {
                     this.uploadingFile.set('status', 4);//abort
                     CB_Browser.confirmUploadRequest({response: 'cancel'}, this.onConfirmResponseProcess, this);
                 }
             }, this, false, this.serverResponse.suggestedFilename);
         }else{
-            if(w.forAll)
-                this.store.each(function(r){
-                    if( (r.get('status') < 2) && (r.get('group') == this.uploadingFile.get('group')))
-                        r.set('response', w.response);
-                }, this); //set default response for all files in this group
+            if (w.forAll) {
+                this.store.each(
+                    function(r){
+                        if ((r.get('status') < 2) && (r.get('group') == this.uploadingFile.get('group'))) {
+                            r.set('response', w.response);
+                        }
+                    }
+                    ,this
+                ); //set default response for all files in this group
+            }
+
             CB_Browser.confirmUploadRequest({response: w.response}, this.onConfirmResponseProcess, this);
         }
         w.destroy();
     }
 
     ,onConfirmResponseProcess: function(r, e){
-        if(r.success === true){
+        if(r && (r.success === true)) {
             this.uploadingFile.set('status', 5); //uploaded
 
             if(Ext.isEmpty(r.data.draftPid)) {
@@ -304,10 +325,11 @@ Ext.define('CB.Uploader', {
     }
 
     ,calculateFilesMd5: function(){
-        idx = this.store.findExact('md5', false);
+        var idx = this.store.findExact('md5', false);
         if(idx >= 0){
             this.md5FileRecord = this.store.getAt(idx);
             this.fileMD5.getMD5(this.md5FileRecord.get('file'));
+
         } else {
             delete this.md5FileRecord;
             this.checkExistentContents();
@@ -320,8 +342,9 @@ Ext.define('CB.Uploader', {
     }
 
     ,checkExistentContents: function(){
-        md5array={};
-        i = 0;
+        var md5array = {}
+            ,i = 0;
+
         this.store.each(
             function(r){
                 if(Ext.isEmpty(r.get('md5'))){
@@ -347,7 +370,7 @@ Ext.define('CB.Uploader', {
     }
 
     ,processCheckExistentContents: function(r, e){
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -709,7 +732,7 @@ Ext.define('CB.UploadWindow', {
         });
 
 
-        CB.UploadWindow.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
 
     ,onAfterRender: function(){
@@ -857,7 +880,9 @@ Ext.define('CB.UploadWindowButton', {
             ,handler: this.showUploadWindow
             ,scope: this
         });
-        CB.UploadWindowButton.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
+
         this.uploader.on('progresschange', this.onProgressChange, this);
     }
     ,showUploadWindow: function(b, e){
@@ -877,11 +902,13 @@ Ext.define('CB.UploadWindowButton', {
             case 0:
                 this.setText(L.UploadQueue);
                 break;
+
             case 1:
                 this.setText(L.Uploading + ' ' + stats.totalLoadedCount+ ' ' + L.outOf + ' ' + stats.totalCount);
-                pc = Math.round((stats.totalLoadedSize * 100) / stats.totalSize);
-                this.getEl().applyStyles('background-size: '+pc+'% 100%');
+                var pc = Math.round((stats.totalLoadedSize * 100) / stats.totalSize);
+                this.getEl().applyStyles('background-size: ' + pc + '% 100%');
                 break;
+
             case 2: this.setText(L.UploadComplete);
                 this.resetLabelTask.delay(3000);
                 break;

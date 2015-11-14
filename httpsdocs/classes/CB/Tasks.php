@@ -3,6 +3,7 @@ namespace CB;
 
 use CB\L;
 use CB\User;
+use CB\DataModel as DM;
 
 class Tasks
 {
@@ -200,7 +201,7 @@ class Tasks
      */
     public static function setTasksActionFlags(&$tasksDataArray, $userId = false)
     {
-        $taskTemplates = Templates::getIdsByType('task');
+        $taskTemplates = DM\Templates::getIdsByType('task');
 
         foreach ($tasksDataArray as &$d) {
             if ((!in_array(@$d['template_id'], $taskTemplates)) ||

@@ -1,8 +1,8 @@
 <?php
 namespace CB\Objects;
 
-use CB\DB;
 use CB\Objects;
+use CB\DataModel as DM;
 
 class Shortcut extends Object
 {
@@ -39,16 +39,11 @@ class Shortcut extends Object
 
         //check if target is also shortuc and replace with its target
         if (Objects::getType($p['target_id']) == 'shortcut') {
-            $res = DB\dbQuery(
-                'SELECT target_id
-                FROM tree
-                WHERE id = $1',
-                $p['target_id']
-            ) or die(DB\dbQueryError());
-            if ($r = $res->fetch_assoc()) {
+            $r = DM\Tree::read($p['target_id']);
+
+            if (!empty($r)) {
                 $p['target_id'] = $r['target_id'];
             }
-            $res->close();
         }
 
         $p['name'] = 'link to #' . $p['target_id'];

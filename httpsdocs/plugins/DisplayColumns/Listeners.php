@@ -7,31 +7,36 @@ class Listeners
     public function onBeforeSolrQuery(&$p)
     {
         $ip = &$p['inputParams'];
-        $class = null;
 
         if (!empty($ip['from']) && ($ip['from'] == 'tree')) {
             return;
         }
 
-        switch (@$ip['view']['type']) {
+        $className = empty($ip['view']['type'])
+            ? ''
+            : $ip['view']['type'];
+
+        switch ($className) {
             case 'grid':
-                $class= new Grid();
+            case 'activityStream':
+            case 'map':
+            case 'formEditor':
                 break;
 
             case 'stream':
-            case 'activityStream':
-                $class= new ActivityStream();
+                $className = 'activityStream';
                 break;
 
-            case 'formEditor':
-                $class= new FormEditor();
+            case 'calendar':
+                unset($p['params']['sort']);
                 break;
 
             case 'charts':
-            case 'calendar':
+            case 'pivot':
                 //unset sort params for other views
                 //because other views (chart, calendar) dont need sorting
                 //and would result in error if sorted by a custom column and not processed
+                $p['rows'] = 0;
                 unset($p['params']['sort']);
 
                 return;
@@ -41,30 +46,34 @@ class Listeners
                 return;
         }
 
+        $className = __NAMESPACE__ . '\\' . ucfirst($className);
+        $class = new $className;
+
         return  $class->onBeforeSolrQuery($p);
     }
 
     public function onSolrQueryWarmUp(&$p)
     {
         $ip = &$p['inputParams'];
-        $class = null;
+        $className = empty($ip['view']['type'])
+            ? ''
+            : $ip['view']['type'];
 
-        switch (@$ip['view']['type']) {
+        switch ($className) {
             case 'grid':
-                $class= new Grid();
-                break;
-
             case 'activityStream':
-                $class= new ActivityStream();
+            case 'formEditor':
                 break;
 
-            case 'formEditor':
-                $class= new FormEditor();
-                break;
+            // dont need to warm up anything, cause location field and title is extracted from solr
+            // case 'map':
 
             default:
                 return;
         }
+
+        $className = __NAMESPACE__ . '\\' . ucfirst($className);
+        $class = new $className;
 
         return $class->onSolrQueryWarmUp($p);
     }
@@ -72,28 +81,29 @@ class Listeners
     public function onSolrQuery(&$p)
     {
         $ip = &$p['inputParams'];
-        $class = null;
 
         if (!empty($ip['from']) && ($ip['from'] == 'tree')) {
             return;
         }
 
-        switch (@$ip['view']['type']) {
+        $className = empty($ip['view']['type'])
+            ? ''
+            : $ip['view']['type'];
+
+        switch ($className) {
             case 'grid':
-                $class= new Grid();
-                break;
-
             case 'activityStream':
-                $class= new ActivityStream();
-                break;
-
+            case 'map':
             case 'formEditor':
-                $class= new FormEditor();
+            case 'calendar':
                 break;
 
             default:
                 return;
         }
+
+        $className = __NAMESPACE__ . '\\' . ucfirst($className);
+        $class = new $className;
 
         return $class->onSolrQuery($p);
     }

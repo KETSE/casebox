@@ -34,7 +34,7 @@ class Security
     public static $CAN_WRITE = 6;
     public static $CAN_DELETE_CHILDS = 7;
     public static $CAN_DELETE = 8;
-    public static $CAN_CHANGE_PERMISSIONS = 9;
+    public static $CAN_CHANGE_PERMS = 9;
     public static $CAN_TAKE_OWNERSHIP = 10;
     public static $CAN_DOWNLOAD = 11;
     /* groups methods */
@@ -80,10 +80,10 @@ class Security
         $p['data']['id'] = DM\Group::create(
             array(
                 'name' => $name
-                ,'l1' => $name
-                ,'l2' => $name
-                ,'l3' => $name
-                ,'l4' => $name
+                // ,'l1' => $name
+                // ,'l2' => $name
+                // ,'l3' => $name
+                // ,'l4' => $name
                 ,'cid' => User::getId()
             )
         );
@@ -259,8 +259,6 @@ class Security
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            $rez['path'] = Path::replaceCustomNames($r['path']);
-            $rez['name'] = Path::replaceCustomNames($r['name']);
             $rez['inherit_acl'] = $r['inherit_acl'];
             $obj_ids = explode(',', $r['obj_ids']);
         }
@@ -366,6 +364,7 @@ class Security
             DM\UsersGroups::getMemberGroupIds($user_group_id)
         );
         $user_group_ids = array_unique($user_group_ids);
+        $user_group_ids = Util\toNumericArray($user_group_ids);
 
         /* end of getting group ids where passed $user_group_id is a member*/
 
@@ -514,7 +513,7 @@ class Security
 
         $user_group_ids = array($user_id);
         $everyoneGroupId = static::getSystemGroupId('everyone');
-        if ($user_id !== $everyoneGroupId) {
+        if (($user_id !== $everyoneGroupId) && !empty($everyoneGroupId)) {
             $user_group_ids[] = $everyoneGroupId;
         }
 
@@ -670,12 +669,12 @@ class Security
         if ($is_owner) {
             $rez[0][static::$CAN_LIST_FOLDERS] = 1;
             $rez[0][static::$CAN_READ] = 1;
-            $rez[0][static::$CAN_CHANGE_PERMISSIONS] = 1;
+            $rez[0][static::$CAN_CHANGE_PERMS] = 1;
             $rez[0][static::$CAN_TAKE_OWNERSHIP] = 1;
 
             $rez[1][static::$CAN_LIST_FOLDERS] = 0;
             $rez[1][static::$CAN_READ] = 0;
-            $rez[1][static::$CAN_CHANGE_PERMISSIONS] = 0;
+            $rez[1][static::$CAN_CHANGE_PERMS] = 0;
             $rez[1][static::$CAN_TAKE_OWNERSHIP] = 0;
         }
 
@@ -860,7 +859,7 @@ class Security
     {
         return (
             Security::isAdmin() ||
-            (Security::getAccessBitForObject($object_id, static::$CAN_CHANGE_PERMISSIONS, $user_group_id) > 0)
+            (Security::getAccessBitForObject($object_id, static::$CAN_CHANGE_PERMS, $user_group_id) > 0)
         );
     }
 
@@ -1009,7 +1008,7 @@ class Security
         if (!Security::isAdmin() && !Security::canChangePermissions($p['id'])) {
             throw new \Exception(L\get('Access_denied'));
         }
-        DB\dbQuery('delete from tree_acl where node_id = $1 and user_group_id = $2', array($p['id'], $p['data']['id'])) or die(DB\dbQueryError());
+        DB\dbQuery('DELETE FROM tree_acl WHERE node_id = $1 AND user_group_id = $2', array($p['id'], $p['data']['id'])) or die(DB\dbQueryError());
 
         Security::calculateUpdatedSecuritySets();
         Solr\Client::runBackgroundCron();
@@ -1047,13 +1046,16 @@ class Security
 
         /* checking if current inherit value is not already set to requested state */
         $inherit_acl = false;
-        $res = DB\dbQuery('SELECT inherit_acl FROM tree WHERE id = $1', $p['id']) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
+
+        $r = DM\Tree::read($p['id']);
+
+        if (!empty($r)) {
             $inherit_acl = $r['inherit_acl'];
+
         } else {
             throw new \Exception(L\get('Object_not_found'));
         }
-        $res->close();
+
         if ($inherit_acl == $p['inherit']) {
             return array('success' => false);
         }
@@ -1062,6 +1064,7 @@ class Security
         // make pre update changes
         if ($p['inherit']) {
             DB\dbQuery('DELETE from tree_acl WHERE node_id = $1', $p['id']) or die(DB\dbQueryError());
+
         } else {
             switch (@$p['copyRules']) {
                 case 'yes':
@@ -1111,13 +1114,12 @@ class Security
         }
 
         // updating inherit flag for the object
-        DB\dbQuery(
-            'UPDATE tree SET inherit_acl = $2 WHERE id = $1',
+        DM\Tree::update(
             array(
-                $p['id']
-                ,intval($p['inherit'])
+                'id' => $p['id'],
+                'inherit_acl' => intval($p['inherit'])
             )
-        ) or die(DB\dbQueryError());
+        );
 
         Security::calculateUpdatedSecuritySets();
 
@@ -1139,18 +1141,8 @@ class Security
             throw new \Exception(L\get('Access_denied'));
         }
 
-        $pids = null;
-        $res = DB\dbQuery(
-            'SELECT pids FROM tree_info WHERE id = $1',
-            $p['id']
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $pids = $r['pids'];
-        } else {
-            throw new \Exception(L\get('Object_not_found'));
-        }
-        $res->close();
+        $pids = Objects::getPids($p['id'], false);
+        $pids = implode(',', $pids);
 
         $child_ids = array();
 
@@ -1234,7 +1226,7 @@ class Security
         }
 
         if (empty($user_id)) {
-            $user_id = $_SESSION['user']['id'];
+            $user_id = User::getId();
         }
 
         $everyoneGroupId = static::getSystemGroupId('everyone');
@@ -1276,6 +1268,7 @@ class Security
                 WHERE id in (' . implode(',', $pids) . ')',
                 array()
             ) or die(DB\dbQueryError());
+
             while ($r = $res->fetch_assoc()) {
                 $ids = explode(',', $r['pids']);
                 foreach ($ids as $id) {
@@ -1307,13 +1300,9 @@ class Security
 
             //now select pids of collected nodes and filter only sets
             //that are for child nodes of the pids
-            $res = DB\dbQuery(
-                'SELECT id, pids
-                FROM tree_info
-                WHERE id in (' . implode(',', array_keys($nodes)) . ')'
-            ) or die(DB\dbQueryError());
+            $recs = DM\TreeInfo::readByIds(array_keys($nodes));
 
-            while ($r = $res->fetch_assoc()) {
+            foreach ($recs as $r) {
                 $ids = explode(',', $r['pids']);
                 $intersection = array_intersect($pids, $ids);
 
@@ -1323,7 +1312,6 @@ class Security
                     }
                 }
             }
-            $res->close();
 
             $rez = array_keys($rez);
         }
@@ -1579,7 +1567,7 @@ class Security
         if (!Cache::exist($var_name)) {
             Cache::set(
                 $var_name,
-                (DM\User::getIdByName('root') == $userId)
+                (DM\Users::getIdByName('root') == $userId)
             );
         }
 
@@ -1605,7 +1593,7 @@ class Security
      */
     public static function isUsersOwner($userId)
     {
-        return (User::getId() == DM\User::getOwnerId($userId));
+        return (User::getId() == DM\Users::getOwnerId($userId));
     }
 
     /**

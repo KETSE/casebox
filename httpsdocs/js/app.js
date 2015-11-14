@@ -1,13 +1,13 @@
 Ext.namespace('App');
 Ext.BLANK_IMAGE_URL = '/css/i/s.gif';
 
-clog = function(){
+var clog = function(){
     if(typeof(console) != 'undefined') {
         console.log(arguments);
     }
-};
-
-plog = clog;
+}
+,plog = clog
+,App;
 
 // application main entry point
 Ext.onReady(function(){
@@ -52,7 +52,7 @@ Ext.onReady(function(){
     }, 10);
 
     CB_User.getLoginInfo( function(r, e){
-        if(r.success !== true) {
+        if(!r || (r.success !== true)) {
             return;
         }
 
@@ -125,22 +125,33 @@ function initApp() {
     };
 
     App.PromtLogin = function (e){
-        if( !this.loginWindow || this.loginWindow.isDestroyed ) this.loginWindow = new CB.Login({});
+        if (!this.loginWindow || this.loginWindow.isDestroyed) {
+            this.loginWindow = new CB.Login({});
+        }
+
         this.loginWindow.show();
     };
 
     App.formSubmitFailure = function(form, action){
-        if(App.hideFailureAlerts) return;
+        var msg;
+        if(App.hideFailureAlerts) {
+            return;
+        }
+
         switch (action.failureType) {
             case Ext.form.Action.CLIENT_INVALID:
-            Ext.Msg.alert(L.Error, 'Form fields may not be submitted with invalid values'); break;
+                msg = 'Form fields may not be submitted with invalid values';
+                break;
+
             case Ext.form.Action.CONNECT_FAILURE:
-            Ext.Msg.alert(L.Error, 'Ajax communication failed'); break;
+                msg = 'Ajax communication failed';
+                break;
+
             case Ext.form.Action.SERVER_INVALID:
                msg = Ext.valueFrom(action.msg, action.result.msg);
                msg = Ext.valueFrom(msg, L.ErrorOccured);
-               Ext.Msg.alert(L.Error, msg);
-           }
+        }
+        Ext.Msg.alert(L.Error, msg);
     };
 
     App.includeJS = function(file){
@@ -170,21 +181,29 @@ function initApp() {
                 return '';
             }
             var va = v.split(',');
-            var vt = [];
-            thesauriId = grid.helperTree.getNode(record.get('id')).data.templateRecord.get('cfg').thesauriId;
+            var vt = []
+                ,thesauriId = grid.helperTree.getNode(record.get('id')).data.templateRecord.get('cfg').thesauriId;
+
             if(Ext.isEmpty(thesauriId) && store.thesauriIds) {
                 thesauriId = store.thesauriIds[record.id];
             }
+
             if(!Ext.isEmpty(thesauriId)){
-                ts = getThesauriStore(thesauriId);
+                var ts = getThesauriStore(thesauriId)
+                    ,idx;
                 for (var i = 0; i < va.length; i++) {
                     idx = ts.findExact('id', parseInt(va[i], 10));
-                    if(idx >=0) vt.push(ts.getAt(idx).get('name'));
+                    if(idx >=0) {
+                        vt.push(ts.getAt(idx).get('name'));
+                    }
                 }
             }
+
             return App.xtemplates.cell.apply(vt);
         }
+
         ,relatedCell: function(v, metaData, record, rowIndex, colIndex, store) { }
+
         ,combo: function(v, metaData, record, rowIndex, colIndex, store) {
             if(Ext.isEmpty(v)) {
                 return '';
@@ -231,7 +250,7 @@ function initApp() {
                     store = CB.DB.groupsStore;
                     break;
                 default:
-                    cw = null;
+                    var cw = null;
                     if(grid && grid.findParentByType) {
                         cw = grid.refOwner || grid.findParentByType(CB.Objects);
                     }
@@ -280,48 +299,94 @@ function initApp() {
             }
 
         }
+
         ,languageCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
-            if(Ext.isEmpty(v)) return '';
-            ri = CB.DB.languages.findExact('id', parseInt(v, 10));
-            if(ri < 0) return '';
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
+
+            var ri = CB.DB.languages.findExact('id', parseInt(v, 10));
+
+            if(ri < 0) {
+                return '';
+            }
+
             return CB.DB.languages.getAt(ri).get('name');
         }
+
         ,sexCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
-            if(Ext.isEmpty(v)) return '';
-            ri = CB.DB.sex.findExact('id', v);
-            if(ri < 0) return '';
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
+            var ri = CB.DB.sex.findExact('id', v);
+
+            if(ri < 0) {
+                return '';
+            }
+
             return CB.DB.sex.getAt(ri).get('name');
         }
+
         ,shortDateFormatCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
-            if(Ext.isEmpty(v)) return '';
-            ri = CB.DB.shortDateFormats.findExact('id', v);
-            if(ri < 0) return '';
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
+
+            var ri = CB.DB.shortDateFormats.findExact('id', v);
+
+            if(ri < 0) {
+                return '';
+            }
+
             return CB.DB.shortDateFormats.getAt(ri).get('name');
         }
+
         ,thesauriCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
-            if(Ext.isEmpty(v)) return '';
-            var node = grid.helperTree.getNode(record.get('id'));
-            var tr = node.data.templateRecord;
-            var th = tr.get('cfg').thesauriId;
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
+            var node = grid.helperTree.getNode(record.get('id'))
+                ,tr = node.data.templateRecord
+                ,th = tr.get('cfg').thesauriId;
+
             if(th == 'dependent'){
                 th = grid.helperTree.getParentValue(node, tr.get('pid'));
             }
-            var ts = getThesauriStore(th);
-            var ri = ts.findExact('id', parseInt(v, 10));
-            if(ri < 0) return '';
+            var ts = getThesauriStore(th)
+                ,ri = ts.findExact('id', parseInt(v, 10));
+
+            if(ri < 0) {
+                return '';
+            }
+
             return ts.getAt(ri).get('name');
         }
+
         ,checkbox: function(v){
-            if(v == 1) return L.yes;
-            if(v == -1) return L.no;
+            if(v == 1) {
+                return L.yes;
+            }
+
+            if(v == -1) {
+                return L.no;
+            }
+
             return '';
         }
+
         ,date: function(v){
             var rez = '';
             if(Ext.isEmpty(v)) {
                 return rez;
             }
-            rez = Ext.Date.format(Ext.isPrimitive(v) ? Ext.Date.parse(v.substr(0,10), 'Y-m-d') : v, App.dateFormat);
+
+            rez = Ext.Date.format(
+                Ext.isPrimitive(v)
+                    ? Ext.Date.parse(v.substr(0,10), 'Y-m-d')
+                    : v
+                ,App.dateFormat
+            );
+
             return rez;
         }
         /**
@@ -382,26 +447,47 @@ function initApp() {
 
             if(v <= 0) {
                 return  '0 KB';
-            }
-            else if(v < 1024) return '1 KB';
-            else if(v < 1024 * 1024) return (Math.round(v / 1024) + ' KB');
-            else{
-                n = v / (1024 * 1024);
+            } else if(v < 1024) {
+                return '1 KB';
+            } else if(v < 1024 * 1024) {
+                return (Math.round(v / 1024) + ' KB');
+            } else {
+                var n = v / (1024 * 1024);
                 return (n.toFixed(2) + ' MB');
             }
         }
+
         ,tags: function(v, m, r, ri, ci, s){
-            if(Ext.isEmpty(v)) return '';
-            rez = [];
-            Ext.each(v, function(i){rez.push(i.name);}, this);
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
+
+            var rez = [];
+
+            Ext.each(
+                v
+                ,function(i){
+                    rez.push(i.name);
+                }
+                ,this
+            );
+
             rez = rez.join(', ');
+
             m.attr = 'name="' + rez.replace(/"/g, '&quot;') + '"';
+
             return rez;
         }
+
         ,tagIds: function(v){
-            if(Ext.isEmpty(v)) return '';
-            rez = [];
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
+
+            var rez = [];
+
             v = String(v).split(',');
+
             Ext.each(
                 v
                 ,function(i){
@@ -411,12 +497,18 @@ function initApp() {
             );
 
             rez = rez.join(', ');
+
             return rez;
         }
+
         ,importance: function(v){
-            if(Ext.isEmpty(v)) return '';
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
+
             return CB.DB.importance.getName(v);
         }
+
         ,timeUnits: function(v){
             if(Ext.isEmpty(v)) {
                 return '';
@@ -424,10 +516,14 @@ function initApp() {
 
             return CB.DB.timeUnits.getName(v);
         }
+
         ,taskStatus: function(v, m, r, ri, ci, s){
-            if(Ext.isEmpty(v)) return '';
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
             return '<span class="taskStatus'+v+'">'+L['taskStatus'+parseInt(v, 10)]+'</span>';
         }
+
         ,text: function(v, m, r, ri, ci, s){
             if(Ext.isEmpty(v)) {
                 return '';
@@ -493,10 +589,12 @@ function initApp() {
             return App.templatesXTemplate[template_id];
         }
 
-        idx = CB.DB.templates.findExact('id', template_id);
+        var idx = CB.DB.templates.findExact('id', template_id);
+
         if(idx >= 0){
-            r = CB.DB.templates.getAt(idx);
-            it = r.get('info_template');
+            var r = CB.DB.templates.getAt(idx)
+                ,it = r.get('info_template');
+
             if(!Ext.isEmpty(it)){
                 App.templatesXTemplate[template_id] = new Ext.XTemplate(it);
                 App.templatesXTemplate[template_id].compile();
@@ -508,38 +606,40 @@ function initApp() {
     };
 
     App.findTab = function(tabPanel, id, xtype){
-        tabIdx = -1;
-        if(Ext.isEmpty(id)) return tabIdx;
-        i= 0;
-        while((tabIdx == -1) && (i < tabPanel.items.getCount())){
-            o = tabPanel.items.get(i);
-            if(Ext.isEmpty(xtype) || ( o.isXType && o.isXType(xtype) ) ){
-                if(Ext.isDefined(o.params) && Ext.isDefined(o.params.id) && (o.params.id == id)) {
-                    tabIdx = i;
-                } else {
-                    if(!Ext.isEmpty(o.data) && !Ext.isEmpty(o.data.id) && (o.data.id == id)) {
+        var tabIdx = -1
+            ,i = 0;
+
+        if(!Ext.isEmpty(id)) {
+            while((tabIdx == -1) && (i < tabPanel.items.getCount())){
+                var o = tabPanel.items.get(i);
+                if(Ext.isEmpty(xtype) || ( o.isXType && o.isXType(xtype) ) ){
+                    if(Ext.isDefined(o.params) && Ext.isDefined(o.params.id) && (o.params.id == id)) {
                         tabIdx = i;
+                    } else {
+                        if(!Ext.isEmpty(o.data) && !Ext.isEmpty(o.data.id) && (o.data.id == id)) {
+                            tabIdx = i;
+                        }
                     }
                 }
+                i++;
             }
-            i++;
         }
+
         return tabIdx;
     };
 
     App.findTabByType = function(tabPanel, type){
-        tabIdx = -1;
-        if(Ext.isEmpty(type)) {
-            return tabIdx;
-        }
+        var tabIdx = -1
+            ,i= 0;
 
-        i= 0;
-        while((tabIdx == -1) && (i < tabPanel.items.getCount())){
-            o = tabPanel.items.get(i);
-            if(Ext.isDefined(o.isXType) && o.isXType(type)) {
-                tabIdx = i;
+        if(!Ext.isEmpty(type)) {
+            while((tabIdx == -1) && (i < tabPanel.items.getCount())){
+                var o = tabPanel.items.get(i);
+                if(Ext.isDefined(o.isXType) && o.isXType(type)) {
+                    tabIdx = i;
+                }
+                i++;
             }
-            i++;
         }
 
         return tabIdx;
@@ -565,7 +665,7 @@ function initApp() {
             tabPanel = App.mainTabPanel;
         }
 
-        c = tabPanel.add(o);
+        var c = tabPanel.add(o);
         o.show();
         tabPanel.setActiveTab(c);
 
@@ -573,8 +673,12 @@ function initApp() {
     };
 
     App.getHtmlEditWindow = function(config){
-        if(!App.htmlEditWindow) App.htmlEditWindow = new CB.HtmlEditWindow();
+        if(!App.htmlEditWindow) {
+            App.htmlEditWindow = new CB.HtmlEditWindow();
+        }
+
         App.htmlEditWindow = Ext.apply(App.htmlEditWindow, config);
+
         return App.htmlEditWindow;
     };
 
@@ -582,6 +686,13 @@ function initApp() {
         //at least template should be defined in config
         if(Ext.isEmpty(config)) {
             return;
+        }
+
+        if(Ext.isEmpty(config.template_id)) {
+            return Ext.Msg.alert(
+                'Error opening object'
+                ,'Template should be specified for object window to load.'
+            );
         }
 
         config.id = Ext.valueFrom(config.target_id, config.id);
@@ -604,21 +715,23 @@ function initApp() {
         var w = App.openWindow(wndCfg)
             ,winHeight = window.innerHeight;
 
-        if((winHeight > 0) && (w.getHeight() > winHeight)) {
-            w.setHeight(winHeight - 20);
-        }
-
-        if(templateType == 'file') {
-            w.center();
-
-            if(config.name && (detectFileEditor(config.name) !== false)) {
-                w.maximize();
+        if(w) {
+            if((winHeight > 0) && (w.getHeight() > winHeight)) {
+                w.setHeight(winHeight - 20);
             }
-        } else if(!w.existing) {
-            App.alignWindowNext(w);
-        }
 
-        delete w.existing;
+            if(templateType == 'file') {
+                w.center();
+
+                if(config.name && (detectFileEditor(config.name) !== false)) {
+                    w.maximize();
+                }
+            } else if(!w.existing) {
+                App.alignWindowNext(w);
+            }
+
+            delete w.existing;
+        }
     };
 
     App.openWindow = function(wndCfg) {
@@ -720,11 +833,17 @@ function initApp() {
             fileId = fileId.id;
             zipped = false;
         }
-        url = '/' + App.config.coreName + '/download/'+fileId;
-        if(!Ext.isEmpty(versionId)) url += '&v='+versionId;
+
+        var url = '/' + App.config.coreName + '/download/'+fileId;
+
+        if(!Ext.isEmpty(versionId)) {
+            url += '&v='+versionId;
+        }
+
         if(zipped) {
             url += '&z=1';
         }
+
         window.open(url, '_blank');
     };
 
@@ -743,7 +862,7 @@ function initApp() {
             ,objectId: e.objectId
             ,path: e.path
         };
-        var w, th, ed;
+        var w, th, ed, rez = null;
         var tr = e.fieldRecord;
         var cfg = tr.get('cfg');
         var objectWindow = e.ownerCt
@@ -802,8 +921,9 @@ function initApp() {
                             });
 
                             formEditor.show();
+
                         } else {
-                            return new CB.ObjectsTriggerField({
+                            rez = new CB.ObjectsTriggerField({
                                 enableKeyEvents: true
                                 ,data: objData
                             });
@@ -892,63 +1012,76 @@ function initApp() {
                 }
 
                 break;
-            case 'checkbox': return new Ext.form.ComboBox({
-                        enableKeyEvents: true
-                        ,triggerAction: 'all'
-                        ,queryMode: 'local'
-                        ,editable: false
-                        ,store: CB.DB.yesno
-                        ,displayField: 'name'
-                        ,valueField: 'id'
-                    });
-            case 'timeunits': return new Ext.form.ComboBox({
-                        enableKeyEvents: true
-                        ,forceSelection: true
-                        ,triggerAction: 'all'
-                        ,lazyRender: true
-                        ,queryMode: 'local'
-                        ,editable: false
-                        ,store: CB.DB.timeUnits
-                        ,displayField: 'name'
-                        ,valueField: 'id'
-                    });
-            case 'importance': return new Ext.form.ComboBox({
-                        enableKeyEvents: true
-                        ,forceSelection: true
-                        ,triggerAction: 'all'
-                        ,lazyRender: true
-                        ,queryMode: 'local'
-                        ,editable: false
-                        ,store: CB.DB.importance
-                        ,displayField: 'name'
-                        ,valueField: 'id'
-                    });
+            case 'checkbox':
+                rez = new Ext.form.ComboBox({
+                    enableKeyEvents: true
+                    ,triggerAction: 'all'
+                    ,queryMode: 'local'
+                    ,editable: false
+                    ,store: CB.DB.yesno
+                    ,displayField: 'name'
+                    ,valueField: 'id'
+                });
+                break;
+
+            case 'timeunits':
+                rez = new Ext.form.ComboBox({
+                    enableKeyEvents: true
+                    ,forceSelection: true
+                    ,triggerAction: 'all'
+                    ,lazyRender: true
+                    ,queryMode: 'local'
+                    ,editable: false
+                    ,store: CB.DB.timeUnits
+                    ,displayField: 'name'
+                    ,valueField: 'id'
+                });
+                break;
+
+            case 'importance':
+                rez = new Ext.form.ComboBox({
+                    enableKeyEvents: true
+                    ,forceSelection: true
+                    ,triggerAction: 'all'
+                    ,lazyRender: true
+                    ,queryMode: 'local'
+                    ,editable: false
+                    ,store: CB.DB.importance
+                    ,displayField: 'name'
+                    ,valueField: 'id'
+                });
+                break;
+
             case 'date':
-                return new Ext.form.DateField({
+                rez = new Ext.form.DateField({
                     enableKeyEvents: true
                     ,format: App.dateFormat
                     ,width: 100
                 });
+                break;
 
             case 'datetime':
-                return new Ext.form.DateField({
+                rez = new Ext.form.DateField({
                     enableKeyEvents: true
                     ,format: App.dateFormat+' ' + App.timeFormat
                     ,width: 130
                 });
+                break;
 
             case 'time':
-                return new Ext.form.field.Time({
+                rez = new Ext.form.field.Time({
                     enableKeyEvents: true
                     ,format: App.timeFormat
                 });
+                break;
 
             case 'int':
-                return new Ext.form.NumberField({
+                rez = new Ext.form.NumberField({
                     enableKeyEvents: true
                     ,allowDecimals: false
                     ,width: 90
                 });
+                break;
 
             case 'float':
                 var fieldCfg = {
@@ -959,14 +1092,15 @@ function initApp() {
 
                 Ext.copyTo(fieldCfg, cfg, 'decimalPrecision');
 
-                return new Ext.form.NumberField(fieldCfg);
+                rez = new Ext.form.NumberField(fieldCfg);
+                break;
 
             case 'combo':
                 th = cfg.thesauriId;
                 if(th == 'dependent'){
                     th = e.pidValue;
                 }
-                return new Ext.form.ComboBox({
+                rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
                     ,typeAhead: true
@@ -977,13 +1111,14 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
+                break;
 
             case 'iconcombo':
                 th = cfg.thesauriId;
                 if(th == 'dependent'){
                     th = e.pidValue;
                 }
-                return new Ext.form.ComboBox({
+                rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: false
                     ,typeAhead: true
@@ -995,8 +1130,10 @@ function initApp() {
                     ,valueField: 'id'
                     ,iconClsField: 'name'
                 });
+                break;
+
             case '_language':
-                return new Ext.form.ComboBox({
+                rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
                     ,typeAhead: true
@@ -1007,8 +1144,10 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
+                break;
+
             case '_sex':
-                return new Ext.form.ComboBox({
+                rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
                     ,typeAhead: true
@@ -1019,8 +1158,10 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
+                break;
+
             case '_templateTypesCombo':
-                return new Ext.form.ComboBox({
+                rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
                     ,typeAhead: true
@@ -1031,8 +1172,10 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
+                break;
+
             case '_fieldTypesCombo':
-                return new Ext.form.ComboBox({
+                rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,autoSelect: true
                     ,forceSelection: true
@@ -1044,8 +1187,10 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
+                break;
+
             case '_short_date_format':
-                return new Ext.form.ComboBox({
+                rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
                     ,typeAhead: true
@@ -1056,6 +1201,8 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
+                break;
+
             case 'memo':
                 var height = Ext.valueFrom(cfg.height, 50);
                 height = parseInt(height, 10);
@@ -1080,11 +1227,12 @@ function initApp() {
 
                 }
 
-                return new Ext.form.TextArea(edConfig);
+                rez = new Ext.form.TextArea(edConfig);
+                break;
 
             case 'text':
                 e.cancel = true;
-                w = new CB.TextEditWindow({
+                rez = new CB.TextEditWindow({
                     title: tr.get('title')
                     ,editor: tr.get('cfg').editor
                     ,mode: tr.get('cfg').mode
@@ -1101,13 +1249,14 @@ function initApp() {
                         }
                     }
                 });
-                w.on('destory', e.grid.gainFocus, e.grid);
-                w.show();
+                rez.on('destory', e.grid.gainFocus, e.grid);
+                rez.show();
+
                 break;
 
             case 'html':
                 e.cancel = true;
-                w = App.getHtmlEditWindow({
+                rez = App.getHtmlEditWindow({
                     title: tr.get('title')
                     ,data: {
                         value: e.record.get('value')
@@ -1116,33 +1265,76 @@ function initApp() {
                             this.originalValue = this.record.get('value');
                             this.value = v;
                             this.record.set('value', v);
-                            if(this.grid.onAfterEditProperty) this.grid.onAfterEditProperty(this);
+
+                            if (this.grid.onAfterEditProperty) {
+                                this.grid.onAfterEditProperty(this);
+                            }
+
                             this.grid.fireEvent('change');
                         }
                     }
                 });
-                if(!Ext.isEmpty(e.grid)) w.on('hide', e.grid.gainFocus, e.grid);
-                w.show();
-                return w;
+
+                if(!Ext.isEmpty(e.grid)) {
+                    w.on('hide', e.grid.gainFocus, e.grid);
+                }
+                rez.show();
+                break;
+
+            case 'geoPoint':
+                if(tr && (tr.get('cfg').editor == 'form')) {
+                    e.cancel = true;
+
+                    rez = Ext.create('CB.LeafletWindow', {
+                        title: L.Map
+                        ,data: {
+                            value: e.record.get('value')
+                            ,cfg: tr.get('cfg')
+                            ,scope: e
+                            ,callback: function(w, v){
+                                this.originalValue = this.record.get('value');
+                                this.value = v;
+                                this.record.set('value', v);
+                                if(this.grid.onAfterEditProperty) {
+                                    this.grid.onAfterEditProperty(this, this);
+                                }
+                            }
+                        }
+                    });
+                    rez.on('destory', e.grid.gainFocus, e.grid);
+                    rez.show();
+
+                } else {
+                    rez = new Ext.form.TextField({
+                        enableKeyEvents: true
+                        ,maskRe: /[\-\d\.,]/
+                    });
+
+                }
                 break;
 
             default:
-                return new Ext.form.TextField({
+                rez = new Ext.form.TextField({
                     enableKeyEvents: true
                 });
         }
+
+        return rez;
     };
 
     App.successResponse = function(r){
-        if(r.success === true) {
+        if(r && (r.success === true)) {
             return true;
         }
         Ext.Msg.alert(L.Error, Ext.valueFrom(r.msg, L.ErrorOccured));
         return false;
     };
 
-    App.showTestingWindow =function(){
-        if(!App.testWindow) App.testWindow = new CB.TestingWindow({ closeAction: 'hide' });
+    App.showTestingWindow = function(){
+        if(!App.testWindow) {
+            App.testWindow = new CB.TestingWindow({ closeAction: 'hide' });
+        }
+
         App.testWindow.show();
     };
 
@@ -1196,7 +1388,7 @@ function initApp() {
 
         App.errorMsgDiv.task.delay(5000);
 
-        dhf = function(){
+        var dhf = function(){
             delete App.hideFailureAlerts;
         };
         Ext.Function.defer(dhf, 1500);
@@ -1299,7 +1491,7 @@ function initApp() {
                         ,name: text
                     }
                     ,function(r, e){
-                        if(r.success !== true){
+                        if(!r || (r.success !== true)) {
                             return;
                         }
 
@@ -1378,19 +1570,19 @@ window.ondragend = function(e){
     delete window.dragFromWindow;
 };
 
-// window.onerror = function(message, url, linenumber)
-// {
-//    var errors = {};
-//    errors.message    = message;
-//    errors.url        = url;
-//    errors.linenumber = linenumber;
-//    clog('ERROR:', errors);
-//   // jQuery.ajax({
-//   //     type: "POST",
-//   //     url: "/scripts/error_report.php",
-//   //     dataType: "json",
-//   //     data: errors
-//   //  });
+window.onerror = function(message, url, linenumber)
+{
+   var errors = {};
+   errors.message    = message;
+   errors.url        = url;
+   errors.linenumber = linenumber;
+   clog('ERROR:', errors);
+  // jQuery.ajax({
+  //     type: "POST",
+  //     url: "/scripts/error_report.php",
+  //     dataType: "json",
+  //     data: errors
+  //  });
 
-//   return true;
-// };
+  return true;
+};

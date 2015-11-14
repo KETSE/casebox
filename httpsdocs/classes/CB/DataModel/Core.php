@@ -20,6 +20,8 @@ class Core extends Base
         ,'active' => 'int'
     );
 
+    protected static $decodeJsonFields = array('cfg');
+
     /**
      * create a core (create database and add core record in __casebox.cores table)
      * @param  array $p
@@ -46,6 +48,10 @@ class Core extends Base
     public static function read($idOrName)
     {
         $id = static::toId($idOrName);
+        
+        if(!$id) {
+            trigger_error('can\'t get core id from name:'.$idOrName, E_USER_WARNING);
+        }
 
         $rez = parent::read($id);
 
@@ -93,7 +99,7 @@ class Core extends Base
 
     public static function getTableName()
     {
-        $dbName = Config::get('prefix') . '__casebox';
+        $dbName = \CB\PREFIX . '_casebox';
 
         return "`$dbName`.`" . static::$tableName . '`';
     }

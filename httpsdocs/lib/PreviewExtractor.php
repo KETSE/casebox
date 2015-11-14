@@ -35,7 +35,7 @@ class PreviewExtractor
 
     public function removeFromQueue($id)
     {
-        dbQuery('delete from file_previews where id = $1', $id) or die( DB\dbQueryError() );
+        dbQuery('delete from file_previews where id = $1', $id) or die(DB\dbQueryError());
     }
 
     public function purify($html, $options = array())
@@ -63,10 +63,36 @@ class PreviewExtractor
                 $config->set($k, $v);
             }
         }
+
         $purifier = new \HTMLPurifier($config);
-        $html = $purifier->purify($html);/**/
+
+        // This storage is freed on error
+        Cache::set('memory', str_repeat('*', 1024 * 1024));
+
+        register_shutdown_function(array($this, 'onScriptShutdown'));
+
+        $html = $purifier->purify($html);
+
+        Cache::remove('memory');
+
         $html = str_replace('/preview/#', '#', $html);
 
         return $html;
+    }
+
+    public static function onScriptShutdown()
+    {
+        Cache::remove('memory');
+
+        if ((!is_null($err = error_get_last())) && (!in_array($err['type'], array (E_NOTICE, E_WARNING)))) {
+
+            DB\dbQuery(
+                'UPDATE file_previews
+                SET `status` = 3
+                WHERE status = 2'
+            ) or die(DB\dbQueryError());
+
+            DB\commitTransaction();
+        }
     }
 }

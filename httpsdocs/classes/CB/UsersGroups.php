@@ -23,20 +23,14 @@ class UsersGroups
         }
         $path = explode('/', $p['path']);
         $id = array_pop($path);
-        $node_type = null;
+        $nodeType = null;
 
         if (is_numeric($id)) {
-            $res = DB\dbQuery(
-                'SELECT type
-                FROM users_groups
-                WHERE id = $1',
-                $id
-            ) or die(DB\dbQueryError());
+            $r = DM\UsersGroups::read($id);
 
-            if ($r = $res->fetch_assoc()) {
-                $node_type = $r['type'];
+            if (!empty($r)) {
+                $nodeType = $r['type'];
             }
-            $res->close();
         }
 
         // users out of a group
@@ -65,7 +59,7 @@ class UsersGroups
             }
             $res->close();
 
-        } elseif (is_null($node_type)) { /* root node childs*/
+        } elseif (is_null($nodeType)) { /* root node childs*/
             $res = DB\dbQuery(
                 'SELECT
                     id
@@ -282,14 +276,14 @@ class UsersGroups
         }
 
         //check if user with such email doesn exist
-        $user_id = DM\User::getIdByEmail($p['email']);
+        $user_id = DM\Users::getIdByEmail($p['email']);
         if (!empty($user_id)) {
             throw new \Exception(L\get('UserEmailExists'));
         }
 
         /*check user existance, if user already exists but is deleted
         then its record will be used for new user */
-        $user_id = DM\User::getIdByName($p['name']);
+        $user_id = DM\Users::getIdByName($p['name']);
         if (!empty($user_id)) {
             throw new \Exception(L\get('User_exists'));
         }
@@ -307,11 +301,11 @@ class UsersGroups
             $params['password'] = $p['password'];
         }
 
-        $user_id = DM\User::getIdByName($p['name'], false);
+        $user_id = DM\Users::getIdByName($p['name'], false);
         if (!empty($user_id)) {
             //update
             $params['id'] = $user_id;
-            DM\User::update($params);
+            DM\Users::update($params);
 
             /* in case it was a deleted user we delete all old acceses */
             DB\dbQuery('DELETE FROM users_groups_association WHERE user_id = $1', $user_id) or die(DB\dbQueryError());
@@ -319,7 +313,7 @@ class UsersGroups
             /* end of in case it was a deleted user we delete all old acceses */
         } else {
             //create
-            $user_id = DM\User::create($params);
+            $user_id = DM\Users::create($params);
         }
 
         $rez = array(
@@ -604,7 +598,7 @@ class UsersGroups
             FROM users_groups_association
             WHERE user_id = $1',
             $user_id
-        ) or die( DB\dbQueryError() );
+        ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
             $groups[] = $r['group_id'];

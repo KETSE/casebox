@@ -1,6 +1,0 @@
-
-Processing core cla ...deleting all
-updating tree
-optimizing
-
-Done

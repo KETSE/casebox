@@ -4,8 +4,37 @@ namespace CB\DataModel;
 
 use CB\DB;
 
-class UsersGroups //extends User
+class UsersGroups extends Base
 {
+
+    protected static $tableName = 'users_groups';
+
+    protected static $tableFields = array(
+        'id' => 'int'
+        ,'type' => 'int' //strict value
+        ,'system' => 'int' //0, 1
+        ,'name' => 'varchar'
+        ,'first_name' => 'varchar'
+        ,'last_name' => 'varchar'
+        ,'sex' => 'char'
+        ,'email' => 'varchar'
+        ,'photo' => 'varchar'
+        ,'password' => 'varchar'
+        ,'recover_hash' => 'varchar'
+        ,'language_id' => 'int'
+        ,'cfg' => 'text'
+        ,'data' => 'text'
+        ,'last_action_time' => 'time'
+        ,'enabled' => 'int'
+        ,'cid' => 'int'
+        ,'uid' => 'int'
+        ,'did' => 'int'
+        ,'ddate' => 'timestamp'
+    );
+
+    protected static $decodeJsonFields = array('cfg', 'data');
+
+    protected static $allowReadAll = true;
 
     /**
      * method to get available user groups

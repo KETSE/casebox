@@ -74,10 +74,8 @@ class Client extends Service
 
         /* if there is a folder template then set its ntsc
         equal to its index in folder_templates array */
-        $folder_index = array_search($r['template_id'], $this->folderTemplates);
-        if ($folder_index !== false) {
-            // $r['ntsc'] = $folder_index;
-            $r['ntsc'] = sizeof($this->folderTemplates);
+        if (in_array($r['template_id'], $this->folderTemplates)) {
+            $r['ntsc'] = 1;
         }
 
         /* make some trivial type checks */
@@ -193,12 +191,12 @@ class Client extends Service
         }
     }
 
-    private function updateCronLastActionTime($cron_id)
+    private function updateCronLastActionTime($cronId)
     {
-        if (empty($cron_id)) {
+        if (empty($cronId)) {
             return;
         }
-        $cache_var_name = 'update_cron_'.$cron_id;
+        $cache_var_name = 'update_cron_'.$cronId;
         /* if less than 20 seconds have passed then skip updating db */
         if (\CB\Cache::exist($cache_var_name) &&
             ( (time() - \CB\Cache::get($cache_var_name)) < 20)
@@ -208,12 +206,23 @@ class Client extends Service
 
         \CB\Cache::set($cache_var_name, time());
 
-        DB\dbQuery(
-            'UPDATE crons
-            SET last_action = CURRENT_TIMESTAMP
-            WHERE cron_id = $1',
-            $cron_id
-        ) or die('error updating crons last action');
+        $id = DM\Crons::toId($cronId, 'cron_id');
+        if (empty($id)) {
+            DM\Crons::create(
+                array(
+                    'cron_id' => $cronId
+                    ,'last_action' => 'CURRENT_TIMESTAMP'
+                )
+            );
+
+        } else {
+            DM\Crons::update(
+                array(
+                    'id' => $id
+                    ,'last_action' => 'CURRENT_TIMESTAMP'
+                )
+            );
+        }
     }
 
     /**
