@@ -189,8 +189,10 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
     document.write('<script type="text/javascript" src="' + bravojs.url + '"><' + '/script>');
 
     //move liflet object to LL, because we assign our translations in L object below
-    LL = L;
-    delete L;
+    if(typeof(L) !== 'undefined') {
+      LL = L;
+      delete L;
+    }
 </script>
 
 <?php

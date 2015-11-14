@@ -257,7 +257,9 @@ class Object
             ,'sys_data' => Util\jsonEncode($p['sys_data'])
         );
 
-        if (!DM\Objects::update($data)) {
+        if (DM\Objects::exists($this->id)) {
+            DM\Objects::update($data);
+        } else {
             DM\Objects::create($data);
         }
     }
@@ -510,7 +512,9 @@ class Object
             ,'sys_data' => Util\jsonEncode($d['sys_data'])
         );
 
-        if (!DM\Objects::update($data)) {
+        if (DM\Objects::exists($d['id'])) {
+            DM\Objects::update($data);
+        } else {
             DM\Objects::create($data);
         }
 
@@ -564,7 +568,9 @@ class Object
             ,'sys_data' => Util\jsonEncode($d['sys_data'])
         );
 
-        if (!DM\Objects::update($data)) {
+        if (DM\Objects::exists($d['id'])) {
+            DM\Objects::update($data);
+        } else {
             DM\Objects::create($data);
         }
 

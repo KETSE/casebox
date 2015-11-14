@@ -1,8 +1,14 @@
+CaseBox 1.9.544 (2015-11-14)
+==============================
+Fixed Bugs:
+----------
+- verify if leaflet namespace is initiated
+- #9440 Getting Error when saving a treeNode config
+
 CaseBox 1.9.543 (2015-11-13)
 ==============================
 - Increased space between tree nodes, grid rows
 - showing FacetNav total in gray color
-
 
 CaseBox 1.9.542 (2015-11-13)
 ==============================
