@@ -108,7 +108,7 @@ background-color: #FFFFCC;
   overflow: hidden;
   max-height: 300px;
   display: -webkit-box;
-  -webkit-line-clamp: 6;
+  -webkit-line-clamp: 10;
   -webkit-box-orient: vertical;
 }
 
