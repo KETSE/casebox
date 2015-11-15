@@ -3,15 +3,19 @@
 }
 .facet .x-panel-header, .activeFilters .x-panel-header{
 	background: none;
-	border-bottom: 1px solid #99bce8 !important;
-	color: #333;
-	text-transform: uppercase;
+	border-bottom: 1px solid #AAA !important; /* #99bce8 */
 	padding: 0 5px 4px 4px;
 	margin: 0;
 	/*font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;*/
 	font-weight: bold;
 	box-shadow: none;
 }
+
+.facet .x-title-text {
+	color: #333;
+	text-transform: uppercase;
+}
+
 .facet .x-panel-body {
 	border: none;
 }
@@ -21,7 +25,8 @@
 .multivalued .x-tool-chain, .multivalued .x-tool-unchain{display: inline-block}
 
 .filter_list {
-	margin:0;
+	margin: 0;
+	margin-top: 4px;
 	padding:0;
 	list-style: none;
 	margin-left: 5px;
@@ -76,9 +81,9 @@
 	float:right;
 	text-align:right
 }
-.filter_list li .t{ color:#333 }
-.filter_list li .b{ color:#000 }
-.filter_list li .n{ color:#57ab3f }
+.filter_list li .t{ color: #999 }
+.filter_list li .b{ color: #000 }
+.filter_list li .n{ color: #57ab3f }
 .show_all {
 	color:#777;
 	padding:5px 10px 0;
