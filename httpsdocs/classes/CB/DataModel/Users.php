@@ -180,7 +180,8 @@ class Users extends UsersGroups
                 ,email
             FROM users_groups
             WHERE email LIKE $1
-                AND enabled = 1',
+                AND enabled = 1
+                AND did IS NULL',
             "%$email%"
         ) or die(DB\dbQueryError());
 

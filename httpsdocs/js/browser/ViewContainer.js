@@ -1250,6 +1250,9 @@ Ext.define('CB.browser.ViewContainer', {
         }
         path += data.nid;
 
+        //targetPath set by Favorites class
+        path = Ext.valueFrom(objectData.targetPath, path);
+
         this.changeSomeParams({
             path: path
             ,query: null

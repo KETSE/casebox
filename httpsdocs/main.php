@@ -130,8 +130,8 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 }
 </style>
 
-<link rel="stylesheet" href="https://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
-<script src="https://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+<link rel="stylesheet" href="/libx/leaflet/leaflet.css" />
+<script src="/libx/leaflet/leaflet.js"></script>
 
 <script type="text/javascript">
     window.name = '<?php

@@ -68,8 +68,10 @@ class Path
             $cfg['class'] = $class;
 
             try {
-                $class = new $class($cfg);
-                $rez[$cfg['guid']] = $class;
+                if (class_exists($class)) {
+                    $class = new $class($cfg);
+                    $rez[$cfg['guid']] = $class;
+                }
             } catch (\Exception $e) {
                 debug('error creating class '.$class);
             }
