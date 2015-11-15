@@ -80,7 +80,7 @@ Ext.define('CB.browser.view.Map',{
                             [a[0], a[1]]
                             ,{
                                 icon: LL.icon({
-                                    iconUrl: 'https://www.fosterly.com/assets/maps/marker-3a77f9ac6522a026170f1aed325f2d19.png',
+                                    iconUrl: '/css/i/marker.png',
                                     iconSize: [25, 41],
                                     iconAnchor: [12, 40],
                                     popupAnchor: [0, -35]

@@ -1,5 +1,12 @@
 CaseBox 1.9.545 (2015-11-14)
 ==============================
+- #9247 vFolder in Favorites doesn't work
+- #9377 CB should not break if a treeNode instance doesn't work + strange behaviour of treeNodes
+- #9454 Leaflet library should be loaded from local server, not CDN + Edit form not shown
+- #8658 When deleting a user, email address cannot be used again
+
+CaseBox 1.9.545 (2015-11-14)
+==============================
 - update translations
 
 CaseBox 1.9.544 (2015-11-14)
