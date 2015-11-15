@@ -106,7 +106,7 @@ background-color: #FFFFCC;
 .block-plugin-comments .comment div.comment-text {
   /*text-overflow: ellipsis;*/
   overflow: hidden;
-  max-height: 200px;
+  max-height: 300px;
   display: -webkit-box;
   -webkit-line-clamp: 6;
   -webkit-box-orient: vertical;
