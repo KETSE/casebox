@@ -7,3 +7,7 @@ Casebox is accessed from a web browser. User Experience is similar to a desktop 
 
 Casebox is your one stop shop for records, tasks and files.
 
+In order to configure new objects here are a few quick steps to help you get started.
+
+
+
