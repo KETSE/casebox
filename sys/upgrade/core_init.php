@@ -21,7 +21,7 @@ namespace CB;
  *
  */
 
-$binDirectorty = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+$binDirectorty = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR;
 $cbHome = dirname($binDirectorty) . DIRECTORY_SEPARATOR;
 $bareBoneCoreSql = $cbHome . 'install/mysql/bare_bone_core.sql';
 

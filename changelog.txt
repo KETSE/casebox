@@ -1,4 +1,14 @@
-CaseBox 1.9.545 (2015-11-14)
+CaseBox 1.9.548 (2015-11-16)
+==============================
+- #9480 Problems with update: Custom column to choose from got lost
+- #9430 Move upgrade scripts from /bin/ to /sys/upgrade/
+- #9481 Error on edit Objects
+
+CaseBox 1.9.547 (2015-11-15)
+==============================
+- include Notifications test for travis
+
+CaseBox 1.9.546 (2015-11-15)
 ==============================
 - #9247 vFolder in Favorites doesn't work
 - #9377 CB should not break if a treeNode instance doesn't work + strange behaviour of treeNodes
