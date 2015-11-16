@@ -1,4 +1,4 @@
-Add Form to Casebox
+Forms
 ============
 
 These are the steps required to be able to use a new form/object in Casebox
@@ -12,15 +12,17 @@ Create New Form
 -----------------------
 Use the tree window to browse to System/Templates folder
 
+.. image:: /i/admin/System-Template.png
 
+Use the “New” button and choose “Template” 
 
-Use the “New” button and choose “Templates Template” (We should call it Form Template)
-
-
-
+.. image:: /i/admin/New-Template.png
 
 
 Create form/object name by filling out the form
+
+.. image:: /i/admin/New-Template-Form.png
+
 
 
 
@@ -29,11 +31,10 @@ Create form/object name by filling out the form
 Add fields to form 
 ------------------
 
-Browse inside the newly created template (by double clicking newly created template) and adding different fields through the new “Fields template” button.
+Browse inside the newly created template (by double clicking newly created template) and adding different fields through the new “Field"  button.
 
 
-Browse inside the newly created template (by double clicking newly created template) and adding different fields through the new “Fields template” button.
-
+For more information 
 
 
 

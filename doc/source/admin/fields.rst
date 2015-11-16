@@ -1,4 +1,4 @@
-Simple Fields Configuration
+Fields
 ============================
 
 Create a new thesauri 
