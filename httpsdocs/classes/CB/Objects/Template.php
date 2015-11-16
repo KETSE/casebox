@@ -68,6 +68,19 @@ class Template extends Object
         ,'varchar' => 'ftVarchar'
     );
 
+    protected function collectCustomModelData()
+    {
+        $p = &$this->data;
+        $rez = parent::collectCustomModelData();
+
+        //set type from data
+        if (isset($rez['type']) && !empty($p['data']['type'])) {
+            $rez['type'] = $p['data']['type'];
+        }
+
+        return $rez;
+    }
+
     /**
      * internal function used by create method for creating custom data
      * @return void

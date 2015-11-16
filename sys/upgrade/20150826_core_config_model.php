@@ -5,10 +5,10 @@ namespace CB;
 /**
  * Script to upgrade core config options to be editable from the tree
  *
- * Note: check core_update_init.php description for params
+ * Note: check core_init.php description for params
  */
 
-include 'core_update_init.php';
+include 'core_init.php';
 
 $class = new Import\UpgradeConfigModel($importConfig);
 

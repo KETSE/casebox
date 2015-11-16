@@ -155,9 +155,7 @@ class Dbnode extends Base
             $templateId = $this->config['template_id'];
         }
 
-        if (empty($from) && !empty($templateId)) {
-            $from = 'template_' . $templateId;
-
+        if (!empty($templateId)) {
             $r = DM\Templates::read($templateId);
             if (!empty($r)) {
                 $tplCfg = $r['cfg'];

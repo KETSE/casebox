@@ -1,3 +1,9 @@
+CaseBox 1.9.548 (2015-11-16)
+==============================
+- #9480 Problems with update: Custom column to choose from got lost
+- #9430 Move upgrade scripts from /bin/ to /sys/upgrade/
+- #9481 Error on edit Objects
+
 CaseBox 1.9.547 (2015-11-15)
 ==============================
 - include Notifications test for travis

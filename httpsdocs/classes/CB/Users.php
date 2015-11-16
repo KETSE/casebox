@@ -43,7 +43,7 @@ class Users
 
         foreach ($recs as $r) {
             $rez[$r['id']] = empty($r['cfg']['customColor'][$uid])
-                ? $r['cfg']['color']
+                ? @$r['cfg']['color']
                 : $r['cfg']['customColor'][$uid];
         }
 

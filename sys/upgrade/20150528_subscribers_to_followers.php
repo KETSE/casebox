@@ -10,7 +10,7 @@ namespace CB;
     Script params:
     -c, --core  - required, core name
 
-    example: php -f upgrade_subscribers_to_followers.php -- -c dev
+    example: php -f subscribers_to_followers.php -- -c dev
 
     Note: there is no need to run any reindexing
         All new actions will generate notifications based on followers data
@@ -20,9 +20,7 @@ use CB\DB;
 ini_set('max_execution_time', 0);
 
 $path = realpath(
-    dirname(__FILE__) . DIRECTORY_SEPARATOR .
-    '..' . DIRECTORY_SEPARATOR .
-    'sys' . DIRECTORY_SEPARATOR .
+    dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR .
     'crons' . DIRECTORY_SEPARATOR
 ) . DIRECTORY_SEPARATOR;
 
