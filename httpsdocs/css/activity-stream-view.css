@@ -23,6 +23,7 @@
 
 .as-record .as-item .action{
     padding: 5px;
+    cursor: pointer;
 }
 .as-record .as-item .action-title{
     padding: 0;
