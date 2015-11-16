@@ -1,5 +1,5 @@
 Forms
-============
+=======
 
 These are the steps required to be able to use a new form/object in Casebox
 
@@ -9,7 +9,7 @@ These are the steps required to be able to use a new form/object in Casebox
 
 
 Create New Form
------------------------
+----------------
 Use the tree window to browse to System/Templates folder
 
 .. image:: /i/admin/System-Template.png
@@ -29,59 +29,44 @@ Create form/object name by filling out the form
 
 
 Add fields to form 
-------------------
+-------------------
 
 Browse inside the newly created template (by double clicking newly created template) and adding different fields through the new “Field"  button.
 
+.. image:: /i/admin/new-field-menu.png
 
-For more information 
+Add a new field
+
+.. image:: /i/admin/new-field.png
+
+For more information on field creation visit: Fields
 
 
 
 
 
+Auto-create a default set of subfolders while creating an object
+-----------------------------------------------------------------
+
+If you want to create a set of subfolders with the creation of each new object, all you have to do is create a folder structure and configure your template using the “systems_folders” JSON directive.
+
+.. image:: /i/admin/auto-create-subfolders.png
+
+Advanced Template Configuration
+--------------------------------
 
 
 Choose the name of the field and the display title and type
 
 
 
-​ Field types
-Casebox supports the following list of field types:
-Varchar: simplest one-line text field
-Date
-Datetime
-Time
-Float
-Integer
-Group: it's not a visible field, but a way to group several fields.
-Header: a Header to visually separate fields
-Html: HTML editor
-Text: Text editor (in a popup window)
-Memo: Inline text editor (multiline text editor inside the grid)
-IconCombo: used in Templates to select the icon
-Objects: lookup field with values from the Tree itself
+​
 
 
 Form items created!
 
 
 
-Add the newly created template to a menu
-----------------------------------------
-Now you have to enable creating the new form you created by adding it to the menu.
-
-Browse to System/Menus
-
-
-
-Edit General Menu
-
-
-Edit the 'Menu' label and add your object by enabling the checkbox next to its title
-
-
-Sort your menus by clicking sort value and arrange your menus
 
 
 

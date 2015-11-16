@@ -1,10 +1,9 @@
 Thesauri
 =========
 
+In order to create a new Thesaurus, use the tree window to browse to System/Templates folder
 
-Create a new thesauri 
-------------------------
-Use the tree window to browse to System/Templates folder
+.. image:: /i/admin/System-Thesauri.png
 
 Create a new folder with the name of the Thesaurus you want to create
 
