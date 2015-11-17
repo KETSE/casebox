@@ -1,3 +1,7 @@
+CaseBox 1.9.549 (2015-11-17)
+==============================
+- #9122 Tamkeen Permission and transfer of ownership
+
 CaseBox 1.9.548 (2015-11-16)
 ==============================
 - #9480 Problems with update: Custom column to choose from got lost

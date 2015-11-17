@@ -3,6 +3,7 @@ namespace CB\Import;
 
 use CB\Cache;
 use CB\DB;
+use CB\Objects;
 use CB\Solr;
 use CB\Util;
 use CB\Import\BareBoneModel as BBM;
@@ -363,5 +364,14 @@ class Base
 
             echo "Ok\n";
         }
+    }
+
+    protected function getMenuSeparatorId()
+    {
+        return Objects::getChildId(
+            1,
+            array('Tree', 'System', 'Templates', 'Built-in', 'Menu', '- Menu separator -')
+        );
+
     }
 }
