@@ -648,20 +648,29 @@ class Objects
 
     /**
      * get a child node id by its name under specified $pid
-     * @param  int      $id
-     * @param  varchar  $name
+     * @param  int           $id
+     * @param  varchar|array $name direct child name or the list of child, subchild, ...
      * @return int|null
      */
     public static function getChildId($pid, $name)
     {
-        $rez = null;
-        $r = DM\Tree::getChildByName($pid, $name);
-
-        if (!empty($r)) {
-            $rez = $r['id'];
+        if (!is_array($name)) {
+            $name = array($name);
         }
 
-        return $rez;
+        do {
+            $n = array_shift($name);
+            $r = DM\Tree::getChildByName($pid, $n);
+
+            if (!empty($r)) {
+                $pid = $r['id'];
+            } else {
+                $pid = null;
+            }
+
+        } while (!empty($pid) && !empty($name));
+
+        return $pid;
     }
 
     /**

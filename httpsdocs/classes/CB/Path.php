@@ -15,7 +15,9 @@ class Path
         }
         $id = explode('/', $path);
         $id = array_pop($id);
-        $id = is_numeric($id) ? $id : Browser::getRootFolderId();
+        $id = is_numeric($id)
+            ? $id
+            : Browser::getRootFolderId();
 
         return $id;
     }

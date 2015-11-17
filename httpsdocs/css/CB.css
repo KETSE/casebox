@@ -688,6 +688,8 @@ padding: 0 2px;
 .icon-document-bookmark {background-image: url(i/ico/document-bookmark.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-inbox-document {background-image: url(i/ico/inbox-document.png) !important; background-position: 0 50%; background-repeat: no-repeat;}
 .icon-globe-medium {background-image: url(i/ico/globe-medium.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.icon-stream {background-image: url(i/ico/ic_subject_black.png) !important; background-position: 0 50%; background-repeat: no-repeat; opacity: 0.55;}
+
 
 
 .tag-item {padding: 4px 3px 4px 20px; font-size: 12px; cursor: hand; cursor: pointer}

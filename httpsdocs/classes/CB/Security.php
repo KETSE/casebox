@@ -328,7 +328,7 @@ class Security
         /* if no user is specified as parameter then calculating for current loged user */
 
         if ($user_group_id === false) {
-            $user_group_id = $_SESSION['user']['id'];
+            $user_group_id = User::getId();
         }
 
         /* prepearing result array (filling it with zeroes)*/
@@ -505,7 +505,7 @@ class Security
 
         /* if no user is specified as parameter then calculating for current loged user */
         if ($user_id === false) {
-            $user_id = $_SESSION['user']['id'];
+            $user_id = User::getId();
         }
 
         /* prepearing result array (filling it with zeroes)*/
@@ -668,14 +668,28 @@ class Security
         }
         if ($is_owner) {
             $rez[0][static::$CAN_LIST_FOLDERS] = 1;
+            $rez[0][static::$CAN_CREATE_FOLDERS] = 1;
+            $rez[0][static::$CAN_CREATE_FILES] = 1;
+            $rez[0][static::$CAN_CREATE_ACTIONS] = 1;
+            $rez[0][static::$CAN_CREATE_TASKS] = 1;
             $rez[0][static::$CAN_READ] = 1;
+            $rez[0][static::$CAN_WRITE] = 1;
+            $rez[0][static::$CAN_DELETE] = 1;
             $rez[0][static::$CAN_CHANGE_PERMS] = 1;
             $rez[0][static::$CAN_TAKE_OWNERSHIP] = 1;
+            $rez[0][static::$CAN_DOWNLOAD] = 1;
 
             $rez[1][static::$CAN_LIST_FOLDERS] = 0;
+            $rez[1][static::$CAN_CREATE_FOLDERS] = 0;
+            $rez[1][static::$CAN_CREATE_FILES] = 0;
+            $rez[1][static::$CAN_CREATE_ACTIONS] = 0;
+            $rez[1][static::$CAN_CREATE_TASKS] = 0;
             $rez[1][static::$CAN_READ] = 0;
+            $rez[1][static::$CAN_WRITE] = 0;
+            $rez[1][static::$CAN_DELETE] = 0;
             $rez[1][static::$CAN_CHANGE_PERMS] = 0;
             $rez[1][static::$CAN_TAKE_OWNERSHIP] = 0;
+            $rez[1][static::$CAN_DOWNLOAD] = 0;
         }
 
         return $rez;
@@ -693,7 +707,7 @@ class Security
         $rez = null;
 
         if ($user_id === false) {
-            $user_id = $_SESSION['user']['id'];
+            $user_id = User::getId();
         }
 
         $eventParams = array(
@@ -928,7 +942,7 @@ class Security
             array(
                 $p['id']
                 ,$p['data']['user_group_id']
-                ,$_SESSION['user']['id']
+                ,User::getId()
             )
         ) or die(DB\dbQueryError());
 
@@ -982,7 +996,7 @@ class Security
                 ,$p['data']['user_group_id']
                 ,$allow
                 ,$deny
-                ,$_SESSION['user']['id']
+                ,User::getId()
             )
         ) or die(DB\dbQueryError());
 
@@ -1102,7 +1116,7 @@ class Security
                                 ,$rule['id']
                                 ,$allow
                                 ,$deny
-                                ,$_SESSION['user']['id']
+                                ,User::getId()
                             )
                         ) or die(DB\dbQueryError());
                     }
@@ -1642,7 +1656,7 @@ class Security
      */
     public static function canEditUser($user_id)
     {
-        return (Security::isAdmin() || Security::isUsersOwner($user_id) || ($_SESSION['user']['id'] == $user_id));
+        return (Security::isAdmin() || Security::isUsersOwner($user_id) || (User::getId() == $user_id));
     }
 
     /**
@@ -1661,7 +1675,7 @@ class Security
         $rez = false;
 
         if ($userId == false) {
-            $userId = $_SESSION['user']['id'];
+            $userId = User::getId();
         }
 
         $task = Objects::getCachedObject($taskId);
