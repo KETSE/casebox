@@ -183,7 +183,7 @@ class Client extends Service
 
                 if (file_exists($filename)) {
                     $content = file_get_contents($filename);
-                    $r['content'] .= "\n" . gzuncompress($content);
+                    $r['content'] .= "\n" . mb_substr(gzuncompress($content), 0, 1024 * 1024); //max 1MB
                 }
                 unset($content);
                 unset($r);
