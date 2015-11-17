@@ -1,3 +1,7 @@
+CaseBox 1.9.550 (2015-11-17)
+==============================
+- limit indexing into Solr of extracted files contents to 1MB to avoid java.lang.OutOfMemoryError
+
 CaseBox 1.9.549 (2015-11-17)
 ==============================
 - #9122 Tamkeen Permission and transfer of ownership
