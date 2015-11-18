@@ -21,7 +21,7 @@ Edit the 'Menu' label and add your object by enabling the checkbox next to its t
 
 Sort your menus by clicking sort value and arrange your menus
 
-.. image:: /i/admin/Global-Menu-Sort.png 
+.. image:: /i/admin/Global-Menu-Sort.PNG 
 
 
 Menu Configurations

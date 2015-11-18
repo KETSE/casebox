@@ -12,16 +12,16 @@ Create New Form
 ----------------
 Use the tree window to browse to System/Templates folder
 
-.. image:: /i/admin/System-Template.png
+.. image:: /i/admin/System-Template.PNG
 
 Use the “New” button and choose “Template” 
 
-.. image:: /i/admin/New-Template.png
+.. image:: /i/admin/New-Template.PNG
 
 
 Create form/object name by filling out the form
 
-.. image:: /i/admin/New-Template-Form.png
+.. image:: /i/admin/New-Template-Form.PNG
 
 
 
@@ -33,11 +33,11 @@ Add fields to form
 
 Browse inside the newly created template (by double clicking newly created template) and adding different fields through the new “Field"  button.
 
-.. image:: /i/admin/new-field-menu.png
+.. image:: /i/admin/new-field-menu.PNG
 
 Add a new field
 
-.. image:: /i/admin/new-field.png
+.. image:: /i/admin/new-field.PNG
 
 For more information on field creation visit: Fields
 
