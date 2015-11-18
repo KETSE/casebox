@@ -12,3 +12,5 @@ Browse to the folder
 Create new Thesauri item
 
 Repeat until you have added all the items in your thesaurus
+
+In order to add subvalues to the thesaurus, doubleclick the thesaurus item and add the fields you need.
