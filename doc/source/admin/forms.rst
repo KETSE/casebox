@@ -45,8 +45,8 @@ For more information on field creation visit: Fields
 
 
 
-Auto-create a default set of subfolders while creating an object
------------------------------------------------------------------
+Auto-create a default set of subfolders
+---------------------------------------
 
 If you want to create a set of subfolders with the creation of each new object, all you have to do is create a folder structure and configure your template using the “systems_folders” JSON directive.
 
