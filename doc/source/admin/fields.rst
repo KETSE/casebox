@@ -1,17 +1,24 @@
 Fields
 ============================
 
-Create a new thesauri 
-------------------------
-Use the tree window to browse to System/Templates folder
 
-Create a new folder with the name of the Thesaurus you want to create
+Field types
+Casebox supports the following list of field types:
+Varchar: simplest one-line text field
+Date
+Datetime
+Time
+Float
+Integer
+Group: it's not a visible field, but a way to group several fields.
+Header: a Header to visually separate fields
+Html: HTML editor
+Text: Text editor (in a popup window)
+Memo: Inline text editor (multiline text editor inside the grid)
+IconCombo: used in Templates to select the icon
+Objects: lookup field with values from the Tree itself
 
-Browse to the folder 
 
-Create new Thesauri item
-
-Repeat until you have added all the items in your thesaurus
 
 
 
@@ -82,7 +89,3 @@ Next create a subfield and configure it so that its scope is 'variable' and add 
 Congratulations! You've created a conditional field.
 
 
-Auto-create a default set of subfolders while creating an object
------------------------------------------------------------------
-
-If you want to create a set of subfolders with the creation of each new object, all you have to do is create a folder structure and configure your template using the “systems_folders” JSON directive.

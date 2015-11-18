@@ -23,3 +23,9 @@ Sort your menus by clicking sort value and arrange your menus
 
 .. image:: /i/admin/Global-Menu-Sort.png 
 
+
+Menu Configurations
+---------------------
+
+
+
