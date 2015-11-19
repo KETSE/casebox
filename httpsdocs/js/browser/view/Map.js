@@ -120,6 +120,15 @@ Ext.define('CB.browser.view.Map',{
             ,lng = Ext.valueFrom(dl.lng, 0)
             ,zoom = Ext.valueFrom(dl.zoom, 3);
 
+        if (!Ext.isEmpty(vp.url)) {
+            p.map.eachLayer(
+                function(l) {
+                    if(l && l.setUrl) {
+                        l.setUrl(vp.url);
+                    }
+                }
+            );
+        }
 
         p.setView(
             new LL.LatLng(lat, lng)

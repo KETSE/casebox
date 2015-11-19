@@ -25,6 +25,8 @@ httpsdocs/*config.ini
 
 httpsdocs/photos/
 
+httpsdocs/css/i/MapQuest
+
 #exclude notes folder
 notes/
 

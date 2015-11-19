@@ -112,6 +112,7 @@
 .i-building, .x-grid-tree-node-expanded .i-building{background-image: url(s/building.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-book-open, .x-grid-tree-node-expanded .i-book-open{background-image: url(s/book-open.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-bullet-arrow-down{background-image: url(s/bullet_arrow_down.png); background-position: 0 50%; background-repeat: no-repeat}
+.i-chat-bubble{background-image: url(s/ic_chat_bubble_black_18dp_1x_gray.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-check-alt{background-image: url(s/check-alt.png)}
 .i-cancel{background-image: url(s/cancel.png)}
 .i-edit-obj{background-image: url(s/ic_edit_black_18dp.png)}
