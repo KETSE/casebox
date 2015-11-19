@@ -251,7 +251,8 @@ class Path
             if (is_numeric($el)) { //it's a real node id
                 $rez = $el;
             } else {
-                list($guid, $el) = explode('-', $el);
+                $arr = explode('-', $el);
+                $guid = $arr[0];
                 if (!empty($GUIDConfigs[$guid]['realNodeId'])) {
                     $rez = $GUIDConfigs[$guid]['realNodeId'];
                 }

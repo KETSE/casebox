@@ -38,7 +38,7 @@ class ActivityStream extends Base
             $la['uids'] = array_reverse(array_keys($la['users']));
             $doc['lastAction'] = $la;
 
-            $actionLogId = $la['users'][$la['uids'][sizeof($la['uids']) - 1]];
+            $actionLogId = $la['users'][$la['uids'][0]];
 
             $doc['comments'] = $comments->getData($doc['id']);
 

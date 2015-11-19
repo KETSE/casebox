@@ -8,8 +8,7 @@ Ext.define('CB.object.plugin.Comments', {
         xtype: 'CBFieldComment'
     }
 
-    ,initComponent: function(config)
-{
+    ,initComponent: function(config) {
         this.actions = {
             edit: new Ext.Action({
                 text: L.Edit
@@ -94,14 +93,20 @@ Ext.define('CB.object.plugin.Comments', {
                 }
             }
         );
-        this.addCommentLabel = Ext.create({
-            xtype: 'button'
-            ,html: '<span class="fwB click"> ' + L.AddComment + ' </span>'
-            ,overCls: ''
+        this.addCommentLink = Ext.create({
+            xtype: 'component'
+            ,autoEl: {
+                tag: 'div'
+                ,html: L.AddComment
+                ,cls: 'fwB click icon-padding i-chat-bubble cG'
+            }
+            ,margin: '3 10 3 10'
             ,border: false
             ,listeners: {
                 scope: this
-                ,click: this.onAddCommentLabelClick
+                ,afterrender: function(c, eOpts) {
+                    c.getEl().on('click', this.onAddCommentLinkClick, this);
+                }
             }
         });
 
@@ -124,7 +129,7 @@ Ext.define('CB.object.plugin.Comments', {
         });
 
         if (this.initialConfig.showAddLabel) {
-            this.items.push(this.addCommentLabel);
+            this.items.push(this.addCommentLink);
         } else {
             this.items.push(this.addCommentField);
         }
@@ -519,8 +524,8 @@ Ext.define('CB.object.plugin.Comments', {
         this.updateLayout();
     }
 
-    ,onAddCommentLabelClick: function() {
-        this.remove(this.addCommentLabel);
+    ,onAddCommentLinkClick: function() {
+        this.remove(this.addCommentLink);
         this.add(this.addCommentField);
         this.addCommentField.reset();
     }

@@ -1,3 +1,9 @@
+CaseBox 1.9.551 (2015-11-19)
+==============================
+- #9302 Adding GeoMapping
+- #9465 UI polish: Comment button in Activity Stream
+- #9517 DIFF shown in Activity Stream not correct
+
 CaseBox 1.9.550 (2015-11-17)
 ==============================
 - limit indexing into Solr of extracted files contents to 1MB to avoid java.lang.OutOfMemoryError
