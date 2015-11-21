@@ -1,3 +1,19 @@
+CaseBox 1.9.552 (2015-11-21)
+==============================
+- #9600 Guarantee GUID uniqueness + guid table per core?
+- #9302 Adding GeoMapping
+- #9627 JS Error when opening Stratelit
+
+Fixed Bugs:
+----------
+- #8006 Grid DC config management
+- #9313 BUG: not possible to leave field учреждение empty, although it is not mandatory
+
+Notes:
+----------
+- for existing local cores execute casebox/install/mysql/differential_updates/v.1.9.552.sql
+  for each core to create guid table
+
 CaseBox 1.9.551 (2015-11-19)
 ==============================
 - #9302 Adding GeoMapping

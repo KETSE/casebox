@@ -146,7 +146,8 @@ class Config extends Singleton
 
         } else {
             trigger_error(
-                "ERROR: Config::getPlatformConfigForCore(" . $coreName . ") cfg=" . print_r($r, true), E_USER_WARNING
+                "ERROR: Config::getPlatformConfigForCore(" . $coreName . ") cfg=" . print_r($r, true),
+                E_USER_WARNING
             );
             // throw new \Exception('Error getting core config', 1);
         }
@@ -905,8 +906,12 @@ class Config extends Singleton
 
         foreach ($jsonProperties as $property) {
             if (!empty($cfg[$property])) {
-                $cfg[$property] = Util\toJSONArray($cfg[$property]);
-                if (empty($cfg[$property])) {
+                $arr = Util\toJSONArray($cfg[$property]);
+
+                if (!empty($arr)) {
+                    $cfg[$property] = $arr;
+
+                } elseif (substr($property, -3) !== '_DC') { //_DC's could have reference to predefined config sets
                     \CB\debug($cfg['core_name'] . ': Error parsing json config for property "' . $property . '".');
                 }
             }

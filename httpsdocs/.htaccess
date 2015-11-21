@@ -26,10 +26,15 @@
     RewriteRule (.*) $1/ [R=301,L]
 
     # allow access only to correct filetypes in appropriate locations
-    RewriteCond %{REQUEST_URI} ^/?css/?.+\.(css|ico|png|bmp|jpg|gif)$
+    RewriteCond %{REQUEST_URI} ^/?css/?.+\.(css|ico|png|bmp|jpg|jpeg|gif)$
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^.*$ - [L,NC]
+
+    # redirect non existing maps tiles to default image
+    RewriteCond %{REQUEST_URI} ^/?css/i/MapQuest/.+\.(png|jpg|jpeg|gif)$
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^.*$ /css/i/error-tile.png [L,NC]
 
     # redirect minify requests
     RewriteCond %{REQUEST_URI} ^/?([^/]+)/min/.*$

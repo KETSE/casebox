@@ -336,6 +336,7 @@ class Browser
         //unset restricted query params from user input
         unset($p['fq']);
 
+        $ids = array();
         $fieldConfig = array();
         // get field config from database
         if (!empty($p['fieldId']) && is_numeric($p['fieldId'])) {
@@ -373,9 +374,6 @@ class Browser
 
             switch ($p['source']) {
                 case 'field':
-
-                    $ids = array();
-
                     switch ($p['scope']) {
                         case 'project':
                             $ids = DM\Tree::getCaseId(Path::detectRealTargetId($p['path']));

@@ -3,7 +3,7 @@ namespace CB;
 
 require_once 'init.php';
 
-//die('<pre>'.print_r($_SESSION,true).'</pre>');
+DataModel\GUID::checkTableExistance();
 
 $coreName = Config::get('core_name');
 
@@ -138,7 +138,7 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
         echo substr(str_shuffle(MD5(tempnam(sys_get_temp_dir(), 'pre') . microtime())), 0, rand(15, 50));
     ?>';
 
-    function setProgress(label, percentage)
+    public function setProgress(label, percentage)
     {
         document.getElementById('loading-msg').innerHTML = label + '…';
         document.getElementById('lpt').style.width = percentage;
@@ -189,7 +189,7 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
     document.write('<script type="text/javascript" src="' + bravojs.url + '"><' + '/script>');
 
     //move liflet object to LL, because we assign our translations in L object below
-    if(typeof(L) !== 'undefined') {
+    if (typeof(L) !== 'undefined') {
       LL = L;
       delete L;
     }
