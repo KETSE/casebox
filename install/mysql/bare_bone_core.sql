@@ -174,6 +174,19 @@ CREATE TABLE `files_versions` (
 
 /*Data for the table `files_versions` */
 
+/*Table structure for table `guids` */
+
+DROP TABLE IF EXISTS `guids`;
+
+CREATE TABLE `guids` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `guids_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `guids` */
+
 /*Table structure for table `notifications` */
 
 DROP TABLE IF EXISTS `notifications`;

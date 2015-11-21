@@ -67,10 +67,16 @@ class GUID extends Base
         return $rez;
     }
 
-    public static function getTableName()
+    public static function checkTableExistance()
     {
-        $dbName = \CB\Config::get('prefix') . '__casebox';
-
-        return "`$dbName`.`" . static::$tableName . '`';
+        return DB\dbQuery(
+            'CREATE TABLE IF NOT EXISTS `guids`(
+                `id` bigint(20) unsigned NOT NULL  auto_increment ,
+                `name` varchar(200) COLLATE utf8_general_ci NOT NULL  ,
+                PRIMARY KEY (`id`) ,
+                UNIQUE KEY `guids_name`(`name`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=\'utf8\' COLLATE=\'utf8_general_ci\'',
+            array()
+        ) or die(DB\dbQueryError());
     }
 }

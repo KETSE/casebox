@@ -659,7 +659,7 @@ Ext.define('CB.browser.Tree', {
             this.expandPaths(state.paths);
         }
 
-        if(!Ext.isEmpty(state.selected)) {
+        if(!Ext.isEmpty(state.selected) && (state.selected !== '/0')) {
             this.selectPath(
                 state.selected
                 ,'nid'
