@@ -1,3 +1,11 @@
+CaseBox 1.9.553 (2015-11-23)
+==============================
+- remove field aliasing on solr query for maps
+
+Fixed Bugs:
+----------
+- js error because of automated "public" added before function definition
+
 CaseBox 1.9.552 (2015-11-21)
 ==============================
 - #9600 Guarantee GUID uniqueness + guid table per core?

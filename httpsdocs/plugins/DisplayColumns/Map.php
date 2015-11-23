@@ -19,9 +19,9 @@ class Map extends Base
             $fn = \CB\Purify::solrFieldName($ip['view']['field']);
             if (!empty($fn)) {
                 $this->solrFieldName = $fn;
-                $p['params']['fl'][] = 'value:' . $fn;
+                $p['params']['fl'][] = $fn;
                 //exclude items with empty field value
-                $p['params']['fq'][] = "-value:[-90,-180 TO 90,180]";
+                $p['params']['fq'][] = "$fn:[-90,-180 TO 90,180]";
             }
         }
 
@@ -32,7 +32,6 @@ class Map extends Base
     {
         $result = &$p['result'];
         $data = &$result['data'];
-
     }
 
     public function getSolrFields($nodeId = false, $templateId = false)

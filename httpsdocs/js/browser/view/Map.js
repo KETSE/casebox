@@ -69,11 +69,11 @@ Ext.define('CB.browser.view.Map',{
     }
 
     ,addItems: function() {
-       var ready = (this.store.getCount() === 0);
+        var ready = (this.store.getCount() === 0);
 
         this.store.each(
             function(r) {
-                var v = r.data.value;
+                var v = r.data[this.viewParams.field];
                 if(Ext.isString(v)) {
                     var a = v.split(',')
                         ,marker = LL.marker(

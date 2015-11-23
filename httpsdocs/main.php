@@ -138,7 +138,7 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
         echo substr(str_shuffle(MD5(tempnam(sys_get_temp_dir(), 'pre') . microtime())), 0, rand(15, 50));
     ?>';
 
-    public function setProgress(label, percentage)
+    function setProgress(label, percentage)
     {
         document.getElementById('loading-msg').innerHTML = label + '…';
         document.getElementById('lpt').style.width = percentage;
