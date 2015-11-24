@@ -130,8 +130,12 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 }
 </style>
 
-<link rel="stylesheet" href="/libx/leaflet/leaflet.css" />
-<script src="/libx/leaflet/leaflet.js"></script>
+<?php
+if (Config::get('geoMapping', false)) {
+  echo '<link rel="stylesheet" href="/libx/leaflet/leaflet.css" />
+    <script src="/libx/leaflet/leaflet.js"></script>';
+}
+?>
 
 <script type="text/javascript">
     window.name = '<?php

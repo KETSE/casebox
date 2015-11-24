@@ -65,17 +65,27 @@ Ext.define('CB.widget.LeafletWindow', {
     }
 
     ,onMapReady: function(p) {
-    var d = this.initialConfig.data
-        ,cfg = Ext.valueFrom(d.cfg, {})
-        ,dl = Ext.valueFrom(cfg.defaultLocation, {})
-        ,lat = Ext.valueFrom(dl.lat, 0)
-        ,lng = Ext.valueFrom(dl.lng, 0)
-        ,zoom = Ext.valueFrom(dl.zoom, 10);
+        var d = this.initialConfig.data
+            ,cfg = Ext.valueFrom(d.cfg, {})
+            ,dl = Ext.valueFrom(cfg.defaultLocation, {})
+            ,lat = Ext.valueFrom(dl.lat, 0)
+            ,lng = Ext.valueFrom(dl.lng, 0)
+            ,zoom = Ext.valueFrom(dl.zoom, 10);
 
         if (!Ext.isEmpty(d.value)) {
             var a = d.value.split(',');
             lat = a[0];
             lng = a[1];
+        }
+
+        if (!Ext.isEmpty(cfg.url)) {
+            p.map.eachLayer(
+                function(l) {
+                    if(l && l.setUrl) {
+                        l.setUrl(cfg.url);
+                    }
+                }
+            );
         }
 
         // start the map in South-East England

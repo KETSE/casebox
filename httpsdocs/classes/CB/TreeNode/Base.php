@@ -3,6 +3,7 @@ namespace CB\TreeNode;
 
 use CB\Config;
 use CB\Util;
+use CB\User;
 
 class Base implements \CB\Interfaces\TreeNode
 {
@@ -506,7 +507,7 @@ class Base implements \CB\Interfaces\TreeNode
     {
         //
         foreach ($filterArray as $key => $value) {
-            $filterArray[$key] = str_replace('$activeUserId', $_SESSION['user']['id'], $value);
+            $filterArray[$key] = str_replace('$activeUserId', User::getId(), $value);
         }
     }
 }
