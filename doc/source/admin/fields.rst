@@ -143,3 +143,87 @@ Example:
 	}
 
 
+Advance Fields Configuration
+-----------------------------
+
+Fields Template
+...............
+
+================  	================================================================================================ 
+Name   				Param  
+================	================================================================================================  
+name   				Internal name of field.
+[lang] 				Title of the field shown in WebClient.  
+type   				Type of field (varchar, date etc, see below)
+order  				The position of field in the grid
+config   			Field configuration. see below
+solr_column_name 	SOLR column to save  value of field. See Faceting.
+================	================================================================================================
+
+Example:
+
+.. image:: /i/admin/template-field.png
+
+
+Field Types
+...........
+
+Field types
+Casebox supports the following list of field types:
+
+Varchar: simplest one-line text field
+Date
+Datetime
+Time
+Float
+Integer
+Group: it's not a visible field, but a way to group several fields.
+Header: a Header to visually separate fields
+Html: HTML editor
+Text: Text editor (in a popup window)
+Memo: Inline text editor (multiline text editor inside the grid)
+IconCombo: used in Templates to select the icon
+Objects: lookup field with values from the Tree itself. See Objects Fieldtype
+
+
+Field configuration
+....................
+
+Configuring a field using JSON notation is flexible, as it allows for custom settings based on field type. There might be better UI for managing the configuration of the field in the future.
+
+Here are the options available to all field types:	
+
+
++--------------------+----------------------------------------------------------------------------------+
+| Option             | Value                                                                            |
+|                    |                                                                                  |
++====================+==================================================================================+
+|readonly            | true/false. A readonly field (custom code can update this field)                 |
++--------------------+----------------------------------------------------------------------------------+
+|defaultPid          | int. Specify in which folder objects should be created no matter                 |
+|                    | what is active folder in Casebox UI.                                             |
+|                    | Example: All tasks should be created in /Task DB/                                |
++--------------------+----------------------------------------------------------------------------------+
+|leaf                | true/false. Leaf objects doesn't contain sub-objects, i.e. they will             |
+|                    | not act like folders. When a 'leaf' object is double clicked in the grid,        |
+|                    | instead of browsing it (i.e. opening it like a folder), the popup window         |
+|                    | to edit the node will appear                                                     |
++--------------------+----------------------------------------------------------------------------------+
+|   required         |  true/false. You can't save an object with empty fields marked as required       |
++--------------------+----------------------------------------------------------------------------------+
+|   maxInstances     |  [1..n] how many instances of the field are allowed (by default 1).              |
+|                    |  A multiple field will feature a small [+] icon on the right side that can       |
+|                    |  be clicked to create a new field.                                               |
++--------------------+----------------------------------------------------------------------------------+
+|   value            |  a default value for the field when the object is created                        |
++--------------------+----------------------------------------------------------------------------------+
+|   dependency       |  a config object that specifies how the current field depends on the parent      |
+|                    |  one. In order to make dependable fields (for example to have two fields,        |
+|                    |  Country/City), you need to explicitly specify a `dependency: {}` config group,  |
+|                    |  even if there are no more dependency conditions                                 |
++--------------------+----------------------------------------------------------------------------------+
+|   faceting         |  true/false. If true, CB will save the value of the field in solr_column_name.   |
+|                    |  See faceting                                                                    |
++--------------------+----------------------------------------------------------------------------------+
+
+

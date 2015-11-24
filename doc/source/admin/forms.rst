@@ -52,25 +52,97 @@ If you want to create a set of subfolders with the creation of each new object, 
 
 .. image:: /i/admin/auto-create-subfolders.png
 
+
+
+
+'_title' field name and '_auto_title' field type
+-------------------------------------------------
+
+Each template should have a field named _title, it tells CaseBox to use the value of the field for display purposes (in the tree, grid). Usually its of varchar type. When the title can be automatically generated out of other fields, then a special _auto_title field type is used.
+
+_auto_title is specified in `templates` table. Examples:
+
+{f34} {f35} {f36} - use field id's from `templates_structure`
+{template_title}: {where_submitted} {where_submitted_info} - or use field names
+
 Advanced Template Configuration
 --------------------------------
 
+For Template configuration
 
-Choose the name of the field and the display title and type
++----------------+---------------------------------------+------------------------------------------------------------------------------+
+| Property       | Description                           | Example                                                                      |
++================+=======================================+==============================================================================+
+| id             | a unique identificator of the template| Used in configuring the Menu and the filter in _objects field type.          |
++----------------+---------------------------------------+------------------------------------------------------------------------------+
+| Name           | the name of a template                |                                                                              |
++----------------+---------------------------------------+------------------------------------------------------------------------------+
+| $lang          | template title in a given language    | example 'en'. CB will show the template title if  language specified by  user|
++----------------+---------------------------------------+------------------------------------------------------------------------------+
+| Type           | see Template Types                    | Most of the time you'll manage 'object' templates                            |
++----------------+---------------------------------------+------------------------------------------------------------------------------+
+| Active         | yes/no                                | template can be turned on/off. Notice that you need to specify in which menu | 
+|                |                                       | the template will appear. See New menu                                       |
++----------------+---------------------------------------+------------------------------------------------------------------------------+
+|Icon Class      |what icon to use when displaying       | Additinal css files can be added to the configuration                        |
+|                |the object in the grid                 | thus allowing for custom icons.                                              | 
++----------------+---------------------------------------+------------------------------------------------------------------------------+
+| Title template | The title can be automatically        | Product N{nr} from {country}                                                 |
+|                | generated from other fields           |                                                                              |
++----------------+---------------------------------------+------------------------------------------------------------------------------+
+| Config         | a JSON cfg                            | See below                                                                    |
++----------------+---------------------------------------+------------------------------------------------------------------------------+
+
+
+
+Config a JSON cfg: available object_plugins, grid display columns etc
+
+.. code-block:: json
+
+	{
+	    "object_plugins": [
+	        "objectProperties",
+	        "thumb",
+	        "meta",
+	        "files",
+	        "contentItems",
+	        "comments",
+	        "systemProperties"
+	    ],
+	    "layout": [vertical, horizontal],
+	    "DC": {
+	        "type": {},
+	        "order": {}
+	    },
+	    "defaultPid": int,
+	    "leaf": true/false,
+	    "acceptChildren": true/false
+	}
+
+**object_plugins**: what plugins are available in the preview panel when the record is selected
+
+**layout**: how the Preview&Edit Window will display the node, with a right panel with plugins, or the plugins displayed below the vGrid.
+
+**DC**: Display columns for the Grid when navigating inside the record
+
+**defaultPid**: if parent node is not specified when a record is created, use defaultPid from template
+
+**leaf**: double clicking the node in Grid will Edit it instead of opening it as a folder. Default = false
+
+**acceptChildren**: Allow D&D operations over the node, fileUpload for ex. Default = true
+
 
 
 
 ​
 
 
-Form items created!
 
 
 
 
 
 
-That's it you have a form with fields you've created and you can create numerous objects and attach files to them.
 
 
 
