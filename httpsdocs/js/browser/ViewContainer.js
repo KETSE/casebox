@@ -1350,13 +1350,20 @@ Ext.define('CB.browser.ViewContainer', {
             return;
         }
 
-        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
 
-        CB.browser.Actions.deleteSelection(
-            selection
-            ,this.processDelete
-            ,this
-        );
+        if(selection[0].isFavorite === true) {
+            this.onUnstarClick();
+            this.onReloadClick();
+
+        } else {
+            this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
+
+            CB.browser.Actions.deleteSelection(
+                selection
+                ,this.processDelete
+                ,this
+            );
+        }
     }
 
     ,processDelete: function(r, e){

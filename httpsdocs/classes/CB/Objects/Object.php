@@ -716,6 +716,36 @@ class Object
             }
         }
 
+        $tplCfg = $tpl->getData()['cfg'];
+
+        if (!empty($tplCfg['copySolrFields'])) {
+            foreach ($tplCfg['copySolrFields'] as $fns => $sc) {
+                $values = array();
+                $lvalues = $this->getLookupValues($fns);
+
+                foreach ($lvalues as $v) {
+                    $v = is_array($v)
+                        ? @$v['value']
+                        : $v;
+
+                    if (!empty($v)) {
+                        if (preg_match('/^(\d+,)*\d+$/', $v)) {
+                            $v = Util\toNumericArray($v);
+                            foreach ($v as $id) {
+                                $values[] = $id;
+                            }
+                        } else {
+                            $values[] = $v;
+                        }
+                    }
+                }
+
+                if (!empty($values)) {
+                    $values = array_unique($values);
+                    $rez[$sc] = $values;
+                }
+            }
+        }
         // add last comment info if present
         if (!empty($sd['lastComment'])) {
             $rez['comment_user_id'] = $sd['lastComment']['user_id'];
@@ -815,6 +845,49 @@ class Object
 
         return $value;
     }
+
+    public function getLookupValues($fields, &$resultingTemplateField = null)
+    {
+        $rez = array();
+        $fields = Util\toTrimmedArray($fields, '.');
+        $objects = array(&$this);
+
+        do {
+            $fn = array_shift($fields);
+            $values = array();
+
+            foreach ($objects as &$o) {
+                $tpl = $o->getTemplate();
+                $tf = $tpl->getField($fn);
+
+                if (!empty($tf)) {
+                    $resultingTemplateField = $tf;
+                    $v = $o->getFieldValue($fn);
+
+                    if (!empty($v)) {
+                        $values = array_merge($values, $v);
+                    }
+                }
+            }
+
+            $objects = array();
+            foreach ($values as $v) {
+                $v = is_array($v)
+                    ? @$v['value']
+                    : $v;
+                $v = Util\toNumericArray($v);
+                foreach ($v as $id) {
+                    $objects[] = \CB\Objects::getCachedObject($id);
+                }
+            }
+
+            $rez = $values;
+
+        } while (!empty($fields) && !empty($tf['type']) && ($tf['type'] == '_objects'));
+
+        return $rez;
+    }
+
 
     /**
      *  get action flags that a user can do this object

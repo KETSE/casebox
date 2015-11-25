@@ -99,39 +99,51 @@ class Base
                     continue;
                 }
 
-                $template = $obj->getTemplate();
+                $ids = $this->getObjectWarmIds($customColumns, $obj, $doc);
+                foreach ($ids as $id) {
+                    $requiredIds[$id] = 1;
+                }
+            }
+        }
+    }
 
-                foreach ($customColumns as $fieldName => &$col) {
-                    //detect field name
-                    $customField = $col['fieldName'];
-                    $templateField = $template->getField($customField);
+    protected function getObjectWarmIds(&$customColumns, &$objClass, &$solrData)
+    {
+        $rez = array();
 
-                    $templateField = null;
-                    $values = array();
+        $template = $objClass->getTemplate();
 
-                    if (!empty($col['solr_column_name'])) {
-                        $values = array(@$doc[$col['solr_column_name']]);
+        foreach ($customColumns as $fieldName => &$col) {
+            //detect field name
+            $customField = $col['fieldName'];
+            $templateField = $template->getField($customField);
 
-                    } else { //default
-                        $values = isset($doc[$customField])
-                            ? array($doc[$customField])
-                            : $obj->getFieldValue($customField);
-                    }
+            // $templateField = null;
+            $values = array();
 
-                    if (!empty($templateField) && in_array($templateField['type'], array('_objects'))) {
-                        foreach ($values as $value) {
-                            $value = is_array($value)
-                                ? @$value['value']
-                                : $value;
-                            $value = Util\toNumericArray($value);
-                            foreach ($value as $v) {
-                                $requiredIds[$v] = 1;
-                            }
-                        }
+            if (!empty($col['solr_column_name'])) {
+                $values = array(@$solrData[$col['solr_column_name']]);
+
+            } else { //default
+                $values = isset($solrData[$customField])
+                    ? array($solrData[$customField])
+                    : $objClass->getFieldValue($customField);
+            }
+
+            if (!empty($templateField) && in_array($templateField['type'], array('_objects'))) {
+                foreach ($values as $value) {
+                    $value = is_array($value)
+                        ? @$value['value']
+                        : $value;
+                    $value = Util\toNumericArray($value);
+                    foreach ($value as $v) {
+                        $rez[] = $v;
                     }
                 }
             }
         }
+
+        return $rez;
     }
 
     /**
@@ -215,6 +227,9 @@ class Base
                             );
                         }
 
+                    } elseif (!empty($col['lookup'])) { //lookup field
+                        $values = $obj->getLookupValues($col['lookup'], $templateField);
+
                     } else { //default
                         $values = isset($doc[$col['fieldName']])
                             ? array($doc[$col['fieldName']])
@@ -260,12 +275,14 @@ class Base
                         // temporary check, this should be reanalised
                         in_array($templateField['type'], array('_objects', 'time'))
                     ) {
+                        $dv = array();
                         foreach ($values as $value) {
                             $value = is_array($value)
                                 ? @$value['value']
                                 : $value;
-                            $doc[$fieldName] = $template->formatValueForDisplay($templateField, $value, false);
+                            $dv[] = $template->formatValueForDisplay($templateField, $value, false);
                         }
+                        $doc[$fieldName] = implode(', ', $dv);
                     }
                 }
             }
@@ -370,8 +387,12 @@ class Base
             $userLanguage = \CB\Config::get('user_language');
 
             foreach ($dc['data'] as $k => $col) {
-                $fieldName = is_numeric($k) ? $col : $k;
-                $rez[$fieldName] = is_numeric($k) ? array() : $col;
+                $fieldName = is_numeric($k)
+                    ? $col
+                    : $k;
+                $rez[$fieldName] = is_numeric($k)
+                    ? array()
+                    : $col;
 
                 if (empty($rez[$fieldName]['solr_column_name']) &&
                     !in_array($fieldName, Search::$defaultFields)

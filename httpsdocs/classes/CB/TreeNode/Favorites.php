@@ -92,6 +92,8 @@ class Favorites extends Base
             $d['path'] = $d['pathText'];
             unset($d['pathText']);
 
+            $d['isFavorite'] = true;
+
             $rez['data'][] = $d;
         }
 

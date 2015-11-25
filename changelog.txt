@@ -1,3 +1,25 @@
+CaseBox 1.9.555 (2015-11-25)
+==============================
+- #9672 Deleting a favorite should Unstar the object, not actually deleting it
+- #9707 Tmpl name not shown in object preview
+- #9699 Incorrect breadcrumb
+  Note: facet definisions that should display titles as they are in solr and not try to lookup in tree,
+    should have set in its config "type": "varchar"
+- #9673 Enable Trashbin folder on dev core
+
+Fixed Bugs:
+----------
+- #9678 JS error breaks barebone CB
+
+Notes:
+----------
+- updated translations in _casebox.sql
+
+CaseBox 1.9.554 (2015-11-24)
+==============================
+- #9304 Join queries
+- #9454 Leaflet library should be loaded from local server, not CDN + Edit form not shown
+
 CaseBox 1.9.553 (2015-11-23)
 ==============================
 - remove field aliasing on solr query for maps
