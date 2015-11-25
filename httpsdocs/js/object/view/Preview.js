@@ -112,7 +112,8 @@ Ext.define('CB.object.view.Preview', {
     }
 
     ,attachEvents: function(){
-        a = this.getEl().query('a.locate');
+        var a = this.getEl().query('a.locate');
+
         Ext.each(
             a
             ,function(t){
@@ -319,7 +320,7 @@ Ext.define('CB.object.view.Preview', {
     }
 
     ,getContainerToolbarItems: function() {
-        rez = {
+        var rez = {
             tbar: {
             }
             ,menu: {

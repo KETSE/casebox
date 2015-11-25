@@ -16,9 +16,14 @@ namespace CB\Install;
  *
  * Requirements:
  *     on Windows platform path to mysql/bin should be added to "Path" environment variable
+ * 
+ * php install.php --arg1=value1 --arg2=value2 ... OR --config=/path/to/config.ini
+ * 
  */
 
 use CB;
+
+
 
 /*define some basic directories*/
 $binDirectorty = dirname(__FILE__) . DIRECTORY_SEPARATOR;
@@ -72,46 +77,11 @@ try {
 
 // detect working mode (interactive or not)
 
-if (empty($options)) {
-    $options = getopt('f:', array('file:'));
-}
-
-$configFile = empty($options['f'])
-    ? @$options['file']
-    : $options['f'];
-
-
-if (!empty($configFile) && file_exists($configFile)) {
-    $options['config'] = \CB\Config::loadConfigFile($configFile);
-    \CB\Cache::set('RUN_SETUP_CFG', $options['config']);
-    if (isset($options['config']['overwrite_create_backups']) && $options['config']['overwrite_create_backups'] == 'n') {
-        \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', false);
-    } else {
-        \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', true);
-    }
-} else {
-    \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', true);
-}
-
-//define working mode
-if (!empty($options['config'])) {
-    // define('CB\\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')', false);
-    \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
-    $cfg = $cfg+$options['config'];
-
-} else {
-    \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
-}
-
 require_once \CB\LIB_DIR.'install_functions.php';
 
-displaySystemNotices();
+$cfg = \CB\Install\cliLoadConfig(isset($options) ? $options:null);
 
-// initialize default values in cofig if not detected
-
-$defaultValues = getDefaultConfigValues();
-
-$cfg = $cfg + $defaultValues;
+    \CB\Install\displaySystemNotices();
 
 if (\CB\Util\getOS() != "WIN") {
     //ask for apache user and set ownership for some folders
@@ -190,7 +160,7 @@ if (!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == false)) {
 do {
     $r = putIniFile(
         \CB\DOC_ROOT . 'config.ini',
-        array_intersect_key($cfg, $defaultValues)
+        array_intersect_key($cfg, getDefaultConfigValues())
     );
 
     if ($r === false) {

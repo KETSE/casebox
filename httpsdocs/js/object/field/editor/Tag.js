@@ -128,12 +128,14 @@ Ext.define('CB.object.field.editor.Tag', {
 
         //set default sorting
         if(this.cfg.sort){
-            field = 'order';
-            dir = 'asc';
+            var field = 'order'
+                ,dir = 'asc';
+
             switch(this.cfg.sort){
                 case 'asc':
                     field = 'name';
                     break;
+
                 case 'desc':
                     field = 'name';
                     dir = 'desc';

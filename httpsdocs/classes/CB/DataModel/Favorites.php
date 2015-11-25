@@ -1,10 +1,7 @@
 <?php
-
 namespace CB\DataModel;
 
 use CB\DB;
-use CB\Util;
-use CB\User;
 
 class Favorites extends Base
 {
@@ -29,23 +26,21 @@ class Favorites extends Base
         ,'data' => 'text'
     );
 
-    public static function readAll($userId = false)
+    protected static $decodeJsonFields = array('data');
+
+    public static function readAll()
     {
         $rez = array();
-
-        if ($userId == false) {
-            $userId = User::getId();
-        }
 
         $res = DB\dbQuery(
             'SELECT *
             FROM ' . static::getTableName() .
             ' WHERE user_id = $1',
-            $userId
+            \CB\User::getId()
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
-            $r['data'] = Util\toJSONArray($r['data']);
+            static::decodeJsonFields($r);
             $rez[] = $r;
         }
         $res->close();
@@ -56,7 +51,7 @@ class Favorites extends Base
     public static function deleteByNodeId($nodeId, $userId = false)
     {
         if ($userId == false) {
-            $userId = User::getId();
+            $userId = \CB\User::getId();
         }
 
         DB\dbQuery(

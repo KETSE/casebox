@@ -98,8 +98,9 @@ function CleanWord( html){
     html = html.replace(/<(\w[^>]*) class=([^ |>]*)([^>]*)/gi, "<$1$3") ;
 
     // Remove styles.
-    if ( bRemoveStyles )
+    if (bRemoveStyles) {
         html = html.replace( /<(\w[^>]*) style="([^\"]*)"([^>]*)/gi, "<$1$3" ) ;
+    }
 
     // Remove style, meta and link tags
     html = html.replace( /<STYLE[^>]*>[\s\S]*?<\/STYLE[^>]*>/gi, '' ) ;

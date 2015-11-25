@@ -101,7 +101,7 @@ class UpgradeConfigModel extends Base
         ) or die(DB\dbQueryError());
 
         // set templates template id in config
-        $ids = Templates::getIdsByType('template');
+        $ids = DM\Templates::getIdsByType('template');
         $id = array_shift($ids);
 
         BBM::$cfg['templatesTemplateId'] = $id;
@@ -109,7 +109,7 @@ class UpgradeConfigModel extends Base
         // $this->cfg['templates']['Menu rule']['fields']['menu']['cfg']['templates'] = $id;
 
         // detect fields template id
-        $ids = Templates::getIdsByType('field');
+        $ids = DM\Templates::getIdsByType('field');
         $id = array_shift($ids);
 
         BBM::$cfg['fieldTemplateId'] = $id;
@@ -200,9 +200,9 @@ class UpgradeConfigModel extends Base
         $o = new \CB\Objects\Object();
         $co = new \CB\Objects\Config();
 
-        $res = DB\dbQuery('SELECT * FROM config') or die(DB\dbQueryError());
+        $recs = DM\Config::readAll();
 
-        while ($r = $res->fetch_assoc()) {
+        foreach ($recs as $r) {
             //detect option type
             $type = '';
 
@@ -300,12 +300,10 @@ class UpgradeConfigModel extends Base
             }
         }
 
-        $res->close();
-
         //add menu rule for Menus folder
 
         $pid = Objects::getChildId($this->systemFolderId, 'Menus');
-        $tempalteIds = Templates::getIdsByType('menu');
+        $tempalteIds = DM\Templates::getIdsByType('menu');
 
         $o->create(
             array(

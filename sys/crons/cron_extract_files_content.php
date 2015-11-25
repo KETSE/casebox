@@ -154,19 +154,19 @@ function checkTikaService()
     $rez = true;
 
     // Create a curl handle to a non-existing location
-    $ch = curl_init('http://127.0.0.1:9998/tika');
+    $handler = curl_init('http://127.0.0.1:9998/tika');
 
     // Execute
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_exec($ch);
+    curl_setopt($handler, CURLOPT_RETURNTRANSFER, true);
+    curl_exec($handler);
 
     // Check if any error occured
-    if (curl_errno($ch)) {
+    if (curl_errno($handler)) {
         $rez = false;
     }
 
     // Close handle
-    curl_close($ch);
+    curl_close($handler);
 
     return $rez;
 }
@@ -187,21 +187,21 @@ function getTikaResult($filename)
 {
     $file = fopen($filename, "rb");
 
-    $ch = curl_init('http://127.0.0.1:9998/unpack/all');
+    $handler = curl_init('http://127.0.0.1:9998/unpack/all');
 
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_PUT, true);
-    curl_setopt($ch, CURLOPT_INFILE, $file);
-    curl_setopt($ch, CURLOPT_INFILESIZE, filesize($filename));
-    $rez = curl_exec($ch);
+    curl_setopt($handler, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($handler, CURLOPT_PUT, true);
+    curl_setopt($handler, CURLOPT_INFILE, $file);
+    curl_setopt($handler, CURLOPT_INFILESIZE, filesize($filename));
+    $rez = curl_exec($handler);
 
     // Check if any error occured
-    if (curl_errno($ch)) {
+    if (curl_errno($handler)) {
         $rez = false;
     }
 
     // Close handle
-    curl_close($ch);
+    curl_close($handler);
     fclose($file);
 
     return $rez;

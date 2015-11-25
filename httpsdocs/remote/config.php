@@ -8,14 +8,11 @@ $API = array_merge(
     array(
         'CB_Browser' => array(
             'methods' => array(
-                'createFolder'          => array('len' => 1)
-                ,'paste'                => array('len' => 1)
+                'paste'                => array('len' => 1)
                 ,'saveFile'             => array('len' => 1, 'formHandler' => true)
                 ,'confirmUploadRequest' => array('len' => 1)
                 ,'delete'               => array('len' => 1)
                 ,'restore'              => array('len' => 1)
-                ,'toggleFavorite'       => array('len' => 1)
-                ,'takeOwnership'        => array('len' => 1)
                 ,'getObjectsForField'   => array('len' => 1)
             )
         )
@@ -31,7 +28,6 @@ $API = array_merge(
         ,'CB_BrowserTree' => array(
             'methods' => array(
                 'getChildren'       => array('len' => 1)
-                ,'createFolder'     => array('len' => 1)
                 ,'delete'           => array('len' => 1)
                 ,'rename'           => array('len' => 1)
                 ,'getRootProperties'=> array('len' => 1)
@@ -41,7 +37,6 @@ $API = array_merge(
         ,'CB_BrowserView' => array(
             'methods' => array(
                 'getChildren'       => array('len' => 1)
-                ,'createFolder'     => array('len' => 1)
                 ,'delete'           => array('len' => 1)
                 ,'rename'           => array('len' => 1)
             )
@@ -49,22 +44,21 @@ $API = array_merge(
 
         ,'CB_Favorites' => array(
             'methods'=>array(
-                'create'        =>  array('len' => 1)
-                ,'read'         =>  array('len' => 1)
-                ,'delete'       =>  array('len' => 1)
+                'create'        => array('len' => 1)
+                ,'read'         => array('len' => 1)
+                ,'delete'       => array('len' => 1)
             )
         )
 
         ,'CB_Files' => array(
             'methods'=>array(
-                'getProperties'         =>  array('len'=>1)
-                ,'getContent'           =>  array('len'=>1)
-                ,'saveContent'          =>  array('len'=>1)
-                ,'restoreVersion'       =>  array('len'=>1)
-                ,'deleteVersion'        =>  array('len'=>1)
-                ,'getDuplicates'        =>  array('len'=>1)
-                ,'checkExistentContents'=>  array('len'=>1)
-                ,'saveProperties'       =>  array('len'=>1)
+                'getProperties'         => array('len' => 1)
+                ,'getContent'           => array('len' => 1)
+                ,'saveContent'          => array('len' => 1)
+                ,'restoreVersion'       => array('len' => 1)
+                ,'deleteVersion'        => array('len' => 1)
+                ,'checkExistentContents'=> array('len' => 1)
+                ,'saveProperties'       => array('len' => 1)
             )
         )
 
@@ -72,30 +66,31 @@ $API = array_merge(
             'methods'=>array(
                 'getList'=> array('len' => 1)
                 ,'getNew'=> array('len' => 1)
-                ,'updateLastSeenId'=> array('len' => 1)
+                ,'updateLastSeenActionId'=> array('len' => 1)
                 ,'markAsRead'=> array('len' => 1)
                 ,'markAllAsRead'=> array('len' => 0)
             )
         )
 
         ,'CB_Objects' => array(
-            'methods'=>array(
-                'load'                  =>  array('len'=>1)
-                ,'create'               =>  array('len'=>1)
-                ,'save'                 =>  array('len'=>1, 'formHandler' => true)
-                ,'getAssociatedObjects' =>  array('len'=>1)
-                ,'getPluginsData'       =>  array('len'=>1)
-                ,'getBasicInfoForId'    =>  array('len'=>1)
-                ,'setSubscription'      =>  array('len'=>1)
-                ,'addComment'           =>  array('len'=>1)
-                ,'updateComment'        =>  array('len'=>1)
-                ,'removeComment'        =>  array('len'=>1)
+            'methods'=> array(
+                'load'                  => array('len' => 1)
+                ,'create'               => array('len' => 1)
+                ,'save'                 => array('len' => 1, 'formHandler' => true)
+                ,'getAssociatedObjects' => array('len' => 1)
+                ,'getPluginsData'       => array('len' => 1)
+                ,'getBasicInfoForId'    => array('len' => 1)
+                ,'setSubscription'      => array('len' => 1)
+                ,'addComment'           => array('len' => 1)
+                ,'updateComment'        => array('len' => 1)
+                ,'removeComment'        => array('len' => 1)
+                ,'setOwnership'         => array('len' => 1)
             )
         )
 
         ,'CB_Objects_Plugins_Comments' => array(
             'methods'=>array(
-                'loadMore'              =>  array('len'=>1)
+                'loadMore' => array('len' => 1)
             )
         )
 
@@ -150,11 +145,11 @@ $API = array_merge(
 
         ,'CB_Tasks' => array(
             'methods'=>array(
-                'setUserStatus'    =>  array('len' => 1)
-                ,'complete'         =>  array('len' => 1)
-                ,'close'            =>  array('len' => 1)
-                ,'reopen'           =>  array('len' => 1)
-                ,'updateDates'      =>  array('len' => 1)
+                'setUserStatus'    => array('len' => 1)
+                ,'complete'         => array('len' => 1)
+                ,'close'            => array('len' => 1)
+                ,'reopen'           => array('len' => 1)
+                ,'updateDates'      => array('len' => 1)
             )
         )
 

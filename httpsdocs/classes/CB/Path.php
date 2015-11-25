@@ -2,6 +2,7 @@
 namespace CB;
 
 use CB\DataModel as DM;
+use CB\Util;
 
 class Path
 {
@@ -14,196 +15,43 @@ class Path
         }
         $id = explode('/', $path);
         $id = array_pop($id);
-        $id = is_numeric($id) ? $id : Browser::getRootFolderId();
+        $id = is_numeric($id)
+            ? $id
+            : Browser::getRootFolderId();
 
         return $id;
     }
 
-    public static function getPath($id)
+    public static function getPath($id, $excludeItself = false)
     {
         $rez = array('success' => false);
         if (!is_numeric($id)) {
             return $rez;
         }
-        $res = DB\dbQuery(
-            'SELECT pids FROM tree_info WHERE id = $1',
-            $id
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            $r['pids'] = str_replace(',', '/', $r['pids']);
-            $rez = array('success' => true, 'id' => $id, 'path' => $r['pids']);
+        $r = DM\Tree::getBasicInfo($id);
+
+        if (!empty($r)) {
+            $p = explode(',', $r['pids']);
+            if ($excludeItself) {
+                array_pop($r['pids']);
+            }
+            $p = implode('/', $p);
+
+            $rez = array(
+                'success' => true,
+                'id' => $id,
+                'name' => $r['name'],
+                'path' => $p
+            );
         }
-        $res->close();
 
         return $rez;
     }
 
     public static function getPidPath($id)
     {
-        $rez = array('success' => false);
-
-        if (!is_numeric($id)) {
-            return $rez;
-        }
-
-        $res = DB\dbQuery(
-            'SELECT t.name
-                    ,ti.pids
-            FROM tree t
-            JOIN tree_info ti ON t.id = ti.id
-            WHERE t.id = $1',
-            $id
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $r['pids'] = explode(',', $r['pids']);
-            array_pop($r['pids']);
-            $r['pids'] = implode('/', $r['pids']);
-
-            $rez = array(
-                'success' => true
-                ,'id' => $id
-                ,'name' => $r['name']
-                ,'path' => $r['pids']
-            );
-        }
-        $res->close();
-
-        return $rez;
-    }
-
-    /**
-     * return textual repsentation of an ids path
-     * @param  varchar | array $p direct path string or an array containig 'path' index defined
-     * @return varchar
-     */
-    public static function getPathText($p)
-    {
-        $path = '';
-        if (is_array($p)) {
-            if (isset($p['path'])) {
-                $path = $p['path'];
-            }
-        } elseif (is_string($p)) {
-            $path = $p;
-        }
-
-        if (empty($path)) {
-            $path = '/';
-        }
-
-        while ($path[0] == '/') {
-            $path = substr($path, 1);
-        }
-
-        $path = explode('/', $path);
-        $ids = array_filter($path, 'is_numeric');
-        $id = array_pop($ids);
-
-        $res = DB\dbQuery('SELECT pids FROM tree_info WHERE id = $1', $id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            $path = explode(',', $r['pids']);
-            if (!empty($path) && empty($path[0])) {
-                array_shift($path);
-            }
-            array_shift($path);
-            $ids = $path;
-        }
-        $res->close();
-
-        if (empty($path)) {
-            return '/';
-        }
-        if ($path[0] == Browser::getRootFolderId()) {
-            array_shift($path);
-        }
-        if (empty($ids)) {
-            return '/';
-        }
-
-        $names = array();
-        $res = DB\dbQuery(
-            'SELECT id
-                ,name
-            FROM tree
-            WHERE id IN ('.implode(', ', $ids).')'
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $names[$r['id']] = htmlspecialchars($r['name'], ENT_COMPAT);
-        }
-        $res->close();
-        $rez = array();
-        for ($i=0; $i < sizeof($path); $i++) {
-            if (isset($names[$path[$i]])) {
-                $rez[] = L\getTranslationIfPseudoValue($names[$path[$i]]);
-            } else {
-                $rez[] = $path[$i];
-            }
-        }
-
-        return '/'.implode('/', $rez);
-    }
-
-    /**
-     * return generic properties for a path of ids
-     * @param  varchar | array $p direct path string or an array containig 'path' index defined
-     * @return varchar
-     */
-    public static function getPathProperties($p)
-    {
-        $path = '';
-        if (is_array($p)) {
-            if (isset($p['path'])) {
-                $path = $p['path'];
-            }
-        } else {
-            $path = $p;
-        }
-
-        if (empty($path)) {
-            $path = '/';
-        }
-        while ($path[0] == '/') {
-            $path = substr($path, 1);
-        }
-        $path = explode('/', $path);
-        $ids = array_filter($path, 'is_numeric');
-        if (empty($ids)) {
-            $ids = array(Browser::getRootFolderId());
-            $path = $ids;
-        }
-
-        $rez = array();
-        $lastId = array_pop($ids);
-
-        $r = Objects::getBasicInfoForId($lastId);
-        if ($r['success']) {
-            $d = &$r['data'];
-            $d['path'] = str_replace(',', '/', $d['pids']);
-            unset($d['pids']);
-            $rez = $d;
-        }
-        $res->close();
-
-        return $rez;
-    }
-
-    /**
-     * tree nodes can contain Translation variable in place of name like: [MyDocuments]
-     * @param  vrchar  $path
-     * @return varchar
-     */
-    public static function replaceCustomNames($path)
-    {
-        $path = explode('/', $path);
-        for ($i=0; $i < sizeof($path); $i++) {
-            $path[$i] = L\getTranslationIfPseudoValue($path[$i]);
-        }
-        $path = implode('/', $path);
-
-        return $path;
+        return static::getPath($id, true);
     }
 
     /**
@@ -222,8 +70,10 @@ class Path
             $cfg['class'] = $class;
 
             try {
-                $class = new $class($cfg);
-                $rez[$cfg['guid']] = $class;
+                if (class_exists($class)) {
+                    $class = new $class($cfg);
+                    $rez[$cfg['guid']] = $class;
+                }
             } catch (\Exception $e) {
                 debug('error creating class '.$class);
             }
@@ -401,7 +251,8 @@ class Path
             if (is_numeric($el)) { //it's a real node id
                 $rez = $el;
             } else {
-                list($guid, $el) = explode('-', $el);
+                $arr = explode('-', $el);
+                $guid = $arr[0];
                 if (!empty($GUIDConfigs[$guid]['realNodeId'])) {
                     $rez = $GUIDConfigs[$guid]['realNodeId'];
                 }

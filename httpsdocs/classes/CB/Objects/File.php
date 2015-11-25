@@ -1,7 +1,7 @@
 <?php
 namespace CB\Objects;
 
-use CB\DB;
+use CB\DataModel as DM;
 use CB\Objects;
 use CB\User;
 use CB\Util;
@@ -57,30 +57,15 @@ class File extends Object
     {
         parent::createCustomData();
 
-        $res = DB\dbQuery(
-            'INSERT INTO files
-                (id
-                ,content_id
-                ,`date`
-                ,`name`
-                ,`cid`
-                )
-            VALUES (
-                $1
-                ,$2
-                ,$3
-                ,$4
-                ,$5
-            )',
+        DM\Files::create(
             array(
-                $this->id
-                ,@$this->data['content_id']
-                ,@$this->data['date']
-                ,@$this->data['name']
-                ,@$this->data['cid']
+                'id' => $this->id
+                ,'content_id' => @$this->data['content_id']
+                ,'date' => @$this->data['date']
+                ,'name' => @$this->data['name']
+                ,'cid' => @$this->data['cid']
             )
-        ) or die(DB\dbQueryError());
-
+        );
     }
 
     /**
@@ -93,49 +78,20 @@ class File extends Object
 
         parent::loadCustomData();
 
-        /* load custom data from objects table */
-        $res = DB\dbQuery(
-            'SELECT f.content_id
-                ,fc.size
-                ,fc.pages
-                ,fc.type `content_type`
-                ,fc.path `content_path`
-                ,fc.md5
-            FROM files f
-            LEFT JOIN files_content fc ON f.content_id = fc.id
-            WHERE f.id = $1',
-            $this->id
-        ) or die(DB\dbQueryError());
+        $d = &$this->data;
 
-        if ($r = $res->fetch_assoc()) {
-            $this->data = array_merge($this->data, $r);
+        $cd = DM\Files::getContentData($this->id);
+
+        if (!empty($cd)) {
+            $d['content_id'] = $cd['id'];
+            $d['size'] = $cd['size'];
+            $d['pages'] = $cd['pages'];
+            $d['content_type'] = $cd['type'];
+            $d['content_path'] = $cd['path'];
+            $d['md5'] = $cd['md5'];
         }
-        $res->close();
 
-        /* get versions */
-
-        $res = DB\dbQuery(
-            'SELECT
-                v.id
-                ,v.`date`
-                ,v.`name`
-                ,v.cid
-                ,v.uid
-                ,v.cdate
-                ,v.udate
-                ,fc.size
-                ,fc.pages
-                ,fc.type content_type
-            FROM files_versions v
-                LEFT JOIN files_content fc on fc.id = v.content_id
-            WHERE v.file_id = $1
-            ORDER BY COALESCE(v.udate, v.cdate) DESC',
-            $this->id
-        ) or die(DB\dbQueryError());
-        while ($r = $res->fetch_assoc()) {
-            $this->data['versions'][] = $r;
-        }
-        $res->close();
+        $this->data['versions'] = DM\FilesVersions::getFileVersions($this->id);
     }
 
     /**
@@ -176,37 +132,29 @@ class File extends Object
     {
         parent::updateCustomData();
 
-        $res = DB\dbQuery(
-            'INSERT INTO files
-                (id
-                ,content_id
-                ,`date`
-                ,`name`
-                ,`cid`
-                )
-            VALUES (
-                $1
-                ,$2
-                ,$3
-                ,$4
-                ,$5
-            )
-            ON DUPLICATE KEY UPDATE
-            content_id = COALESCE($2, content_id)
-            ,`date` = $3
-            ,name = $4
-            ,cid = $5
-            ,uid = $6',
+        $updated = DM\Files::update(
             array(
-                $this->id
-                ,@$this->data['content_id']
-                ,@$this->data['date']
-                ,@$this->data['name']
-                ,@$this->data['cid']
-                ,$_SESSION['user']['id']
+                'id' => $this->id
+                ,'content_id' => @$this->data['content_id']
+                ,'date' => @$this->data['date']
+                ,'name' => @$this->data['name']
+                ,'cid' => @$this->data['cid']
+                ,'uid' => User::getId()
             )
-        ) or die(DB\dbQueryError());
+        );
 
+        //create record if doesnt exist yet
+        if (!$updated) {
+            DM\Files::create(
+                array(
+                    'id' => $this->id
+                    ,'content_id' => @$this->data['content_id']
+                    ,'date' => @$this->data['date']
+                    ,'name' => @$this->data['name']
+                    ,'cid' => @$this->data['cid']
+                )
+            );
+        }
     }
 
     /**
@@ -221,25 +169,12 @@ class File extends Object
 
         $sd = &$this->data['sys_data']['solr'];
 
-        $res = DB\dbQuery(
-            'SELECT c.size
-            ,(SELECT count(*)
-                FROM files_versions
-                WHERE file_id = f.id
-            ) `versions`
-            FROM files f
-            LEFT JOIN files_content c
-                ON f.content_id = c.id
-            WHERE f.id = $1',
-            $this->id
-        ) or die(DB\dbQueryError());
+        $r = DM\Files::getSolrData($this->id);
 
-        if ($r = $res->fetch_assoc()) {
+        if (!empty($r)) {
             $sd['size'] = $r['size'];
             $sd['versions'] = intval($r['versions']);
         }
-
-        $res->close();
     }
 
     /**
@@ -249,37 +184,10 @@ class File extends Object
      */
     protected function copyCustomDataTo($targetId)
     {
-        // - files data, but without versions. Should we copy versions also?
-        // copy files data
-        DB\dbQuery(
-            'INSERT INTO `files`
-                (`id`
-                ,`content_id`
-                ,`date`
-                ,`name`
-                ,`title`
-                ,`cid`
-                ,`uid`
-                ,`cdate`
-                ,`udate`)
-            SELECT
-                $2
-                ,`content_id`
-                ,`date`
-                ,`name`
-                ,`title`
-                ,`cid`
-                ,$3
-                ,`cdate`
-                ,CURRENT_TIMESTAMP
-            FROM `files`
-            WHERE id = $1',
-            array(
-                $this->id
-                ,$targetId
-                ,$_SESSION['user']['id']
-            )
-        ) or die(DB\dbQueryError());
+        DM\Files::copy(
+            $this->id,
+            $targetId
+        );
     }
 
     /**

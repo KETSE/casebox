@@ -88,7 +88,6 @@ function sendUserMails($u)
 
     $coreName = Config::get('core_name');
     // $coreUrl = Config::get('core_url');
-    $adminEmail = Config::get('ADMIN_EMAIL');
 
     $languages = Config::get('languages');
 
@@ -157,7 +156,6 @@ function sendUserMails($u)
             );
         }
 
-        $seenMaxId = 0;
         foreach ($mails['separate'] as $mail) {
             echo $u['email'].': ' . $mail['subject']  . "\n";
 
@@ -172,7 +170,7 @@ function sendUserMails($u)
                     $mail['body']
                 );
             } else {
-                DM\Notifications::markAsSeen($uid, $mail['nId']);
+                DM\Notifications::markAsSeen($mail['nId'], $uid);
             }
         }
 

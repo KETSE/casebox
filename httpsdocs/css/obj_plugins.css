@@ -106,9 +106,9 @@ background-color: #FFFFCC;
 .block-plugin-comments .comment div.comment-text {
   /*text-overflow: ellipsis;*/
   overflow: hidden;
-  max-height: 200px;
+  max-height: 300px;
   display: -webkit-box;
-  -webkit-line-clamp: 6;
+  -webkit-line-clamp: 10;
   -webkit-box-orient: vertical;
 }
 
@@ -299,14 +299,15 @@ cursor: hand;
 .obj-header {
     padding: 10px;
     font-size: 14px;
-    font-weight: bold;
+    /* font-weight: bold; */
     overflow: hidden;
 }
 
 .obj-header > div.info {
-    font-size: 11px;
-    color: #7d7d7d;
+    font-size: 12px;
+    color: #444;
     padding: 2px 1px;
+    margin-top: 4px;
 }
 
 .taskview h2 {

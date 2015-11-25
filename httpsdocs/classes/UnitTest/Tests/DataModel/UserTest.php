@@ -62,8 +62,8 @@ class UserTest extends \PHPUnit_Framework_TestCase
             ,'password' => 'a'
             ,'photo' => '/tmp/q.jpg'
             ,'language_id' => 2
-            ,'data' => '{}'
-            ,'cfg' => '{"db_user": "root"}'
+            //,'data' => '{}'
+            //,'cfg' => '{"db_user": "root"}'
             ,'recover_hash' => '---'
             ,'enabled' => 0
             ,'cid' => 1
@@ -143,20 +143,20 @@ class UserTest extends \PHPUnit_Framework_TestCase
     /**
      * @depends testCreate
      */
-    public function testsetAsLoged() {
-
+    public function testsetAsLoged()
+    {
         $id = DM\Users::create(
-                    array(
-                        'name' => $this->testName
-                        ,'password' => 'qq'
-                    )
-                );
+            array(
+                'name' => $this->testName
+                ,'password' => 'qq'
+            )
+        );
 
         $this->assertTrue(is_numeric($id), 'Cant create User');
 
         \CB\User::setAsLoged($id, 'tests_key');
 
-        $this->assertTrue(\CB\User::isLoged(),' Error: user is not logged');
+        $this->assertTrue(\CB\User::isLoged(), ' Error: user is not logged');
         $this->assertEquals($id, $_SESSION['user']['id'], 'Sessions user is not equal with setted users');
         $this->assertEquals('tests_key', $_SESSION['key'], 'Sessions key is not equal with setted keys');
 

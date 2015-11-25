@@ -73,7 +73,7 @@ Ext.define('CB.object.field.editor.Form', {
             ,selModel: {
                 selType: 'checkboxmodel'
                 ,injectCheckbox: 'first'
-                ,checkOnly: false
+                ,allowDeselect: true
                 ,toggleOnClick: true
                 ,mode: (this.cfg.multiValued ? 'SIMPLE': 'SINGLE')
                 ,listeners: {
@@ -144,11 +144,6 @@ Ext.define('CB.object.field.editor.Form', {
                     this.triggerField.focus(false, 400);
                 }
                 ,change: this.onChange
-                // ,beforedestroy: function(){
-                //     if(this.qt) {
-                //         this.qt.destroy();
-                //     }
-                // }
             }
             ,buttons:[
                 ,this.actions.showSelection
@@ -269,8 +264,9 @@ Ext.define('CB.object.field.editor.Form', {
 
         //set default sorting
         if(this.cfg.sort){
-            field = 'order';
-            dir = 'asc';
+            var field = 'order'
+                ,dir = 'asc';
+
             switch(this.cfg.sort){
                 case 'asc':
                     field = 'name';

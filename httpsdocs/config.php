@@ -31,10 +31,13 @@ $cfg['db_name'] = PREFIX.$cfg['core_name'];
 //loading core defined params
 try {
     $cfg = array_merge($cfg, Config::getPlatformConfigForCore($cfg['core_name']));
+
 } catch (\Exception $e) { //return http "not found" if cant load core config
     if (Util\is_cli()) {
-        trigger_error("ERROR: Config::getPlatformConfigForCore(".$cfg['core_name'].") cfg=".print_r($cfg, true),
-            E_USER_ERROR);
+        trigger_error(
+            "ERROR: Config::getPlatformConfigForCore(".$cfg['core_name'].") cfg=".print_r($cfg, true),
+            E_USER_ERROR
+        );
     } else {
 
         header(@$_SERVER["SERVER_PROTOCOL"].' 404 Not Found');
@@ -84,12 +87,15 @@ ini_set("session.gc_maxlifetime", $sessionLifetime);
 ini_set("session.gc_divisor", "100");
 ini_set("session.gc_probability", "1");
 
-session_set_cookie_params($sessionLifetime, '/'.$cfg['core_name'].'/', $_SERVER['SERVER_NAME'],
-    !empty($_SERVER['HTTPS']), true);
+session_set_cookie_params(
+    $sessionLifetime,
+    '/' . $cfg['core_name'] . '/',
+    $_SERVER['SERVER_NAME'],
+    !empty($_SERVER['HTTPS']),
+    true
+);
 
-$SESSION_NAME = getSessionName();
-
-session_name($SESSION_NAME);
+session_name(setSessionName());
 
 //error reporting params
 error_reporting(IS_DEBUG_HOST ? E_ALL : E_ERROR);

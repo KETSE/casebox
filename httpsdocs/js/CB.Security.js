@@ -225,7 +225,7 @@ Ext.define('CB.SecurityWindow', {
             }
         });
 
-        topToolbar = null;
+        var topToolbar = null;
 
         if(App.loginData.admin){
             topToolbar = [ this.actions.removeChildPermissions ];
@@ -366,10 +366,12 @@ Ext.define('CB.SecurityWindow', {
     ,updateDeleteAction: function(){
         var canDelete = true
             ,sr = this.aclList.getSelectionModel().getSelection();
+
         if(!Ext.isEmpty(sr)){
             var r = sr[0];
             canDelete = ( ( r.get('allow').indexOf('2') < 0 ) && ( r.get('deny').indexOf('-2') < 0 ));
         }
+
         this.actions.del.setDisabled(!canDelete);
     }
 
@@ -429,8 +431,12 @@ Ext.define('CB.SecurityWindow', {
     }
 
     ,onDeleteClick: function(b, e){
-        ra = this.aclList.getSelectionModel().getSelection();
-        if(Ext.isEmpty(ra)) return;
+        var ra = this.aclList.getSelectionModel().getSelection();
+
+        if(Ext.isEmpty(ra)) {
+            return;
+        }
+
         Ext.Msg.confirm(
             L.Delete
             ,L.DeleteSelectedConfirmationMessage
@@ -491,21 +497,27 @@ Ext.define('CB.SecurityWindow', {
     }
 
     ,accessToGroupValue: function(accessArray, groupBitsArray){
-        lastBit = null;
-        bitsMatch = true;
-        bitsCombinedMatch = false;
-        i = 0;
+        var lastBit = null
+            ,bitsMatch = true
+            ,bitsCombinedMatch = false
+            ,i = 0;
+
         while( (i < accessArray.length ) && bitsMatch){
-            currentBit = parseInt(accessArray[i], 10);
-            if(groupBitsArray[i] == 1){
+            var currentBit = parseInt(accessArray[i], 10);
+            if (groupBitsArray[i] == 1){
                 if(Ext.isEmpty(lastBit)){
                     lastBit = currentBit;
-                }else if( (currentBit * lastBit) > 0 ){
-                    if(currentBit != lastBit) bitsCombinedMatch = true;
-                }else bitsMatch = false;
+                } else if( (currentBit * lastBit) > 0 ){
+                    if (currentBit != lastBit) {
+                        bitsCombinedMatch = true;
+                    }
+                } else {
+                    bitsMatch = false;
+                }
             }
             i++;
         }
+
         return bitsMatch
             ? ( bitsCombinedMatch
                     ? ( (lastBit < 0) ? -1 : 1 )
@@ -531,17 +543,28 @@ Ext.define('CB.SecurityWindow', {
 
         newValue = parseInt(newValue, 10);
 
-        for (var i = 0; i < group.length; i++)
-            if(group[i] == 1){
-                if( newValue > -1 ){
-                    if( (allow[i] > -2) && (allow[i] < 2) ) allow[i] = newValue;
-                    if(deny[i] > -2) deny[i] = 0;
+        for (var i = 0; i < group.length; i++) {
+            if (group[i] == 1) {
+                if (newValue > -1) {
+                    if ((allow[i] > -2) && (allow[i] < 2)) {
+                        allow[i] = newValue;
+                    }
+                    if (deny[i] > -2) {
+                        deny[i] = 0;
+                    }
                 }
-                if( newValue < 1 ){
-                    if( (deny[i] > -2) && (deny[i] < 2) ) deny[i] = newValue;
-                    if(allow[i] < 2) allow[i] = 0;
+                if (newValue < 1 ){
+                    if ((deny[i] > -2) && (deny[i] < 2)) {
+                        deny[i] = newValue;
+                    }
+
+                    if(allow[i] < 2) {
+                        allow[i] = 0;
+                    }
                 }
             }
+        }
+
         r.set('allow', allow.join(','));
         r.set('deny', deny.join(','));
 
@@ -549,8 +572,8 @@ Ext.define('CB.SecurityWindow', {
     }
 
     ,reloadPermissionsStore: function(){
-        data = [];
-        sr = this.aclList.getSelectionModel().getSelection();
+        var data = []
+            ,sr = this.aclList.getSelectionModel().getSelection();
 
         if(!Ext.isEmpty(sr)) {
             data = this.accessToGroupsData(sr[0], this.permissionsStore.accessGroups);

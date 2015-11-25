@@ -1,8 +1,7 @@
 <?php
 namespace CB\Templates;
 
-use CB\DB;
-use CB\Util;
+use CB\DataModel as DM;
 
 /**
  * Templates collection class
@@ -35,72 +34,34 @@ class Collection
 
         $this->reset();
         /* collecting template_fields */
-        $templateFields = array();
-        $templateFieldsByIndex = array();
+        $fields = array();
+        $fieldsByIndex = array();
 
-        $res = DB\dbQuery(
-            'SELECT
-                ts.id
-                ,ts.pid
-                ,ts.template_id
-                ,ts.name
-                ,ts.l' . \CB\Config::get('user_language_index') . ' `title`
-                ,ts.`type`
-                ,ts.cfg
-                ,ts.order
-                ,ts.solr_column_name
-            FROM templates_structure ts
-            JOIN tree t on ts.id = t.id AND t.dstatus = 0
-            ORDER BY ts.`order`'
-        ) or die(DB\dbQueryError());
+        $recs = DM\TemplatesStructure::getFields();
 
-        while ($r = $res->fetch_assoc()) {
-            $template_id = $r['template_id'];
+        foreach ($recs as $r) {
+            $templateId = $r['template_id'];
             unset($r['template_id']);
-            $r['cfg'] = Util\toJSONArray($r['cfg']);
-            $templateFields[$template_id][$r['id']] = &$r;
-            $templateFieldsByIndex[$template_id][] = &$r;
+
+            $fields[$templateId][$r['id']] = &$r;
+            $fieldsByIndex[$templateId][] = &$r;
             unset($r);
         }
-        $res->close();
 
         /* loading templates */
-        $res = DB\dbQuery(
-            'SELECT t.id
-                ,t.pid
-                ,t.is_folder
-                ,t.`type`
-                ,t.name
-                ,t.`order`
-                ,t.`visible`
-                ,t.iconCls
-                ,t.default_field
-                ,t.cfg
-                ,t.title_template
-                ,t.info_template
-                ,o.data
-            FROM templates t
-            LEFT JOIN objects o
-                ON t.id = o.id
-            WHERE t.is_folder = 0'
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $r['cfg'] = Util\toJSONArray($r['cfg']);
-            $r['data'] = Util\toJSONArray($r['data']);
-
-            $r['fields'] = empty($templateFields[$r['id']])
+        $recs = DM\Templates::readAllWithData();
+        foreach ($recs as $r) {
+            $r['fields'] = empty($fields[$r['id']])
                 ? array()
-                : $templateFields[$r['id']];
-            $r['fieldsByIndex'] = empty($templateFieldsByIndex[$r['id']])
+                : $fields[$r['id']];
+            $r['fieldsByIndex'] = empty($fieldsByIndex[$r['id']])
                 ? array()
-                : $templateFieldsByIndex[$r['id']];
+                : $fieldsByIndex[$r['id']];
 
             /* store template in collection */
             $this->templates[$r['id']] = new \CB\Objects\Template($r['id'], false);
             $this->templates[$r['id']]->setData($r);
         }
-        $res->close();
 
         $this->loadedAll = true;
     }
@@ -137,44 +98,35 @@ class Collection
             }
         }
 
-        $res = DB\dbQuery('SELECT id FROM templates WHERE name = $1', $name) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            return $this->getTemplate($r['id']);
-        }
-        $res->close();
+        $id = DM\Templates::toId($name);
 
-        return null;
+        return $this->getTemplate($id);
     }
 
     /**
      * get template type by its id
-     * @param  int     $templateId
+     * @param  int     $id
      * @return varchar
      */
-    public function getType($templateId)
+    public function getType($id)
     {
-        if (!is_numeric($templateId)) {
+        if (!is_numeric($id)) {
             return null;
         }
 
         // check if template has been loaded
-        if (!empty($this->templates[$templateId])) {
-            return $this->templates[$templateId]->getData()['type'];
+        if (!empty($this->templates[$id])) {
+            return $this->templates[$id]->getData()['type'];
         }
 
-        $var_name = 'template_type'.$templateId;
+        $var_name = 'template_type' . $id;
 
         if (!\CB\Cache::exist($var_name)) {
-            $res = DB\dbQuery(
-                'SELECT `type`
-                FROM templates
-                WHERE id = $1',
-                $templateId
-            ) or die(DB\dbQueryError());
-            if ($r = $res->fetch_assoc()) {
+            $r = DM\Templates::read($id);
+
+            if (!empty($r)) {
                 \CB\Cache::set($var_name, $r['type']);
             }
-            $res->close();
         }
 
         return \CB\Cache::get($var_name);

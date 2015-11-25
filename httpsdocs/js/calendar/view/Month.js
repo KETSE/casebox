@@ -351,8 +351,9 @@ Ext.define('Ext.calendar.view.Month', {
 
     // private
     getViewPadding: function(sides) {
-        var sides = sides || 'tlbr',
-            top = sides.indexOf('t') > -1,
+        sides = sides || 'tlbr';
+
+        var top = sides.indexOf('t') > -1,
             left = sides.indexOf('l') > -1,
             right = sides.indexOf('r') > -1,
             height = this.showHeader && top ? this.el.select('.ext-cal-hd-days-tbl').first().getHeight() : 0,

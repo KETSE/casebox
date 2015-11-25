@@ -174,6 +174,19 @@ CREATE TABLE `files_versions` (
 
 /*Data for the table `files_versions` */
 
+/*Table structure for table `guids` */
+
+DROP TABLE IF EXISTS `guids`;
+
+CREATE TABLE `guids` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `guids_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `guids` */
+
 /*Table structure for table `notifications` */
 
 DROP TABLE IF EXISTS `notifications`;
@@ -1010,11 +1023,15 @@ DELIMITER $$
 	from tree_info ti
 	left join `tree_acl_security_sets` ts on ti.security_set_id = ts.id
 	where ti.id = new.node_id;
+
 	/* we have to analize 2 cases when node has already other security rules attached and when this is the first rule attached.
 	In first case we have to mark as updated only the security set assigned to this node and child sets
-	In second case we have to add the new security set and update all lower security sets form that tree baranch
+	In second case we have to add the new security set and update all lower security sets form that tree branch
 	*/
-	if(tmp_acl_count > 1) THEN
+	IF((tmp_acl_count > 1) OR
+	  (tmp_old_security_set = new.node_id) OR
+	  (CONCAT(',', tmp_old_security_set) LIKE CONCAT('%,', new.node_id))
+	 ) THEN
 		UPDATE tree_info
 		SET acl_count = tmp_acl_count
 		WHERE id = new.node_id;
@@ -1035,6 +1052,7 @@ DELIMITER $$
 		update id = last_insert_id(id);
 		set tmp_new_security_set_id = last_insert_id();
 		/* end of create new security set*/
+
 		UPDATE tree_info
 		SET 	acl_count = tmp_acl_count
 			,security_set_id = tmp_new_security_set_id

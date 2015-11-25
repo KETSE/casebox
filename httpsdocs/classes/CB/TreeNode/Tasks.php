@@ -3,6 +3,7 @@ namespace CB\TreeNode;
 
 use CB\L;
 use CB\Templates;
+use CB\DataModel as DM;
 
 class Tasks extends Base
 {
@@ -12,7 +13,7 @@ class Tasks extends Base
         $this->fq = array();
 
         //select only task templates
-        $taskTemplates = Templates::getIdsByType('task');
+        $taskTemplates = DM\Templates::getIdsByType('task');
         if (!empty($taskTemplates)) {
             $this->fq[] = 'template_id:('.implode(' OR ', $taskTemplates).')';
         }
@@ -66,11 +67,11 @@ class Tasks extends Base
         }
         switch ($id) {
             case 'tasks':
-                return L\get('Tasks');
+                return L\get('MyTasks');
             case 2:
                 return L\get('AssignedToMe');
             case 3:
-                return L\get('Created');
+                return L\get('CreatedByMe');
             case 4:
                 return lcfirst(L\get('Overdue'));
             case 5:
@@ -100,19 +101,31 @@ class Tasks extends Base
         $rez = $s->query($p);
         $count = '';
         if (!empty($rez['total'])) {
-            $count = ' ('.$rez['total'].')';
+            $count = ' (' . $rez['total'] . ')';
+            $count = $this->renderCount($rez['total']);
         }
 
         return array(
             'data' => array(
                 array(
-                    'name' => L\get('Tasks') . $count
+                    'name' => L\get('MyTasks') . $count
                     ,'id' => $this->getId('tasks')
                     ,'iconCls' => 'icon-task'
+                    ,'cls' => 'tree-header'
                     ,'has_childs' => true
                 )
             )
         );
+    }
+
+    /**
+     *  returns a formatted total number for UI tree
+     *  @param  Int $n   the total count of tasks
+     *  @return String   formatted string
+     */
+    protected function renderCount($n)
+    {
+        return ' <span style="color: #AAA; font-size: 12px">' . $n . '</span>';
     }
 
     protected function getDepthChildren2()
@@ -134,7 +147,7 @@ class Tasks extends Base
             $rez = array('data' => array());
             if (!empty($sr['facets']->facet_fields->{'1assigned'}->{$_SESSION['user']['id']})) {
                 $rez['data'][] = array(
-                    'name' => L\get('AssignedToMe').' ('.$sr['facets']->facet_fields->{'1assigned'}->{$_SESSION['user']['id']}.')'
+                    'name' => L\get('AssignedToMe') . $this->renderCount($sr['facets']->facet_fields->{'1assigned'}->{$_SESSION['user']['id']})
                     ,'id' => $this->getId(2)
                     ,'iconCls' => 'icon-task'
                     ,'has_childs' => true
@@ -142,7 +155,7 @@ class Tasks extends Base
             }
             if (!empty($sr['facets']->facet_fields->{'2cid'}->{$_SESSION['user']['id']})) {
                 $rez['data'][] = array(
-                    'name' => L\get('Created').' ('.$sr['facets']->facet_fields->{'2cid'}->{$_SESSION['user']['id']}.')'
+                    'name' => L\get('CreatedByMe') . $this->renderCount($sr['facets']->facet_fields->{'2cid'}->{$_SESSION['user']['id']})
                     ,'id' => $this->getId(3)
                     ,'iconCls' => 'icon-task'
                     ,'has_childs' => true
@@ -188,21 +201,21 @@ class Tasks extends Base
             $rez = array('data' => array());
             if (!empty($sr['facets']->facet_fields->{'0task_status'}->{'1'})) {
                 $rez['data'][] = array(
-                    'name' => lcfirst(L\get('Overdue')).' ('.$sr['facets']->facet_fields->{'0task_status'}->{'1'}.')'
+                    'name' => lcfirst(L\get('Overdue')) . $this->renderCount($sr['facets']->facet_fields->{'0task_status'}->{'1'})
                     ,'id' => $this->getId(4)
                     ,'iconCls' => 'icon-task'
                 );
             }
             if (!empty($sr['facets']->facet_fields->{'0task_status'}->{'2'})) {
                 $rez['data'][] = array(
-                    'name' => lcfirst(L\get('Ongoing')).' ('.$sr['facets']->facet_fields->{'0task_status'}->{'2'}.')'
+                    'name' => lcfirst(L\get('Ongoing')) . $this->renderCount($sr['facets']->facet_fields->{'0task_status'}->{'2'})
                     ,'id' => $this->getId(5)
                     ,'iconCls' => 'icon-task'
                 );
             }
             if (!empty($sr['facets']->facet_fields->{'0task_status'}->{'3'})) {
                 $rez['data'][] = array(
-                    'name' => lcfirst(L\get('Closed')).' ('.$sr['facets']->facet_fields->{'0task_status'}->{'3'}.')'
+                    'name' => lcfirst(L\get('Closed')) . $this->renderCount($sr['facets']->facet_fields->{'0task_status'}->{'3'})
                     ,'id' => $this->getId(6)
                     ,'iconCls' => 'icon-task'
                 );
@@ -217,7 +230,6 @@ class Tasks extends Base
                 );
             }
         } else {
-
             $p['fq'][] = 'task_status:(1 OR 2)';
 
             $s = new \CB\Search();
@@ -299,7 +311,7 @@ class Tasks extends Base
             foreach ($sr['facets']->facet_fields->{'task_u_ongoing'} as $k => $v) {
                 $k = 'au_'.$k;
                 $r = array(
-                    'name' => $this->getName($k).' ('.$v.')'
+                    'name' => $this->getName($k) . $this->renderCount($v)
                     ,'id' => $this->getId($k)
                     ,'iconCls' => 'icon-user'
                 );

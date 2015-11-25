@@ -65,12 +65,12 @@ a.btn-task-complete { font-size: 12px; color: white; font-weight: bold}
 .taskview h2.completed  { color: #555; text-decoration: line-through }
 .taskview .path {color: #777 }
 
-.taskview .datetime {padding: 10px 0px; }
+.taskview .datetime {padding: 10px 0; }
 .taskview .info {color: #777; padding-bottom: 10px; border-bottom: 1px solid #EEE; }
 .taskview .props {width: 100%; margin-top: 10px; font: 13px/normal Arial,sans-serif; }
-.taskview .props td {padding: 5px 0px; vertical-align: top; }
+.taskview .props td {padding: 5px 0; vertical-align: top; }
 .taskview .props td.k {width: 1%; padding-right: 15px; color: #777; }
-.taskview .props .status1, .taskStatus1 {font-size: 10px; background-color: #B00; color: #FFF; padding: 1px 3px; margin: 1px 0px; display: inline-block; }
+.taskview .props .status1, .taskStatus1 {font-size: 10px; background-color: #B00; color: #FFF; padding: 1px 3px; margin: 1px 0; display: inline-block; }
 /*.taskview .props .status1, .taskStatus1 {background-color: #EE0000; color: white; padding: 2px 4px; font-weight: normal; }/**/
 .taskview .props .status3, .taskStatus3 {background-color: green; color: white; padding: 2px 4px; font-weight: normal; }
 .taskview .people {
@@ -82,10 +82,10 @@ a.btn-task-complete { font-size: 12px; color: white; font-weight: bold}
     border-spacing: 0;
 }
 
-.people td {vertical-align: top; padding: 5px 5px 5px 0px; }
+.people td {vertical-align: top; padding: 5px 5px 5px 0; }
 .people td.user {width: 1% !important; padding-right: 5px; }
 
-.taskview .people td {vertical-align: top; padding: 5px 5px 5px 0px; }
+.taskview .people td {vertical-align: top; padding: 5px 5px 5px 0; }
 .taskview .people .user {width: 1% !important; padding-right: 5px; }
 .taskview .people tr a.bt{display: none; margin-left: 5px; } .taskview .people tr:hover a.bt{display: inline; }
 

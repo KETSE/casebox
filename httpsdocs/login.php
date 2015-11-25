@@ -80,7 +80,7 @@ if (empty($_SESSION['check_TSV'])) {
                         </label>
                         <a style="margin-top: 30px;" class="pull-right" href="<?php echo '/'.$coreName; ?>/recover/forgot-password/"><?php echo L\get('ForgotPassword'); ?></a>
                         <?php
-                        
+
                             $Oauth2Providers = Config::get('oauth2_providers', null);
                             if (isset($Oauth2Providers) && in_array('google', explode(',', $Oauth2Providers))) {
                                 $googleProvider = Oauth2Utils::getGoogleProvider();
@@ -122,7 +122,7 @@ if (empty($_SESSION['check_TSV'])) {
 <?php echo Config::get('login_footer_text'); ?>
         </div>
 
-        <div class="footer" style="right: 0px;">
+        <div class="footer" style="right: 0;">
             <a href="https://www.casebox.org/">www.casebox.org</a> <span style="color: #AAA; padding-left: 2px; padding-right: 5px">&bull;</span>  <a href="http://forum.casebox.org/">Support forum</a>
         </div>
     </body>

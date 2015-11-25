@@ -134,7 +134,7 @@ foreach ($mailServers as $mailConf) {
         include $site_path.DIRECTORY_SEPARATOR.'config.php';
         include $site_path.DIRECTORY_SEPARATOR.'lib/language.php';
 
-        $templateIds = Templates::getIdsByType('comment');
+        $templateIds = DM\Templates::getIdsByType('comment');
 
         if (empty($templateIds)) {
             \CB\debug('receive comments cron: no comment template defined');
@@ -200,12 +200,10 @@ function processMails(&$mailServer)
 
     $dids = array (); //array for deleted ids
 
-    $i = 0;
     $newMails = 0;
 
     //iterate and process each mail
     foreach ($mailServer['mailbox'] as $k => $mail) {
-        $i++;
         try {
             if ($mail->hasFlag(\Zend\Mail\Storage::FLAG_SEEN) || empty($mail->subject)) {
                 continue;
@@ -259,6 +257,7 @@ function processMails(&$mailServer)
             $dids[] = $mailServer['mailbox']->getUniqueId($k);
         }
     }
+
     $rez .= (
         ($newMails > 0)
         ? ("\nnew mails: " . $newMails . "\n")

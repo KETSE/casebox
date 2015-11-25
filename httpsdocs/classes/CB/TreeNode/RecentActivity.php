@@ -42,19 +42,19 @@ class RecentActivity extends Base
         $ourPid = @$this->config['pid'];
 
         if ($this->lastNode->id == (String)$ourPid) {
-            $rez = $this->getRootNode();
-        } else {
-            switch ($this->lastNode->getClassDepth()) {
-                case 1:
-                    $rez = $this->getGroups();
-                    break;
+            return $this->getRootNode();
+        }
 
-                case 2:
-                default:
-                    $rez = $this->getGroupItems();
+        switch ($this->lastNode->getClassDepth()) {
+            case 1:
+                $rez = $this->getGroups();
+                break;
 
-                    break;
-            }
+            case 2:
+            default:
+                $rez = $this->getGroupItems();
+
+                break;
         }
 
         return $rez;

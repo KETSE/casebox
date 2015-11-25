@@ -11,18 +11,19 @@
 }
 
 .as-record > td {
-    padding: 5px 0;
+    padding: 10px 0;
 }
 
 .as-record .as-item {
     border: 1px solid;
     border-color: #e5e6e9 #dfe0e4 #d0d1d5;
-    border-radius: 3px;
+    /* border-radius: 3px; */
     background-color: #fff
 }
 
 .as-record .as-item .action{
     padding: 5px;
+    cursor: pointer;
 }
 .as-record .as-item .action-title{
     padding: 0;
@@ -36,7 +37,7 @@
     background-color: #efefef;
 }
 
-.activity-stream .x-item-selected .as-item{
+.activity-stream .x-item-selected{
     background-color: #dfe8f6;
 }
 
@@ -66,7 +67,7 @@
     text-decoration: line-through;
 }
 
-.as-item .comment-input .x-form-trigger{
+.action-comments .comment-input .x-form-trigger{
     width: 24px;
     background-position: 50% calc(100% - 10px);
     background-repeat: no-repeat;

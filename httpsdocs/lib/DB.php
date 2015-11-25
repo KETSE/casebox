@@ -132,8 +132,11 @@ if (!function_exists(__NAMESPACE__.'\dbQuery')) {
     {
         if (empty($dbh)) {
             $dbh = \CB\Cache::get('dbh');
-            if(empty($dbh)) {
-                trigger_error('Error Database connections:'.__DIR__.' '.__FILE__.'('.__LINE__.')',E_USER_ERROR);
+            if (empty($dbh)) {
+                trigger_error(
+                    'Error Database connections:'.__DIR__.' '.__FILE__.'('.__LINE__.')',
+                    E_USER_ERROR
+                );
             }
         }
 
@@ -147,14 +150,18 @@ if (!function_exists(__NAMESPACE__.'\dbQuery')) {
             if (!is_scalar($v) && !is_null($v)) {
                 throw new \Exception("param error: ".print_r($parameters, 1)."\n For SQL: $query", 1);
             }
+
             $parameters[$k] = is_int($v)
                 ? $v
                 : (
-                    (null === $v) ?
-                    'NULL' :
-                    "'" . $dbh->real_escape_string($v) . "'"
+                    (null === $v)
+                    ? 'NULL'
+                    : (
+                        ($v == 'CURRENT_TIMESTAMP')
+                        ? $v
+                        : "'" . $dbh->real_escape_string($v) . "'"
+                    )
                 );
-            // \CB\debug("parameters[$k]", $v, $parameters[$k], $dbh->ping(), $dbh->get_charset());
         }
 
         \CB\Cache::set('queryParameters', $parameters);

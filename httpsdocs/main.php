@@ -3,7 +3,7 @@ namespace CB;
 
 require_once 'init.php';
 
-//die('<pre>'.print_r($_SESSION,true).'</pre>');
+DataModel\GUID::checkTableExistance();
 
 $coreName = Config::get('core_name');
 
@@ -42,6 +42,7 @@ loadMinifyUris();
     <meta name="robots" content="noindex">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
 <?php
 
 echo '<link rel="stylesheet" type="text/css" href="/libx/ext/packages/ext-theme-' . $theme . '/build/resources/ext-theme-' . $theme . '-all' . $rtl . '.css" />
@@ -129,6 +130,13 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 }
 </style>
 
+<?php
+if (Config::get('geoMapping', false)) {
+  echo '<link rel="stylesheet" href="/libx/leaflet/leaflet.css" />
+    <script src="/libx/leaflet/leaflet.js"></script>';
+}
+?>
+
 <script type="text/javascript">
     window.name = '<?php
         echo substr(str_shuffle(MD5(tempnam(sys_get_temp_dir(), 'pre') . microtime())), 0, rand(15, 50));
@@ -183,6 +191,12 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
         url: window.location.protocol + "//" + window.location.host + "/libx/extjs-ace/Component.js"
     };
     document.write('<script type="text/javascript" src="' + bravojs.url + '"><' + '/script>');
+
+    //move liflet object to LL, because we assign our translations in L object below
+    if (typeof(L) !== 'undefined') {
+      LL = L;
+      delete L;
+    }
 </script>
 
 <?php

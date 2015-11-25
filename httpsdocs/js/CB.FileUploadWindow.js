@@ -29,12 +29,15 @@ Ext.define('CB.FilesConfirmationWindow', {
 
         var buttons = [];
 
-        if(this.data.allow_new_version) buttons.push({
-            text: L.NewVersion
-            ,name: 'newversion'
-            ,scope: this
-            ,handler: this.onButtonClick
-        });
+        if(this.data.allow_new_version) {
+            buttons.push({
+                text: L.NewVersion
+                ,name: 'newversion'
+                ,scope: this
+                ,handler: this.onButtonClick
+            });
+        }
+
         buttons.push({
             text: L.Replace
             ,name: 'replace'
@@ -48,14 +51,19 @@ Ext.define('CB.FilesConfirmationWindow', {
             ,scope: this
             ,handler: this.onButtonClick
         });
-        if(!Ext.isEmpty(this.data.suggestedFilename)) buttons.push(this.renameButton);
 
-        if(this.data.autorenameButton) buttons.push({
-            text: L.AutoRename
-            ,name: 'autorename'
-            ,scope: this
-            ,handler: this.onButtonClick
-        });
+        if(!Ext.isEmpty(this.data.suggestedFilename)) {
+            buttons.push(this.renameButton);
+        }
+
+        if(this.data.autorenameButton) {
+            buttons.push({
+                text: L.AutoRename
+                ,name: 'autorename'
+                ,scope: this
+                ,handler: this.onButtonClick
+            });
+        }
 
         buttons.push({
             text: Ext.MessageBox.buttonText.cancel
@@ -63,21 +71,26 @@ Ext.define('CB.FilesConfirmationWindow', {
             ,scope: this
             ,handler: this.onButtonClick
         });
-        items = [
+
+        var items = [
             {xtype: 'label', text: this.data.msg}
         ];
-        if(this.data.single === false) items.push({
-            xtype: 'checkbox'
-            ,boxLabel: L.ApplyForAll
-            ,style: 'margin-top: 25px'
-            ,listeners:{
-                check: function(cb, checked){
-                    this.forAll = checked;
-                    this.renameButton.setDisabled(checked);
+
+        if(this.data.single === false) {
+            items.push({
+                xtype: 'checkbox'
+                ,boxLabel: L.ApplyForAll
+                ,style: 'margin-top: 25px'
+                ,listeners:{
+                    check: function(cb, checked){
+                        this.forAll = checked;
+                        this.renameButton.setDisabled(checked);
+                    }
+                    ,scope: this
                 }
-                ,scope: this
-            }
-        });
+            });
+        }
+
         Ext.apply(this, {
             items: items
             ,buttons: buttons

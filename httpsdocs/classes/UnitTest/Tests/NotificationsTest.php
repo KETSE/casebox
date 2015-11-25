@@ -136,8 +136,11 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         //code for 3 and more users notifications grouping
         //and check root notifications with each comment
         for ($i = 0; $i < 4; $i++) {
-            $_SESSION['user']['id'] = $this->userIds[$i];
+            
+            //$_SESSION['user']['id'] = $this->userIds[$i];
+            \CB\User::setAsLoged($this->userIds[$i], $_SESSION['key']);
             $commentData['data']['_title'] = 'Comment from user #' . $i .'.';
+         
             $this->createObject($commentData);
 
             $this->assertTrue(
@@ -153,7 +156,8 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
             );
         }
 
-        $_SESSION['user']['id'] = $rootUserId;
+        // $_SESSION['user']['id'] = $rootUserId;
+        \CB\User::setAsLoged($rootUserId, $_SESSION['key']);
 
         /*-------- answer back to previous comment with root and see if notifications are created */
         $commentData['data']['_title'] = 'Reply to Hellow comment.';
@@ -274,7 +278,6 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
     public function createObject($data)
     {
         $class = new \CB\Objects();
-
         $data = $class->create($data);
 
         return $data['data']['id'];
@@ -323,6 +326,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         //restore previous user id
         //$_SESSION['user']['id'] = $currentUser;
         \CB\User::setAsLoged($currentUser, $_SESSION['key']);
+
         return $rez;
     }
 
@@ -347,6 +351,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         $countResult = $api->getNew(array());
         if (($countResult['success'] !== true) || empty($countResult['data'])) {
             trigger_error(print_r($countResult,true),E_USER_ERROR);
+
             return $rez;
         }
 
@@ -363,9 +368,10 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         //restore previous user id
         //$_SESSION['user']['id'] = $currentUser;
          \CB\User::setAsLoged($currentUser, $_SESSION['key']);
-        if(!$rez) {
+        if (!$rez) {
             trigger_error(print_r($n,true),E_USER_ERROR);
         }
+
         return $rez;
     }
 

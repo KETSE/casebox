@@ -1,6 +1,7 @@
 <?php
-
 namespace UnitTest;
+
+use CB\Util;
 
 /**
  * Description of ObjectsTest
@@ -78,42 +79,49 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider templatesProvider
      */
-    public function testTemplateCRUD($data_template)
+    public function testTemplateCRUD($td)
     {
 
         $obj = new \CB\Objects\Template();
 
         // first create object
-        $data_template['id'] = $obj->create($data_template);
+        $td['id'] = $obj->create($td);
 
-        $this->assertTrue($data_template['id'] > 0, ' Error on create Template');
+        $this->assertTrue($td['id'] > 0, ' Error on create Template');
 
         // second read created object
-        $obj->load($data_template['id']);
-        $read_data_template = $obj->getData();
+        $obj->load($td['id']);
+        $read_td = $obj->getData();
+
+        $vtd = $td;
+        $vtd['cfg'] = Util\toJsonArray($td['cfg']);
+
         $this->assertArraySubset(
-            $data_template,
-            $read_data_template,
+            $vtd,
+            $read_td,
             false,
-            ' Error read template data '.print_r($read_data_template, true)
+            ' Error read template data ' . print_r($read_td, true)
         );
 
         // third update created object
 
-        $data_template['visible'] = 0;
-        $data_template['order'] = 2;
-        $data_template['iconCls'] = '';
+        $td['visible'] = 0;
+        $td['order'] = 2;
+        $td['iconCls'] = '';
 
-        $obj->update($data_template);
+        $obj->update($td);
 
-        $obj->load($data_template['id']);
-        $read_data_template = $obj->getData();
+        $obj->load($td['id']);
+        $read_td = $obj->getData();
+
+        $vtd = $td;
+        $vtd['cfg'] = Util\toJsonArray($td['cfg']);
 
         $this->assertArraySubset(
-            $data_template,
-            $read_data_template,
+            $vtd,
+            $read_td,
             false,
-            ' error on updated template data '.print_r($read_data_template, true)
+            ' error on updated template data '.print_r($read_td, true)
         );
     }
 
@@ -151,10 +159,10 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
                 "type" => "object",
                 "name" => "Test fields CRUD",
                 "title" => "Test fields CRUD",
-                'l1' => "Test fields CRUD",
-                'l2' => "Test fields CRUD",
-                'l3' => "Test fields CRUD",
-                'l4' => "Test fields CRUD",
+                // 'l1' => "Test fields CRUD",
+                // 'l2' => "Test fields CRUD",
+                // 'l3' => "Test fields CRUD",
+                // 'l4' => "Test fields CRUD",
                 'order' => '1',
                 'visible' => '1',
                 'iconCls' => "icon-bell",
@@ -186,7 +194,7 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-  /*  public function testGetPluginsData()
+    /*  public function testGetPluginsData()
     {
         $result = Helpers::getIncludeContents(
             \CB\DOC_ROOT.'remote/router.php',

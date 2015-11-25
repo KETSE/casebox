@@ -78,6 +78,7 @@ Ext.define('CB.browser.ViewContainer', {
                 ,scope: this
                 ,handler: this.onDownloadClick
             })
+
             ,contextPreview: new Ext.Action({
                 text: L.Preview
                 ,hidden: true
@@ -115,15 +116,6 @@ Ext.define('CB.browser.ViewContainer', {
                 ,scope: this
                 ,disabled: true
                 ,handler: this.onPasteShortcutClick
-            })
-
-            ,takeOwnership: new Ext.Action({
-                text: L.TakeOwnership
-                ,itemId: 'takeownership'
-                ,iconCls: 'icon-user-gray'
-                ,disabled: true
-                ,scope: this
-                ,handler: this.onTakeOwnershipClick
             })
 
             ,'delete': new Ext.Action({
@@ -307,8 +299,6 @@ Ext.define('CB.browser.ViewContainer', {
                     ,this.actions.copy
                     ,this.actions.paste
                     ,this.actions.pasteShortcut
-                    ,'-'
-                    ,this.actions.takeOwnership
                 ]
             })
             ,new Ext.Button(this.actions.preview)
@@ -473,6 +463,13 @@ Ext.define('CB.browser.ViewContainer', {
                     ,showObjectPropertiesPanel: true
                     ,getProperty: getPropertyHandler
                 })
+                ,new CB.browser.view.Map({
+                    border: false
+                    ,refOwner: this
+                    ,store: this.store
+                    ,showObjectPropertiesPanel: false
+                    ,getProperty: getPropertyHandler
+                })
             ]
             ,listeners: {
                 scope: this
@@ -574,10 +571,14 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,getProperty: function(propertyName){
-        if(propertyName == 'nid') propertyName = 'id';
+        if(propertyName == 'nid') {
+            propertyName = 'id';
+        }
+
         if(this.folderProperties && this.folderProperties[propertyName]) {
             return this.folderProperties[propertyName];
         }
+
         return null;
     }
 
@@ -703,6 +704,7 @@ Ext.define('CB.browser.ViewContainer', {
 
         if(Ext.isNumeric(indexOrName)) {
             rez = this.cardContainer.items.getAt(indexOrName);
+
         } else {
             var viewName = 'CBBrowserView' + Ext.util.Format.capitalize(indexOrName);
 
@@ -723,24 +725,22 @@ Ext.define('CB.browser.ViewContainer', {
                 }
 
                 rez = layout.setActiveItem(rez);
+
+                //check if need to show objectPanel for selected view
+                var showObjPanel = (
+                        rez &&
+                        (rez.showObjectPropertiesPanel === true)
+                    )
+                    ,showPreviewButton = showObjPanel && (this.objectPanel.getCollapsed() !== false);
+
+                this.actions.preview.setDisabled(!showPreviewButton);
+                this.actions.preview.setHidden(!showPreviewButton);
+                this.objectPanel.setVisible(showObjPanel);
+
+                App.mainViewPort.onToggleFilterPanelClick({
+                    pressed: (rez.showFilterPanel === true)
+                });
             }
-
-            //check if need to show objectPanel for selected view
-            var showObjPanel = (
-                    rez &&
-                    (rez.showObjectPropertiesPanel === true)
-                )
-                ,showFilterPanel = (
-                    rez &&
-                    (rez.showFilterPanel === true)
-                )
-                ,showPreviewButton = showObjPanel && (this.objectPanel.getCollapsed() !== false);
-
-            this.actions.preview.setDisabled(!showPreviewButton);
-            this.actions.preview.setHidden(!showPreviewButton);
-            this.objectPanel.setVisible(showObjPanel);
-
-            App.mainViewPort.onToggleFilterPanelClick({pressed: showFilterPanel});
         }
 
         return rez;
@@ -829,8 +829,8 @@ Ext.define('CB.browser.ViewContainer', {
         Ext.apply(options, vp);
 
         //workaround to set from param for search by template
-        if(this.requestParams && this.requestParams.from && (this.requestParams.from != 'tree')) {
-            options.from = this.requestParams.from;
+        if(this.params && this.params.from && (this.params.from != 'tree')) {
+            options.from = this.params.from;
         }
 
 
@@ -887,35 +887,81 @@ Ext.define('CB.browser.ViewContainer', {
             }
             ,this
         );
-
-        this.requestParams = {};
     }
 
     ,sameParams: function(params1, params2){
-        if(Ext.isEmpty(params1) && Ext.isEmpty(params2)) return true;
+        if(Ext.isEmpty(params1) && Ext.isEmpty(params2)) {
+            return true;
+        }
 
-        if(Ext.isEmpty(params1)) params1 = {};
-        if(Ext.isEmpty(params2)) params2 = {};
-        path1 = Ext.valueFrom(params1.path, '');
-        path2 = Ext.valueFrom(params2.path, '');
-        while( (path1.length > 0) && (path1[0] == '/') ) path1 = path1.substr(1);
-        while( (path2.length > 0) && (path2[0] == '/') ) path2 = path2.substr(1);
-        if ((params1.path != params2.path) || !Ext.isDefined(params1.path) ) return false;
-        if ((Ext.Number.from(params1.start, 0) != Ext.Number.from(params2.start, 0))) return false;
-        if ((Ext.Number.from(params1.page, 0) != Ext.Number.from(params2.page, 0))) return false;
-        if ((!Ext.isEmpty(params1.descendants) || !Ext.isEmpty(params2.descendants) ) && (params1.descendants != params2.descendants) ) return false;
-        if ((!Ext.isEmpty(params1.query) || !Ext.isEmpty(params2.query) ) && (params1.query != params2.query) ) return false;
-        if ((!Ext.isEmpty(params1.filters) || !Ext.isEmpty(params2.filters) ) && (params1.filters != params2.filters) ) return false;
-        if ((!Ext.isEmpty(params1.dateStart) || !Ext.isEmpty(params2.dateStart) ) && (params1.dateStart != params2.dateStart) ) return false;
-        if ((!Ext.isEmpty(params1.dateEnd) || !Ext.isEmpty(params2.dateEnd) ) && (params1.dateEnd != params2.dateEnd) ) return false;
-        if ((!Ext.isEmpty(params1.view) || !Ext.isEmpty(params2.view) ) && (params1.view != params2.view) ) return false;
-        if ((!Ext.isEmpty(params1.search) || !Ext.isEmpty(params2.search) ) && (Ext.encode(params1.search) != Ext.encode(params2.search)) ) return false;
+        if(Ext.isEmpty(params1)) {
+            params1 = {};
+        }
+
+        if(Ext.isEmpty(params2)) {
+            params2 = {};
+        }
+
+        var path1 = Ext.valueFrom(params1.path, '')
+            ,path2 = Ext.valueFrom(params2.path, '');
+
+        while ((path1.length > 0) && (path1[0] == '/')) {
+            path1 = path1.substr(1);
+        }
+
+        while ((path2.length > 0) && (path2[0] == '/')) {
+            path2 = path2.substr(1);
+        }
+
+        if ((params1.path != params2.path) || !Ext.isDefined(params1.path) ) {
+            return false;
+        }
+
+        if ((Ext.Number.from(params1.start, 0) != Ext.Number.from(params2.start, 0))) {
+            return false;
+        }
+
+        if ((Ext.Number.from(params1.page, 0) != Ext.Number.from(params2.page, 0))) {
+            return false;
+        }
+
+        if ((!Ext.isEmpty(params1.descendants) || !Ext.isEmpty(params2.descendants)) && (params1.descendants != params2.descendants)) {
+            return false;
+        }
+
+        if ((!Ext.isEmpty(params1.query) || !Ext.isEmpty(params2.query)) && (params1.query != params2.query)) {
+            return false;
+        }
+
+        if ((!Ext.isEmpty(params1.filters) || !Ext.isEmpty(params2.filters)) && (params1.filters != params2.filters)) {
+            return false;
+        }
+
+        if ((!Ext.isEmpty(params1.dateStart) || !Ext.isEmpty(params2.dateStart)) && (params1.dateStart != params2.dateStart)) {
+            return false;
+        }
+
+        if ((!Ext.isEmpty(params1.dateEnd) || !Ext.isEmpty(params2.dateEnd)) && (params1.dateEnd != params2.dateEnd)) {
+            return false;
+        }
+
+        if ((!Ext.isEmpty(params1.view) || !Ext.isEmpty(params2.view)) && (params1.view != params2.view)) {
+            return false;
+        }
+
+        if ((!Ext.isEmpty(params1.search) || !Ext.isEmpty(params2.search)) && (Ext.encode(params1.search) != Ext.encode(params2.search))) {
+            return false;
+        }
+
         return true;
     }
 
     // fired by internal view
     ,changeParams: function(params, e){
-        if(e && e.stopPropagation) e.stopPropagation();
+        if(e && e.stopPropagation) {
+            e.stopPropagation();
+        }
+
         this.setParams(params);
     }
 
@@ -979,7 +1025,9 @@ Ext.define('CB.browser.ViewContainer', {
             return;
         }
 
-        this.params = Ext.apply({}, this.requestParams);
+        this.params = Ext.clone(this.requestParams);
+
+        delete this.requestParams;
 
         delete this.params.forceLoad;
 
@@ -1037,7 +1085,6 @@ Ext.define('CB.browser.ViewContainer', {
             this.actions.edit.setDisabled(true);
             this.actions.cut.setDisabled(true);
             this.actions.copy.setDisabled(true);
-            this.actions.takeOwnership.setDisabled(true);
 
             this.actions.download.setDisabled(true);
             this.actions.download.hide();
@@ -1059,6 +1106,7 @@ Ext.define('CB.browser.ViewContainer', {
             this.actions.restore.setDisabled(true);
             this.actions.restore.hide();
             this.actions.permissions.setDisabled(isNaN(fp.id));
+
         } else {
             var firstObjId = Ext.valueFrom(selection[0].nid, selection[0].id)
                 ,firstObjType = CB.DB.templates.getType(selection[0].template_id)
@@ -1128,6 +1176,19 @@ Ext.define('CB.browser.ViewContainer', {
         return this.getActiveView().currentSelection;
     }
 
+    ,getSelectionIds: function() {
+        var rez = []
+            ,selection = this.getSelection();
+
+        if(!Ext.isEmpty(selection)) {
+            for (var i = 0; i < selection.length; i++) {
+                rez.push(selection[i].nid);
+            }
+        }
+
+        return rez;
+    }
+
     ,onObjectsSelectionChange: function(objectsDataArray){
         this.getActiveView().currentSelection = objectsDataArray;
         this.updateToolbarButtons();
@@ -1189,6 +1250,9 @@ Ext.define('CB.browser.ViewContainer', {
         }
         path += data.nid;
 
+        //targetPath set by Favorites class
+        path = Ext.valueFrom(objectData.targetPath, path);
+
         this.changeSomeParams({
             path: path
             ,query: null
@@ -1203,6 +1267,27 @@ Ext.define('CB.browser.ViewContainer', {
 
     ,onSearchQuery: function(query, e){
         this.changeSomeParams({query: query});
+    }
+
+    ,onSetOwnerClick: function(b, e) {
+        var ids = this.getSelectionIds();
+
+        if(!Ext.isEmpty(ids)) {
+            CB_Objects.setOwnership(
+                {
+                    ids: ids
+                    ,userId: b.userId
+                }
+                ,this.processSetOwnership
+                ,this
+            );
+        }
+    }
+
+    ,processSetOwnership: function(r, e) {
+        if(r && r.success) {
+            this.onReloadClick();
+        }
     }
 
     ,onCreateObjectClick: function(b, e) {
@@ -1238,15 +1323,11 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onDownloadClick: function(b, e) {
-        var ids = [];
-        var selection = this.getSelection();
-        if(Ext.isEmpty(selection)) {
-            return;
+        var ids = this.getSelectionIds();
+
+        if(!Ext.isEmpty(ids)) {
+            this.fireEvent('filedownload', ids, false, e);
         }
-        for (var i = 0; i < selection.length; i++) {
-            ids.push(selection[i].nid);
-        }
-        this.fireEvent('filedownload', ids, false, e);
     }
 
     ,onContextPreviewClick: function(b, e) {
@@ -1291,20 +1372,13 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onRestoreClick: function() {
-        var s = this.getSelection();
-        var ids = [];
+        var ids = this.getSelectionIds();
 
-        if(Ext.isEmpty(s)) {
-            return;
+        if(!Ext.isEmpty(ids)) {
+            this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
+
+            CB_Browser.restore(ids, this.processRestore, this);
         }
-
-        for (var i = 0; i < s.length; i++) {
-            ids.push(Ext.valueFrom(s[i].nid, s[i].id));
-        }
-
-        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-
-        CB_Browser.restore(ids, this.processRestore, this);
     }
 
     ,processRestore: function(r, e) {
@@ -1331,13 +1405,13 @@ Ext.define('CB.browser.ViewContainer', {
             return;
         }
 
-        var selection = this.getSelection();
+        var rez = []
+            ,selection = this.getSelection();
 
         if(Ext.isEmpty(selection)) {
             return;
         }
 
-        var rez = [];
 
         for (var i = 0; i < selection.length; i++) {
             rez.push({
@@ -1348,6 +1422,7 @@ Ext.define('CB.browser.ViewContainer', {
                 ,iconCls: selection[i].iconCls
             });
         }
+
         App.clipboard.set(rez, 'copy');
     }
 
@@ -1373,8 +1448,8 @@ Ext.define('CB.browser.ViewContainer', {
         var selection = this.getSelection()
             ,id = Ext.isEmpty(selection)
                 ? this.folderProperties.id
-
                 : Ext.valueFrom(selection[0].nid, selection[0].id);
+
         App.mainViewPort.openPermissions(id);
     }
 
@@ -1462,6 +1537,15 @@ Ext.define('CB.browser.ViewContainer', {
                 ,menu:[]
             });
 
+            this.setOwnerItem = new Ext.menu.Item({
+                text: L.SetOwner
+                ,hideOnClick: false
+                ,menu: getMenuUserItems(
+                    this.onSetOwnerClick
+                    ,this
+                )
+            });
+
             this.createItemSeparator = new Ext.menu.Separator();
 
             this.contextMenu = new Ext.menu.Menu({
@@ -1482,6 +1566,7 @@ Ext.define('CB.browser.ViewContainer', {
                     ,this.actions.unstar
                     ,this.actions.webdavlink
                     ,this.actions.permalink
+                    ,this.setOwnerItem
                     ,'-'
                     ,this.createItem
                     ,this.createItemSeparator
@@ -1491,12 +1576,14 @@ Ext.define('CB.browser.ViewContainer', {
         }
 
         var s = this.getSelection()
-            ,visible = Ext.isEmpty(s);
+            ,hasSelection = !Ext.isEmpty(s);
 
-        this.createItem.setHidden(!visible);
-        this.createItemSeparator.setHidden(!visible);
+        this.setOwnerItem.setHidden(!hasSelection);
 
-        if(visible) {
+        this.createItem.setHidden(hasSelection);
+        this.createItemSeparator.setHidden(hasSelection);
+
+        if(!hasSelection) {
             updateMenu(
                 this.createItem
                 ,this.folderProperties.menu

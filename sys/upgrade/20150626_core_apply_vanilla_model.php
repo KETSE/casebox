@@ -11,7 +11,7 @@ namespace CB;
  *                 php core_apply_vanilla_model.php -c test_core_name -s /tmp/custom_core_sql_dump.sql
  */
 
-include 'core_update_init.php';
+include 'core_init.php';
 
 $vanilla = new Import\VanillaModel($importConfig);
 

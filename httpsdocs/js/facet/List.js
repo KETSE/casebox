@@ -137,16 +137,19 @@ Ext.define('CB.facet.List', {
     }
 
     ,getFacetData: function(fid, serverData, options){
-        var data = [];
-        var values = [];
-        var facetField = Ext.valueFrom(this.f, fid);
+        var data = []
+            ,values = []
+            ,facetField = Ext.valueFrom(this.f, fid);
 
         if(options && options.filters && options.filters[fid]){
             Ext.each(
                 options.filters[fid]
                 ,function(f){
-                    if(!Ext.isEmpty(f.f)) facetField = f.f;
-                    for(i = 0; i < f.values.length; i++) {
+                    if(!Ext.isEmpty(f.f)) {
+                        facetField = f.f;
+                    }
+
+                    for(var i = 0; i < f.values.length; i++) {
                         values.push(f.values[i]);
                     }
                 }
@@ -240,11 +243,12 @@ Ext.define('CB.facet.List', {
             }
         } while (si > -1);
 
-        if(!Ext.isEmpty(this.serverValues))
-        for (var i = 0; i < this.serverValues.length; i++) {
-            si = this.store.findExact('id', this.serverValues[i]);
-            if(si < 0) {
-                r.push(this.serverValues[i]);
+        if(!Ext.isEmpty(this.serverValues)) {
+            for (var i = 0; i < this.serverValues.length; i++) {
+                si = this.store.findExact('id', this.serverValues[i]);
+                if(si < 0) {
+                    r.push(this.serverValues[i]);
+                }
             }
         }
 

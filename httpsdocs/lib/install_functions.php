@@ -57,7 +57,7 @@ function getDefaultConfigValues()
 /**
  * get question / phrase to be displayed for a given paramName
  */
-function getParamPhrase($paramName)
+function getParamPhrase($paramName = null )
 {
     $phrases = array(
         'apache_user' => 'Specify apache user {default}:' . "\n"
@@ -115,10 +115,12 @@ function getParamPhrase($paramName)
         ,'overwrite_existing_core_db' => "Core database exists. Would you like to backup it and overwrite with dump from current installation [Y/n]: "
         ,'solr_create_cores' => "solr aucreate cores ?"
     );
-
-    return empty($phrases[$paramName])
-        ? $paramName
-        : $phrases[$paramName];
+    
+    if (empty($paramName)) {
+            return $phrases;
+        } else {
+            return empty($phrases[$paramName]) ? $paramName : $phrases[$paramName];
+        }
 }
 
 /**
@@ -149,7 +151,7 @@ function setOwnershipForApacheUser(&$cfg)
     }
 
     return ;
-    
+
     $files = array(
         \CB\LOGS_DIR,
         \CB\DATA_DIR,
@@ -227,7 +229,7 @@ function createSolrConfigsetsSymlinks(&$cfg)
             $r = $r && symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $logLinkName);
         }
 
-        if (\CB\Util\getOS() == "LINUX" && \CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') ) {
+        if (\CB\Util\getOS() == "LINUX" && \CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
                 shell_exec("chown -R ".fileowner($CBCSPath).":".filegroup($CBCSPath)." ".$CBCSPath);
         }
 
@@ -239,7 +241,7 @@ function createSolrConfigsetsSymlinks(&$cfg)
             // symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR. 'conf', $logCore . DIRECTORY_SEPARATOR . 'conf' );
         }
 
-        if (\CB\Util\getOS() == "LINUX" && \CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') ) {
+        if (\CB\Util\getOS() == "LINUX" && \CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
                 // set owner of core folder for solr
                 shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$logCore);
         }
@@ -265,9 +267,9 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
     $askReindex   = true;
     $fullCoreName = $cfg['prefix'].'_'.$coreName;
 
-       $status =  json_decode(file_get_contents('http://' . $solrHost. ':' . $solrPort . '/solr/admin/cores?action=STATUS&wt=json'),true);
+       $status =  json_decode(file_get_contents('http://' . $solrHost. ':' . $solrPort . '/solr/admin/cores?action=STATUS&wt=json'), true);
 
-    if (isset($status['status']) && isset($status['status'][$fullCoreName]) && !\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') ) {
+    if (isset($status['status']) && isset($status['status'][$fullCoreName]) && !\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
         return true;
     }
 
@@ -350,8 +352,8 @@ function solrUnloadCore($host, $port, $coreName)
 function solrCreateCore($host, $port, $coreName, $cfg = array())
 {
     $rez = true;
-   
-    if ( isset($cfg['solr_home']) ) {
+
+    if (isset($cfg['solr_home'])) {
 
         $CB_CORE_SOLR_PATH = $cfg['solr_home'].$coreName;
 
@@ -655,7 +657,7 @@ function defineBackupDir(&$cfg)
     }
 
     $dir = empty($cfg['backup_dir'])
-        ? \CB\APP_DIR . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR
+        ? \CB\APP_DIR . 'backup' . DIRECTORY_SEPARATOR
         : $cfg['backup_dir'];
 
     \CB\Cache::set('RUN_INSTALL_BACKUP_DIR', $dir);
@@ -725,5 +727,112 @@ function showMessage($msg = 'OK', $color = 32)
 
 function showError($msg = "ERROR")
 {
-    displayMessage($msg, 31);
+    showMessage($msg, 31);
+}
+
+/**
+ * 
+ * @return array 
+ */
+function cliGetAllOptions()
+{
+    
+    $longopts = array_keys(\CB\Install\getParamPhrase());
+     
+    foreach ($longopts as &$optName) {
+        $optName .= '::';
+    }
+    
+    array_push($longopts, 'config::');
+    array_push($longopts, 'file:');
+    
+
+    
+    $cliOptions = getopt('f:',$longopts);
+    
+        return $cliOptions;
+    
+}
+
+/**
+ * 
+ * @param array $cliOptions
+ */
+function cliGetConfigFile($cliOptions = null)
+{
+
+    $configFile = null;
+    $keyFiles = array('f', 'file', 'config');
+    if (isset($cliOptions)) {
+        if (\CB\Util\checkKeyExists( $keyFiles, $cliOptions )) {
+            $keys = array_intersect(array_keys($cliOptions), $keyFiles);
+            foreach ($keys as $k) {
+                if (isset($cliOptions[$k]) && trim($cliOptions[$k])) {
+                    $configFile = $cliOptions[$k];
+                }
+            }
+        }
+    }
+    return $configFile;
+}
+
+/**
+ * load config from CLI parameters and set respective FLAGS fro install
+ * @param array $options
+ */
+function cliLoadConfig($options = null)
+{
+
+    $cfg = null;
+
+    if (empty($options)) {
+        $options = \CB\Install\cliGetAllOptions();
+    }
+
+    $configFile = \CB\Install\cliGetConfigFile($options);
+    // echo $configFile.'!!!!!'.PHP_EOL;
+
+    if (!empty($configFile) && file_exists($configFile)) {
+        $cfg = \CB\Config::loadConfigFile($configFile);
+        if(count($cfg)) {
+          //  echo "\CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);";
+          \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
+        }
+        \CB\Cache::set('RUN_SETUP_CFG', $cfg);
+        if (isset($cfg['overwrite_create_backups']) && $cfg['overwrite_create_backups'] == 'n') {
+            \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', false);
+        } else {
+            \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', true);
+        }
+    } else {
+        \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', true);
+    }
+
+    //define working mode
+    if (!empty($cfg)) {
+        // define('CB\\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')', false);
+        \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
+       // $cfg = $cfg + $options['config'];
+    } else {
+        \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
+    }
+
+    // initialize default values in cofig if not detected
+
+    $defaultValues = getDefaultConfigValues();
+    
+        if(is_array($cfg)) {
+           $cfg = $cfg + $defaultValues;
+       } else {
+            $cfg = $defaultValues;
+       }
+
+       if (\CB\Util\checkKeyExists(  array_keys($options), \CB\Install\getParamPhrase()) ) {
+            foreach ($options as $OptKey => $OptValue) {
+                $cfg[$OptKey] = $OptValue;
+            }
+        }
+        
+       
+    return $cfg;
 }

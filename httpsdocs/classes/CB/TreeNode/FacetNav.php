@@ -145,7 +145,8 @@ class FacetNav extends Query
                 }
 
                 if (!empty($this->config['show_count']) && !empty($count)) {
-                    $name .= ' (' . $count . ')';
+                    // $name .= ' (' . $count . ')';
+                    $name .= ' <span style="color: #AAA; font-size: 12px">' . $count . '</span>';
 
                 }
 
@@ -153,6 +154,7 @@ class FacetNav extends Query
                     'name' => $name
                     ,'id' => $this->getId($k)
                     ,'iconCls' => 'icon-folder'
+                    // ,'iconCls' => 'icon-none'
                 );
 
                 if ($showChilds) {

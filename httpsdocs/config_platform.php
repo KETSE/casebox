@@ -125,7 +125,7 @@ function detectCore()
 {
     $rez = false;
 
-   if (isset($_GET['core'])) {
+    if (isset($_GET['core'])) {
         $rez = preg_replace('/[^\w]\-_/i', '', $_GET['core']);
     } else {
         $arr = explode('.', $_SERVER['SERVER_NAME']);
@@ -266,19 +266,21 @@ function raiseErrorIf($result, $translationIndex = 'Error')
 }
 
 /**
- * return session name, 
+ * return session name,
  * for returned value $SESSION_NAME in $_COOKE[$SESION_NAME] contain id of session
  * @return string
  */
-function getSessionName()
+function setSessionName()
 {
     $SESSION_NAME = str_replace(
-            array(
+        array(
             '.casebox.org'
             , '.'
             , '-'
-            ), '', $_SERVER['SERVER_NAME']
-        ) . \CB\Config::get('core_name');
+        ),
+        '',
+        $_SERVER['SERVER_NAME']
+    ) . \CB\Config::get('core_name');
 
     return $SESSION_NAME;
 }

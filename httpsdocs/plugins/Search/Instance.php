@@ -1,13 +1,8 @@
 <?php
 namespace Search;
 
-class Instance extends CB\Plugin
+class Instance
 {
-    public function install()
-    {
-
-    }
-
     public function init()
     {
     }

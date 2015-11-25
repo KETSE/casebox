@@ -70,7 +70,7 @@ if [ $coverage ];
 
     service solr stop
 
-        export SOLR_VERSION="5.1.0"
+        export SOLR_VERSION="5.2.0"
         bash $DIR/server/solr/solr5-install.sh
 
        export SOLR_CORENAME="cbtest_log"
@@ -84,16 +84,17 @@ if [ $coverage ];
       cp $DIR/../httpsdocs/config.ini $DIR/tmp/config.ini.old
 
         php $DIR/auto_install.php
-        $DIR/../vendor/bin/phpunit --colors --verbose --debug --bootstrap $DIR/init.php $DIR/../httpsdocs/classes/UnitTest
+        $DIR/../vendor/bin/phpunit --colors --configuration $DIR/phpunit-travis.xml --verbose --debug --bootstrap $DIR/init.php
 
-      bash $DIR/server/solr/solr5-stop.sh
+     bash $DIR/server/solr/solr5-stop.sh
 
-     echo "remove solr directory"
 
-     rm -rf "${DIR}/server/solr/solr-${SOLR_VERSION}"
+    sleep 5
+    echo "remove solr directory"
+    rm -rf "${DIR}/server/solr/solr-${SOLR_VERSION}"
 
       cp $DIR/tmp/config.ini.old $DIR/../httpsdocs/config.ini 
 
-   service solr start
+   # service solr start
 
     fi

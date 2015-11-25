@@ -1,12 +1,10 @@
-<?php
-namespace UnitTest;
+<?php namespace UnitTest;
 
 /**
  * Description of InstallTest
  *
  * @author ghindows
  */
-
 class InstallTest extends \PHPUnit_Framework_TestCase
 {
 
@@ -15,56 +13,69 @@ class InstallTest extends \PHPUnit_Framework_TestCase
         $cfg = \CB\Config::loadConfigFile(\CB_DOC_ROOT . 'config.ini');
 
         $this->assertEquals(
-            CB_ROOT_PATH . 'backup' . DIRECTORY_SEPARATOR,
-            \CB\Install\defineBackupDir($cfg)
+            CB_ROOT_PATH . 'backup' . DIRECTORY_SEPARATOR, \CB\Install\defineBackupDir($cfg)
         );
-
     }
 
-   /* public function testCreateSolrConfigsetsSymlinks()
-    {
-        $cfg = \CB\Config::loadConfigFile(\CB_DOC_ROOT . 'config.ini');
-
-        $result = \CB\Install\createSolrConfigsetsSymlinks($cfg);
-
-        $this->assertTrue($result['success'], ' creates symplink return errors');
-
-        $this->assertTrue(
-            file_exists($result['links']['log']),
-            'solr logs configset symlink not created : ' . $result['links']['log']
-        );
-
-        $this->assertTrue(
-            file_exists($result['links']['default']),
-            'solr default configset symlink not created : ' .$result['links']['default']
-        );
-    } */
-
-    public function _testReindexSolr()
+    public function testReindexSolr()
     {
         /*
-        $argv[1] = '-c';
-        $argv[2] = 'test';
-        $argv[3] = '-a';
-        $argv[4] = '-l'; */
+          $argv[1] = '-c';
+          $argv[2] = 'test';
+          $argv[3] = '-a';
+          $argv[4] = '-l'; */
 
-        $options =  array(
-
+        $options = array(
         );
-        $content = Helpers::getIncludeContents(\CB\BIN_DIR . 'solr_reindex_core.php', $options);
+        $content = Helpers::getIncludeContents(\CB\BIN_DIR . 'solr_reindex_core.php', ['options' => $options]);
 
         // $this->assertEquals('no core specified or invalid options set.', $content);
-        $this->assertEquals('Core not found or inactive.', trim($content) );
+        $content = array_filter(explode("\n", $content));
+        $expectedResults = [ 'no core specified or invalid options set.', 'Core not found or inactive.' ];
+        $this->assertArraySubset($options, $expectedResults);
 
-        $options =  array(
-                'c' => DEFAULT_TEST_CORENAME,
-                'a' => true,
-                'l' => true
+        $options = array(
+            'c' => DEFAULT_TEST_CORENAME,
+            'a' => true,
+            'l' => true
         );
 
-        $content = Helpers::getIncludeContents(\CB\BIN_DIR . 'solr_reindex_core.php', $options);
+        $content = Helpers::getIncludeContents(\CB\BIN_DIR . 'solr_reindex_core.php', ['options' => $options]);
         $content = array_filter(explode("\n", $content));
 
         $this->assertEquals('optimizing', end($content));
+        
+    }
+
+    public function testcliGetConfigFile()
+    {
+
+        $this->assertEquals('test', \CB\Install\cliGetConfigFile(['config' => 'test']));
+        $this->assertEquals('test', \CB\Install\cliGetConfigFile(['f' => 'test']));
+        $this->assertEquals('test', \CB\Install\cliGetConfigFile(['file' => 'test']));
+    }
+
+    public function testcliLoadConfig()
+    {
+
+        $configFile = \UnitTest\Helpers::getConfigFilenameTPL();
+        $cfg = \CB\Install\cliLoadConfig(['config' => $configFile]);
+        $realConf = \CB\Config::loadConfigFile($configFile);
+        // test if loaded solr_port is equal with real solr_port
+        $this->assertEquals($cfg['solr_port'], $realConf['solr_port']);
+        $cfg = \CB\Install\cliLoadConfig(['config' => $configFile, 'solr_port' => 8180]);
+        $this->assertEquals($cfg['solr_port'], 8180);
+        
+        $configTestFile = TEST_PATH . 'test.ini';
+        $cfg = \CB\Install\cliLoadConfig(['config' => $configFile, 'su_db_pass' => '1234567', 'core_root_pass' => '1234567' ]);
+        
+        $this->assertEquals($cfg['su_db_pass'], '1234567');
+        $this->assertEquals($cfg['core_root_pass'], '1234567');
+        
+        $cfg = \CB\Install\cliLoadConfig([ 'su_db_pass' => '1234567', 'core_root_pass' => '1234567' ]);
+        
+        $this->assertEquals($cfg['su_db_pass'], '1234567');
+        $this->assertEquals($cfg['core_root_pass'], '1234567');
+        
     }
 }

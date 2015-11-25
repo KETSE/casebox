@@ -33,10 +33,12 @@ class Log extends Base
         ,'activity_data_solr' => 'text'
     );
 
+    protected static $decodeJsonFields = array('data', 'activity_data_db', 'activity_data_solr');
+
     /**
      * update a record
-     * @param  array   $p array with properties
-     * @return boolean
+     * @param  array $p array with properties
+     * @return array
      */
     public static function getRecords($ids)
     {

@@ -878,3 +878,20 @@ function is_cli()
 
     return false;
 }
+
+/**
+ *  check if one or more keys wxists in array
+ * @param type $keys
+ * @param type $array
+ * @return boolean
+ */
+function checkKeyExists($keys, $array) {
+    
+    $result = false;
+    foreach($keys as $key) {
+        if(array_key_exists($key, $array)) {
+            $result = true;
+        }
+    }
+   return $result;
+}

@@ -4,6 +4,7 @@ namespace Demosrc\TreeNode;
 // - Cases by role / status  (update all cases, case.status = Active)
 use CB\DB;
 use CB\Templates;
+use CB\DataModel as DM;
 
 class Offices extends \CB\TreeNode\Base
 {
@@ -27,7 +28,7 @@ class Offices extends \CB\TreeNode\Base
         $this->fq = array();
 
         //select only task templates
-        $taskTemplates = Templates::getIdsByType('task');
+        $taskTemplates = DM\Templates::getIdsByType('task');
         if (!empty($taskTemplates)) {
             $this->fq[] = 'template_id:('.implode(' OR ', $taskTemplates).')';
         }

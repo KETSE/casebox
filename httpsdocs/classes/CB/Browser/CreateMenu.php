@@ -2,6 +2,7 @@
 namespace CB\Browser;
 
 use CB\DB;
+use CB\DataModel as DM;
 use CB\Util;
 use CB\Search;
 use CB\Objects;
@@ -33,21 +34,19 @@ class CreateMenu
 
         // get templates for each path elements
         $nodeTemplate = array();
-        $res = DB\dbQuery(
-            'SELECT id, template_id
-            FROM tree
-            WHERE id in (0' . implode(',', $path) . ')'
-        ) or die(DB\dbQueryError());
 
-        while ($r = $res->fetch_assoc()) {
+        $recs = DM\Tree::readByIds($path);
+        foreach ($recs as $r) {
             $nodeTemplate[$r['id']] = $r['template_id'];
         }
-        $res->close();
 
         //get db menu into variable
         $menu = static::getMenuRules();
 
-        $ugids = isset($_SESSION['user']['groups']) ? $_SESSION['user']['groups']:[];
+        $ugids = isset($_SESSION['user']['groups'])
+            ? $_SESSION['user']['groups']
+            : array();
+
         $ugids[] = $_SESSION['user']['id'];
 
         // we have 3 main criterias for detecting needed menu:

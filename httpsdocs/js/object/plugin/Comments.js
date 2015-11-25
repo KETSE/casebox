@@ -8,8 +8,7 @@ Ext.define('CB.object.plugin.Comments', {
         xtype: 'CBFieldComment'
     }
 
-    ,initComponent: function(config)
-{
+    ,initComponent: function(config) {
         this.actions = {
             edit: new Ext.Action({
                 text: L.Edit
@@ -94,6 +93,23 @@ Ext.define('CB.object.plugin.Comments', {
                 }
             }
         );
+        this.addCommentLink = Ext.create({
+            xtype: 'component'
+            ,autoEl: {
+                tag: 'div'
+                ,html: L.AddComment
+                ,cls: 'fwB click icon-padding i-chat-bubble cG'
+            }
+            ,margin: '3 10 3 10'
+            ,border: false
+            ,listeners: {
+                scope: this
+                ,afterrender: function(c, eOpts) {
+                    c.getEl().on('click', this.onAddCommentLinkClick, this);
+                }
+            }
+        });
+
         this.addCommentField = Ext.create(cfg);
 
         if(this.initialConfig.header !== false) {
@@ -108,9 +124,15 @@ Ext.define('CB.object.plugin.Comments', {
             ,bodyStyle: 'padding-top: 3px'
             ,items: [
                 this.dataView
-                ,this.addCommentField
+                // ,this.addCommentField
             ]
         });
+
+        if (this.initialConfig.showAddLabel) {
+            this.items.push(this.addCommentLink);
+        } else {
+            this.items.push(this.addCommentField);
+        }
 
         this.callParent(arguments);
 
@@ -137,7 +159,7 @@ Ext.define('CB.object.plugin.Comments', {
         var el  = this.getEl();
 
         if(el) {
-            lm = el.down('div.load-more');
+            var lm = el.down('div.load-more');
 
             if(lm && !lm.hasListener('click')) {
                 lm.on('click', this.onLoadMoreClick, this);
@@ -189,7 +211,8 @@ Ext.define('CB.object.plugin.Comments', {
         this.loadedData.data = r.data.concat(this.loadedData.data);
 
         var panel = this.up('panel')
-            ,scrollable = false;
+            ,scrollable = false
+            ,scrollPosition;
 
         while(!scrollable && panel) {
             scrollable = panel.getScrollable();
@@ -499,5 +522,11 @@ Ext.define('CB.object.plugin.Comments', {
         }
 
         this.updateLayout();
+    }
+
+    ,onAddCommentLinkClick: function() {
+        this.remove(this.addCommentLink);
+        this.add(this.addCommentField);
+        this.addCommentField.reset();
     }
 });

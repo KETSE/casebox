@@ -21,7 +21,6 @@ class Helpers
     public static function init($corename = DEFAULT_TEST_CORENAME)
     {
 
-  
         $CB_PATH                = \CB_DOC_ROOT;
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         $_SERVER['SERVER_NAME'] = static::getHost();
@@ -86,10 +85,10 @@ class Helpers
                 //$test_cfg['server_name']     = Install\readParam('server_name', $test_cfg['server_name']);
                 $test_hostname               = preg_replace('/^http(s)?:\/\//si', '', $test_cfg['server_name']);
 
-                   $tests_solr_path = CB_ROOT_PATH.'tests/server/solr/solr-5.1.0/server/';
+                   $tests_solr_path = CB_ROOT_PATH.'tests/server/solr/solr-5.2.0/server/';
 
-            if (file_exists($tests_solr_path)) {
-                    $test_cfg['solr_home'] = CB_ROOT_PATH.'tests/server/solr/solr-5.1.0/server/';
+                if (file_exists($tests_solr_path)) {
+                    $test_cfg['solr_home'] = CB_ROOT_PATH.'tests/server/solr/solr-5.2.0/server/';
                 }
 
                 $test_cfg['admin_email']     = 'admin@'.$test_hostname;
@@ -99,10 +98,10 @@ class Helpers
 
                 if (!\CB\IS_WINDOWS) {
                     //ask for apache user and set ownership for some folders
-                   // $test_cfg['apache_user'] = Install\readParam('apache_user', $test_cfg['apache_user']);
+                    // $test_cfg['apache_user'] = Install\readParam('apache_user', $test_cfg['apache_user']);
                 }
 
-               /* $test_cfg['db_user']     = Install\readParam('db_user', $test_cfg['db_user']);
+                /* $test_cfg['db_user']     = Install\readParam('db_user', $test_cfg['db_user']);
                 $test_cfg['db_pass']     = Install\readParam('db_pass');
 
                 $test_cfg['su_db_user'] = Install\readParam('su_db_user', $test_cfg['su_db_user']);
@@ -113,7 +112,7 @@ class Helpers
                 Install\putIniFile($config_filename, $test_cfg);
 
                 if (!\CB\IS_WINDOWS) {
-               //     shell_exec('chown ' . $test_cfg['apache_user'].' "' . $config_filename . '"');
+                    //     shell_exec('chown ' . $test_cfg['apache_user'].' "' . $config_filename . '"');
                 }
 
 
@@ -316,7 +315,7 @@ class Helpers
             if (is_array($data)) {
                 extract($data);
             }
-
+            
             ob_start();
 
             include $filename;

@@ -19,19 +19,18 @@ $T = array();
 
 $cfg = Config::getPlatformDBConfig();
 
-$languages = L\getAvailableTranslationLanguages();
-
 $res = DB\dbQuery(
-    'SELECT name, `' . implode('`,`', $languages) . '`
+    'SELECT *
     FROM ' . \CB\PREFIX . '_casebox.translations
-    WHERE `type` in (0,2)'
-) or die( DB\dbQueryError() );
+    WHERE `type` in (0, 2)'
+) or die(DB\dbQueryError());
 
 while ($r = $res->fetch_assoc()) {
-    reset($r);
-    $name = current($r);
-    while (($v = next($r)) !== false) {
-        $T[key($r)][] = "'".$name."':'".addcslashes($v, "'")."'";
+    foreach ($r as $k => $v) {
+        if ((strlen($k) == 2) && ($k != 'id') && !empty($v)) {
+            $T[$k][] = "'".$r['name'] . "':'".addcslashes($v, "'")."'";
+
+        }
     }
 }
 $res->close();
@@ -43,7 +42,12 @@ echo "main language files saved\n";
 
 //iterate cores and collect those that have custom translations
 $cores = array();
-$res = DB\dbQuery('SELECT name, cfg FROM ' . \CB\PREFIX . '_casebox.cores') or die(DB\dbQueryError());
+
+$res = DB\dbQuery(
+    'SELECT name, cfg
+    FROM ' . \CB\PREFIX . '_casebox.cores'
+) or die(DB\dbQueryError());
+
 while ($r = $res->fetch_assoc()) {
     $cfg = Util\jsonDecode($r['cfg']);
 
@@ -78,13 +82,13 @@ if (empty($cores)) {
         $res = DB\dbQuery(
             'SELECT *
             FROM ' . $db . '.translations
-            WHERE `type` in (0,2)'
-        ) or die( DB\dbQueryError() );
+            WHERE `type` in (0, 2)'
+        ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
-            foreach ($languages as $l) {
-                if (!empty($r[$l])) {
-                    $CT[$l][] = "'".$r['name']."':'".addcslashes($r[$l], "'")."'";
+            foreach ($r as $k => $v) {
+                if ((strlen($k) == 2) && ($k != 'id') && !empty($v)) {
+                    $CT[$k][] = "'".$r['name']."':'".addcslashes($v, "'")."'";
                 }
             }
         }

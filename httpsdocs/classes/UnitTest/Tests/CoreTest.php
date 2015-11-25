@@ -30,11 +30,11 @@ class CoreTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreateCore()
     {
-        $SQL = 'SELECT `active` '
-            . ' FROM `'.DEFAULT_TEST_CBPREFIX.'__casebox`.`cores`  '
+        $sql = 'SELECT `active` '
+            . ' FROM `' . DEFAULT_TEST_CBPREFIX . '__casebox`.`cores`  '
             . ' WHERE name LIKE "'.DEFAULT_TEST_CORENAME.'" ';
 
-        $rCore =  \CB\DB\dbQuery($SQL);
+        $rCore =  \CB\DB\dbQuery($sql);
 
         $CoreData = $rCore->fetch_assoc();
 
@@ -47,7 +47,7 @@ class CoreTest extends \PHPUnit_Framework_TestCase
      */
     public function testLoginCore()
     {
-       /* Helpers::getLoginKey();
+        /* Helpers::getLoginKey();
 
         $data = Helpers::getCredentialUserData('root');
 

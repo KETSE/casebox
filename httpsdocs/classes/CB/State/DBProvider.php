@@ -126,7 +126,7 @@ class DBProvider
                 ON DUPLICATE KEY UPDATE cfg = $3',
                 array(
                     $guid
-                    ,$_SESSION['user']['id']
+                    ,User::getId()
                     ,Util\jsonEncode($p['state'])
                 )
             ) or die(DB\dbQueryError());
@@ -144,7 +144,7 @@ class DBProvider
             FROM tree_user_config
             WHERE  user_id = $1 and guid = $2',
             array(
-                $_SESSION['user']['id']
+                User::getId()
                 ,$guid
             )
         ) or die(DB\dbQueryError());

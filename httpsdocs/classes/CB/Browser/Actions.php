@@ -3,6 +3,7 @@ namespace CB\Browser;
 
 use CB\L;
 use CB\DB;
+use CB\DataModel as DM;
 use CB\Util;
 use CB\Solr;
 use CB\Security;
@@ -74,22 +75,15 @@ class Actions
             return L\get('CannotCopyObjectInsideItself');
         }
 
-        $res = DB\dbQuery(
-            'SELECT pids
-            FROM tree_info
-            WHERE id = $1',
-            $p['targetId']
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $pids = explode(',', $r['pids']);
+        $r = DM\TreeInfo::read($p['targetId']);
+        if (!empty($r['pids'])) {
+            $pids = Util\toNumericArray($r['pids']);
             foreach ($p['sourceIds'] as $sourceId) {
                 if (in_array($sourceId, $pids)) {
                     return L\get('CannotCopyObjectInsideItself');
                 }
             }
         }
-        $res->close();
 
         /* end of dummy check if not copying inside a child of sourceIds */
 
@@ -255,18 +249,22 @@ class Actions
 
         //get security sets to which this user has
         //read access for copy or delete access for move
+
         $this->securitySetsFilter = '';
+
         if (!Security::isAdmin()) {
             $ss = array();
             switch ($action) {
                 case 'copy':
                     $ss = \CB\Security::getSecuritySets();
                     break;
+
                 case 'move':
                     //check if the user can move, because it doesnt anctually delete the obj, but just move it
                     $ss = \CB\Security::getSecuritySets(false, 5);
                     break;
             }
+
             $this->securitySetsFilter = 'AND ti.security_set_id in (0'.implode(',', $ss).')';
         }
 

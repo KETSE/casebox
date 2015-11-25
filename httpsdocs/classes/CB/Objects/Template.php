@@ -1,7 +1,7 @@
 <?php
 namespace CB\Objects;
 
-use CB\DB;
+use CB\DataModel as DM;
 use CB\Util;
 use CB\User;
 use CB\UsersGroups;
@@ -19,15 +19,15 @@ class Template extends Object
      * available table fields in templates table
      * @var array
      */
-    private $tableFields =  array(
+    protected $tableFields =  array(
         'id'
         ,'pid'
         ,'type'
         ,'name'
-        ,'l1'
-        ,'l2'
-        ,'l3'
-        ,'l4'
+        // ,'l1'
+        // ,'l2'
+        // ,'l3'
+        // ,'l4'
         ,'order'
         ,'visible'
         ,'iconCls'
@@ -68,6 +68,19 @@ class Template extends Object
         ,'varchar' => 'ftVarchar'
     );
 
+    protected function collectCustomModelData()
+    {
+        $p = &$this->data;
+        $rez = parent::collectCustomModelData();
+
+        //set type from data
+        if (isset($rez['type']) && !empty($p['data']['type'])) {
+            $rez['type'] = $p['data']['type'];
+        }
+
+        return $rez;
+    }
+
     /**
      * internal function used by create method for creating custom data
      * @return void
@@ -78,74 +91,15 @@ class Template extends Object
 
         $p = &$this->data;
 
-        $saveFields = array();
-        $saveValues = array();
-        $params = array();
-        $i = 1;
-
         if (empty($p['visible'])) {
             $p['visible'] = 0;
         }
 
-        foreach ($this->tableFields as $fieldName) {
-            $field = null;
-            if (!empty($this->template)) {
-                $field = $this->template->getField($fieldName);
-            }
-            if (isset($p[$fieldName])) {
-                $value = $p[$fieldName];
-                $value = (is_scalar($value) || is_null($value))
-                    ? $value
-                    : Util\jsonEncode($value);
+        $data = $this->collectCustomModelData();
 
-                $saveFields[] = $fieldName;
-                $saveValues[] = $value;
-                $params[] = $i;
-                $i++;
-            } elseif (!empty($field)) {
-                $value = @$this->getFieldValue($fieldName, 0)['value'];
-
-                // this if should be removed after complete migration to language abreviation titles
-                if (empty($value) && in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
-                    $lang = @\CB\Config::get('languages')[$fieldName[1]-1];
-                    if (!empty($lang)) {
-                        $value = @$this->getFieldValue($lang, 0)['value'];
-                    }
-                }
-
-                $value = (is_scalar($value) || is_null($value))
-                    ? $value
-                    : Util\jsonEncode($value);
-
-                $saveFields[] = $fieldName;
-                $saveValues[] = $value;
-                $params[] = $i;
-                $i++;
-            } else {
-                // this if should be removed after complete migration to language abreviation titles
-                if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
-                    $lang = @\CB\Config::get('languages')[$fieldName[1]-1];
-                    if (!empty($lang)) {
-                        $value = @$this->getFieldValue($lang, 0)['value'];
-
-                        $saveFields[] = $fieldName;
-                        $saveValues[] = $value;
-                        $params[] = "$i";
-                        $i++;
-                    }
-                }
-            }
+        if (!empty($data)) {
+            DM\Templates::create($data);
         }
-        if (!empty($saveFields)) {
-            $params = '$'.implode(',$', $params);
-            DB\dbQuery(
-                'INSERT INTO templates
-                (`'.implode('`,`', $saveFields).'`)
-                VALUES('.$params.')',
-                $saveValues
-            ) or die(DB\dbQueryError());
-        }
-        $this->saveFields();
     }
 
     /**
@@ -155,74 +109,32 @@ class Template extends Object
     {
         parent::loadCustomData();
 
-        $userLanguageIndex = \CB\Config::get('user_language_index');
+        $r = DM\Templates::read($this->id);
 
-        $res = DB\dbQuery(
-            'SELECT id
-                ,is_folder
-                ,`type`
-                ,name
-                ,l' . $userLanguageIndex . ' `title`
-                ,l1
-                ,l2
-                ,l3
-                ,l4
-                ,`order`
-                ,`visible`
-                ,iconCls
-                ,default_field
-                ,cfg
-                ,title_template
-                ,info_template
-            FROM templates
-            WHERE is_folder = 0 AND id = $1',
-            $this->id
-        ) or die(DB\dbQueryError());
+        if (!empty($r)) {
+            //dont override name from tree with name from templates table
+            unset($r['name']);
 
-        if ($r = $res->fetch_assoc()) {
-            $r['cfg'] = Util\toJSONArray($r['cfg']);
             $this->data = array_merge($this->data, $r);
+
         } else {
-            throw new \Exception("Template load error: no template found with id = ".$this->id);
+            throw new \Exception("Template load error: no template found with id = " . $this->id);
         }
-        $res->close();
 
         /* loading template fields */
         $this->data['fields'] = array();
         $this->data['fieldsByIndex'] = array();
         $this->fieldsOrder = array();
 
-        $res = DB\dbQuery(
-            'SELECT
-                ts.id
-                ,ts.pid
-                ,ts.name
-                ,ts.l' . $userLanguageIndex . ' `title`
-                ,ts.l1
-                ,ts.l2
-                ,ts.l3
-                ,ts.l4
-                ,ts.`type`
-                ,ts.`level`
-                ,ts.`order`
-                ,ts.cfg
-                ,ts.solr_column_name
-            FROM templates_structure ts
-                JOIN tree t on ts.id = t.id AND t.dstatus = 0
-            WHERE ts.template_id = $1
-            ORDER BY ts.`order`',
-            $this->id
-        ) or die(DB\dbQueryError());
+        $recs = DM\TemplatesStructure::getFields($this->id);
 
-        while ($r = $res->fetch_assoc()) {
-            $r['cfg'] = Util\toJSONArray($r['cfg']);
+        foreach ($recs as &$r) {
             $this->data['fields'][$r['id']] = &$r;
             $this->data['fieldsByIndex'][] = &$r;
 
             $this->fieldsOrder[$r['name']] = intval($r['order']);
             unset($r);
         }
-        $res->close();
     }
 
     /**
@@ -236,169 +148,31 @@ class Template extends Object
         /* saving template data to templates and templates_structure tables */
         $p = &$this->data;
 
-        $saveFields = array();
-        $saveValues = array($this->id);
-        $params = array();
-        $i = 2;
-        foreach ($this->tableFields as $fieldName) {
-            $field = null;
-            if (!empty($this->template)) {
-                $field = $this->template->getField($fieldName);
-            }
+        $data = $this->collectCustomModelData();
 
-            if (isset($p[$fieldName]) && ($fieldName !== 'id')) {
-                $value = $p[$fieldName];
-                $value = (is_scalar($value) || is_null($value))
-                    ? $value
-                    : Util\jsonEncode($value);
+        unset($data['id']);
 
-                $saveFields[] = $fieldName;
-                $saveValues[] = $value;
-                $params[] = "`$fieldName` = \$$i";
-                $i++;
+        if (!empty($data)) {
+            $data['id'] = $this->id;
 
-            } elseif (!empty($field)) {
-                $value = @$this->getFieldValue($fieldName, 0)['value'];
-                $value = (is_scalar($value) || is_null($value))
-                    ? $value
-                    : Util\jsonEncode($value);
-
-                $saveFields[] = $fieldName;
-                $saveValues[] = $value;
-                $params[] = "`$fieldName` = \$$i";
-                $i++;
-
-            } else {
-                // this if should be removed after complete migration to language abreviation titles
-                if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
-                    $lang = @\CB\Config::get('languages')[$fieldName[1]-1];
-                    if (!empty($lang)) {
-                        $value = @$this->getFieldValue($lang, 0)['value'];
-
-                        $saveFields[] = $fieldName;
-                        $saveValues[] = $value;
-                        $params[] = "`$fieldName` = \$$i";
-                        $i++;
-                    }
-                }
-            }
+            DM\Templates::update($data);
         }
-        if (!empty($saveFields)) {
-            DB\dbQuery(
-                'UPDATE templates
-                SET '.implode(',', $params).'
-                WHERE id = $1',
-                $saveValues
-            ) or die(DB\dbQueryError());
-        }
-        $this->saveFields();
     }
 
     protected function copyCustomDataTo($targetId)
     {
-        DB\dbQuery(
-            'INSERT INTO `templates`
-                (id,
-                pid,
-                `is_folder`,
-                `type`,
-                `name`,
-                `l1`,
-                `l2`,
-                `l3`,
-                `l4`,
-                `order`,
-                `visible`,
-                `iconCls`,
-                `default_field`,
-                `cfg`,
-                `title_template`,
-                `info_template`)
-            SELECT
-                $2,
-                $3,
-                `is_folder`,
-                `type`,
-                `name`,
-                `l1`,
-                `l2`,
-                `l3`,
-                `l4`,
-                `order`,
-                `visible`,
-                `iconCls`,
-                `default_field`,
-                `cfg`,
-                `title_template`,
-                `info_template`
-            FROM `templates`
-            WHERE id = $1',
-            array(
-                $this->id
-                ,$targetId
-                ,$this->data['pid']
-            )
-        ) or die(DB\dbQueryError());
+        DM\Templates::copy($this->id, $targetId);
     }
 
-    /**
-     * save fields property from this->data
-     * @return void
-     */
-    protected function saveFields()
+    public function getType()
     {
-        if (empty($this->data['fields'])) {
-            return;
-        }
+        $data = $this->getData();
 
-        $tableFields = array(
-            'id'
-            ,'pid'
-            ,'name'
-            ,'l1'
-            ,'l2'
-            ,'l3'
-            ,'l4'
-            ,'type'
-            ,'order'
-            ,'cfg'
-            ,'solr_column_name'
-        );
+        $rez = empty($data['type'])
+            ? null
+            : $data['type'];
 
-        $keepFieldIds = array();
-        foreach ($this->data['fields'] as $field) {
-            $saveFields = array('template_id');
-            $saveValues = array($this->id);
-            $insertParams = array('$1');
-            $updateParams = array();
-            $i = 2;
-            foreach ($tableFields as $fieldName) {
-                $value = null;
-                if (isset($field[$fieldName])) {
-                    $value = (is_scalar($field[$fieldName]) || is_null($field[$fieldName]))
-                        ? $field[$fieldName]
-                        : Util\jsonEncode($field[$fieldName]);
-                    $saveFields[] = $fieldName;
-                    $saveValues[] = $value;
-                    $insertParams[] = "\$$i";
-                    if ($fieldName !== 'name') {
-                        $updateParams[] = "`$fieldName` = \$$i";
-                    }
-                    $i++;
-                }
-            }
-            if (!empty($saveFields)) {
-                DB\dbQuery(
-                    'INSERT INTO templates_structure
-                        (`'.implode('`,`', $saveFields).'`)
-                    VALUES ('.implode(',', $insertParams).')
-                    ON DUPLICATE KEY UPDATE
-                        '.implode(',', $updateParams),
-                    $saveValues
-                ) or die(DB\dbQueryError());
-                $keepFieldIds[] = DB\dbLastInsertId();
-            }
-        }
+        return $rez;
     }
 
     /**

@@ -173,7 +173,7 @@ Ext.define('CB.facet.Base', {
                 itemId: 'period'
                 ,name: 'period'
                 ,xtype: 'button'
-                // ,html: '<span onclick="document.getElementById(\'addDatePeriod\').style.display = \'block\'" style="cursor: pointer; padding-left: 19px; background: url(/i4/16/calendar_mono.png) 0px 0px no-repeat; vertical-align: top;">Period</span>'
+                // ,html: '<span onclick="document.getElementById(\'addDatePeriod\').style.display = \'block\'" style="cursor: pointer; padding-left: 19px; background: url(/i4/16/calendar_mono.png) 0 0 no-repeat; vertical-align: top;">Period</span>'
                 ,callback: this.onPeriodAddClick
                 ,scope: this
                 ,qtip: 'Add period'

@@ -79,7 +79,7 @@ Ext.define('CB.Favorites.Panel', {
                                 //set path as title attribute
                                 App.customRenderers.titleAttribute(v.pathText, m);
 
-                                rez = '<span class="n">' + v.name + '</span>';
+                                var rez = '<span class="n">' + v.name + '</span>';
 
                                 return rez;
                             }

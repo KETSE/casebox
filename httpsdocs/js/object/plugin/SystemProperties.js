@@ -54,7 +54,7 @@ Ext.define('CB.object.plugin.SystemProperties', {
     }
 
     ,attachEvents: function(){
-        a = this.getEl().query('a.path');
+        var a = this.getEl().query('a.path');
         Ext.each(
             a
             ,function(t){
@@ -79,7 +79,7 @@ Ext.define('CB.object.plugin.SystemProperties', {
     }
 
     ,getContainerToolbarItems: function() {
-        rez = {
+        var rez = {
             tbar: {}
             ,menu: {}
         };

@@ -1,3 +1,147 @@
+CaseBox 1.9.554 (2015-11-24)
+==============================
+- #9304 Join queries
+- #9454 Leaflet library should be loaded from local server, not CDN + Edit form not shown
+
+CaseBox 1.9.553 (2015-11-23)
+==============================
+- remove field aliasing on solr query for maps
+
+Fixed Bugs:
+----------
+- js error because of automated "public" added before function definition
+
+CaseBox 1.9.552 (2015-11-21)
+==============================
+- #9600 Guarantee GUID uniqueness + guid table per core?
+- #9302 Adding GeoMapping
+- #9627 JS Error when opening Stratelit
+
+Fixed Bugs:
+----------
+- #8006 Grid DC config management
+- #9313 BUG: not possible to leave field учреждение empty, although it is not mandatory
+
+Notes:
+----------
+- for existing local cores execute casebox/install/mysql/differential_updates/v.1.9.552.sql
+  for each core to create guid table
+
+CaseBox 1.9.551 (2015-11-19)
+==============================
+- #9302 Adding GeoMapping
+- #9465 UI polish: Comment button in Activity Stream
+- #9517 DIFF shown in Activity Stream not correct
+
+CaseBox 1.9.550 (2015-11-17)
+==============================
+- limit indexing into Solr of extracted files contents to 1MB to avoid java.lang.OutOfMemoryError
+
+CaseBox 1.9.549 (2015-11-17)
+==============================
+- #9122 Tamkeen Permission and transfer of ownership
+
+CaseBox 1.9.548 (2015-11-16)
+==============================
+- #9480 Problems with update: Custom column to choose from got lost
+- #9430 Move upgrade scripts from /bin/ to /sys/upgrade/
+- #9481 Error on edit Objects
+
+CaseBox 1.9.547 (2015-11-15)
+==============================
+- include Notifications test for travis
+
+CaseBox 1.9.546 (2015-11-15)
+==============================
+- #9247 vFolder in Favorites doesn't work
+- #9377 CB should not break if a treeNode instance doesn't work + strange behaviour of treeNodes
+- #9454 Leaflet library should be loaded from local server, not CDN + Edit form not shown
+- #8658 When deleting a user, email address cannot be used again
+
+CaseBox 1.9.545 (2015-11-14)
+==============================
+- update translations
+
+CaseBox 1.9.544 (2015-11-14)
+==============================
+Fixed Bugs:
+----------
+- verify if leaflet namespace is initiated
+- #9440 Getting Error when saving a treeNode config
+
+CaseBox 1.9.543 (2015-11-13)
+==============================
+- Increased space between tree nodes, grid rows
+- showing FacetNav total in gray color
+
+CaseBox 1.9.542 (2015-11-13)
+==============================
+- #9045 Can't write comment in Activity Stream view
+- #9151 Remove Comment.textArea in Activity Stream, replace it with "Comment" link
+- #9377 CB should not break if a treeNode instance doesn't work + strange behaviour of treeNodes
+
+Notes:
+----------
+- updated translations in _casebox.sql
+
+CaseBox 1.9.541 (2015-11-12)
+==============================
+- GeoMap view adjustments
+
+CaseBox 1.9.540 (2015-11-12)
+==============================
+- #9302 Adding GeoMapping
+
+CaseBox 1.9.539 (2015-11-06)
+==============================
+- iterate codacy issues
+- #9200 Import Alhaq statements (eStatements2003_be.mdb)
+
+Fixed Bugs:
+----------
+- #9303 Titles of menu items broken
+
+CaseBox 1.9.538 (2015-11-02)
+==============================
+- #9258 Last user that did action should be shown in Activity Stream for the object
+- #9183 Color field names for required fields instead of underline in field Value & Save button always enabled
+- #9083 Clean field types list
+
+Fixed Bugs:
+----------
+- #9202 Fast clicks in Tree doesn't correctly select node
+- #9241 Filter panel closes after selecting a facet & button remains ON
+
+CaseBox 1.9.536 (2015-10-31)
+==============================
+Fixed Bugs:
+----------
+- fail creating core from script
+
+CaseBox 1.9.536 (2015-10-30)
+==============================
+- #9184 Transfer ownership feature
+
+Fixed Bugs:
+----------
+- separators not set correctly in create menus
+- misspelled variable name in DataModel\Users.php
+- removed remained resource reference in Files.php
+- wrong versions assignment in File.php
+- misspelled namespace in Solr\Client.php
+- misspelled variable name in TemplatesStructure.php
+- wrong variable name in DBNode.php
+
+CaseBox 1.9.535 (2015-10-29)
+==============================
+- template fields are no more saved/updated from its data['fields'] property
+- set ntsc to 1 for folder templates
+- removed upgrade_task_data.php
+
+Fixed Bugs:
+----------
+- mark notifications as seen by action id not by notification id
+
 CaseBox 1.9.534 (2015-10-19)
 ==============================
 - #9088 Trouble with "word" file preview

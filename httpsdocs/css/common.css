@@ -33,6 +33,7 @@
 .cGR, .cGR *{ color: green !important }
 .cLG{ color:#CCCCCC }
 .cR{ color: red }
+.cRequired{ color: #C00 }
 .cM, .cM *{ color: maroon !important }
 .cDB, .cDB *{ color: #356AA0 !important } /*DiggBlue*/
 .bgcLG{ background-color: #eee }
@@ -177,9 +178,9 @@
 
 
 
-.file{ padding-left: 17px !important; padding-top: 0px; background-position: 0 50%; background-repeat: no-repeat; }
+.file{ padding-left: 17px !important; padding-top: 0; background-position: 0 50%; background-repeat: no-repeat; }
 a.file{min-height: 16px; display: inline-block}
-.file-grid-cell{ text-indent: 15px !important; padding-top: 0px; background-position: 0 50% }
+.file-grid-cell{ text-indent: 15px !important; padding-top: 0; background-position: 0 50% }
 
 .file-, .file-unknown { background-image:url(/css/i/ext/.png) !important; background-position: 0 0%; background-repeat: no-repeat; min-width: 16px; }
 

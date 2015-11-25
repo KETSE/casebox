@@ -1,0 +1,56 @@
+/* COMPACT VIEW ---------------------------------------------------------------------------------------- */
+.icon-grid-column-top { background-position: 8px 4px !important; background-repeat: no-repeat; }
+.x-rtl .icon-grid-column-top { background-position: 99% 4px !important; background-repeat: no-repeat; }
+
+.x-grid-cell-inner {
+  font-size: 12px;
+  /*min-height: 24px;*/
+  padding: 7px 6px 7px 6px;
+  /*line-height: 16px !important*/
+}
+
+.folder-grid .x-grid-cell-inner {
+  font-size: 12px;
+  line-height: 16px;
+  /*min-height: 24px;*/
+
+  padding: 5px 6px 5px 6px;
+  /*line-height: 16px !important*/
+}
+
+
+.x-grid-cell-inner pre {
+  font: normal 12px arial, verdana, sans-serif;
+  margin: 0;
+}
+
+.x-grid-cell-inner-treecolumn {
+padding: 3px 6px 3px 0;
+font-size: 12px;
+}
+
+.edit-grid .x-grid-cell-inner {
+padding: 4px 6px 4px 6px;
+min-height: 14px;
+line-height: 14px;
+font-size: 12px;
+}
+
+
+
+.x-form-text-grid-cell {
+  font: normal 12px arial verdana, sans-serif;
+  line-height: 16px;
+  min-height: 16px;
+  padding-top: 2px;
+}
+
+.x-grid-item {
+  font: normal 12px arial, verdana, sans-serif;
+}
+
+.spacy-rows .x-grid-cell {padding: 0}
+.spacy-rows .x-grid-item {border-top: 1px solid #fff;}
+.spacy-fields .x-form-item {padding: 0}
+
+/* end of COMPACT GRID --------------------------------------------------------------------------------------------  */

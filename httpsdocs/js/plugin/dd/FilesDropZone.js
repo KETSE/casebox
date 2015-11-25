@@ -30,7 +30,7 @@ Ext.define('CB.plugin.dd.FilesDropZone', {
     }
 
     ,onRender: function(grid){
-        el = grid.getEl();
+        var el = grid.getEl();
         el.on('dragleave', this.onDragLeave, this);
         el.on('dragover', this.onDragOver, this);
         el.on('drop', this.onDrop, this);
@@ -99,7 +99,7 @@ Ext.define('CB.plugin.dd.FilesDropZone', {
     }
 
     ,onDragLeave: function(e){ // dataTransfer info is not available on drag enter, it's only available on drop
-        te = this.getTarget(e);
+        var te = this.getTarget(e);
         te.removeCls('drop-target');
     }
 
@@ -204,9 +204,14 @@ Ext.define('CB.plugin.dd.FilesDropZone', {
 
     ,filesCount: function(e){
         var files = e.browserEvent.dataTransfer.files; // FileList object.
-        if(Ext.isEmpty(files)) return 0;
+
+        if(Ext.isEmpty(files)) {
+            return 0;
+        }
+
         for (var i = 0, f; f = files[i]; i++) {
         }
+
         return i;
     }
 

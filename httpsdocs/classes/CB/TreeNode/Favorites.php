@@ -70,6 +70,7 @@ class Favorites extends Base
                     'name' => $this->getName('favorites')
                     ,'id' => $this->getId('favorites')
                     ,'iconCls' => 'i-star'
+                    ,'cls' => 'tree-header'
                     ,'has_childs' => false
                 )
             )
@@ -87,6 +88,10 @@ class Favorites extends Base
         foreach ($fa as $f) {
             $d = Util\toJSONArray($f['data']);
             $d['nid'] = $f['node_id'];
+            $d['targetPath'] = $d['path'];
+            $d['path'] = $d['pathText'];
+            unset($d['pathText']);
+
             $rez['data'][] = $d;
         }
 

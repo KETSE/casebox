@@ -165,7 +165,7 @@ Ext.define('CB.FilterPanel', {
         var i = this.child('[facetId="' + data.facetId + '"]');
         if(i){
             i.uncheck(data.value);
-            fv = this.getFacetsValues();
+            var fv = this.getFacetsValues();
             this.fireEvent('change', fv);
         }
     }
@@ -190,7 +190,9 @@ Ext.define('CB.FacetActiveFilters', {
                 type: 'memory'
             }
         });
-        if( !Ext.isEmpty( this.data ) ) this.store.loadData( this.data, false );
+        if (!Ext.isEmpty( this.data )) {
+            this.store.loadData(this.data, false);
+        }
 
         Ext.apply(this, {
             items: new Ext.DataView({
@@ -208,7 +210,7 @@ Ext.define('CB.FacetActiveFilters', {
                 ,listeners: {
                     scope: this
                     ,itemclick: function(cmp, record, item, index, e, eOpts){//dv, idx, el, ev
-                        r = this.store.getAt(index);
+                        var r = this.store.getAt(index);
                         this.fireEvent('itemclick', index, r.data, e);
                     }
                 }

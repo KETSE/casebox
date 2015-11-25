@@ -5,49 +5,8 @@ namespace CB\DataModel;
 use CB\DB;
 use CB\Util;
 
-class Users extends Base
+class Users extends UsersGroups
 {
-    /**
-     * database table name
-     * @var string
-     */
-    protected static $tableName = 'users_groups';
-
-    /**
-     * available table fields
-     *
-     * associative array of fieldName => type
-     * that is also used for trivial validation of input values
-     *
-     * @var array
-     */
-    protected static $tableFields = array(
-        'id' => 'int'
-        ,'type' => 'int' //strict value
-        ,'system' => 'int' //0, 1
-        ,'name' => 'varchar'
-        ,'first_name' => 'varchar'
-        ,'last_name' => 'varchar'
-        ,'l1' => 'varchar'
-        ,'l2' => 'varchar'
-        ,'l3' => 'varchar'
-        ,'l4' => 'varchar'
-        ,'sex' => 'char'
-        ,'email' => 'varchar'
-        ,'photo' => 'varchar'
-        ,'password' => 'varchar'
-        ,'recover_hash' => 'varchar'
-        ,'language_id' => 'int'
-        ,'cfg' => 'text'
-        ,'data' => 'text'
-        ,'last_action_time' => 'time'
-        ,'enabled' => 'int'
-        ,'cid' => 'int'
-        ,'uid' => 'int'
-        ,'did' => 'int'
-        ,'ddate' => 'timestamp'
-    );
-
     /**
      * db value for type field
      * @var integer
@@ -221,7 +180,8 @@ class Users extends Base
                 ,email
             FROM users_groups
             WHERE email LIKE $1
-                AND enabled = 1',
+                AND enabled = 1
+                AND did IS NULL',
             "%$email%"
         ) or die(DB\dbQueryError());
 
@@ -288,6 +248,23 @@ class Users extends Base
         return $rez;
     }
 
+    public static function auth($login, $pass, $info)
+    {
+        $rez = false;
+
+        $res = DB\dbQuery(
+            'CALL p_user_login($1, $2, $3)',
+            array($login, $pass, $info)
+        ) or die(DB\dbQueryError());
+
+        if (($r = $res->fetch_assoc()) && ($r['status'] == 1)) {
+            $rez = $r['user_id'];
+        }
+        $res->close();
+
+        return $rez;
+    }
+
     /**
      * get user owner id
      * @param  int     $userId
@@ -311,30 +288,6 @@ class Users extends Base
 
         if ($r = $res->fetch_assoc()) {
             $rez = true;
-        }
-        $res->close();
-
-        return $rez;
-    }
-
-    /**
-     * read all user records
-     * @return array
-     */
-    public static function readAll()
-    {
-        $rez = array();
-
-        $sql = 'SELECT *
-            FROM `' . static::getTableName() . '`
-            WHERE `type` = $1';
-
-        $res = DB\dbQuery($sql, static::$type) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $r['cfg'] = Util\toJSONArray($r['cfg']);
-            $r['data'] = Util\toJSONArray($r['data']);
-            $rez[] = $r;
         }
         $res->close();
 

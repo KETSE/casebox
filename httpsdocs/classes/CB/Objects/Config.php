@@ -44,9 +44,9 @@ class Config extends Object
         parent::updateCustomData();
 
         $od = $this->oldObject->getData();
-        // var_export($od);
+
         $id = DM\Config::toId($od['data']['_title'], 'param');
-        // var_export($id);
+
         $d = &$this->data;
         $dd = &$d['data'];
 
