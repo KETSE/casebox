@@ -41,7 +41,7 @@ Example:
 
 .. image:: /i/admin/thesaurus-lookup.png
 
-Here there is a field called 'status' under /System/Templates/Case form. In its config field we define a thesaurus folder as the lookup by "scope" directive and putting the number next to it.
+Here there is a field called 'status' under /System/Templates/Case form. There are a set of statuses defined in a thesaurus that we want available as options for this field. In its config field we define a thesaurus folder as the lookup by "scope" directive and specifying which ID the lookup should be from.
 
 You can get the Id of any folder/object by clicking on the object and reading the ID from the top panel.
 
