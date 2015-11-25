@@ -5,3 +5,7 @@ Casebox is an open source Content Management System. You can define data models 
 
 Casebox is accessed from a web browser. User Experience is similar to a desktop application.
 
+Casebox is your one stop shop for records, tasks and files.
+
+
+

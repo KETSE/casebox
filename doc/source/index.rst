@@ -24,6 +24,8 @@ The main documentation is organized into a three sections:
 
    user/index
    user/two-step-verification
+   user/features
+   
 
 
 .. toctree::
@@ -32,10 +34,16 @@ The main documentation is organized into a three sections:
    :caption: Administrator Manual
 
    admin/index
-   admin/form
-   admin/templates
+   admin/forms
    admin/fields
-
+   admin/thesauri
+   admin/menus
+   admin/dc
+   admin/facets
+   admin/filters
+   admin/searches
+   admin/smartfolders
+   
 
 
 .. toctree::
@@ -51,7 +59,6 @@ The main documentation is organized into a three sections:
    dev/fields
    dev/tree
    dev/grid
-   dev/faceting
    dev/filter
    dev/search
    dev/files
