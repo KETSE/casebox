@@ -23,6 +23,10 @@ class FacetNav extends Query
                     $rez = User::getDisplayName($id);
                     break;
 
+                case 'varchar':
+                    $rez = $id;
+                    break;
+
                 default:
                     $rez = Objects::getName($id);
             }

@@ -387,8 +387,12 @@ class Base
             $userLanguage = \CB\Config::get('user_language');
 
             foreach ($dc['data'] as $k => $col) {
-                $fieldName = is_numeric($k) ? $col : $k;
-                $rez[$fieldName] = is_numeric($k) ? array() : $col;
+                $fieldName = is_numeric($k)
+                    ? $col
+                    : $k;
+                $rez[$fieldName] = is_numeric($k)
+                    ? array()
+                    : $col;
 
                 if (empty($rez[$fieldName]['solr_column_name']) &&
                     !in_array($fieldName, Search::$defaultFields)

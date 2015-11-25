@@ -197,32 +197,26 @@ Ext.define('CB.controller.Browsing', {
         if(fp.path &&
             Ext.isEmpty(this.VC.params.query) // dont sync on search query
         ) {
-            // add flag to avoid reloading viewport on tree node selection change
-            this.syncingTreePathWithViewContainer = true;
-
             this.tree.updateCreateMenu(fp.menu);
 
             //check if rootnode id is set at the beginning of the path
             //its id could be missing if it's a virtual root node
             var p = String(fp.path).split('/');
 
-            if(p.indexOf(App.config.rootNode.nid) < 0) {
-                if(Ext.isEmpty(p[0])) {
-                    p.splice(1, 0, App.config.rootNode.nid);
-                } else {
-                    p.unshift(App.config.rootNode.nid);
-                }
+            if (!Ext.isEmpty(fp.path) && (['/', '/0', '/' + App.config.rootNode.nid].indexOf(fp.path) < 0)) {
+                // add flag to avoid reloading viewport on tree node selection change
+                this.syncingTreePathWithViewContainer = true;
+
+                App.mainTree.selectPath(
+                    p.join('/')
+                    ,'nid'
+                    ,'/'
+                    ,function(){
+                        delete this.syncingTreePathWithViewContainer;
+                    }
+                    ,this
+                );
             }
-            //select the path in tree
-            App.mainTree.selectPath(
-                p.join('/')
-                ,'nid'
-                ,'/'
-                ,function(){
-                    delete this.syncingTreePathWithViewContainer;
-                }
-                ,this
-            );
         }
     }
 
@@ -327,8 +321,8 @@ Ext.define('CB.controller.Browsing', {
             ,id;
 
         for (var i = 0; i <= index; i++) {
-            id = store.getAt(i).get('id');
-            if(!Ext.isEmpty(id)) {
+            id = store.getAt(i).data.id;
+            if(!Ext.isEmpty(id) && (id > 0)) {
                 path.push(id);
             }
         }

@@ -353,7 +353,7 @@ Ext.define('CB.ViewPort', {
         if(b.pressed) {
             App.mainViewPort.breadcrumb.setValue([
                 {
-                    id: null
+                    id: -1
                     ,name: L.Notifications
                 }
             ]);

@@ -215,9 +215,9 @@ function getStoreTitles(v){
     Ext.each(
         ids
         ,function(id){
-            var idx = this.findExact('id', parseInt(id, 10));
-            if(idx >= 0) {
-                texts.push(this.getAt(idx).get('title'));
+            var r = this.findRecord('id', parseInt(id, 10), 0, false, false, true);
+            if(r) {
+                texts.push(Ext.valueFrom(r.data.title, r.data.name));
             }
         }
         ,this
