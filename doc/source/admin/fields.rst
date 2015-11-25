@@ -3,7 +3,8 @@ Fields
 
 
 Field types
-Casebox supports the following list of field types:
+-----------
+
 Varchar: simplest one-line text field
 Date
 Datetime
@@ -18,41 +19,44 @@ Memo: Inline text editor (multiline text editor inside the grid)
 IconCombo: used in Templates to select the icon
 Objects: lookup field with values from the Tree itself
 
+Populate a field from a Thesaurus/Folder
+----------------------------------------
 
+You can have the field select from a dropdown or pop up window. 
 
+In order to define the field to be populated from a Thesaurus. 
 
+When creating the field choose the type as 'Object'
 
-Populate a field from a Thesaurus
----------------------------------
-
-When creating the field pick type object
-In config add the ID of the Thesaurus folder
-
-.. code-block:: json
-
-	{
-	"scope": thesaurus_folder_id
-	} 
-
-You may also choose if you want a default value for a new object using the “value” JSON directive.
-
-Note: You can get the Id of any folder/object by clicking on the object and reading the ID from the top panel.
-
-
-Populated a field from an Object
---------------------------------
-When creating the field pick type object
-In config add the ID of the folder
+Configure the field to look up a set of options using the following JSON configuration in the 'Config' part of the field template
 
 .. code-block:: json
 
 	{
-	"source":"tree",
+	"source": "tree"
 	"scope": folder_id
 	} 
 
+Example:
+
+.. image:: /i/admin/thesaurus-lookup.png
+
+Here there is a field called 'status' under /System/Templates/Case form. In its config field we define a thesaurus folder as the lookup by "scope" directive and putting the number next to it.
+
+You can get the Id of any folder/object by clicking on the object and reading the ID from the top panel.
+
+.. image:: /i/admin/thesaurus-lookup-1.png
+
+You may also choose if you want a default value for a new object using the “value” JSON directive.
+
+
+
+
 Populated a field from users
 ----------------------------
+
+You can have the field select from a dropdown or pop up window with values of users. 
+
 To choose from a list of users use the "Source" directive with the value of "users".
 
 .. code-block:: json
@@ -94,7 +98,6 @@ For example this is the config of a field looking up values from a thesaurus ind
 	} 
 
 Note: You can get the Id of any folder/object by clicking on the object and reading the ID from the top panel.
-
 
 
 Create a conditional field 
@@ -164,26 +167,6 @@ Example:
 
 .. image:: /i/admin/template-field.png
 
-
-Field Types
-...........
-
-Field types
-Casebox supports the following list of field types:
-
-Varchar: simplest one-line text field
-Date
-Datetime
-Time
-Float
-Integer
-Group: it's not a visible field, but a way to group several fields.
-Header: a Header to visually separate fields
-Html: HTML editor
-Text: Text editor (in a popup window)
-Memo: Inline text editor (multiline text editor inside the grid)
-IconCombo: used in Templates to select the icon
-Objects: lookup field with values from the Tree itself. See Objects Fieldtype
 
 
 Field configuration
