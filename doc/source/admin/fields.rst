@@ -26,7 +26,7 @@ You can have the field select from a dropdown or pop up window.
 
 In order to define the field to be populated from a Thesaurus. 
 
-When creating the field choose the type as 'Object'
+When creating the field choose the type as 'Objects'
 
 Configure the field to look up a set of options using the following JSON configuration in the 'Config' part of the field template
 
@@ -52,7 +52,7 @@ You may also choose if you want a default value for a new object using the “va
 
 
 
-Populated a field from users
+Populate a field from users
 ----------------------------
 
 You can have the field select from a dropdown or pop up window with values of users. 
@@ -66,7 +66,7 @@ To choose from a list of users use the "Source" directive with the value of "use
 	}
 
 
-Populated a field from a list of specific objects
+Populate a field from a list of specific objects
 --------------------------------------------------
 To choose from a list of users use the "Template" directive with value of the template id.
 
