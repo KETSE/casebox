@@ -1,3 +1,9 @@
+CaseBox 1.9.556 (2015-11-26)
+==============================
+- #9692 Show map pointer, improve UI
+- #9358 Demo not being reset by demo data
+- #9699 Incorrect breadcrumb
+
 CaseBox 1.9.555 (2015-11-25)
 ==============================
 - #9672 Deleting a favorite should Unstar the object, not actually deleting it

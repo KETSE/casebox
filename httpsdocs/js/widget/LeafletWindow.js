@@ -73,9 +73,13 @@ Ext.define('CB.widget.LeafletWindow', {
             ,zoom = Ext.valueFrom(dl.zoom, 10);
 
         if (!Ext.isEmpty(d.value)) {
+            this.valueEditor.setValue(d.value);
+
             var a = d.value.split(',');
             lat = a[0];
             lng = a[1];
+
+            this.getMarker().setLatLng(new LL.LatLng(lat, lng));
         }
 
         if (!Ext.isEmpty(cfg.url)) {
@@ -99,7 +103,14 @@ Ext.define('CB.widget.LeafletWindow', {
     }
 
     ,onMapClick: function(p, e) {
-        this.valueEditor.setValue(e.latlng.lat.toFixed(4) + ',' + e.latlng.lng.toFixed(4));
+        var ll = e.latlng.wrap()
+            ,lat = ll.lat.toFixed(4)
+            ,lng = ll.lng.toFixed(4)
+            ,marker = this.getMarker();
+
+        this.valueEditor.setValue(lat + ',' + lng);
+
+        marker.setLatLng(ll);
         this.actions.save.setDisabled(false);
     }
 
@@ -117,6 +128,34 @@ Ext.define('CB.widget.LeafletWindow', {
         }
 
         this.close();
+    }
+
+    ,getMarker: function(ll) {
+        if(!this.marker) {
+            this.marker = LL.marker(new LL.LatLng(0, 0), {
+                icon:  LL.icon({
+                    iconUrl: '/css/i/marker.png',
+                    iconSize: [25, 41],
+                    'marker-color': 'ff8888'
+                }),
+                draggable: true
+            });
+
+            this.marker.on('dragend', this.onMarkerDragEnd, this);
+
+            this.marker.addTo(this.mapPanel.map);
+        }
+
+        return this.marker;
+    }
+
+    ,onMarkerDragEnd: function(e) {
+        var ll =  e.target.getLatLng().wrap()
+            ,lat = ll.lat.toFixed(4)
+            ,lng = ll.lng.toFixed(4);
+
+        this.valueEditor.setValue(lat + ',' + lng);
+        this.actions.save.setDisabled(false);
     }
 }
 );

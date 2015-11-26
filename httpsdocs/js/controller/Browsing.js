@@ -322,7 +322,8 @@ Ext.define('CB.controller.Browsing', {
 
         for (var i = 0; i <= index; i++) {
             id = store.getAt(i).data.id;
-            if(!Ext.isEmpty(id) && (id > 0)) {
+
+            if(!Ext.isEmpty(id) && (id != -1)) {
                 path.push(id);
             }
         }
