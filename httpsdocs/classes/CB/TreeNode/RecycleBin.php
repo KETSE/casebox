@@ -2,6 +2,7 @@
 namespace CB\TreeNode;
 
 use CB\L;
+use CB\User;
 use CB\DataModel as DM;
 
 class RecycleBin extends Base
@@ -9,7 +10,7 @@ class RecycleBin extends Base
 
     protected function createDefaultFilter()
     {
-        $this->fq = array('did:'.$_SESSION['user']['id']);
+        $this->fq = array('did:' . User::getId());
     }
 
     public function getChildren(&$pathArray, $requestParams)

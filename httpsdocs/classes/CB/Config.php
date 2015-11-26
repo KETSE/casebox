@@ -751,7 +751,7 @@ class Config extends Singleton
                     ,'width' => 200
                 )
                 ,'did' => array(
-                    'title' => L\get('UpdatedBy')
+                    'title' => L\get('DeletedBy')
                     ,'width' => 200
                 )
                 ,'comment_user_id' => array(
