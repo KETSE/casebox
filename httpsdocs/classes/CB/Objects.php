@@ -146,15 +146,6 @@ class Objects
             return $this->create($d);
         }
 
-        /*if (empty($d['id']) ||
-            !is_numeric($d['id'])// ||
-            // (!empty($d['draft']) &&
-            //     DM\Objects::isDraft($d['id'])
-            // )
-        ) {
-            return $this->create($d);
-        }/**/
-
         // SECURITY: check if current user has write access to this action
         if (!Security::canWrite($d['id'])) {
             throw new \Exception(L\get('Access_denied'));

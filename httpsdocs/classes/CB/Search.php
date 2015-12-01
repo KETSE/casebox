@@ -109,7 +109,7 @@ class Search extends Solr\Client
         /* setting highlight if query parrameter is present /**/
         if (!empty($this->query)) {
             $this->params['hl'] = 'true';
-            $this->params['hl.fl'] = 'name,content';
+            $this->params['hl.fl'] = 'name'; //,content
             $this->params['hl.simple.pre'] = '<em class="hl">';
             $this->params['hl.simple.post'] = '</em>';
             $this->params['hl.usePhraseHighlighter'] = 'true';
@@ -572,9 +572,9 @@ class Search extends Solr\Client
                 if (!empty($sr->highlighting->{$id}->{'name'})) {
                     $d['hl'] = $sr->highlighting->{$id}->{'name'}[0];
                 }
-                if (!empty($sr->highlighting->{$id}->{'content'})) {
-                    $d['content'] = $sr->highlighting->{$id}->{'content'}[0];
-                }
+                // if (!empty($sr->highlighting->{$id}->{'content'})) {
+                //     $d['content'] = $sr->highlighting->{$id}->{'content'}[0];
+                // }
             }
         }
 

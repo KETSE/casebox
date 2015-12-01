@@ -91,7 +91,14 @@ if (\CB\DB\dbQuery('use `' . $dbName . '`')) {
 }
 
 if ($applyDump) {
-    shell_exec('mysql --host=' . $cfg['db_host'] . ' --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' < ' . $sqlFile);
+    restoreDB(
+        $dbName,
+        $dbUser,
+        $dbPass,
+        $cfg['db_host'],
+        $sqlFile
+    );
+
     showMessage();
 }
 

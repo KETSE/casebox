@@ -57,7 +57,7 @@ function getDefaultConfigValues()
 /**
  * get question / phrase to be displayed for a given paramName
  */
-function getParamPhrase($paramName = null )
+function getParamPhrase($paramName = null)
 {
     $phrases = array(
         'apache_user' => 'Specify apache user {default}:' . "\n"
@@ -115,12 +115,12 @@ function getParamPhrase($paramName = null )
         ,'overwrite_existing_core_db' => "Core database exists. Would you like to backup it and overwrite with dump from current installation [Y/n]: "
         ,'solr_create_cores' => "solr aucreate cores ?"
     );
-    
+
     if (empty($paramName)) {
             return $phrases;
-        } else {
-            return empty($phrases[$paramName]) ? $paramName : $phrases[$paramName];
-        }
+    } else {
+        return empty($phrases[$paramName]) ? $paramName : $phrases[$paramName];
+    }
 }
 
 /**
@@ -494,14 +494,28 @@ function createMainDatabase($cfg)
             }
 
             echo 'Applying dump .. ';
-            echo shell_exec('mysql --host=' . $cfg['db_host'] . ' --user=' . $dbUser . ( $dbPass ? ' --password=' . $dbPass : '' ) . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
+            restoreDB(
+                $cbDb,
+                $dbUser,
+                $dbPass,
+                $cfg['db_host'],
+                \CB\APP_DIR . 'install/mysql/_casebox.sql'
+            );
+
             showMessage();
         }
     } else {
         if (confirm('create__casebox_from_dump')) {
              echo "Create database ". $cbDb. PHP_EOL;
             if (\CB\DB\dbQuery('CREATE DATABASE IF NOT EXISTS `' . $cbDb . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
-                echo shell_exec('mysql --host=' . $cfg['db_host'] . ' --user=' . $dbUser . ( $dbPass ? ' --password=' . $dbPass : '' )  . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
+                restoreDB(
+                    $cbDb,
+                    $dbUser,
+                    $dbPass,
+                    $cfg['db_host'],
+                    \CB\APP_DIR . 'install/mysql/_casebox.sql'
+                );
+
             } else {
                 $rez = false;
                 showError('Cant create database "' . $cbDb . '".');
@@ -687,13 +701,43 @@ function backupFile($fileName)
 /**
  * backup given database to sys/backup folder
  * @param  varchar $dbName
+ * @param  varchar $dbUser
+ * @param  varchar $dbPass
+ * @param  varchar $dbHost
+ * @param  varchar $fileName (optional)
  * @return boolean
  */
-function backupDB($dbName, $dbUser, $dbPass, $dbHost)
+function backupDB($dbName, $dbUser, $dbPass, $dbHost, $fileName = false)
 {
-    $fileName = \CB\Cache::get('RUN_INSTALL_BACKUP_DIR') . date('Ymd_His_') . $dbName . '.sql';
+    if ($fileName === false) {
+        $fileName = \CB\Cache::get('RUN_INSTALL_BACKUP_DIR') . date('Ymd_His_') . $dbName . '.sql';
+    }
 
-    shell_exec('mysqldump --host=' . $dbHost . ' --routines --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' > ' . $fileName);
+    shell_exec('mysqldump --host=' . $dbHost . ' --routines --no-create-db --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' > ' . $fileName);
+
+    //remove database reference from backup file
+    $txt = file_get_contents($fileName);
+
+    $txt = str_replace("`$dbName`.", '', $txt);
+
+    //write the entire string
+    file_put_contents($fileName, $txt);
+
+    return true;
+}
+
+/**
+ * restore database from sql dump
+ * @param  varchar $dbName
+ * @param  varchar $dbUser
+ * @param  varchar $dbPass
+ * @param  varchar $dbHost
+ * @param  varchar $sqlFile
+ * @return boolean
+ */
+function restoreDB($dbName, $dbUser, $dbPass, $dbHost, $sqlFile)
+{
+    shell_exec('mysql --host=' . $dbHost . ' --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' < ' . $sqlFile);
 
     return true;
 }
@@ -731,31 +775,29 @@ function showError($msg = "ERROR")
 }
 
 /**
- * 
- * @return array 
+ *
+ * @return array
  */
 function cliGetAllOptions()
 {
-    
+
     $longopts = array_keys(\CB\Install\getParamPhrase());
-     
+
     foreach ($longopts as &$optName) {
         $optName .= '::';
     }
-    
+
     array_push($longopts, 'config::');
     array_push($longopts, 'file:');
-    
 
-    
-    $cliOptions = getopt('f:',$longopts);
-    
+    $cliOptions = getopt('f:', $longopts);
+
         return $cliOptions;
-    
+
 }
 
 /**
- * 
+ *
  * @param array $cliOptions
  */
 function cliGetConfigFile($cliOptions = null)
@@ -764,7 +806,7 @@ function cliGetConfigFile($cliOptions = null)
     $configFile = null;
     $keyFiles = array('f', 'file', 'config');
     if (isset($cliOptions)) {
-        if (\CB\Util\checkKeyExists( $keyFiles, $cliOptions )) {
+        if (\CB\Util\checkKeyExists($keyFiles, $cliOptions)) {
             $keys = array_intersect(array_keys($cliOptions), $keyFiles);
             foreach ($keys as $k) {
                 if (isset($cliOptions[$k]) && trim($cliOptions[$k])) {
@@ -773,6 +815,7 @@ function cliGetConfigFile($cliOptions = null)
             }
         }
     }
+
     return $configFile;
 }
 
@@ -790,13 +833,11 @@ function cliLoadConfig($options = null)
     }
 
     $configFile = \CB\Install\cliGetConfigFile($options);
-    // echo $configFile.'!!!!!'.PHP_EOL;
 
     if (!empty($configFile) && file_exists($configFile)) {
         $cfg = \CB\Config::loadConfigFile($configFile);
-        if(count($cfg)) {
-          //  echo "\CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);";
-          \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
+        if (count($cfg)) {
+            \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
         }
         \CB\Cache::set('RUN_SETUP_CFG', $cfg);
         if (isset($cfg['overwrite_create_backups']) && $cfg['overwrite_create_backups'] == 'n') {
@@ -812,7 +853,7 @@ function cliLoadConfig($options = null)
     if (!empty($cfg)) {
         // define('CB\\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')', false);
         \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
-       // $cfg = $cfg + $options['config'];
+        // $cfg = $cfg + $options['config'];
     } else {
         \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
     }
@@ -820,19 +861,18 @@ function cliLoadConfig($options = null)
     // initialize default values in cofig if not detected
 
     $defaultValues = getDefaultConfigValues();
-    
-        if(is_array($cfg)) {
-           $cfg = $cfg + $defaultValues;
-       } else {
-            $cfg = $defaultValues;
-       }
 
-       if (\CB\Util\checkKeyExists(  array_keys($options), \CB\Install\getParamPhrase()) ) {
-            foreach ($options as $OptKey => $OptValue) {
-                $cfg[$OptKey] = $OptValue;
-            }
+    if (is_array($cfg)) {
+        $cfg = $cfg + $defaultValues;
+    } else {
+        $cfg = $defaultValues;
+    }
+
+    if (\CB\Util\checkKeyExists(array_keys($options), \CB\Install\getParamPhrase())) {
+        foreach ($options as $OptKey => $OptValue) {
+            $cfg[$OptKey] = $OptValue;
         }
-        
-       
+    }
+
     return $cfg;
 }

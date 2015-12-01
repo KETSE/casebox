@@ -466,15 +466,23 @@ class Object
 
         \CB\fireEvent('nodeDbUpdate', $this);
 
-        $this->logAction(
-            $wasDraft
-            ? 'create'
-            : 'update',
-            array(
-                'old' => $this->oldObject
-                ,'mentioned' => $this->lastMentionedUserIds
-            )
-        );
+        if ($wasDraft) {
+            $this->logAction(
+                'create',
+                array(
+                    'mentioned' => $this->lastMentionedUserIds
+                )
+            );
+
+        } else {
+            $this->logAction(
+                'update',
+                array(
+                    'old' => $this->oldObject
+                    ,'mentioned' => $this->lastMentionedUserIds
+                )
+            );
+        }
 
         return true;
     }

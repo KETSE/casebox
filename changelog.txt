@@ -1,3 +1,11 @@
+CaseBox 1.9.557 (2015-12-01)
+==============================
+- #8753 Request to add a column "Приемная" to the Consultation search results  закрыта
+- #9806 Error when searching for 'Human Rights Information Center'
+- #9692 Show map pointer, improve UI
+- #9517 DIFF shown in Activity Stream not correct
+- #9358 Demo not being reset by demo data
+
 CaseBox 1.9.556 (2015-11-26)
 ==============================
 - #9692 Show map pointer, improve UI
