@@ -1442,9 +1442,9 @@ class User
 
     private static function setTSVConfig($TSVConfig, $userId = false)
     {
-        $cfg                    = static::getUserConfig($userId);
+        $cfg = static::getUserConfig($userId);
         $cfg['security']['TSV'] = $TSVConfig;
-        $cfg                    = static::setUserConfig($cfg, $userId);
+        static::setUserConfig($cfg, $userId);
     }
 
     public static function getNotificationSettings($userId = false)

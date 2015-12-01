@@ -28,6 +28,12 @@ Ext.define('CB.widget.LeafletWindow', {
                 ,scope: this
                 ,handler: this.close
             })
+
+            ,set: new Ext.Action({
+                text: L.Set
+                ,scope: this
+                ,handler: this.onSetClick
+            })
         };
 
         this.mapPanel = Ext.create('CB.LeafletPanel', {
@@ -38,11 +44,28 @@ Ext.define('CB.widget.LeafletWindow', {
             }
         });
 
-        this.valueEditor = new Ext.form.TextField({
+        this.latEd = new Ext.form.TextField({
             enableKeyEvents: true
-            ,fieldLabel: L.selectedCoordinates
-            ,labelWidth: 105
-            ,maskRe: /[\-\d\.,]/
+            ,fieldLabel: L.Latitude
+            ,labelWidth: 50
+            ,width: 120
+            ,maskRe: /[\-\d\.]/
+            ,listeners: {
+                specialkey: this.onEditorEnterPress
+                ,scope: this
+            }
+        });
+
+        this.longEd = new Ext.form.TextField({
+            enableKeyEvents: true
+            ,fieldLabel: L.Longitude
+            ,labelWidth: 55
+            ,width: 125
+            ,maskRe: /[\-\d\.]/
+            ,listeners: {
+                specialkey: this.onEditorEnterPress
+                ,scope: this
+            }
         });
 
         Ext.apply(this, {
@@ -53,11 +76,23 @@ Ext.define('CB.widget.LeafletWindow', {
             ,tbar: [
                 this.actions.save
                 ,this.actions.cancel
-                ,'-'
-                ,this.valueEditor
+                ,'->'
+                ,this.latEd
+                ,{
+                    xtype: 'tbspacer'
+                    ,width: 10
+                }
+                ,this.longEd
+                ,this.actions.set
             ]
             ,items: [
                 this.mapPanel
+            ]
+            ,bbar: [
+                {
+                    xtype: 'label'
+                    ,text: 'Location'
+                }
             ]
         });
 
@@ -73,11 +108,13 @@ Ext.define('CB.widget.LeafletWindow', {
             ,zoom = Ext.valueFrom(dl.zoom, 10);
 
         if (!Ext.isEmpty(d.value)) {
-            this.valueEditor.setValue(d.value);
 
             var a = d.value.split(',');
             lat = a[0];
             lng = a[1];
+
+            this.latEd.setValue(lat);
+            this.longEd.setValue(lng);
 
             this.getMarker().setLatLng(new LL.LatLng(lat, lng));
         }
@@ -108,7 +145,8 @@ Ext.define('CB.widget.LeafletWindow', {
             ,lng = ll.lng.toFixed(4)
             ,marker = this.getMarker();
 
-        this.valueEditor.setValue(lat + ',' + lng);
+        this.latEd.setValue(lat);
+        this.longEd.setValue(lng);
 
         marker.setLatLng(ll);
         this.actions.save.setDisabled(false);
@@ -121,7 +159,10 @@ Ext.define('CB.widget.LeafletWindow', {
             var f = Ext.Function.bind(
                 d.callback
                 ,Ext.valueFrom(d.scope, this)
-                ,[this, this.valueEditor.getValue()]
+                ,[
+                    this
+                    ,this.latEd.getValue() + ',' + this.longEd.getValue()
+                ]
             );
 
             f();
@@ -154,8 +195,26 @@ Ext.define('CB.widget.LeafletWindow', {
             ,lat = ll.lat.toFixed(4)
             ,lng = ll.lng.toFixed(4);
 
-        this.valueEditor.setValue(lat + ',' + lng);
+        this.latEd.setValue(lat);
+        this.longEd.setValue(lng);
         this.actions.save.setDisabled(false);
+    }
+
+    ,onEditorEnterPress: function (ed, e) {
+        if (e.getKey() == e.ENTER) {
+            this.onSetClick();
+        }
+    }
+
+    ,onSetClick: function(b, e) {
+        var lat = this.latEd.getValue()
+            ,lng = this.longEd.getValue();
+
+        if (!Ext.isEmpty(lat) && !Ext.isEmpty(lng)) {
+            var ll = new LL.LatLng(lat, lng);
+            this.getMarker().setLatLng(ll);
+            this.mapPanel.map.setView(ll);
+        }
     }
 }
 );

@@ -153,7 +153,6 @@ Ext.define('CB.browser.view.Grid', {
                 border: 0
             }
 
-            ,autoRender: true
             ,store: this.store
             ,getProperty: this.getProperty // link to view container method
             ,defaultColumns: Ext.apply([], columns)
@@ -518,6 +517,7 @@ Ext.define('CB.browser.view.Grid', {
                 : L.NoResultsFound;
 
         this.grid.view.emptyText = '<div class="gv-empty-text"><div class="middle"><div class="inner">' + emptyText + '</div></div></div>';
+        this.grid.view.refresh();
     }
 
     ,ddOnContainerOver: function(source, e, data) {
