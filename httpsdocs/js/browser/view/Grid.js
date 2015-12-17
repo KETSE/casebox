@@ -146,7 +146,6 @@ Ext.define('CB.browser.view.Grid', {
 
         this.grid = new Ext.grid.Panel({
             loadMask: false
-            ,region: 'center'
             ,cls: 'folder-grid'
             ,border: false
             ,bodyStyle: {
@@ -315,6 +314,7 @@ Ext.define('CB.browser.view.Grid', {
             ,bbar: {
                 xtype: 'CBBrowserViewGridPagingToolbar'
                 ,store: this.store
+                ,hidden: !Ext.isEmpty(this.hideBottomBar)
                 ,doRefresh: this.onReloadClick.bind(this)
             }
             ,plugins: [{
@@ -387,7 +387,7 @@ Ext.define('CB.browser.view.Grid', {
         Ext.apply(this, {
             title: L.Explorer
             ,header: false
-            ,layout: 'border'
+            ,layout: 'fit'
             ,viewName: 'grid'
             ,items: [
                 this.grid
@@ -491,7 +491,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,currSelectedId = haveSelection
                     ? this.grid.getSelection()[0].get('nid')
                     : 0
-                ,currSelectedPid = this.refOwner.folderProperties.id;
+                ,currSelectedPid = Ext.valueFrom(this.refOwner.folderProperties, {}).id;
 
             if(
                 // (hadSelection !== haveSelection) || (prevSelectedId != currSelectedId)
@@ -507,9 +507,10 @@ Ext.define('CB.browser.view.Grid', {
         this.updateToolbarButtons();
 
         // update empty text
-
         var noRecords = Ext.isEmpty(recs)
-            ,params = options.request.config.params
+            ,params = options.request
+                ? options.request.config.params
+                : {}
             ,filters = params.filters
             ,emptyFilters = Ext.isEmpty(filters) || Ext.Object.isEmpty(filters)
             ,emptyText = (emptyFilters && Ext.isEmpty(params.query) && Ext.isEmpty(params.search))

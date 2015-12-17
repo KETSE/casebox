@@ -109,6 +109,7 @@ class Browser
 
         $this->result = array(
             'data' => array()
+            ,'blockData' => array()
             ,'facets' => array()
             ,'pivot' => array()
             ,'search' => array()
@@ -280,7 +281,8 @@ class Browser
                 }
 
                 $params = array(
-                    'facets'
+                    'blockData'
+                    ,'facets'
                     ,'pivot'
                     // ,'view'
                     ,'stats'

@@ -8,6 +8,8 @@ Ext.define('CB.browser.view.Map',{
     ,border: false
     ,tbarCssClass: 'x-panel-white'
 
+    ,viewParams: {}
+
     ,initComponent: function(){
 
         this.mapPanel = Ext.create(
@@ -93,7 +95,6 @@ Ext.define('CB.browser.view.Map',{
             }
             ,this
         );
-
     }
 
     ,onActivate: function() {
@@ -114,29 +115,7 @@ Ext.define('CB.browser.view.Map',{
     }
 
     ,onMapReady: function(p) {
-        var vp = Ext.valueFrom(this.viewParams, {})
-            ,dl = Ext.valueFrom(vp.defaultLocation, {})
-            ,lat = Ext.valueFrom(dl.lat, 0)
-            ,lng = Ext.valueFrom(dl.lng, 0)
-            ,zoom = Ext.valueFrom(dl.zoom, 3);
-
-        if (!Ext.isEmpty(vp.url)) {
-            p.map.eachLayer(
-                function(l) {
-                    if(l && l.setUrl) {
-                        l.setUrl(vp.url);
-                    }
-                }
-            );
-        }
-
-        p.setView(
-            new LL.LatLng(lat, lng)
-            ,zoom
-            ,{
-                reset: true
-            }
-        );
+        p.setViewConfig(Ext.valueFrom(this.viewParams, {}));
 
         this.mapReady = true;
 

@@ -1,3 +1,16 @@
+CaseBox 1.9.558 (2015-12-17)
+==============================
+- #9843 Dashboards
+- renamed view config options:
+    pivot_type -> pivotType
+    chart_type -> chartType
+- issue #30 unable to install casebox
+
+Important Notes:
+----------
+- config model have to be updated by executing shell command:
+    php 20150826_core_config_model.php -c < core_name>
+
 CaseBox 1.9.557 (2015-12-01)
 ==============================
 - #8753 Request to add a column "Приемная" to the Consultation search results  закрыта

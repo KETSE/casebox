@@ -32,8 +32,10 @@ class PivotFacet extends StringsFacet
             $rez['stats.field'][] = '{!tag=pv1 ' . $func . '=true}' . $cfg['stats']['field'];
         }
 
-        $cfg['field'] = $cfg['facet1']->field . ',' . $cfg['facet2']->field;
-        $rez['facet.pivot'][] = $statsTag . $cfg['field'];
+        if (is_object($cfg['facet1'])) {
+            $cfg['field'] = $cfg['facet1']->field . ',' . $cfg['facet2']->field;
+            $rez['facet.pivot'][] = $statsTag . $cfg['field'];
+        }
 
         return $rez;
     }
@@ -50,7 +52,7 @@ class PivotFacet extends StringsFacet
         $this->solrData = array();
         $cfg = &$this->config;
 
-        if (!empty($solrResult->facet_pivot->{$cfg['field']})) {
+        if (!empty($cfg['field']) && !empty($solrResult->facet_pivot->{$cfg['field']})) {
             $this->solrData = $solrResult->facet_pivot->{$cfg['field']};
 
             if (!empty($statsSolrResult) && !empty($statsSolrResult->stats)) {
@@ -83,6 +85,11 @@ class PivotFacet extends StringsFacet
                   )),
          */
         $cfg = &$this->config;
+
+        if (empty($cfg['field'])) {
+            return false;
+        }
+
         $f1d = array();
         $f2d = array();
         // collect all distinct values available for both fields

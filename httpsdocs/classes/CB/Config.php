@@ -15,7 +15,7 @@ class Config extends Singleton
     /* define possible statuses for a core */
     public static $CORESTATUS_DISABLED = 0;
     public static $CORESTATUS_ACTIVE = 1;
-    public static $CORESTATUS_MAINTAINANCE = 2;
+    public static $CORESTATUS_MAINT = 2;
 
     /* flags */
     protected static $flags = array(
@@ -164,24 +164,48 @@ class Config extends Singleton
     private static function getCoreDBConfig()
     {
         $rez = array();
+
         $ref = array();
+        $left = array();
+        $lastLength = 0;
 
         $rows = DM\Config::readAll();
 
-        foreach ($rows as $r) {
-            $ref[$r['id']] = $r['param'];
+        //add root nodes
+        foreach ($rows as &$r) {
+            if (empty($r['pid'])) {
+                $ref[$r['id']] = &$r;
+            } else {
+                $left[] = &$r;
+            }
+        }
 
+        while (!empty($left) && (sizeof($left) != $lastLength)) {
+            $rows = $left;
+            $lastLength = sizeOf($left);
+            $left = array();
+
+            foreach ($rows as &$r) {
+                if (isset($ref[$r['pid']])) {
+                    $p = &$ref[$r['pid']];
+                    if (!is_array($p['value'])) {
+                        $p['value'] = Util\toJSONArray($p['value']);
+                    }
+
+                    $r['value'] = Util\toJSONArray($r['value']);
+                    $p['value'][$r['param']] = &$r['value'];
+                    $ref[$r['id']] = &$r;
+
+                } else {
+                    $left[] = &$r;
+                }
+            }
+        }
+
+        //iterate and collect resulting items
+        foreach ($ref as &$r) {
             if (empty($r['pid'])) {
                 $rez[$r['param']] = $r['value'];
-
-            } else {
-                $parent = &$rez[$ref[$r['pid']]];
-
-                if (!is_array($parent)) {
-                    $rez[$ref[$r['pid']]] = Util\toJSONArray($parent);
-                }
-
-                $rez[$ref[$r['pid']]][$r['param']] = Util\toJSONArray($r['value']);
             }
         }
 
@@ -196,7 +220,7 @@ class Config extends Singleton
     {
         $status = static::get('core_status', static::$CORESTATUS_DISABLED);
 
-        if ($status != static::$CORESTATUS_MAINTAINANCE) {
+        if ($status != static::$CORESTATUS_MAINT) {
             return $status;
         }
 
@@ -259,7 +283,7 @@ class Config extends Singleton
                 $rez = 'Core is not active at the moment, please try again later.';
                 break;
 
-            case static::$CORESTATUS_MAINTAINANCE:
+            case static::$CORESTATUS_MAINT:
                 $coreName = static::get('core_name');
 
                 $rez = file_get_contents(TEMPLATES_DIR . 'maintenance.html');
@@ -959,6 +983,28 @@ class Config extends Singleton
                     $v = $mainFolder.$v;
                 }
                 $rez[$key] = $v;
+            }
+        }
+
+        return $rez;
+    }
+
+    /**
+     * extend the given $customization from value set in $cutomization["extends"] if present under container
+     * @param  varchar $container
+     * @param  array   $customization
+     * @return array
+     */
+    public static function extend($container, $customization)
+    {
+        $rez = $customization;
+
+        if (!empty($rez['extends'])) {
+            $container = static::get($container);
+
+            if (!empty($container[$rez['extends']])) {
+                $rez = array_merge($container[$rez['extends']], $rez);
+                unset($rez['extends']);
             }
         }
 

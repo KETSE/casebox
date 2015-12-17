@@ -95,8 +95,9 @@ return array_merge(
             ,'//js/browser/view/grid/feature/Grouping.js'
             ,'//js/browser/view/Calendar.js'
             ,'//js/browser/view/Charts.js'
-            ,'//js/browser/view/Pivot.js'
+            ,'//js/browser/view/Dashboard.js'
             ,'//js/browser/view/Map.js'
+            ,'//js/browser/view/Pivot.js'
 
             ,'//js/CB.VerticalEditGrid.js'
             ,'//js/CB.VerticalSearchEditGrid.js'
@@ -179,6 +180,12 @@ return array_merge(
             ,'//js/widget/LeafletPanel.js'
             ,'//js/widget/LeafletWindow.js'
             ,'//js/widget/TaskBar.js'
+            ,'//js/widget/block/Base.js'
+            ,'//js/widget/block/Chart.js'
+            ,'//js/widget/block/Grid.js'
+            ,'//js/widget/block/Map.js'
+            ,'//js/widget/block/Pivot.js'
+            ,'//js/widget/block/Template.js'
         )
 
         ,'jsdev' => array(

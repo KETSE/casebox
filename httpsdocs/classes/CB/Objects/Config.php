@@ -45,13 +45,11 @@ class Config extends Object
 
         $od = $this->oldObject->getData();
 
-        $id = DM\Config::toId($od['data']['_title'], 'param');
-
         $d = &$this->data;
         $dd = &$d['data'];
 
         $p = array(
-            'id' => $id
+            'id' => $d['id']
             ,'pid' => empty($d['pid'])
                 ? null
                 : $this->getDMPid($d['pid'])
@@ -93,13 +91,23 @@ class Config extends Object
     protected function getDMPid($pid)
     {
         $rez = null;
-        $name = Objects::getName($pid);
-        $id = DM\Config::toId($name, 'param');
 
-        if (is_numeric($id)) {
-            $rez = $id;
+        $r = DM\Config::read($pid);
+
+        if (!empty($r)) {
+            $rez = $r['id'];
         }
 
         return $rez;
+    }
+
+    protected function moveCustomDataTo($targetId)
+    {
+        DM\Config::update(
+            array(
+                'id' => $this->id
+                ,'pid' => $targetId
+            )
+        );
     }
 }

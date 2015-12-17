@@ -114,128 +114,23 @@ Ext.define('CB.browser.view.Charts', {
             ,this.sortButton
         );
 
-        this.seriesStyles = [];
-        for (var i = 0; i < App.colors.length; i++) {
-            this.seriesStyles.push({
-                color: App.colors[i]
-            });
-        }
-
-        this.chartDataStore = new Ext.data.JsonStore({
-            autoDestroy: false
-            // ,fields: ['id', 'name', {name: 'count', type: 'int'}]
-            ,model: 'GenericCount'
-        });
-
-        this.chartConfigs = {
-            'barchart': {
-                store: this.chartDataStore
-                ,colors: App.colors
-                ,axes: [
-                    {
-                        type: 'numeric'
-                        ,position: 'bottom'
-                        ,fields: 'count'
-                        ,grid: true
-                    },{
-                        type: 'category'
-                        ,position: 'left'
-                        ,fields: 'name'
-                        ,grid: true
-                    }
-                ]
-                ,series: [{
-                    type: 'bar'
-                    ,axis: 'bottom'
-                    ,xField: 'name'
-                    ,yField: 'count'
-                    ,style: {
-                        opacity: 0.80
-                        ,minGapWidth: 10
-                    }
-                    ,highlight: {
-                        fillStyle: 'rgba(249, 204, 157, 1.0)'
-                        ,strokeStyle: 'black'
-                        ,radius: 10
-                    }
-                    ,label: {
-                        field: 'count'
-                        ,display: 'insideEnd'
-                    }
-                    ,listeners: {
-                        scope: this
-                        ,itemclick: this.onChartItemClick
-                    }
-                }]
-            }
-            ,'columnchart': {
-                store: this.chartDataStore
-                ,colors: App.colors
-                ,axes: [{
-                        type: 'numeric'
-                        ,position: 'left'
-                        ,adjustByMajorUnit: true
-                        ,fields: ['count']
-                        ,grid: true
-                    }, {
-                        type: 'category'
-                        ,position: 'bottom'
-                        ,fields: ['name']
-                        ,grid: true
-                    }
-                ]
-                ,series: [{
-                    type: 'column'
-                    ,xField: 'name'
-                    ,yField: ['count']
-                    ,stacked: true
-                    ,highlight: {
-                        fillStyle: 'yellow'
-                    }
-                    ,label: {
-                        field: 'count'
-                        ,display: 'insideEnd'
-                    }
-                    ,listeners: {
-                        scope: this
-                        ,itemclick: this.onChartItemClick
-                    }
-                }]
-            }
-            ,'piechart': {
-                store: this.chartDataStore
-                ,series: [{
-                    type: 'pie',
-                    angleField: 'count',
-                    label: {
-                        field: 'name',
-                        display: 'outside',
-                        calloutLine: true
-                    },
-                    showInLegend: true,
-                    highlight: true,
-                    highlightCfg: {
-                        'stroke-width': 20,
-                        stroke: '#fff'
-                    }
-                    ,listeners: {
-                        scope: this
-                        ,itemclick: this.onChartItemClick
-                    }
-                }]
-            }
-        };
-
-        this.chartContainer = new Ext.Panel({
+        this.chartBlock = new CB.widget.block.Chart({
             region: 'center'
-            ,layout: 'fit'
+            ,scrollable: true
             ,border: false
+            ,listeners: {
+                scope: this
+                ,itemclick: this.onChartItemClick
+            }
         });
 
         Ext.apply(this, {
             title: L.Charts
             ,header: false
-            ,items: this.chartContainer
+            ,layout: 'fit'
+            ,items: [
+                this.chartBlock
+            ]
             ,listeners: {
                 scope: this
                 ,activate: this.onActivate
@@ -247,6 +142,7 @@ Ext.define('CB.browser.view.Charts', {
         this.currentButton = this.refOwner.buttonCollection.get('barchart');
 
         this.selectedFacets = [];
+
         this.store.on('load', this.onStoreLoad, this);
     }
 
@@ -279,32 +175,69 @@ Ext.define('CB.browser.view.Charts', {
     }
 
     ,onChangeChartClick: function(b, e) {
-        b.toggle(true);
-        this.currentButton = b;
-        this.loadChartData();
+        this.chartData.charts = [b.itemId.split('chart').shift()];
 
-        this.chartContainer.removeAll(true);
-
-        this.chart = Ext.create(
-            'Ext.chart.Chart'
-            ,this.chartConfigs[b.itemId]
-        );
-
-        this.chartContainer.add(this.chart);
+        this.onChangeChart();
     }
 
-    ,loadAvailableFacets: function() {
+    ,onChangeChart: function() {
+        var BC = this.refOwner.buttonCollection
+            ,ch = this.chartData.charts;
+
+        BC.get('barchart').toggle(ch.indexOf('bar') > -1, true);
+        BC.get('columnchart').toggle(ch.indexOf('column') > -1, true);
+        BC.get('piechart').toggle(ch.indexOf('pie') > -1, true);
+
+        this.chartBlock.changeCharts(ch);
+    }
+
+    ,onStoreLoad: function(store, recs, successful, eOpts) {
+        if(!this.rendered ||
+            !this.getEl().isVisible(true) ||
+            (successful !== true)
+        ) {
+            return;
+        }
+
+        this.loadRemoteData(store.proxy.reader.rawData);
+    }
+
+    ,loadRemoteData: function(rd) {
+        var selectedValues = {};
+
+        rd.sorter = this.detectSorter(Ext.valueFrom(rd.view, {}));
+
+        if(this.chartData) {
+            if(this.selectedFacets) {
+                selectedValues = {
+                    facet: this.selectedFacets[0]
+                };
+            }
+
+            selectedValues.charts = this.chartData.charts;
+        }
+
+        this.chartData = this.chartBlock.loadData(rd, selectedValues);
+
+        this.selectedFacets = [this.chartData.facet];
+
+        this.loadAvailableFacets(rd.facets);
+
+        // this.onChangeChart();
+    }
+
+    ,loadAvailableFacets: function(facets) {
         var data = [];
 
         Ext.iterate(
-            this.data
+            facets
             ,function(key, val, o) {
-                if(Ext.isEmpty(this.selectedFacets)) {
-                    this.selectedFacets = [key];
-                }
+                // if(Ext.isEmpty(this.selectedFacets)) {
+                //     this.selectedFacets = [key];
+                // }
                 data.push({
                     id: key
-                    ,name: Ext.htmlDecode(Ext.valueFrom(val['title'], L['facet_'+key]))
+                    ,name: Ext.htmlDecode(Ext.valueFrom(val['title'], L['facet_' + key]))
                 });
             }
             ,this
@@ -318,70 +251,6 @@ Ext.define('CB.browser.view.Charts', {
         st.loadData(data);
 
         this.facetsCombo.setValue(this.selectedFacets[0]);
-    }
-
-    ,loadChartData: function() {
-        var data = {}
-            ,sorter = null;
-
-        sorter = this.detectSorter(Ext.valueFrom(this.viewParams, {}));
-
-        Ext.iterate(
-            this.data
-            ,function(key, val, o) {
-                data[key] = CB.facet.List.prototype.getFacetData(key, val.items);
-
-                for (var i = 0; i < data[key].length; i++) {
-                    if(Ext.isObject(data[key][i].items)) {
-                        data[key][i].name = data[key][i].items.name;
-                        data[key][i].count = data[key][i].items.count;
-                    } else {
-                        data[key][i].count = data[key][i].items;
-                    }
-                    data[key][i].name = htmlEntityDecode(App.shortenString(data[key][i].name, 30));
-                }
-
-                if(sorter) {
-                    data[key] = Ext.Array.sort(data[key], sorter);
-                }
-            }
-            ,this
-        );
-        this.chartData = data;
-
-        if(data[this.selectedFacets[0]]) {
-            var d = Ext.clone(data[this.selectedFacets[0]]);
-            this.chartDataStore.loadData(d);
-        } else {
-            this.chartDataStore.removeAll();
-        }
-    }
-
-    ,onStoreLoad: function(store, recs, successful, eOpts) {
-        if(!this.rendered ||
-            !this.getEl().isVisible(true) ||
-            (successful !== true)
-        ) {
-            return;
-        }
-
-        this.data = store.proxy.reader.rawData.facets;
-
-        if(this.viewParams) {
-            var vp = this.viewParams;
-            if(!Ext.isEmpty(vp.facet)) {
-                this.selectedFacets = [vp.facet];
-            }
-            if(!Ext.isEmpty(vp.chart_type)) {
-                var b = this.refOwner.buttonCollection.get(vp.chart_type + 'chart');
-                if(b) {
-                    this.currentButton = b;
-                }
-            }
-        }
-
-        this.loadAvailableFacets();
-        this.onChangeChartClick(this.currentButton);
     }
 
     ,onChartItemClick: function(o, event){
@@ -405,7 +274,8 @@ Ext.define('CB.browser.view.Charts', {
             : records;
 
         this.selectedFacets[0] = record.get('id');
-        this.onChangeChartClick(this.currentButton);
+
+        this.loadRemoteData(this.store.proxy.reader.rawData);
     }
 
     /**
@@ -415,14 +285,12 @@ Ext.define('CB.browser.view.Charts', {
      * @return void
      */
     ,onSortButtonClick: function(b, e) {
-        var params = Ext.valueFrom(this.viewParams, {});
+        var rd = this.store.proxy.reader.rawData;
 
-        params.sort = b.sort;
-        params.direction = b.direction;
+        rd.sort = b.sort;
+        rd.direction = b.direction;
 
-        this.viewParams = params;
-
-        this.loadChartData();
+        this.loadRemoteData(rd);
 
         this.sortButton.setText(b.text);
     }

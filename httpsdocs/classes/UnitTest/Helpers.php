@@ -136,7 +136,7 @@ class Helpers
         }
     }
 
-    public static function getCookieFilePath($corename = DEFAULT_TEST_CORENAME)
+    public static function getCookieFilePath()
     {
 
         $cookie_path = TEST_PATH_TEMP . 'cookie';
@@ -251,8 +251,8 @@ class Helpers
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
 
-        curl_setopt($ch, CURLOPT_COOKIEJAR, static::getCookieFilePath($corename));
-        curl_setopt($ch, CURLOPT_COOKIEFILE, static::getCookieFilePath($corename));
+        curl_setopt($ch, CURLOPT_COOKIEJAR, static::getCookieFilePath());
+        curl_setopt($ch, CURLOPT_COOKIEFILE, static::getCookieFilePath());
 
         //return the transfer as a string
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -315,7 +315,7 @@ class Helpers
             if (is_array($data)) {
                 extract($data);
             }
-            
+
             ob_start();
 
             include $filename;

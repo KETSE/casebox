@@ -113,7 +113,7 @@ function getParamPhrase($paramName = null)
         ,'core_solr_reindex' => 'Reindex core [Y/n]: '
 
         ,'overwrite_existing_core_db' => "Core database exists. Would you like to backup it and overwrite with dump from current installation [Y/n]: "
-        ,'solr_create_cores' => "solr aucreate cores ?"
+        ,'solr_create_cores' => "Would you like to initialize solr connection [Y/n]:"
     );
 
     if (empty($paramName)) {
@@ -781,7 +781,7 @@ function showError($msg = "ERROR")
 function cliGetAllOptions()
 {
 
-    $longopts = array_keys(\CB\Install\getParamPhrase());
+    $longopts = array_keys(getParamPhrase());
 
     foreach ($longopts as &$optName) {
         $optName .= '::';
@@ -792,8 +792,7 @@ function cliGetAllOptions()
 
     $cliOptions = getopt('f:', $longopts);
 
-        return $cliOptions;
-
+    return $cliOptions;
 }
 
 /**
@@ -820,7 +819,7 @@ function cliGetConfigFile($cliOptions = null)
 }
 
 /**
- * load config from CLI parameters and set respective FLAGS fro install
+ * load config from CLI parameters and set respective FLAGS for install
  * @param array $options
  */
 function cliLoadConfig($options = null)
@@ -829,10 +828,10 @@ function cliLoadConfig($options = null)
     $cfg = null;
 
     if (empty($options)) {
-        $options = \CB\Install\cliGetAllOptions();
+        $options = cliGetAllOptions();
     }
 
-    $configFile = \CB\Install\cliGetConfigFile($options);
+    $configFile = cliGetConfigFile($options);
 
     if (!empty($configFile) && file_exists($configFile)) {
         $cfg = \CB\Config::loadConfigFile($configFile);
@@ -868,7 +867,7 @@ function cliLoadConfig($options = null)
         $cfg = $defaultValues;
     }
 
-    if (\CB\Util\checkKeyExists(array_keys($options), \CB\Install\getParamPhrase())) {
+    if (\CB\Util\checkKeyExists(array_keys($options), getParamPhrase())) {
         foreach ($options as $OptKey => $OptValue) {
             $cfg[$OptKey] = $OptValue;
         }
