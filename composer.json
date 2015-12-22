@@ -11,7 +11,7 @@
     ,"require-dev": {
         "phpunit/phpunit": "4.6.*",
         "phpunit/phpunit-story": ">=1.0",
-        "satooshi/php-coveralls": "~0.6@stable",
+        "satooshi/php-coveralls": "~0.7@stable",
         "league/oauth2-google": "^1.0.1"
     }
 
