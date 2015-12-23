@@ -2,16 +2,16 @@
 
 namespace CB\WebDAV;
 
-class Main {
-    private $method = 'browse';   # browse | edit
+class Main
+{
+    // private $method = 'browse';   # browse | edit
     private $core = '';
 
-    public function __construct() {
-
+    public function __construct()
+    {
     }
 
-
-    public function run() {
-
+    public function run()
+    {
     }
 }

@@ -84,7 +84,7 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
         FROM crons
         WHERE cron_id = $1',
         array($cron_id)
-    ) or die(DB\dbQueryError());
+    );
 
     if ($r = $res->fetch_assoc()) {
         if (empty($r['last_end_time'])) {
@@ -117,7 +117,7 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
                 $cron_id
                 ,$t[0]['file']
             )
-        ) or die(DB\dbQueryError());
+        );
         $rez['id'] = DB\dbLastInsertId();
     }
 
@@ -128,7 +128,7 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
             ,last_end_time = NULL
             ,last_action = CURRENT_TIMESTAMP, execution_info=NULL
         WHERE id = '.$rez['id']
-    ) or die(DB\dbQueryError());
+    );
 
     return $rez;
 }

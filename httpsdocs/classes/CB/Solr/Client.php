@@ -307,7 +307,7 @@ class Client extends Service
         while (!empty($docs) && ($nolimit || ($indexedDocsCount < 2000))) {
             $docs = array();
 
-            $res = DB\dbQuery($sql, $lastId) or die(DB\dbQueryError());
+            $res = DB\dbQuery($sql, $lastId);
             while ($r = $res->fetch_assoc()) {
                 $lastId = $r['id'];
 
@@ -341,7 +341,7 @@ class Client extends Service
                         ,tree_info.updated = 0
                     WHERE tree.id in ('.implode(',', array_keys($docs)).')
                         AND tree_info.id = tree.id'
-                ) or die(DB\dbQueryError());
+                );
 
                 $this->updateCronLastActionTime(@$p['cron_id']);
 
@@ -392,7 +392,7 @@ class Client extends Service
         while (!empty($docs)) {
             $docs = array();
 
-            $res = DB\dbQuery($sql, $lastId) or die(DB\dbQueryError());
+            $res = DB\dbQuery($sql, $lastId);
             while ($r = $res->fetch_assoc()) {
                 $lastId = $r['id'];
                 $r['update'] = true;
@@ -428,7 +428,7 @@ class Client extends Service
                     'UPDATE tree_info
                     SET updated = 0
                     WHERE id IN ('.implode(', ', array_keys($docs)).')'
-                ) or die(DB\dbQueryError());
+                );
 
                 $this->updateCronLastActionTime(@$p['cron_id']);
 
@@ -467,9 +467,9 @@ class Client extends Service
      */
     public static function escapeLuceneChars($v)
     {
-        $luceneReservedCharacters = preg_quote('+-&|!(){}[]^"~*?:\\');
+        $luceneReservedChars = preg_quote('+-&|!(){}[]^"~*?:\\');
         $v = preg_replace_callback(
-            '/([' . $luceneReservedCharacters . '])/',
+            '/([' . $luceneReservedChars . '])/',
             function ($matches) {
                 return '\\' . $matches[0];
             },

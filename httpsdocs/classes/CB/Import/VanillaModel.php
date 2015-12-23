@@ -376,7 +376,8 @@ class VanillaModel extends Base
                     WHERE pid = $1
                         AND dstatus = 0',
                     $pid
-                ) or die(DB\dbQueryError());
+                );
+
                 if ($r = $res->fetch_assoc()) {
                     $o = Objects::getCachedObject($r['id']);
                     $d = $o->getData();

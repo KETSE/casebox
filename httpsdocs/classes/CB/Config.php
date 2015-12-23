@@ -31,8 +31,6 @@ class Config extends Singleton
      */
     public static function load($cfg = array())
     {
-        $instance = static::getInstance();
-
         // merging configs from platform, from casebox database and from core itself
         $cfg = array_merge($cfg, static::getPlatformDBConfig());
         $cfg = array_merge($cfg, static::getPlatformConfigForCore($cfg['core_name']));
@@ -240,9 +238,9 @@ class Config extends Singleton
         $startTime = empty($mcfg['startTime'])
             ? null
             : strtotime($mcfg['startTime']);
-        $endTime = empty($mcfg['endTime'])
-            ? null
-            : strtotime($mcfg['endTime']);
+        // $endTime = empty($mcfg['endTime'])
+        //     ? null
+        //     : strtotime($mcfg['endTime']);
         $now = strtotime('now');
 
         if (//(is_null($startTime) && is_null($endTime)) ||
@@ -284,8 +282,6 @@ class Config extends Singleton
                 break;
 
             case static::$CORESTATUS_MAINT:
-                $coreName = static::get('core_name');
-
                 $rez = file_get_contents(TEMPLATES_DIR . 'maintenance.html');
                 if (empty($rez)) {
                     $rez = 'Core is under maintainance, please try again {time}.';
@@ -368,7 +364,8 @@ class Config extends Singleton
     private static function getEnvironmentVars($config)
     {
         $coreName = $config['core_name'];
-        $filesDir = DATA_DIR.'files'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR;
+        $ds = DIRECTORY_SEPARATOR;
+        $filesDir = DATA_DIR . 'files' . $ds . $coreName . $ds;
 
         $rez = array(
             'db_name' => empty($config['db_name'])
@@ -380,26 +377,26 @@ class Config extends Singleton
                 : $config['solr_core']
 
             ,'core_dir' => empty($config['core_dir'])
-                ? DOC_ROOT.'cores'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR
+                ? DOC_ROOT.'cores' . $ds . $coreName . $ds
                 : $config['core_dir']
 
             // path to files folder
             ,'files_dir' => $filesDir
 
             /* path to preview folder. Generated previews are stored for some filetypes */
-            ,'files_preview_dir' => $filesDir.'preview'.DIRECTORY_SEPARATOR
+            ,'files_preview_dir' => $filesDir . 'preview' . $ds
 
             // path to photos folder
-            ,'photos_path' => $filesDir.'_photo'.DIRECTORY_SEPARATOR
+            ,'photos_path' => $filesDir . '_photo' . $ds
 
             ,'core_url' => $config['server_name'] . $coreName.'/'
 
-            ,'upload_temp_dir' => TEMP_DIR.$coreName.DIRECTORY_SEPARATOR
+            ,'upload_temp_dir' => TEMP_DIR . $coreName . $ds
 
             /* path to incomming folder. In this folder files are stored when just uploaded
             and before checking existance in target.
             If no user intervention is required then files are stored in db. */
-            ,'incomming_files_dir' => TEMP_DIR.$coreName.DIRECTORY_SEPARATOR.'incomming'.DIRECTORY_SEPARATOR
+            ,'incomming_files_dir' => TEMP_DIR.$coreName . $ds . 'incomming' . $ds
 
             ,'error_log' => LOGS_DIR . PREFIX . $coreName.'_error_log'
 
@@ -483,7 +480,7 @@ class Config extends Singleton
             : static::$config['api'];
 
         $plugins = static::getPlugins();
-        foreach ($plugins as $name => $data) {
+        foreach ($plugins as $data) {
             if (!empty($data['api'])) {
                 $rez = array_merge($rez, $data['api']);
             }
@@ -576,7 +573,7 @@ class Config extends Singleton
         }
 
         foreach ($languages as $l) {
-            $k = mb_strtolower(trim($l));
+            $l = mb_strtolower(trim($l));
 
             $dir = DOC_ROOT . 'js' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR;
 
@@ -943,7 +940,7 @@ class Config extends Singleton
 
         //change date formats from mysql to php
         if (!empty($cfg['language_settings'])) {
-            foreach ($cfg['language_settings'] as $k => &$v) {
+            foreach ($cfg['language_settings'] as &$v) {
                 $v['long_date_format'] = str_replace('%', '', $v['long_date_format']);
                 $v['short_date_format'] = str_replace('%', '', $v['short_date_format']);
                 $v['time_format'] = str_replace('%', '', $v['time_format']);

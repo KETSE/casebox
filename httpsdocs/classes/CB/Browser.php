@@ -758,6 +758,7 @@ class Browser
         } else {
             foreach ($F as $k => $v) {
                 $F[$k]['name'] = Purify::filename(@$F[$k]['name']);
+                $v = $v; //dummy codacy assignment
             }
         }
 
@@ -769,7 +770,7 @@ class Browser
         }
 
         /*checking if there is no upload error (for any type of upload: single, multiple, archive) */
-        foreach ($F as $fn => $f) {
+        foreach ($F as $f) {
             if (!in_array($f['error'], array(UPLOAD_ERR_OK, UPLOAD_ERR_NO_FILE))) {
                 return array(
                     'success' => false,
@@ -1026,7 +1027,7 @@ class Browser
                 return Files::getIcon($data['name']);
                 break;
             case 'task':
-                if (@$d['status'] == 3) {
+                if (@$data['status'] == 3) {
                     return 'icon-task-completed';
                 }
 

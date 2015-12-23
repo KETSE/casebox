@@ -93,11 +93,11 @@ class PivotFacet extends StringsFacet
         $f1d = array();
         $f2d = array();
         // collect all distinct values available for both fields
-        foreach ($this->solrData as $idx => &$v) {
+        foreach ($this->solrData as &$v) {
             $f1d[$v->value] = 1;
             unset($v->field);
             if (!empty($v->pivot)) {
-                foreach ($v->pivot as $si => &$sv) {
+                foreach ($v->pivot as &$sv) {
                     $f2d[$sv->value] = 1;
                     unset($sv->field);
                 }

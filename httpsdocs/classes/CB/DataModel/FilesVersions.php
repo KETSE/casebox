@@ -50,7 +50,7 @@ class FilesVersions extends Base
             WHERE v.file_id = $1
             ORDER BY COALESCE(v.udate, v.cdate) DESC',
             $fileId
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $rez[] = $r;
@@ -77,7 +77,7 @@ class FilesVersions extends Base
             ORDER BY id DESC
             LIMIT ' . $skipCount . ', 10',
             $fileId
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $rez[] = $r['id'];
@@ -107,7 +107,7 @@ class FilesVersions extends Base
                 $fileId
                 ,$md5
             )
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r;

@@ -51,7 +51,7 @@ class UsersGroups
                     AND u.did IS NULL
                     AND a.group_id IS NULL
                 ORDER BY 3, 2'
-            ) or die(DB\dbQueryError());
+            );
 
             while ($r = $res->fetch_assoc()) {
                 $r['loaded'] = true;
@@ -75,7 +75,7 @@ class UsersGroups
                 WHERE `type` = 1
                     AND `system` = 0
                 ORDER BY 3, 2'
-            ) or die(DB\dbQueryError());
+            );
 
             while ($r = $res->fetch_assoc()) {
                 $r['iconCls'] = 'icon-users';
@@ -108,7 +108,7 @@ class UsersGroups
                     AND u.did IS NULL
                 ORDER BY 4, 5, 3',
                 $id
-            ) or die(DB\dbQueryError());
+            );
 
             while ($r = $res->fetch_assoc()) {
                 $r['loaded'] = true;
@@ -116,8 +116,6 @@ class UsersGroups
             }
             $res->close();
         }
-
-        $pid = empty($id) ? 'is null' : ' = '.intval($id);
 
         /* collapse first and last names into title */
         for ($i=0; $i < sizeof($rez); $i++) {
@@ -154,8 +152,8 @@ class UsersGroups
             WHERE user_id = $1
                 AND group_id = $2',
             array($user_id, $group_id)
-        ) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
+        );
+        if ($res->fetch_assoc()) {
             throw new \Exception(L\get('UserAlreadyInOffice'));
         }
         $res->close();
@@ -167,7 +165,7 @@ class UsersGroups
                 ,$group_id
                 ,User::getId()
             )
-        ) or die(DB\dbQueryError());
+        );
 
         Security::calculateUpdatedSecuritySets();
 
@@ -194,7 +192,7 @@ class UsersGroups
             WHERE user_id = $1
                 AND group_id = $2',
             array($user_id, $group_id)
-        ) or die(DB\dbQueryError());
+        );
 
         Security::calculateUpdatedSecuritySets();
 
@@ -208,7 +206,7 @@ class UsersGroups
             FROM users_groups_association
             WHERE user_id = $1 LIMIT 1',
             $user_id
-        ) or die(DB\dbQueryError());
+        );
         if ($r = $res->fetch_assoc()) {
             $outOfGroup = false;
         }
@@ -308,8 +306,8 @@ class UsersGroups
             DM\Users::update($params);
 
             /* in case it was a deleted user we delete all old acceses */
-            DB\dbQuery('DELETE FROM users_groups_association WHERE user_id = $1', $user_id) or die(DB\dbQueryError());
-            DB\dbQuery('DELETE FROM tree_acl WHERE user_group_id = $1', $rez['data']['id']) or die(DB\dbQueryError());
+            DB\dbQuery('DELETE FROM users_groups_association WHERE user_id = $1', $user_id);
+            DB\dbQuery('DELETE FROM tree_acl WHERE user_group_id = $1', $rez['data']['id']);
             /* end of in case it was a deleted user we delete all old acceses */
         } else {
             //create
@@ -334,7 +332,7 @@ class UsersGroups
                     ,$p['group_id']
                     ,User::getId()
                 )
-            ) or die(DB\dbQueryError());
+            );
             $rez['data']['group_id'] = $p['group_id'];
         } else {
             $rez['data']['group_id'] = 0;
@@ -373,7 +371,7 @@ class UsersGroups
                 $user_id
                 ,User::getId()
             )
-        ) or die(DB\dbQueryError());
+        );
 
         //TODO: destroy user session if loged in
         return array(
@@ -395,7 +393,7 @@ class UsersGroups
         On deleting a group also the users associations are deleted by the foreign key
         and corresponding security sets are marked, by trigger, as updated.
         */
-        DB\dbQuery('DELETE FROM users_groups WHERE id = $1 AND `type` = 1', $group_id) or die(DB\dbQueryError());
+        DB\dbQuery('DELETE FROM users_groups WHERE id = $1 AND `type` = 1', $group_id);
         /* call the recalculation method for security sets. */
         Security::calculateUpdatedSecuritySets();
 
@@ -435,7 +433,7 @@ class UsersGroups
             FROM users_groups u
             WHERE id = $1',
             $user_id
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $r['title'] = User::getDisplayName($r);
@@ -506,7 +504,7 @@ class UsersGroups
             FROM users_groups_association a
             WHERE user_id = $1',
             $user_id
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $rez['data']['groups'][] = $r['group_id'];
@@ -561,7 +559,7 @@ class UsersGroups
                     ,$group_id
                     ,User::getId()
                 )
-            ) or die(DB\dbQueryError());
+            );
         }
 
         if (!empty($deleting_groups)) {
@@ -571,7 +569,7 @@ class UsersGroups
                 WHERE user_id = $1
                     AND group_id IN ('.implode(', ', $deleting_groups).')',
                 $user_id
-            ) or die(DB\dbQueryError());
+            );
         }
 
         Security::calculateUpdatedSecuritySets($user_id);
@@ -598,7 +596,7 @@ class UsersGroups
             FROM users_groups_association
             WHERE user_id = $1',
             $user_id
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $groups[] = $r['group_id'];
@@ -634,7 +632,7 @@ class UsersGroups
                     $user_id
                     ,$p['currentpassword']
                 )
-            ) or die(DB\dbQueryError());
+            );
             if (!$res->fetch_assoc()) {
                 throw new \Exception(L\get('WrongCurrentPassword'));
             }
@@ -656,7 +654,7 @@ class UsersGroups
                 ,$p['password']
                 ,User::getId()
             )
-        ) or die(DB\dbQueryError());
+        );
 
         Session::clearUserSessions($user_id);
 
@@ -803,7 +801,7 @@ class UsersGroups
                 ,$name
                 ,User::getId()
             )
-        ) or die(DB\dbQueryError());
+        );
 
         return array('success' => true, 'name' => $name);
     }
@@ -859,7 +857,7 @@ class UsersGroups
                 ,$title
                 ,User::getId()
             )
-        ) or die(DB\dbQueryError());
+        );
 
         return array('success' => true, 'title' => $title);
     }

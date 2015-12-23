@@ -62,7 +62,7 @@ class Oauth2Utils
         if (isset($provider)) {
 
             $generator    = $provider->getRandomFactory()->getMediumStrengthGenerator();
-            $random_state = $generator->generateString(32);
+            // $random_state = $generator->generateString(32);
 
             $state = [
                 'core' => Config::get('core_name'),

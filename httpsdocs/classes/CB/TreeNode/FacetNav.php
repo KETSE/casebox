@@ -98,17 +98,17 @@ class FacetNav extends Query
     {
         $rez = array('data' => array());
 
-        $currentFacetFieldConfig  = $this->getCurrentFacetFieldConfig();
+        $cffc  = $this->getCurrentFacetFieldConfig();
 
         $lfc = $this->getLevelFieldConfigs();
         $isLastFacetField = ($this->lastNodeDepth >= sizeOf($lfc));
 
-        if (empty($currentFacetFieldConfig) || (@$this->requestParams['from'] !== 'tree')) {
+        if (empty($cffc) || (@$this->requestParams['from'] !== 'tree')) {
             return $this->getItems();
         }
 
-        $facetName = $currentFacetFieldConfig['name'];
-        $facetField = $currentFacetFieldConfig['field'];
+        $facetName = $cffc['name'];
+        $facetField = $cffc['field'];
 
         $fq = empty($this->config['fq'])
             ? array()
@@ -134,7 +134,7 @@ class FacetNav extends Query
         );
 
         if (!empty($sr['facets']->facet_fields->{$facetName})) {
-            $facetClass = Facets::getFacetObject($currentFacetFieldConfig);
+            $facetClass = Facets::getFacetObject($cffc);
             $facetClass->loadSolrResult($sr['facets']);
             $facetData = $facetClass->getClientData();
             $showChilds = (!$isLastFacetField || !empty($this->config['show_in_tree']));

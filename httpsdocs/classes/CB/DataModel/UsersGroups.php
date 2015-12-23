@@ -53,7 +53,7 @@ class UsersGroups extends Base
             FROM users_groups
             WHERE TYPE = 1
             ORDER BY 3'
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $rez[] = $r;
@@ -83,7 +83,7 @@ class UsersGroups extends Base
             WHERE `type` = 2
                 AND did IS NULL
             ORDER BY 2'
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $rez[] = $r;
@@ -107,7 +107,7 @@ class UsersGroups extends Base
             FROM users_groups_association
             WHERE user_id = $1',
             $id
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $rez[] = $r['group_id'];
@@ -131,7 +131,7 @@ class UsersGroups extends Base
             FROM users_groups_association
             WHERE group_id = $1',
             $id
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $rez[] = $r['user_id'];
@@ -155,7 +155,7 @@ class UsersGroups extends Base
             ,CASE WHEN (`type` = 1) THEN \'icon-users\' ELSE CONCAT(\'icon-user-\', coalesce(sex, \'\') ) END `iconCls`
             FROM users_groups';
 
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+        $res = DB\dbQuery($sql);
 
         while ($r = $res->fetch_assoc()) {
             $rez[$r['id']] = $r;

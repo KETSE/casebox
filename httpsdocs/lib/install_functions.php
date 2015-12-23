@@ -371,7 +371,7 @@ function solrCreateCore($host, $port, $coreName, $cfg = array())
         $confPath = $CBCSPath.'default_config'.DIRECTORY_SEPARATOR.'conf';
 
         if (!file_exists($confLink) && file_exists($confPath)) {
-            $r = symlink($confPath, $confLink);
+            symlink($confPath, $confLink);
         } elseif (!file_exists($confPath)) {
             trigger_error($confPath, E_USER_WARNING);
         }
@@ -407,7 +407,7 @@ function verifyDBConfig(&$cfg)
     $success = true;
 
     try {
-        $dbh = @new \mysqli(
+        @new \mysqli(
             $cfg['db_host'],
             $cfg['su_db_user'],
             (isset($cfg['su_db_pass']) ? $cfg['su_db_pass'] : null),

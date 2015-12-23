@@ -41,7 +41,7 @@ class User
 
             if (!empty($userId)) {
                 $_SESSION['user']['id'] = $userId;
-                $logActionType = 'login_fail';
+                // $logActionType = 'login_fail';
             }
 
             $rez['msg'] = L\get('Auth_fail');
@@ -67,8 +67,7 @@ class User
     public static function setAsLoged($userId, $key)
     {
 
-        $logActionType = 'login';
-
+        // $logActionType = 'login';
         $coreName = Config::get('core_name');
 
         $ips             = '|'.Util\getIPs().'|';
@@ -149,17 +148,6 @@ class User
     }
 
     /**
-     * email verification method. send a confirmation message
-     * to specified mail with a url containing secret key
-     * @param varchar $email
-     * return array json responce
-     */
-    public static function verifyEmail($email)
-    {
-
-    }
-
-    /**
      * Phone verification method. Send an sms message and prompt to insert received code
      * @param varchar $phone
      * return array json responce
@@ -167,8 +155,7 @@ class User
     public function verifyPhone($p)
     {
         $rez   = array('success' => true);
-        $phone = preg_replace('/[^0-9]+/', '', $p['country_code'].$p['phone_number']);
-
+        // $phone = preg_replace('/[^0-9]+/', '', $p['country_code'] . $p['phone_number']);
         return $rez;
     }
 
@@ -455,7 +442,6 @@ class User
             throw new \Exception(L\get('Access_denied'));
         }
 
-        $rez  = array();
         $cfg  = $this->getUserConfig($p['id']);
         $languageSettings = Config::get('language_settings');
 
@@ -491,16 +477,9 @@ class User
         }
 
         if (isset($p['phone']) && !empty($p['phone'])) {
-
             // remove all symbols except 0-9, (, ), -, +
             $phone        = preg_replace("/[^0-9 \-\(\)\+]/", '', $p['phone']);
             $cfg['phone'] = $phone;
-
-            // if (empty($p['phone']) || is_numeric($p['phone'])) {
-            //     $cfg['phone'] = $p['phone'];
-            // } else {
-            //    return array('success' => false, 'msg' => 'Invalid phone number');
-            // }
         }
 
         if (isset($p['timezone'])) {
@@ -707,16 +686,7 @@ class User
 
         return $rez;
     }
-    /* get code for Google Authenticator */
 
-    private function getGACode()
-    {
-        $sk = $this->getGASk();
-        $sk = $sk['sk'];
-        $ga = new \GoogleAuthenticator();
-
-        return $ga->getCode($sk);
-    }
     /* verify given Google Authenticator code */
 
     public function verifyGACode($code)

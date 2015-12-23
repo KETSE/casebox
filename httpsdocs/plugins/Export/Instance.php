@@ -30,8 +30,6 @@ class Instance
         $defaultColumns = Config::getDefaultGridColumnConfigs();
         $columns = $defaultColumns;
 
-        $colDefs = array();
-
         // retreive data
         $p['start'] = 0;
         $p['rows'] = 500;

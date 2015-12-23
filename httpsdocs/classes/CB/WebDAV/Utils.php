@@ -125,7 +125,7 @@ class Utils
                 FROM files f
                 LEFT JOIN files_content c ON f.content_id = c.id
                 WHERE f.id in (' . implode(',', $fileIds) . ')'
-            ) or die(DB\dbQueryError());
+            );
 
             // append additional file info (content_path, MD5, type)
             while ($r = $res->fetch_assoc()) {
@@ -155,7 +155,7 @@ class Utils
         $cachedNodes = \CB\Cache::get('DAVNodes');
 
         // store nodes in cache
-        foreach ($ary as $id => $node) {
+        foreach ($ary as $node) {
 
             // remove '/'
             $path = str_replace('\\', '/', $node['path']);

@@ -71,7 +71,7 @@ $res = DB\dbQuery(
     FROM ' . PREFIX . '_casebox.cores
     WHERE ((active > 0) AND (active < $1))',
     $force ? 3 : 2
-) or die(DB\dbQueryError());
+);
 
 while ($r = $res->fetch_assoc()) {
     if (empty($argv[2]) ||

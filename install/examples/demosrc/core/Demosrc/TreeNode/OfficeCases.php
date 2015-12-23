@@ -115,7 +115,7 @@ class OfficeCases extends \CB\TreeNode\Base
         $res = DB\dbQuery(
             'SELECT name FROM tree WHERE id = $1',
             $id
-        ) or die(DB\dbQueryError());
+        );
         if ($r = $res->fetch_assoc()) {
             $rez = $r['name'];
         }

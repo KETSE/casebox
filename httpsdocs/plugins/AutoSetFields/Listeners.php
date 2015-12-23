@@ -97,7 +97,7 @@ class Listeners
             }
 
             //replacing field titles into object title variable
-            foreach ($templateData['fields'] as $fk => $fv) {
+            foreach ($templateData['fields'] as $fv) {
                 $rez = str_replace('{f'.$fv['name'].'t}', $fv['title'], $rez);
 
             }

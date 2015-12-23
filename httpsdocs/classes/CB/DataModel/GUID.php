@@ -57,7 +57,7 @@ class GUID extends Base
             FROM ' . static::getTableName() . '
             WHERE name in (' . implode(',', $params). ')';
 
-        $res = DB\dbQuery($sql, $names) or die(DB\dbQueryError());
+        $res = DB\dbQuery($sql, $names);
 
         while ($r = $res->fetch_assoc()) {
             $rez[$r['name']] = $r['id'];
@@ -77,6 +77,6 @@ class GUID extends Base
                 UNIQUE KEY `guids_name`(`name`)
             ) ENGINE=InnoDB DEFAULT CHARSET=\'utf8\' COLLATE=\'utf8_general_ci\'',
             array()
-        ) or die(DB\dbQueryError());
+        );
     }
 }

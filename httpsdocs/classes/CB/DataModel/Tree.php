@@ -70,7 +70,7 @@ class Tree extends Base
                 DB\dbQuery(
                     'CALL p_delete_tree_node($1)',
                     $id
-                ) or die(DB\dbQueryError());
+                );
 
             } else {
                 static::update(
@@ -89,7 +89,7 @@ class Tree extends Base
                         $id
                         ,$userId
                     )
-                ) or die(DB\dbQueryError());
+                );
             }
         }
     }
@@ -116,7 +116,7 @@ class Tree extends Base
                 )
             );
 
-            DB\dbQuery('CALL p_mark_all_childs_as_active($1)', $id) or die(DB\dbQueryError());
+            DB\dbQuery('CALL p_mark_all_childs_as_active($1)', $id);
         }
 
     }
@@ -141,7 +141,7 @@ class Tree extends Base
             JOIN tree_info ti on t.id = ti.id
             WHERE t.id = $1',
             $id
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r;
@@ -176,7 +176,7 @@ class Tree extends Base
             LEFT JOIN templates tt ON t.template_id = tt.id
             WHERE t.id = $1',
             $id
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r;
@@ -203,7 +203,7 @@ class Tree extends Base
             JOIN tree_info ti ON t.id = ti.id
             WHERE t.id = $1',
             $id
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r['pid'];
@@ -235,7 +235,7 @@ class Tree extends Base
                     $ownerId
                     ,User::getId()
                 )
-            ) or die(DB\dbQueryError());
+            );
         }
     }
 
@@ -249,7 +249,7 @@ class Tree extends Base
             WHERE pid IS NULL
                 AND `system` = 1
                 AND `is_main` = 1'
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r['id'];
@@ -275,7 +275,7 @@ class Tree extends Base
                 AND name = $2
                 AND dstatus = 0',
             array($pid, $name)
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r;
@@ -305,7 +305,7 @@ class Tree extends Base
                 $pid
                 ,$name . '%' . '.'.$ext
             )
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $rez[] = $r['name'];
@@ -346,7 +346,7 @@ class Tree extends Base
                 AND dstatus = 0' . $templateIds . '
             GROUP BY pid';
 
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+        $res = DB\dbQuery($sql);
 
         while ($r = $res->fetch_assoc()) {
             $rez[$r['pid']] = $r['children'];
@@ -366,7 +366,7 @@ class Tree extends Base
         DB\dbQuery(
             'call `p_mark_all_child_drafts_as_active`($1)',
             $id
-        ) or die(DB\dbQueryError());
+        );
     }
 
     /**
@@ -377,8 +377,6 @@ class Tree extends Base
      */
     public static function assignChildDrafts($draftId, $targetId)
     {
-        $cildren = array();
-
         $res = DB\dbQuery(
             'SELECT id
             FROM tree
@@ -390,7 +388,7 @@ class Tree extends Base
                 $draftId
                 ,User::getId()
             )
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $children[] = $r['id'];
@@ -406,7 +404,7 @@ class Tree extends Base
                     ,updated = 1
                 WHERE id in (' . implode(',', $children) . ')',
                 $targetId
-            ) or die(DB\dbQueryError());
+            );
         }
     }
 
@@ -476,7 +474,7 @@ class Tree extends Base
                 ,$pid
                 ,User::getId()
             )
-        ) or die(DB\dbQueryError());
+        );
 
         return DB\dbLastInsertId();
     }
@@ -499,7 +497,7 @@ class Tree extends Base
                 $sourceId
                 ,$targetId
             )
-        ) or die(DB\dbQueryError());
+        );
 
         return (DB\dbAffectedRows() > 0);
     }

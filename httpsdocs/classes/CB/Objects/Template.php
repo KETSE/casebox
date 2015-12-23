@@ -146,8 +146,6 @@ class Template extends Object
         parent::updateCustomData();
 
         /* saving template data to templates and templates_structure tables */
-        $p = &$this->data;
-
         $data = $this->collectCustomModelData();
 
         unset($data['id']);
@@ -200,7 +198,7 @@ class Template extends Object
         if (isset($this->data['fields'][$field])) {
             return $this->data['fields'][$field];
         }
-        foreach ($this->data['fields'] as $fieldId => $fv) {
+        foreach ($this->data['fields'] as $fv) {
             if ($fv['name'] == $field) {
                 return $fv;
             }
@@ -229,6 +227,16 @@ class Template extends Object
         }
 
         return 0;
+    }
+
+    public function getActionFlags($userId = false)
+    {
+        $d = &$this->data;
+        $sd = &$d['sys_data'];
+
+        return array(
+            'updateSolrData' => !empty($sd['solrConfigUpdated'])
+        );
     }
 
     /**

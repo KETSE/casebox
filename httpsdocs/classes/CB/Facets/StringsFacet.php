@@ -123,6 +123,7 @@ class StringsFacet
 
     public function getClientData($options = array())
     {
+        $options = $options; // dummy codacy assignment
         $rez = array(
             'f' => $this->field
             ,'title' => $this->getTitle()

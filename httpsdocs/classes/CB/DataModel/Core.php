@@ -48,8 +48,8 @@ class Core extends Base
     public static function read($idOrName)
     {
         $id = static::toId($idOrName);
-        
-        if(!$id) {
+
+        if (!$id) {
             trigger_error('can\'t get core id from name:'.$idOrName, E_USER_WARNING);
         }
 
@@ -91,7 +91,7 @@ class Core extends Base
         if ($rez) {
             $dbName = Config::get('prefix') . '_' . $data['name'];
 
-            DB\dbQuery("DROP DATABASE `$dbName`") or die(DB\dbQueryError());
+            DB\dbQuery("DROP DATABASE `$dbName`");
         }
 
         return $rez;

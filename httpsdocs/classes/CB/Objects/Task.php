@@ -51,8 +51,8 @@ class Task extends Object
             $d['data'] = array();
         }
 
-        $cd = &$d['data']; //custom data
-        $sd = &$d['sys_data']; //sys_data
+        // $cd = &$d['data']; //custom data
+        // $sd = &$d['sys_data']; //sys_data
 
         /* add possible action flags*/
         \CB\Tasks::setTaskActionFlags($d);
@@ -369,7 +369,7 @@ class Task extends Object
     public function getUserStatus($userId = false)
     {
         if ($userId == false) {
-            $userId = $_SESSION['user']['id'];
+            $userId = User::getId();
         }
 
         $d = &$this->data;
@@ -459,16 +459,14 @@ class Task extends Object
     }
 
     /**
-     *  get action flags that a user can do this task
+     *  get action flags that a user can do to task
      * @param  int   $userId
      * @return array
      */
     public function getActionFlags($userId = false)
     {
-        $d = &$this->data;
-
         if ($userId === false) {
-            $userId = $_SESSION['user']['id'];
+            $userId = User::getId();
         }
 
         $isAdmin = \CB\Security::isAdmin($userId);
@@ -477,8 +475,8 @@ class Task extends Object
         $canEdit = !$isClosed && ($isAdmin || $isOwner);
 
         $rez = array(
-            'edit' => $canEdit
-            ,'close' => $canEdit
+            // 'edit' => $canEdit
+            'close' => $canEdit
             ,'reopen' => ($isClosed && $isOwner)
             ,'complete' => (!$isClosed && ($this->getUserStatus($userId) == static::$USERSTATUS_ONGOING))
         );
@@ -522,40 +520,16 @@ class Task extends Object
 
         $template = $this->getTemplate();
 
-        $actionsLine = 'Actions<hr />';
         $dateLines = '';
         $ownerRow = '';
         $assigneeRow = '';
         $contentRow = '';
 
-        //create actions line
-        $flags = $this->getActionFlags();
-
-        $actions = array();
-
-        if (!empty($flags['complete'])) {
-            $actions[] = '<a action="complete" class="task-action ib-done">'.L\get('Complete').'</a>';
-        }
-
-        if (!empty($flags['close'])) {
-            $actions[] = '<a action="close" class="task-action ib-done-all">'.L\get('Close').'</a>';
-        }
-
-        if (!empty($flags['reopen'])) {
-            $actions[] = '<a action="reopen" class="task-action ib-repeat">'.L\get('Reopen').'</a>';
-        }
-
-        $actionsLine = '<div class="task-actions">' . implode(' ', $actions) . '</div>';
-
         //create date and status row
         $ed = $this->getEndDate();
-        $status = $this->getStatus();
 
         if (!empty($ed)) {
             $endDate = Util\formatTaskTime($ed, !$sd['task_allday']);
-            // $endDate = empty($sd['task_allday'])
-            //     ? Util\formatDateTimePeriod($ed, null, @$_SESSION['user']['cfg']['timezone'])
-            //     : Util\formatDatePeriod($ed, null, @$_SESSION['user']['cfg']['timezone']);
 
             $dateLines = '<tr><td class="prop-key">'.L\get('Due').':</td><td>' . $endDate . '</td></tr>';
             // $dateLine .= '<div class="date">' . $endDate . '</div>';
@@ -595,7 +569,7 @@ class Task extends Object
             foreach ($v as $id) {
                 $un = User::getDisplayName($id);
                 $completed = ($this->getUserStatus($id) == static::$USERSTATUS_DONE);
-                $flags = $this->getActionFlags($id);
+
                 $cdt = ''; //completed date title
                 $dateText = '';
 
@@ -638,7 +612,7 @@ class Task extends Object
             $p = substr($p, 0, $pos);
         }
 
-        $pb[0] = $actionsLine .
+        $pb[0] = $this->getPreviewActionsRow() .
             '<table class="obj-preview"><tbody>' .
             $dateLines .
             $p .

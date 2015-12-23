@@ -97,7 +97,7 @@ class Users extends UsersGroups
             'DELETE from `' . static::getTableName() . '` ' .
             'WHERE id = $1 AND `type` = $2',
             array($id, static::$type)
-        ) or die(DB\dbQueryError());
+        );
 
         $rez = (DB\dbAffectedRows() > 0);
 
@@ -125,9 +125,9 @@ class Users extends UsersGroups
         $res = DB\dbQuery(
             $sql,
             array($id, static::$type)
-        ) or die(DB\dbQueryError());
+        );
 
-        if ($r = $res->fetch_assoc()) {
+        if ($res->fetch_assoc()) {
             $rez = true;
         }
         $res->close();
@@ -156,7 +156,7 @@ class Users extends UsersGroups
         $res = DB\dbQuery(
             $sql,
             array($username, static::$type)
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r['id'];
@@ -183,7 +183,7 @@ class Users extends UsersGroups
                 AND enabled = 1
                 AND did IS NULL',
             "%$email%"
-        ) or die(DB\dbQueryError());
+        );
 
         while (($r = $res->fetch_assoc()) && empty($rez)) {
             $mails = Util\toTrimmedArray($r['email']);
@@ -214,7 +214,7 @@ class Users extends UsersGroups
             FROM users_groups
             WHERE recover_hash = $1',
             $hash
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r['id'];
@@ -238,7 +238,7 @@ class Users extends UsersGroups
             FROM users_groups
             WHERE id = $1',
             $userId
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r['cid'];
@@ -255,7 +255,7 @@ class Users extends UsersGroups
         $res = DB\dbQuery(
             'CALL p_user_login($1, $2, $3)',
             array($login, $pass, $info)
-        ) or die(DB\dbQueryError());
+        );
 
         if (($r = $res->fetch_assoc()) && ($r['status'] == 1)) {
             $rez = $r['user_id'];
@@ -284,7 +284,7 @@ class Users extends UsersGroups
                 $userId
                 ,'aero'.$pass
             )
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = true;

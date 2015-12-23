@@ -37,7 +37,7 @@ class Favorites extends Base
             FROM ' . static::getTableName() .
             ' WHERE user_id = $1',
             \CB\User::getId()
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             static::decodeJsonFields($r);
@@ -61,7 +61,7 @@ class Favorites extends Base
                 $userId
                 ,$nodeId
             )
-        ) or die(DB\dbQueryError());
+        );
 
         $rez = (DB\dbAffectedRows() > 0);
 

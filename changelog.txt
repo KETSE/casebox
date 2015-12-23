@@ -1,3 +1,11 @@
+CaseBox 1.9.559 (2015-12-23)
+==============================
+- #9874 Trigger reindexing after making changes that affect SOLR
+
+Notes:
+----------
+- updated translations in _casebox.sql
+
 CaseBox 1.9.558 (2015-12-17)
 ==============================
 - #9843 Dashboards

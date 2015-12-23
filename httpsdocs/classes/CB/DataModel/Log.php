@@ -49,7 +49,7 @@ class Log extends Base
             'SELECT *
             FROM `' . static::getTableName() . '`
             WHERE id in (' . implode(',', $ids). ')'
-        ) or die(DB\dbQueryError());
+        );
         while ($r = $res->fetch_assoc()) {
             $rez[] = $r;
         }

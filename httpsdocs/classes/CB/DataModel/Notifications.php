@@ -74,7 +74,7 @@ class Notifications extends Base
             ,seen = $6
             ,`read` = 0';
 
-        DB\dbQuery($sql, $params) or die(DB\dbQueryError());
+        DB\dbQuery($sql, $params);
 
         $rez = DB\dbLastInsertId();
 
@@ -125,7 +125,7 @@ class Notifications extends Base
                 $userId
                 ,$fromId
             )
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $rez[] = $r;
@@ -173,7 +173,7 @@ class Notifications extends Base
         'ORDER BY n.user_id
            ,l.`action_time` DESC';
 
-        $res = DB\dbQuery($sql, $userId) or die(DB\dbQueryError());
+        $res = DB\dbQuery($sql, $userId);
 
         while ($r = $res->fetch_assoc()) {
             $r['data'] = Util\jsonDecode($r['data']);
@@ -216,7 +216,7 @@ class Notifications extends Base
                 $userId
                 ,$fromId
             )
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r['count'];
@@ -249,7 +249,7 @@ class Notifications extends Base
                 SET `read` = 1
                 WHERE user_id = $1 AND id IN (' . implode(',', $ids) .')',
                 $userId
-            ) or die(DB\dbQueryError());
+            );
         }
     }
 
@@ -273,7 +273,7 @@ class Notifications extends Base
                 SET `seen` = 1
                 WHERE user_id = $1 AND action_id <= $2 AND seen = 0',
                 array($userId, $id)
-            ) or die(DB\dbQueryError());
+            );
         }
     }
 
@@ -299,7 +299,7 @@ class Notifications extends Base
                     AND id IN (' . implode(',', $ids) . ')
                     AND seen = 0',
                 $userId
-            ) or die(DB\dbQueryError());
+            );
         }
     }
 
@@ -321,6 +321,6 @@ class Notifications extends Base
             SET `read` = 1
             WHERE user_id = $1 AND `read` = 0',
             $userId
-        ) or die(DB\dbQueryError());
+        );
     }
 }

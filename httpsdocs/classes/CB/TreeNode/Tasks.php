@@ -3,6 +3,7 @@ namespace CB\TreeNode;
 
 use CB\L;
 use CB\Templates;
+use CB\User;
 use CB\DataModel as DM;
 
 class Tasks extends Base
@@ -93,7 +94,7 @@ class Tasks extends Base
     {
         $p = $this->requestParams;
         $p['fq'] = $this->fq;
-        $p['fq'][] = 'task_u_all:' . $_SESSION['user']['id'];
+        $p['fq'][] = 'task_u_all:' . User::getId();
         $p['fq'][] = 'task_status:(1 OR 2)';
         $p['rows'] = 0;
 
@@ -130,9 +131,11 @@ class Tasks extends Base
 
     protected function getDepthChildren2()
     {
+        $userId = User::getId();
         $p = $this->requestParams;
+
         $p['fq'] = $this->fq;
-        $p['fq'][] = 'task_u_all:' . $_SESSION['user']['id'];
+        $p['fq'][] = 'task_u_all:' . $userId;
         $p['fq'][] = 'task_status:(1 OR 2)';
 
         if (@$this->requestParams['from'] == 'tree') {
@@ -145,17 +148,17 @@ class Tasks extends Base
             );
             $sr = $s->query($p);
             $rez = array('data' => array());
-            if (!empty($sr['facets']->facet_fields->{'1assigned'}->{$_SESSION['user']['id']})) {
+            if (!empty($sr['facets']->facet_fields->{'1assigned'}->{$userId})) {
                 $rez['data'][] = array(
-                    'name' => L\get('AssignedToMe') . $this->renderCount($sr['facets']->facet_fields->{'1assigned'}->{$_SESSION['user']['id']})
+                    'name' => L\get('AssignedToMe') . $this->renderCount($sr['facets']->facet_fields->{'1assigned'}->{$userId})
                     ,'id' => $this->getId(2)
                     ,'iconCls' => 'icon-task'
                     ,'has_childs' => true
                 );
             }
-            if (!empty($sr['facets']->facet_fields->{'2cid'}->{$_SESSION['user']['id']})) {
+            if (!empty($sr['facets']->facet_fields->{'2cid'}->{$userId})) {
                 $rez['data'][] = array(
-                    'name' => L\get('CreatedByMe') . $this->renderCount($sr['facets']->facet_fields->{'2cid'}->{$_SESSION['user']['id']})
+                    'name' => L\get('CreatedByMe') . $this->renderCount($sr['facets']->facet_fields->{'2cid'}->{$userId})
                     ,'id' => $this->getId(3)
                     ,'iconCls' => 'icon-task'
                     ,'has_childs' => true
@@ -174,13 +177,14 @@ class Tasks extends Base
 
     protected function getDepthChildren3()
     {
+        $userId = User::getId();
         $p = $this->requestParams;
         $p['fq'] = $this->fq;
 
         if ($this->lastNode->id == 2) {
-            $p['fq'][] = 'task_u_ongoing:' . $_SESSION['user']['id'];
+            $p['fq'][] = 'task_u_ongoing:' . $userId;
         } else {
-            $p['fq'][] = 'cid:' . $_SESSION['user']['id'];
+            $p['fq'][] = 'cid:' . $userId;
         }
 
         $rez = array();
@@ -246,15 +250,16 @@ class Tasks extends Base
     {
         $rez = array();
 
+        $userId = User::getId();
         $p = $this->requestParams;
         $p['fq'] = $this->fq;
 
         $parent = $this->lastNode->parent;
 
         if ($parent->id == 2) {
-            $p['fq'][] = 'task_u_ongoing:' . $_SESSION['user']['id'];
+            $p['fq'][] = 'task_u_ongoing:' . $userId;
         } else {
-            $p['fq'][] = 'cid:'.$_SESSION['user']['id'];
+            $p['fq'][] = 'cid:'.$userId;
         }
 
         // please don't use numeric IDs for named folders: "Assigned to me", "Overdue" etc
@@ -292,7 +297,7 @@ class Tasks extends Base
         $p = $this->requestParams;
         $p['fq'] = $this->fq;
 
-        $p['fq'][] = 'cid:'.$_SESSION['user']['id'];
+        $p['fq'][] = 'cid:' . User::getId();
         $p['fq'][] = 'task_status:[1 TO 2]';
 
         $p['rows'] = 0;
@@ -333,7 +338,7 @@ class Tasks extends Base
         $p = $this->requestParams;
         $p['fq'] = $this->fq;
 
-        $p['fq'][] = 'cid:'.$_SESSION['user']['id'];
+        $p['fq'][] = 'cid:' . User::getId();
         $p['fq'][] = 'task_status:[1 TO 2]';
 
         $user_id = substr($this->lastNode->id, 3);

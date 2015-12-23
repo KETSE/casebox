@@ -46,7 +46,7 @@ $res = DB\dbQuery(
     'SELECT count(*) `nr`
     FROM objects
     WHERE `sys_data` LIKE \'%"subscribers"%\''
-) or die(DB\dbQueryError());
+);
 if ($r = $res->fetch_assoc()) {
     echo "Total objects: ".$r['nr'] . "\n";
 }
@@ -59,7 +59,7 @@ $res = DB\dbQuery(
     'SELECT id, sys_data
     FROM objects
     WHERE `sys_data` LIKE \'%"subscribers"%\''
-) or die(DB\dbQueryError());
+);
 
 while ($r = $res->fetch_assoc()) {
     if ($i > 100) {
@@ -83,7 +83,7 @@ while ($r = $res->fetch_assoc()) {
             $r['id'],
             Util\jsonEncode($d)
         )
-    ) or die(DB\dbQueryError());
+    );
 
     $i++;
 }

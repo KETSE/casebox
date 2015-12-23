@@ -75,7 +75,7 @@ if (!empty($where)) {
 $res = DB\dbQuery(
     'SELECT count(*) `nr`
     FROM objects o' . $where
-) or die(DB\dbQueryError());
+);
 if ($r = $res->fetch_assoc()) {
     echo "Total objects: ".$r['nr'] . "\n";
 }
@@ -89,7 +89,7 @@ DB\startTransaction();
 $res = DB\dbQuery(
     'SELECT o.id
     FROM objects o' . $where
-) or die(DB\dbQueryError());
+);
 while ($r = $res->fetch_assoc()) {
     if ($i > 100) {
         $i = 0;

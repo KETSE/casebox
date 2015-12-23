@@ -108,7 +108,7 @@ class UpgradeConfigModel extends Base
             "ALTER TABLE `templates`
               CHANGE `type` `type` ENUM('case','object','file','task','user','email','template','field','search','comment','shortcut','menu','config')
               CHARSET utf8 COLLATE utf8_general_ci NULL"
-        ) or die(DB\dbQueryError());
+        );
 
         // set templates template id in config
         $ids = DM\Templates::getIdsByType('template');
@@ -405,7 +405,7 @@ class UpgradeConfigModel extends Base
                     $tr['id'],
                     $pid
                 )
-            ) or die(DB\dbQueryError());
+            );
         }
 
         echo "Ok \n";

@@ -59,6 +59,7 @@ class Helpers
      */
     public static function prepareInstance($corename = DEFAULT_TEST_CORENAME)
     {
+        $corename = $corename; //dummy codacy assignment
 
         try {
             require_once CB_ROOT_PATH . 'httpsdocs/config_platform.php';
@@ -123,9 +124,9 @@ class Helpers
 
         if (file_exists($config_filename)) {
 
-            $options = array(
-                'file' => $config_filename
-            );
+            // $options = array(
+            //     'file' => $config_filename
+            // );
             include CB_ROOT_PATH . 'bin/install.php';
 
         } else {

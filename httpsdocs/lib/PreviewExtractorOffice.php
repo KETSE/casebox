@@ -17,7 +17,7 @@ class PreviewExtractorOffice extends PreviewExtractor
             WHERE `status` = 2
                 AND `group` = $1',
             'office'
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $processing = ($r['count'] > 0);
@@ -41,7 +41,7 @@ class PreviewExtractorOffice extends PreviewExtractor
                     AND `group` = \'office\'
                 ORDER BY p.cdate';
 
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+        $res = DB\dbQuery($sql);
 
         while ($r = $res->fetch_assoc()) {
             //start the transaction so that the file status would not change on script fail
@@ -52,7 +52,7 @@ class PreviewExtractorOffice extends PreviewExtractor
                 SET `status` = 2
                 WHERE id = $1',
                 $r['content_id']
-            ) or die(DB\dbQueryError());
+            );
             $ext = explode('.', $r['name']);
             $ext = array_pop($ext);
             $ext = strtolower($ext);
@@ -93,7 +93,7 @@ class PreviewExtractorOffice extends PreviewExtractor
                         ,$r['content_id'].'_.html'
                         ,filesize($pfn)
                     )
-                )  or die(DB\dbQueryError());
+                ) ;
                 $res->close();
             } else {
                 //preview not generated for some reason, probably unoconv service not started
@@ -107,12 +107,12 @@ class PreviewExtractorOffice extends PreviewExtractor
                     SET `status` = 3
                     WHERE id = $1',
                     $r['content_id']
-                )  or die(DB\dbQueryError());
+                ) ;
             }
 
             DB\commitTransaction();
 
-            $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+            $res = DB\dbQuery($sql);
         }
         $res->close();
     }

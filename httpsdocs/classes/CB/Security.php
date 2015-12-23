@@ -20,6 +20,7 @@ namespace CB;
  *       11 Download
  */
 
+use CB\Cache;
 use CB\DataModel as DM;
 
 class Security
@@ -195,7 +196,7 @@ class Security
             (empty($where) ? '' : ' AND '.implode(' AND ', $where)) .
             ' ORDER BY `type`, 2 LIMIT 100',
             $params
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             if ($r['type'] == 1) {
@@ -256,7 +257,7 @@ class Security
             LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
             WHERE t.id = $1',
             $p['id']
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez['inherit_acl'] = $r['inherit_acl'];
@@ -266,7 +267,6 @@ class Security
         /* end of set object title and path*/
 
         /* get the full set of access credentials(users and/or groups) including inherited from parents */
-        $lid =  Config::get('user_language_index', 1);
         $res = DB\dbQuery(
             'SELECT DISTINCT u.id
                     ,u.`name`
@@ -284,7 +284,7 @@ class Security
                     : ' = $1 '
                 ).' ORDER BY u.`type`, 2',
             $p['id']
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $r['user_group_id'] = $r['id'];
@@ -348,7 +348,7 @@ class Security
             JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
             WHERE ti.id = $1',
             $object_id
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $ids = explode(',', $r['ids']);
@@ -381,7 +381,7 @@ class Security
             FROM tree_acl
             WHERE node_id IN (0'.implode(',', $ids).')
                 AND user_group_id IN ('.implode(',', $user_group_ids).')'
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $acl[$acl_order[$r['node_id']]][$r['user_group_id']] = array($r['allow'], $r['deny']);
@@ -395,7 +395,7 @@ class Security
         while (( current($acl) !== false ) && ($set_bits < 12)) {
             $i = key($acl);
             $inherited = ($i > 0) || (!isset($acl_order[$object_id]));
-            $direct_allow_user_group_access = array_fill(0, 12, 0);
+            $allowDirectAccess = array_fill(0, 12, 0);
             /* check firstly if direct access is specified for passed user_group_id */
             if (!empty($acl[$i][$user_group_id])) {
                 $deny = intval($acl[$i][$user_group_id][1]);
@@ -410,7 +410,7 @@ class Security
                 for ($j=0; $j < sizeof($rez[0]); $j++) {
                     if (empty($rez[0][$j]) && empty($rez[1][$j]) && ($allow & 1)) {
                         $rez[0][$j] = (1 + $inherited);
-                        $direct_allow_user_group_access[$j] = (1 + $inherited);
+                        $allowDirectAccess[$j] = (1 + $inherited);
                         $set_bits++;
                     }
                     $allow = $allow >> 1;
@@ -437,7 +437,7 @@ class Security
                         if (empty($rez[0][$j])
                             && empty($rez[1][$j])
                             && ($deny & 1)
-                            && empty($direct_allow_user_group_access[$j])) {
+                            && empty($allowDirectAccess[$j])) {
 
                             //set deny access only if not set directly for that credential allow access
                             $rez[1][$j] = -(1 + $inherited);
@@ -464,7 +464,7 @@ class Security
                     if (empty($rez[0][$j])
                         && empty($rez[1][$j])
                         && ($deny & 1)
-                        && empty($direct_allow_user_group_access[$j])) {
+                        && empty($allowDirectAccess[$j])) {
 
                         //set deny access only if not set directly for that credential allow access
                         $rez[1][$j] = -(1 + $inherited);
@@ -526,7 +526,7 @@ class Security
             LEFT JOIN tree_acl_security_sets ts on ti.security_set_id = ts.id
             WHERE t.id = $1',
             $object_id
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $ids = explode(',', $r['set']);
@@ -546,7 +546,7 @@ class Security
             FROM users_groups_association
             WHERE user_id = $1',
             $user_id
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             if (!in_array($r['group_id'], $user_group_ids)) {
@@ -569,7 +569,7 @@ class Security
             FROM tree_acl
             WHERE node_id IN (0'.implode(',', $ids).')
                 AND user_group_id IN ('.implode(',', $user_group_ids).')'
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $acl[$acl_order[$r['node_id']]][$r['user_group_id']] = array($r['allow'], $r['deny']);
@@ -586,7 +586,7 @@ class Security
         while (( current($acl) !== false ) && ($set_bits < 12)) {
             $i = key($acl);
             $inherited = ($i > 0);
-            $direct_allow_user_group_access = array_fill(0, 12, 0);
+            $allowDirectAccess = array_fill(0, 12, 0);
             /* check firstly if direct access is specified for passed user_id */
             if (!empty($acl[$i][$user_id])) {
                 $deny = intval($acl[$i][$user_id][1]);
@@ -601,7 +601,7 @@ class Security
                 for ($j=0; $j < sizeof($rez[0]); $j++) {
                     if (empty($rez[0][$j]) && empty($rez[1][$j]) && ($allow & 1)) {
                         $rez[0][$j] = (1 + $inherited);
-                        $direct_allow_user_group_access[$j] = (1 + $inherited);
+                        $allowDirectAccess[$j] = (1 + $inherited);
                         $set_bits++;
                     }
                     $allow = $allow >> 1;
@@ -625,7 +625,7 @@ class Security
 
                     for ($j=0; $j < sizeof($rez[1]); $j++) {
                         //set deny access only if not set directly for that credential allow access
-                        if (empty($rez[0][$j]) && empty($rez[1][$j]) && ($deny & 1) && empty($direct_allow_user_group_access[$j])) {
+                        if (empty($rez[0][$j]) && empty($rez[1][$j]) && ($deny & 1) && empty($allowDirectAccess[$j])) {
                             $rez[1][$j] = -(1 + $inherited);
                             $set_bits++;
                         }
@@ -648,7 +648,7 @@ class Security
                 $deny = intval($value[1]);
                 for ($j=0; $j < sizeof($rez[1]); $j++) {
                     //set deny access only if not set directly for that credential allow access
-                    if (empty($rez[0][$j]) && empty($rez[1][$j]) && ($deny & 1) && empty($direct_allow_user_group_access[$j])) {
+                    if (empty($rez[0][$j]) && empty($rez[1][$j]) && ($deny & 1) && empty($allowDirectAccess[$j])) {
                         $rez[1][$j] = -(1 + $inherited);
                         $set_bits++;
                     }
@@ -719,7 +719,7 @@ class Security
         fireEvent('beforeGetAccessForObject', $eventParams);
 
         if (is_null($rez)) {
-            $accessArray = Security::getEstimatedUserAccessForObject($object_id, $user_id);
+            $accessArray = static::getEstimatedUserAccessForObject($object_id, $user_id);
 
             if (!empty($accessArray[0][$access_bit_index])) {
                 $rez = $accessArray[0][$access_bit_index];
@@ -944,7 +944,7 @@ class Security
                 ,$p['data']['user_group_id']
                 ,User::getId()
             )
-        ) or die(DB\dbQueryError());
+        );
 
         $p['data']['id'] = $p['data']['user_group_id'];
         $rez['data'][] = $p['data'];
@@ -998,7 +998,7 @@ class Security
                 ,$deny
                 ,User::getId()
             )
-        ) or die(DB\dbQueryError());
+        );
 
         Security::calculateUpdatedSecuritySets();
 
@@ -1022,7 +1022,7 @@ class Security
         if (!Security::isAdmin() && !Security::canChangePermissions($p['id'])) {
             throw new \Exception(L\get('Access_denied'));
         }
-        DB\dbQuery('DELETE FROM tree_acl WHERE node_id = $1 AND user_group_id = $2', array($p['id'], $p['data']['id'])) or die(DB\dbQueryError());
+        DB\dbQuery('DELETE FROM tree_acl WHERE node_id = $1 AND user_group_id = $2', array($p['id'], $p['data']['id']));
 
         Security::calculateUpdatedSecuritySets();
         Solr\Client::runBackgroundCron();
@@ -1077,7 +1077,7 @@ class Security
 
         // make pre update changes
         if ($p['inherit']) {
-            DB\dbQuery('DELETE from tree_acl WHERE node_id = $1', $p['id']) or die(DB\dbQueryError());
+            DB\dbQuery('DELETE from tree_acl WHERE node_id = $1', $p['id']);
 
         } else {
             switch (@$p['copyRules']) {
@@ -1118,11 +1118,11 @@ class Security
                                 ,$deny
                                 ,User::getId()
                             )
-                        ) or die(DB\dbQueryError());
+                        );
                     }
                     break;
                 default:
-                    DB\dbQuery('DELETE from tree_acl WHERE node_id = $1', $p['id']) or die(DB\dbQueryError());
+                    DB\dbQuery('DELETE from tree_acl WHERE node_id = $1', $p['id']);
                     break;
             }
         }
@@ -1166,7 +1166,7 @@ class Security
             FROM tree_info
             WHERE pids like $1 and acl_count > 0',
             $pids.',%'
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $child_ids[] = $r['id'];
@@ -1175,9 +1175,9 @@ class Security
 
         //remove security rules for childs
         if (!empty($child_ids)) {
-            DB\dbQuery('DELETE FROM tree_acl WHERE node_id in ('.implode(',', $child_ids).')') or die(DB\dbQueryError());
+            DB\dbQuery('DELETE FROM tree_acl WHERE node_id in ('.implode(',', $child_ids).')');
             // update inherit flag
-            DB\dbQuery('UPDATE tree SET inherit_acl = 1 WHERE id in ('.implode(',', $child_ids).')') or die(DB\dbQueryError());
+            DB\dbQuery('UPDATE tree SET inherit_acl = 1 WHERE id in ('.implode(',', $child_ids).')');
         }
 
         Solr\Client::runBackgroundCron();
@@ -1218,7 +1218,7 @@ class Security
                 $sourceNodeId
                 ,$targetNodeId
             )
-        ) or die(DB\dbQueryError());
+        );
     }
 
     /* end of objects acl methods*/
@@ -1253,7 +1253,7 @@ class Security
                 $user_id
                 ,$everyoneGroupId
                 )
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $sets[$r['security_set_id']][$r['user_id']] = $r['access'];
@@ -1281,7 +1281,7 @@ class Security
                 FROM tree_info
                 WHERE id in (' . implode(',', $pids) . ')',
                 array()
-            ) or die(DB\dbQueryError());
+            );
 
             while ($r = $res->fetch_assoc()) {
                 $ids = explode(',', $r['pids']);
@@ -1299,7 +1299,7 @@ class Security
                 'SELECT id, `set`
                 FROM tree_acl_security_sets
                 WHERE id in (' . implode(',', $rez) . ')'
-            ) or die(DB\dbQueryError());
+            );
 
             while ($r = $res->fetch_assoc()) {
                 $ids = explode(',', $r['set']);
@@ -1341,19 +1341,19 @@ class Security
     public static function calculateUpdatedSecuritySets($onlyForUserId = false)
     {
 
-        if (!empty($_SESSION['calculatingSecuritySets'])) {
+        if (Cache::get('calculatingSecuritySets', false)) {
             return;
         }
 
         //set a flag to avoid double call to this function
-        $_SESSION['calculatingSecuritySets'] = true;
+        Cache::set('calculatingSecuritySets', true);
 
         DB\startTransaction();
         $res = DB\dbQuery(
             'SELECT id
             FROM tree_acl_security_sets
             WHERE updated = 1'
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             //calculate for all even if there are sets for non existing obejcts
@@ -1366,7 +1366,7 @@ class Security
         $res->close();
         DB\commitTransaction();
 
-        unset($_SESSION['calculatingSecuritySets']);
+        Cache::remove('calculatingSecuritySets');
     }
 
     /**
@@ -1377,8 +1377,6 @@ class Security
      */
     public static function updateSecuritySet($set_id, $onlyForUserId = false)
     {
-        $acl = array();
-
         /* get set */
         $set = '';
         $res = DB\dbQuery(
@@ -1386,7 +1384,7 @@ class Security
             FROM tree_acl_security_sets
             WHERE id = $1',
             $set_id
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $set = $r['set'];
@@ -1411,7 +1409,7 @@ class Security
 
                 if (empty($groupUsers)) {
                     $updatingUser = true;
-                    $users[$onlyForUserId] = Security::getEstimatedUserAccessForObject($object_id, $onlyForUserId);
+                    $users[$onlyForUserId] = static::getEstimatedUserAccessForObject($object_id, $onlyForUserId);
                 }
 
             }
@@ -1425,7 +1423,7 @@ class Security
                     JOIN users_groups u on a.user_group_id = u.id
                     WHERE a.node_id in(0'.implode(',', $obj_ids).')
                     ORDER BY u.`type`'
-                ) or die(DB\dbQueryError());
+                );
 
                 while ($r = $res->fetch_assoc()) {
                     $group_users = array();
@@ -1436,7 +1434,7 @@ class Security
                     }
                     foreach ($group_users as $user_id) {
                         if (empty($users[$user_id])) {
-                            $users[$user_id] = Security::getEstimatedUserAccessForObject($object_id, $user_id);
+                            $users[$user_id] = static::getEstimatedUserAccessForObject($object_id, $user_id);
                         }
                     }
                 }
@@ -1456,7 +1454,7 @@ class Security
                 $set_id
                 ,$updatingUser ? $onlyForUserId : null
             )
-        ) or die(DB\dbQueryError());
+        );
 
         $sql = 'INSERT INTO tree_acl_security_sets_result
                 (security_set_id
@@ -1493,7 +1491,7 @@ class Security
                 $params[] = ( empty($access[1][$i]) && ( $access[0][$i] >0 ) ) ? 1 : 0;
             }
 
-            $res = DB\dbQuery($sql, $params) or die(DB\dbQueryError());
+            $res = DB\dbQuery($sql, $params);
         }
 
         $res = DB\dbQuery(
@@ -1501,7 +1499,7 @@ class Security
             SET updated = 0
             WHERE id = $1',
             $set_id
-        ) or die(DB\dbQueryError());
+        );
         /* end of update set in database */
     }
 
@@ -1545,7 +1543,7 @@ class Security
             'data' => array()
         );
 
-        $photosPath = Config::get('photos_path');
+        // $photosPath = Config::get('photos_path');
 
         $users = DM\UsersGroups::getAvailableUsers();
 
@@ -1570,8 +1568,6 @@ class Security
      */
     public static function isAdmin($userId = false)
     {
-        $rez = false;
-
         if ($userId == false) {
             $userId = User::getId();
         }

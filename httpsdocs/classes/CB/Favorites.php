@@ -54,6 +54,7 @@ class Favorites
 
     public function read($p)
     {
+        $p = $p; //dummy codacy assignment
         $rez = array(
             'succes' => true
             ,'data' => array()

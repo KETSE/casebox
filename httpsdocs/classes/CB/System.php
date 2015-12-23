@@ -22,7 +22,7 @@ class System
                 ,phone_codes
             FROM ' . PREFIX . '_casebox.country_phone_codes
             ORDER BY name'
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $rez[] = array_values($r);

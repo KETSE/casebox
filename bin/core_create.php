@@ -123,7 +123,7 @@ do {
     $pass = readParam('core_root_pass');
 } while (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') && empty($pass));
 
-DB\dbQuery("use `$dbName`") or die(DB\dbQueryError());
+DB\dbQuery("use `$dbName`");
 
 if (!empty($email) || !empty($pass)) {
     DM\Users::updateByName(
@@ -143,11 +143,11 @@ $sql = 'INSERT INTO `config` (param, `value`)
 
 $language = readParam('core_default_language', 'en');
 
-DB\dbQuery($sql, array('default_language', $language)) or die(DB\dbQueryError());
+DB\dbQuery($sql, array('default_language', $language));
 
 $languages = readParam('core_languages', $language);
 
-DB\dbQuery($sql, array('languages', $languages)) or die(DB\dbQueryError());
+DB\dbQuery($sql, array('languages', $languages));
 
     createSolrCore($cfg, $coreName);
 

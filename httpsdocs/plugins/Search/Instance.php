@@ -69,7 +69,8 @@ class Instance
      */
     private function solrSearch($p, $prepare = false)
     {
-         // skip grid params
+        $prepare = $prepare; //dummy codacy assignment
+        // skip grid params
         unset($p->grid);
 
         $p->fl = 'id, pid, path, name, template_type, system, '.

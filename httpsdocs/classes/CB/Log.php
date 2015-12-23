@@ -39,8 +39,8 @@ class Log
 
         $p['activityData'] = static::getActivityData($data);
 
-        if(!isset($data['id'])) {
-            trigger_error('Log data error :'.print_r($data,true),E_USER_ERROR);
+        if (!isset($data['id'])) {
+            trigger_error('Log data error :' . print_r($data, true), E_USER_ERROR);
         }
         $params = array(
             'object_id' => $data['id']
@@ -261,8 +261,8 @@ class Log
             )
             : $p['new']->getData();
 
-        $fu = @$p['activityData']['fu'];
-        $wu = @$p['activityData']['wu'];
+        // $fu = @$p['activityData']['fu'];
+        // $wu = @$p['activityData']['wu'];
 
         $record = array(
             'id' => Config::get('core_name') . '_' . $p['action_id']
@@ -290,7 +290,7 @@ class Log
         $record['dstatus'] = 0;
         $record['system'] = 0;
 
-        $rez = $solr->addDocument($record);
+        $solr->addDocument($record);
 
         $solr->commit();
     }

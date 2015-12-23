@@ -5,9 +5,8 @@ namespace CB\WebDAV;
 use \Sabre\DAV\PropFind;
 use \Sabre\DAV\PropPatch;
 
-class PropertyStorageBackend implements \Sabre\DAV\PropertyStorage\Backend\BackendInterface {
-
-
+class PropertyStorageBackend implements \Sabre\DAV\PropertyStorage\Backend\BackendInterface
+{
     /**
      * Fetches properties for a path.
      *
@@ -18,12 +17,12 @@ class PropertyStorageBackend implements \Sabre\DAV\PropertyStorage\Backend\Backe
      * as this will give you the _exact_ list of properties that need to be
      * fetched, and haven't yet.
      *
-     * @param string $path
-     * @param PropFind $propFind
+     * @param  string   $path
+     * @param  PropFind $propFind
      * @return void
      */
-    public function propFind($path, PropFind $propFind) {
-
+    public function propFind($path, PropFind $propFind)
+    {
         $propertyNames = $propFind->get404Properties();
         if (!$propertyNames) {
             return;
@@ -45,7 +44,7 @@ class PropertyStorageBackend implements \Sabre\DAV\PropertyStorage\Backend\Backe
         $node = $cachedNodes[$path];
 
 
-        // while($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+        // while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
         //     $propFind->set($row['name'], $row['value']);
         // }
         foreach ($propertyNames as $prop) {
@@ -75,24 +74,26 @@ class PropertyStorageBackend implements \Sabre\DAV\PropertyStorage\Backend\Backe
      * Usually you would want to call 'handleRemaining' on this object, to get;
      * a list of all properties that need to be stored.
      *
-     * @param string $path
-     * @param PropPatch $propPatch
+     * @param  string    $path
+     * @param  PropPatch $propPatch
      * @return void
      */
-    public function propPatch($path, PropPatch $propPatch) {
+    public function propPatch($path, PropPatch $propPatch)
+    {
+        $path = path; //dummy codacy assignment
+
         return true;
     }
-
 
     /**
      * This method is called after a node is deleted.
      *
      * This allows a backend to clean up all associated properties.
      */
-    public function delete($path) {
+    public function delete($path)
+    {
+        $path = $path; //dummy codacy assignment
     }
-
-
 
      /**
      * This method is called after a successful MOVE
@@ -101,8 +102,10 @@ class PropertyStorageBackend implements \Sabre\DAV\PropertyStorage\Backend\Backe
      * Note that entire collections may be moved, so ensure that all properties
      * for children are also moved along.
      */
-    function move($source, $destination) {
-
+    public function move($source, $destination)
+    {
+        $source = $source; //dummy codacy assignment
+        $destination = $destination; //dummy codacy assignment
     }
 
 }

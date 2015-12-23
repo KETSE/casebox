@@ -181,7 +181,7 @@ class Yubikey implements \CB\Interfaces\Auth
             $rez = false;
         } else {
             try {
-                $auth = $this->instance->verify($code);
+                $this->instance->verify($code);
             } catch (\Exception $e) {
                 $rez = false;
                 \CB\debug($e->getMessage());

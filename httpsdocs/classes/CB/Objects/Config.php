@@ -19,7 +19,8 @@ class Config extends Object
         $dd = &$d['data'];
 
         $p = array(
-            'pid' => empty($d['pid'])
+            'id' => $this->id
+            ,'pid' => empty($d['pid'])
                 ? null
                 : $this->getDMPid($d['pid'])
             ,'param' => $dd['_title']
@@ -43,8 +44,6 @@ class Config extends Object
     {
         parent::updateCustomData();
 
-        $od = $this->oldObject->getData();
-
         $d = &$this->data;
         $dd = &$d['data'];
 
@@ -63,7 +62,11 @@ class Config extends Object
             $p['order'] = $dd['order'];
         }
 
-        DM\Config::update($p);
+        if (DM\Config::exists($d['id'])) {
+            DM\Config::update($p);
+        } else {
+            DM\Config::create($p);
+        }
     }
 
     public function delete($permanent = false)

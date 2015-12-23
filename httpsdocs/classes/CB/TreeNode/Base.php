@@ -148,7 +148,7 @@ class Base implements \CB\Interfaces\TreeNode
     {
         $rez = array();
 
-        if (!$this->acceptedPath($pathArray, $requestParams)) {
+        if (!$this->acceptedPath($pathArray, $rp)) {
             return $rez;
         }
 

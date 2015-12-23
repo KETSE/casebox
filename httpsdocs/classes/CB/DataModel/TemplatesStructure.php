@@ -70,7 +70,7 @@ class TemplatesStructure extends Base
 
         $sql .= 'ORDER BY ts.template_id, ts.`order` ';
 
-        $res = DB\dbQuery($sql, $templateId) or die(DB\dbQueryError());
+        $res = DB\dbQuery($sql, $templateId);
 
         while ($r = $res->fetch_assoc()) {
             $data = Util\toJSONArray($r['data']);
@@ -140,7 +140,7 @@ class TemplatesStructure extends Base
                 ,$targetId
                 ,$parentTemplate
             )
-        ) or die(DB\dbQueryError());
+        );
     }
 
     public static function move($sourceId, $targetId)
@@ -153,6 +153,6 @@ class TemplatesStructure extends Base
                 $sourceId
                 ,$targetId
             )
-        ) or die(DB\dbQueryError());
+        );
     }
 }
