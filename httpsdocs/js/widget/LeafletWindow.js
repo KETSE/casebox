@@ -23,7 +23,7 @@ Ext.define('CB.widget.LeafletWindow', {
             })
 
             ,cancel: new Ext.Action({
-                text: Ext.MessageBox.buttonText.cancel
+                text: L.Cancel
                 ,iconCls: 'i-cancel'
                 ,scope: this
                 ,handler: this.close

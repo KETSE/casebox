@@ -1,3 +1,12 @@
+CaseBox 1.9.560 (2015-12-30)
+==============================
+- added translation for "Cancel" word
+- changed totals calculation for pivot table
+
+Fixed Bugs:
+----------
+- errors on core_create
+
 CaseBox 1.9.559 (2015-12-23)
 ==============================
 - #9874 Trigger reindexing after making changes that affect SOLR

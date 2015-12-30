@@ -53,7 +53,7 @@ Ext.define('CB.SecurityWindow', {
                 ,disabled: true
             })
             ,cancel: new Ext.Action({
-                text: Ext.MessageBox.buttonText.cancel
+                text: L.Cancel
                 ,scope: this
                 ,handler: this.onCancelPermissionsChangeClick
                 ,hidden: true

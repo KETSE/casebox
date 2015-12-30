@@ -121,7 +121,7 @@ Ext.define('CB.object.edit.Window', {
             })
 
             ,cancel: new Ext.Action({
-                text: Ext.MessageBox.buttonText.cancel
+                text: L.Cancel
                 ,iconCls: 'i-cancel'
                 ,hidden: true
                 ,scope: this

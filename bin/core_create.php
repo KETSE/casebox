@@ -106,7 +106,7 @@ $cbDb = $cfg['prefix'] . '__casebox';
 
 echo 'Registering core .. ';
 \CB\DB\dbQuery(
-    'INSERT INTO ' . $cbDb . ' .cores (name, cfg) VALUES ($1, $2)',
+    'REPLACE INTO ' . $cbDb . ' .cores (name, cfg) VALUES ($1, $2)',
     array($coreName, '{}')
 );
 showMessage();
@@ -137,19 +137,32 @@ if (!empty($email) || !empty($pass)) {
 }
 
 //set core languages
-$sql = 'INSERT INTO `config` (param, `value`)
-    VALUES ($1,$2)
-    ON DUPLICATE KEY UPDATE `value` = $2';
+$sql = 'REPLACE INTO `config` (id, param, `value`)
+    VALUES ($1, $2, $3);';
 
 $language = readParam('core_default_language', 'en');
 
-DB\dbQuery($sql, array('default_language', $language));
+DB\dbQuery(
+    $sql,
+    array(
+        DM\Config::toId('default_language', 'param'),
+        'default_language',
+        $language
+    )
+);
 
 $languages = readParam('core_languages', $language);
 
-DB\dbQuery($sql, array('languages', $languages));
+DB\dbQuery(
+    $sql,
+    array(
+        DM\Config::toId('languages', 'param'),
+        'languages',
+        $languages
+    )
+);
 
-    createSolrCore($cfg, $coreName);
+createSolrCore($cfg, $coreName);
 
 echo 'Creating language files .. ';
 exec('php "' . $binDirectorty . 'languages_update_js_files.php"');

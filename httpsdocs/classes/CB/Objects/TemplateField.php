@@ -92,6 +92,8 @@ class TemplateField extends Object
 
         $data = $this->collectCustomModelData();
 
+        $data['id'] = $this->id;
+
         $data['template_id'] = $this->detectParentTemplate();
 
         DM\TemplatesStructure::update($data);

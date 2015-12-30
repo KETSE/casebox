@@ -154,7 +154,7 @@ Ext.define('CB.object.field.editor.Form', {
                     ,scope: this
                     ,handler: this.onOkClick
                 },{
-                    text: Ext.MessageBox.buttonText.cancel
+                    text: L.Cancel
                     ,scope: this
                     ,handler: this.destroy
                 }

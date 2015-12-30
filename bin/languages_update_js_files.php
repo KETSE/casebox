@@ -57,8 +57,11 @@ while ($r = $res->fetch_assoc()) {
 
     $res2 = DB\dbQuery(
         'SELECT count(*) `count`
-        FROM ' . $db . '.translations'
-    ); // dont exit if db doesnt have translations
+        FROM ' . $db . '.translations',
+        array(
+            'hideErrors' => true
+        )
+    );
 
     if ($res2) {
         if ($r2 = $res2->fetch_assoc()) {
@@ -82,7 +85,10 @@ if (empty($cores)) {
         $res = DB\dbQuery(
             'SELECT *
             FROM ' . $db . '.translations
-            WHERE `type` in (0, 2)'
+            WHERE `type` in (0, 2)',
+            array(
+                'hideErrors' => true
+            )
         );
 
         while ($r = $res->fetch_assoc()) {

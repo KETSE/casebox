@@ -766,7 +766,9 @@ class Object
     public function updateSolrData()
     {
         $this->load();
-        $this->collectSolrData();
+
+        // $this->collectSolrData(); // called by updateSysData
+
         $this->updateSysData();
     }
 

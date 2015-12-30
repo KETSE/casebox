@@ -92,13 +92,14 @@ Ext.define('CB.widget.block.Pivot', {
 
         // create refs object for common usage
         if(!Ext.isEmpty(data.pivot)) {
-            var i, j, f1, f2, value;
+            var i, j, f1, f2, value, f1t;
 
             d = data.pivot[rez.xField + ',' + rez.yField];
 
             if(d && d.data) {
                 for (i = 0; i < d.data.length; i++) {
                     f1 = d.data[i];
+                    f1t = 0;
                     if(!Ext.isEmpty(f1.pivot)) {
                         for (j = 0; j < f1.pivot.length; j++) {
                             f2 = f1.pivot[j];
@@ -114,14 +115,18 @@ Ext.define('CB.widget.block.Pivot', {
 
                                 if(Ext.isNumeric(value)) {
                                     rez.refs['t_' + f2.value] += value;
+                                    f1t += value;
                                 }
                             }
                         }
                     }
 
-                    value = this.getFacetCount(f1);
-                    if(value > 0) {
-                        rez.refs[f1.value + '_t'] = this.getFacetCount(f1);
+                    // value = this.getFacetCount(f1);
+                    // if(value > 0) {
+                    //     rez.refs[f1.value + '_t'] = this.getFacetCount(f1);
+                    // }
+                    if(f1t > 0) {
+                        rez.refs[f1.value + '_t'] = f1t;
                     }
                 }
             }

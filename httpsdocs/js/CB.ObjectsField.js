@@ -738,7 +738,7 @@ Ext.define('CB.ObjectsSelectionForm', {
             ,buttons:[
                 '->'
                 ,{text: Ext.MessageBox.buttonText.ok, iconCls: 'icon-tick', scope: this, handler: this.onOkClick}
-                ,{text: Ext.MessageBox.buttonText.cancel, iconCls: 'icon-cancel', scope: this, handler: this.destroy}]
+                ,{text: L.Cancel, iconCls: 'icon-cancel', scope: this, handler: this.destroy}]
         });
 
         this.callParent(arguments);
@@ -1114,7 +1114,7 @@ Ext.define('CB.ObjectsSelectionPopupList', {
                 {text: L.ClearSelection, handler: this.doClearSelection, scope: this, tabIndex: 6}
                 ,'->'
                 ,{text: Ext.MessageBox.buttonText.ok, handler: this.doSubmit, scope: this, tabIndex: 3}
-                ,{text: Ext.MessageBox.buttonText.cancel, handler: this.doClose, scope: this, tabIndex: 4}
+                ,{text: L.Cancel, handler: this.doClose, scope: this, tabIndex: 4}
             ]
         });
 

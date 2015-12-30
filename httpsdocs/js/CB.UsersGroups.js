@@ -149,7 +149,7 @@ Ext.define('CB.AddUserForm', {
                     ,handler: this.saveData
                     ,scope: this
                 },{
-                    text: Ext.MessageBox.buttonText.cancel
+                    text: L.Cancel
                     ,iconCls: 'icon-cancel'
                     ,handler: function(b, e){
                         this.destroy();
@@ -936,7 +936,7 @@ Ext.define('CB.UsersGroupsForm', {
                     ,handler: this.saveData
                     ,scope: this
                 },{
-                    text: Ext.MessageBox.buttonText.cancel
+                    text: L.Cancel
                     ,iconCls: 'im-cancel'
                     ,scale: 'medium'
                     ,disabled: true
@@ -1674,7 +1674,7 @@ Ext.define('CB.ChangePasswordWindow', {
                             });
                         }
                     },{
-                        text: Ext.MessageBox.buttonText.cancel
+                        text: L.Cancel
                         ,iconCls:'icon-cancel'
                         ,handler: this.destroy
                         ,scope: this
