@@ -48,7 +48,7 @@ class Log extends Base
         $res = DB\dbQuery(
             'SELECT *
             FROM `' . static::getTableName() . '`
-            WHERE id in (' . implode(',', $ids). ')'
+            WHERE id in (0' . implode(',', $ids). ')'
         );
         while ($r = $res->fetch_assoc()) {
             $rez[] = $r;

@@ -3,7 +3,6 @@
 namespace CB\DataModel;
 
 use CB\DB;
-use CB\Config;
 
 class Core extends Base
 {
@@ -31,7 +30,7 @@ class Core extends Base
     {
         $rez = false;
 
-        $dbName = Config::get('prefix') . '_' . $p['name'];
+        $dbName = \CB\Config::get('prefix') . '_' . $p['name'];
 
         if (DB\dbQuery('CREATE DATABASE `' . $dbName . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
             $rez = parent::create($p);
@@ -89,7 +88,7 @@ class Core extends Base
         $rez = parent::delete($id);
 
         if ($rez) {
-            $dbName = Config::get('prefix') . '_' . $data['name'];
+            $dbName = \CB\Config::get('prefix') . '_' . $data['name'];
 
             DB\dbQuery("DROP DATABASE `$dbName`");
         }

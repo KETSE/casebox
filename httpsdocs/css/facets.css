@@ -47,6 +47,11 @@
 	background-repeat: no-repeat;
 }
 
+.x-rtl .filter_list li .tick{
+	margin-right: 0;
+	margin-left: 5px;
+}
+
 .filter_list .tick.active {
 	background-position: 0 -104px
 }
@@ -80,6 +85,9 @@
 	width:30px;
 	float:right;
 	text-align:right
+}
+.x-rtl .filter_list li span{
+	float: left
 }
 .filter_list li .t{ color: #999 }
 .filter_list li .b{ color: #000 }

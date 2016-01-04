@@ -1,3 +1,11 @@
+CaseBox 1.9.561 (2016-01-04)
+==============================
+- #9897 Fix CSS for Arabic Language on faceting block
+
+Fixed Bugs:
+----------
+- action buttons from popup window preview didnt work
+
 CaseBox 1.9.560 (2015-12-30)
 ==============================
 - added translation for "Cancel" word
