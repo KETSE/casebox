@@ -41,6 +41,7 @@ class Helpers
      */
     public static function getConfigFilename()
     {
+        // return \CB_DOC_ROOT . 'config.ini';
         return TEST_PATH_TEMP . 'auto_install_config.ini';
     }
 
@@ -63,30 +64,30 @@ class Helpers
 
         try {
             require_once CB_ROOT_PATH . 'httpsdocs/config_platform.php';
+
         } catch (\Exception $e) {
             //config.ini could not exist
             //we don't need to do anything here because this script will create confing.ini in result
             //we just use values form config.ini as defaults, if it exists
         }
 
-        require_once \CB\LIB_DIR.'install_functions.php';
+        require_once \CB\LIB_DIR . 'install_functions.php';
 
 
-        $config_filename = static::getConfigFilename();
+        $configFilename = static::getConfigFilename();
 
-        $config_filename_tpl = static::getConfigFilenameTPL();
+        $configFilenameTpl = static::getConfigFilenameTPL();
 
-        if (!file_exists($config_filename)) {
-            if (file_exists($config_filename_tpl)) {
-
-                $test_cfg = parse_ini_file($config_filename_tpl);
+        if (!file_exists($configFilename)) {
+            if (file_exists($configFilenameTpl)) {
+                $test_cfg = parse_ini_file($configFilenameTpl);
                 Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
 
                 $test_cfg['backup_dir']      = CB_ROOT_PATH . 'backup'.DIRECTORY_SEPARATOR;
                 //$test_cfg['server_name']     = Install\readParam('server_name', $test_cfg['server_name']);
                 $test_hostname               = preg_replace('/^http(s)?:\/\//si', '', $test_cfg['server_name']);
 
-                   $tests_solr_path = CB_ROOT_PATH.'tests/server/solr/solr-5.2.0/server/';
+                $tests_solr_path = CB_ROOT_PATH.'tests/server/solr/solr-5.2.0/server/';
 
                 if (file_exists($tests_solr_path)) {
                     $test_cfg['solr_home'] = CB_ROOT_PATH.'tests/server/solr/solr-5.2.0/server/';
@@ -108,29 +109,28 @@ class Helpers
                 $test_cfg['su_db_user'] = Install\readParam('su_db_user', $test_cfg['su_db_user']);
                 $test_cfg['su_db_pass'] = Install\readParam('su_db_pass'); */
 
-                echo 'writing autoconfig file to:'.$config_filename.PHP_EOL;
+                echo 'writing autoconfig file to:'.$configFilename.PHP_EOL;
 
-                Install\putIniFile($config_filename, $test_cfg);
+                Install\putIniFile($configFilename, $test_cfg);
 
                 if (!\CB\IS_WINDOWS) {
-                    //     shell_exec('chown ' . $test_cfg['apache_user'].' "' . $config_filename . '"');
+                    //     shell_exec('chown ' . $test_cfg['apache_user'].' "' . $configFilename . '"');
                 }
-
 
                 Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
             }
         }
 
 
-        if (file_exists($config_filename)) {
+        if (file_exists($configFilename)) {
+            $options = array(
+                'file' => $configFilename
+            );
 
-            // $options = array(
-            //     'file' => $config_filename
-            // );
             include CB_ROOT_PATH . 'bin/install.php';
 
         } else {
-            $error_msg = ' Please create cofig file : '.$config_filename.PHP_EOL.' '
+            $error_msg = ' Please create cofig file : '.$configFilename.PHP_EOL.' '
                 .' You can use file: ' . TEST_PATH . 'auto_install_config.ini as template '.PHP_EOL.PHP_EOL;
 
             trigger_error($error_msg, E_USER_ERROR);

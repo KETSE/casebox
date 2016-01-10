@@ -73,7 +73,10 @@ if (file_exists(DOC_ROOT . 'config.ini')) {
     }
 
 } else {
-    trigger_error("WARNING: file not exists " . DOC_ROOT . 'config.ini', E_USER_WARNING);
+    //Usually this appears when installing casebox and
+    //a message instead of a complex error should be enough
+    echo "Config file doesnt exist\n";
+    // trigger_error("WARNING: file not exists " . DOC_ROOT . 'config.ini', E_USER_WARNING);
 }
 
 //define global prefix used

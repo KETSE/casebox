@@ -238,30 +238,34 @@ class Security
             return $rez;
         }
 
+        $id = $p['id'];
+
         if (empty($this->internalAccessing)
-            && !Security::canRead($p['id'])
+            && !Security::canRead($id)
         ) {
             throw new \Exception(L\get('Access_denied'));
         }
 
+        $obj = Objects::getCachedObject($id);
+        $od = $obj->getData();
+
+        $rez['name'] = $obj->getHtmlSafeName();
+        $rez['inherit_acl'] = $od['inherit_acl'];
+
         /* set object title, path and inheriting access ids path*/
-        $obj_ids = array();
+        $objIds = array();
         $res = DB\dbQuery(
             'SELECT
                 ti.`path`
-                ,t.name
-                ,t.inherit_acl
                 ,ts.`set` `obj_ids`
-            FROM tree t
-            JOIN tree_info ti ON t.id = ti.id
+            FROM tree_info ti
             LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
-            WHERE t.id = $1',
-            $p['id']
+            WHERE ti.id = $1',
+            $id
         );
 
         if ($r = $res->fetch_assoc()) {
-            $rez['inherit_acl'] = $r['inherit_acl'];
-            $obj_ids = explode(',', $r['obj_ids']);
+            $objIds = explode(',', $r['obj_ids']);
         }
         $res->close();
         /* end of set object title and path*/
@@ -280,10 +284,10 @@ class Security
                 JOIN users_groups u ON a.user_group_id = u.id
                 WHERE a.node_id '.(
                     $inherited
-                    ? ' in (0'.implode(',', $obj_ids).')'
+                    ? ' in (0'.implode(',', $objIds).')'
                     : ' = $1 '
                 ).' ORDER BY u.`type`, 2',
-            $p['id']
+            $id
         );
 
         while ($r = $res->fetch_assoc()) {
@@ -292,7 +296,7 @@ class Security
             $r['iconCls'] = ($r['type'] == 1) ? 'icon-users' : 'icon-user-'.$r['sex'];
 
             unset($r['sex']);
-            $access = $this->getUserGroupAccessForObject($p['id'], $r['id']);
+            $access = $this->getUserGroupAccessForObject($id, $r['id']);
             $r['allow'] = implode(',', $access[0]);
             $r['deny'] = implode(',', $access[1]);
             $rez['data'][] = $r;
@@ -948,6 +952,7 @@ class Security
 
         $p['data']['id'] = $p['data']['user_group_id'];
         $rez['data'][] = $p['data'];
+        \CB\debug($rez);
         Security::calculateUpdatedSecuritySets();
         Solr\Client::runBackgroundCron();
 
@@ -1371,11 +1376,11 @@ class Security
 
     /**
      * update a security set
-     * @param  int  $set_id
+     * @param  int  $setId
      * @param  int  $onlyForUserId
      * @return void
      */
-    public static function updateSecuritySet($set_id, $onlyForUserId = false)
+    public static function updateSecuritySet($setId, $onlyForUserId = false)
     {
         /* get set */
         $set = '';
@@ -1383,7 +1388,7 @@ class Security
             'SELECT `set`
             FROM tree_acl_security_sets
             WHERE id = $1',
-            $set_id
+            $setId
         );
 
         if ($r = $res->fetch_assoc()) {
@@ -1393,7 +1398,7 @@ class Security
 
         /* end of get set*/
 
-        $obj_ids = explode(',', $set);
+        $objIds = explode(',', $set);
         $everyoneGroupId = static::getSystemGroupId('everyone');
         $users = array();
         $updatingUser = false;
@@ -1401,7 +1406,7 @@ class Security
         /* iterate the full set of access credentials(users and/or groups)
         and estimate access for every user including everyone group */
         if (!empty($set)) {
-            $object_id = $obj_ids[sizeof($obj_ids) -1];
+            $objectId = $objIds[sizeof($objIds) -1];
 
             $groupUsers = array();
             if (!empty($onlyForUserId)) {
@@ -1409,9 +1414,8 @@ class Security
 
                 if (empty($groupUsers)) {
                     $updatingUser = true;
-                    $users[$onlyForUserId] = static::getEstimatedUserAccessForObject($object_id, $onlyForUserId);
+                    $users[$onlyForUserId] = static::getEstimatedUserAccessForObject($objectId, $onlyForUserId);
                 }
-
             }
 
             if (!$updatingUser) {
@@ -1421,20 +1425,21 @@ class Security
                         ,u.`type`
                     FROM tree_acl a
                     JOIN users_groups u on a.user_group_id = u.id
-                    WHERE a.node_id in(0'.implode(',', $obj_ids).')
+                    WHERE a.node_id in(0' . implode(',', $objIds).')
                     ORDER BY u.`type`'
                 );
 
                 while ($r = $res->fetch_assoc()) {
-                    $group_users = array();
+                    $groupUsers = array();
                     if (($r['id'] == $everyoneGroupId) || ($r['type'] == 2)) {
-                        $group_users[] = $r['id'];
+                        $groupUsers[] = $r['id'];
                     } else {
-                        $group_users = Security::getGroupUserIds($r['id']);
+                        $groupUsers = Security::getGroupUserIds($r['id']);
                     }
-                    foreach ($group_users as $user_id) {
-                        if (empty($users[$user_id])) {
-                            $users[$user_id] = static::getEstimatedUserAccessForObject($object_id, $user_id);
+
+                    foreach ($groupUsers as $userId) {
+                        if (empty($users[$userId])) {
+                            $users[$userId] = static::getEstimatedUserAccessForObject($objectId, $userId);
                         }
                     }
                 }
@@ -1451,8 +1456,10 @@ class Security
             WHERE security_set_id = $1
                 and (ISNULL($2) OR ($2 = user_id))',
             array(
-                $set_id
-                ,$updatingUser ? $onlyForUserId : null
+                $setId
+                ,$updatingUser
+                    ? $onlyForUserId
+                    : null
             )
         );
 
@@ -1485,10 +1492,11 @@ class Security
                 ,$12
                 ,$13
                 ,$14)';
-        foreach ($users as $user_id => $access) {
-            $params = array($set_id, $user_id);
+
+        foreach ($users as $userId => $access) {
+            $params = array($setId, $userId);
             for ($i=0; $i < sizeof($access[0]); $i++) {
-                $params[] = ( empty($access[1][$i]) && ( $access[0][$i] >0 ) ) ? 1 : 0;
+                $params[] = (empty($access[1][$i]) && ($access[0][$i] >0)) ? 1 : 0;
             }
 
             $res = DB\dbQuery($sql, $params);
@@ -1498,7 +1506,7 @@ class Security
             'UPDATE tree_acl_security_sets
             SET updated = 0
             WHERE id = $1',
-            $set_id
+            $setId
         );
         /* end of update set in database */
     }
@@ -1522,12 +1530,12 @@ class Security
     /**
      * Get an array of user ids associated to the given group
      *
-     * @param  int   $group_id
+     * @param  int   $groupId
      * @return array
      */
-    public static function getGroupUserIds($group_id)
+    public static function getGroupUserIds($groupId)
     {
-        $rez = DM\UsersGroups::getGroupUserIds($group_id);
+        $rez = DM\UsersGroups::getGroupUserIds($groupId);
 
         return $rez;
     }

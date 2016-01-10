@@ -1,3 +1,7 @@
+CaseBox 1.9.562 (2016-01-10)
+==============================
+- Testing Travis build errors
+
 CaseBox 1.9.561 (2016-01-04)
 ==============================
 - #9897 Fix CSS for Arabic Language on faceting block

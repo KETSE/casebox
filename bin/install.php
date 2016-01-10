@@ -27,7 +27,7 @@ use CB;
 $binDirectorty = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 $cbHome = dirname($binDirectorty) . DIRECTORY_SEPARATOR;
 
-require_once $cbHome.'httpsdocs/lib/Util.php';
+require_once $cbHome . 'httpsdocs/lib/Util.php';
 
 /* check if we are running under root / Administrator user */
 
@@ -37,13 +37,16 @@ switch (CB\Util\getOS()) {
 
         $returned_user_state = shell_exec(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'get_user_state.bat');
         $user_state = preg_replace('/\n|\r/si', '', $returned_user_state);
+
         if ($user_state != 'admin') {
             die("This script should be run under \"Administrator\"\n");
         }
         break;
 
     case "LINUX":
-        $currentUser = empty($_SERVER['USER']) ? @$_SERVER['USERNAME'] : $_SERVER['USER'];
+        $currentUser = empty($_SERVER['USER'])
+            ? @$_SERVER['USERNAME']
+            : $_SERVER['USER'];
 
         if (!in_array($currentUser, array('root'))) {
             echo "\033[31mThis script should be run under \"root\" \033[0m\n";
@@ -86,6 +89,7 @@ $cliCfg = \CB\Install\cliLoadConfig(
 otherwise - the config specified in params */
 if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
     $cfg += $cliCfg;
+
 } else {
     $cfg = $cliCfg + $cfg;
 }

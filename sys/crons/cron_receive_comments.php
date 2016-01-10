@@ -58,7 +58,7 @@ if (!empty($platformConfig['comments_email'])) {
 } else { //backward compatibile check
     $res = DB\dbQuery(
         'SELECT `value`
-        FROM casebox.config
+        FROM `' . PREFIX . '_casebox`.config
         WHERE param = $1',
         'comments_config'
     );

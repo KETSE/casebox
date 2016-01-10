@@ -140,8 +140,12 @@ class TemplateField extends Object
         $d1 = &$od['data'];
         $d2 = &$nd['data'];
 
-        $cfg1 = Util\toJSONArray($d1['cfg']);
-        $cfg2 = Util\toJSONArray($d2['cfg']);
+        $cfg1 = empty($d1['cfg'])
+            ? array()
+            : Util\toJSONArray($d1['cfg']);
+        $cfg2 = empty($d2['cfg'])
+            ? array()
+            : Util\toJSONArray($d2['cfg']);
 
         $indexed1 = !empty($cfg1['indexed']) || !empty($cfg1['faceting']);
         $indexed2 = !empty($cfg2['indexed']) || !empty($cfg2['faceting']);
