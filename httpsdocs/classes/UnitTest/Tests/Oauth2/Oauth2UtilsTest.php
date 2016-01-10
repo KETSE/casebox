@@ -4,7 +4,6 @@
 namespace League\OAuth2\Client\Test\Provider;
 
 use League\OAuth2\Client\Provider\Google as GoogleProvider;
-use Mockery as m;
 use CB;
 use CB\DataModel as DM;
 
@@ -15,13 +14,15 @@ class Oauth2UtilsTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->provider = new GoogleProvider([
-            'clientId' => 'mock_client_id',
-            'clientSecret' => 'mock_secret',
-            'redirectUri' => 'none',
-            'hostedDomain' => 'mock_domain',
-            'accessType' => 'mock_access_type'
-        ]);
+        $this->provider = new GoogleProvider(
+            array(
+                'clientId' => 'mock_client_id',
+                'clientSecret' => 'mock_secret',
+                'redirectUri' => 'none',
+                'hostedDomain' => 'mock_domain',
+                'accessType' => 'mock_access_type'
+            )
+        );
 
         DM\Users::updateByName(
             array(
@@ -37,7 +38,7 @@ class Oauth2UtilsTest extends \PHPUnit_Framework_TestCase
         return \CB\Oauth2Utils::getLoginUrl($this->provider);
     }
 
-    public function test_getLoginUrl()
+    public function testGetLoginUrl()
     {
 
         $url = $this->getUrl();
@@ -65,9 +66,9 @@ class Oauth2UtilsTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends test_getLoginUrl
+     * @depends testGetLoginUrl
      */
-    public function test_checkLogined()
+    public function testCheckLogined()
     {
 
         unset($_SESSION['key']);
@@ -88,16 +89,15 @@ class Oauth2UtilsTest extends \PHPUnit_Framework_TestCase
 
         $check = \CB\Oauth2Utils::checkLogined();
 
-        $this->assertTrue($check['success'],'\CB\Oauth2Utils::checkLogined() return success false');
-        
+        $this->assertTrue($check['success'], '\CB\Oauth2Utils::checkLogined() return success false');
+
         $this->assertTrue($check['user_id'] == 1, '\CB\Oauth2Utils::checkLogined() WRONG USER ID');
-        
-        $this->assertTrue($check['session_id']  == $state['state'] , '\CB\Oauth2Utils::checkLogined() WRON SESSION ID');
-        
+
+        $this->assertTrue($check['session_id']  == $state['state'], '\CB\Oauth2Utils::checkLogined() WRONG SESSION ID');
+
         $r = \CB\User::setAsLoged($check['user_id'], $check['session_id']);
-        
+
         $this->assertTrue($r['success'], ' User can\'t be set as logined');
-        
-        
+
     }
 }

@@ -32,7 +32,7 @@ $sql = 'UPDATE crons
     SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
     WHERE cron_id = $1';
 
-DB\dbQuery($sql, array($cron_id, Util\jsonEncode($rez))) or die(DB\dbQueryError());
+DB\dbQuery($sql, array($cron_id, Util\jsonEncode($rez)));
 
 if (checkTikaService() == false) {
     startTikaService();
@@ -53,7 +53,7 @@ $sql = 'SELECT id
 FROM files_content
 WHERE '.$where;
 
-$res = DB\dbQuery($sql) or die(DB\dbQueryError()); //and name like \'%.pdf\'
+$res = DB\dbQuery($sql); //and name like \'%.pdf\'
 
 while ($r = $res->fetch_assoc()) {
     Cache::set('lastRecId', $r['id']);
@@ -225,7 +225,7 @@ function onScriptShutdown ()
                 SET skip_parsing = 1
                 WHERE id = $1',
                 $id
-            ) or die(DB\dbQueryError());
+            );
 
         }
     }

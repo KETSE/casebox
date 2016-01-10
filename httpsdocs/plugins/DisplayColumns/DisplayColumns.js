@@ -27,6 +27,7 @@ Ext.define('CB.plugin.DisplayColumns', {
 
         this.owner.on('activate', this.onActivateView, this);
         this.store.on('load', this.onStoreLoad, this);
+        this.store.on('manualload', this.onStoreLoad, this);
         this.store.on('clear', this.onStoreClear, this);
         this.store.on('load', this.clearDisableStateSaveFlag, this, {defer: 1000});
     }

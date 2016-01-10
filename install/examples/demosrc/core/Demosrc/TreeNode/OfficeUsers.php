@@ -130,7 +130,7 @@ class OfficeUsers extends \CB\TreeNode\Base
             WHERE uga.`group_id` = $1
             ORDER BY ug.first_name, ug.last_name, ug.name',
             $od['data']['security_group']
-        ) or die(DB\dbQueryError());
+        );
         while ($r = $res->fetch_assoc()) {
             $name = trim($r['first_name'].' '.$r['last_name']);
             if (empty($name)) {

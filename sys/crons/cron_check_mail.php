@@ -55,7 +55,7 @@ if (!$cd['success']) {
 /* check if this core has an email template defined */
 $email_template_id = false;
 
-$res = DB\dbQuery('SELECT id FROM templates WHERE `type` = \'email\'') or die(DB\dbQueryError());
+$res = DB\dbQuery('SELECT id FROM templates WHERE `type` = \'email\'');
 if ($r = $res->fetch_assoc()) {
     $email_template_id = $r['id'];
 }
@@ -167,7 +167,7 @@ foreach ($mailbox as $k => $mail) {
         $rootFolderId = Browser::getRootFolderId();
         $rootFolderName = null;
         $sql = 'SELECT name FROM tree WHERE id = $1';
-        $res = DB\dbQuery($sql, $rootFolderId) or die(DB\dbQueryError());
+        $res = DB\dbQuery($sql, $rootFolderId);
         if ($r = $res->fetch_assoc()) {
             $rootFolderName = $r['name'];
         }
@@ -193,7 +193,7 @@ foreach ($mailbox as $k => $mail) {
                 while ($found && ($i < sizeof($path))) {
                     if (!empty($path[$i])) {
                         $sql = 'SELECT id FROM tree WHERE pid = $1 AND name = $2';
-                        $res = DB\dbQuery($sql, array($lastPid, $path[$i])) or die(DB\dbQueryError());
+                        $res = DB\dbQuery($sql, array($lastPid, $path[$i]));
                         if ($r = $res->fetch_assoc()) {
                             $lastPid = $r['id'];
                         } else {
@@ -213,7 +213,7 @@ foreach ($mailbox as $k => $mail) {
                 while ($found && ($i < sizeof($path))) {
                     if (!empty($path[$i])) {
                         $sql = 'SELECT id FROM tree WHERE pid = $1 AND name = $2';
-                        $res = DB\dbQuery($sql, array($lastPid, $path[$i])) or die(DB\dbQueryError());
+                        $res = DB\dbQuery($sql, array($lastPid, $path[$i]));
                         if ($r = $res->fetch_assoc()) {
                             $lastPid = $r['id'];
                         } else {

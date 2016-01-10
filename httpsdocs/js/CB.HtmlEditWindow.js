@@ -31,7 +31,7 @@ Ext.define('CB.HtmlEditWindow', {
                 }
             ]
             ,buttons: [ {text: Ext.MessageBox.buttonText.ok, handler: this.doSubmit, scope: this}
-                        ,{text: Ext.MessageBox.buttonText.cancel, handler: this.doClose, scope: this}]
+                        ,{text: L.Cancel, handler: this.doClose, scope: this}]
         });
 
         this.callParent(arguments);

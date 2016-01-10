@@ -14,8 +14,6 @@ class Objects
      */
     public function load($p)
     {
-        $rez = array();
-
         // check if object id is numeric
         if (!is_numeric($p['id'])) {
             throw new \Exception(L\get('Wrong_input_data'));
@@ -256,7 +254,7 @@ class Objects
         }
 
         if (!empty($p['data']) && is_array($p['data'])) {
-            foreach ($p['data'] as $key => $value) {
+            foreach ($p['data'] as $value) {
                 $a = Util\toIntArray($value);
                 $ids = array_merge($ids, $a);
             }
@@ -735,9 +733,7 @@ class Objects
             ,'data' => array()
         );
 
-        if ((empty($id) && empty($templateId)) ||
-            (!is_numeric($id) && !is_numeric($templateId))
-        ) {
+        if ((empty($id) && empty($templateId)) || (!is_numeric($id) && !is_numeric($templateId))) {
             return $rez;
         }
 
@@ -746,9 +742,7 @@ class Objects
                 return $rez;
             }
 
-            if (!Security::canRead($id)) {
-                throw new \Exception(L\get('Access_denied'));
-            }
+            \CB\raiseErrorIf(!Security::canRead($id), 'Access_denied');
 
             $rez['menu'] = Browser\CreateMenu::getMenuForPath($id);
 

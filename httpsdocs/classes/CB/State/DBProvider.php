@@ -129,7 +129,7 @@ class DBProvider
                     ,User::getId()
                     ,Util\jsonEncode($p['state'])
                 )
-            ) or die(DB\dbQueryError());
+            );
         }
 
         return $rez;
@@ -147,7 +147,7 @@ class DBProvider
                 User::getId()
                 ,$guid
             )
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = Util\toJSONArray($r['cfg']);

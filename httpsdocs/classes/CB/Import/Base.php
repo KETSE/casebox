@@ -84,6 +84,8 @@ class Base
                 ,'sql' => $cfg['importSql']
             );
 
+            $options = $options; //dummy codacy assignment
+
             include $this->binDirectory . 'core_create.php';
         }
     }

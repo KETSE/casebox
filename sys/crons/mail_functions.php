@@ -24,7 +24,7 @@ function saveObjectAttachments($objectId, &$attachments)
             array(
                 'pid' => $objectId
                 ,'localFile' => $tmpName
-                ,'oid' => $_SESSION['user']['id']
+                ,'oid' => \CB\User::getId()
                 ,'filename' => $d['filename']
                 ,'content-type' => $d['content-type']
                 ,'fileExistAction' => 'autorename'

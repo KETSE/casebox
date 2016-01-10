@@ -60,6 +60,31 @@ Ext.define('CB.widget.LeafletPanel', {
         this.fireEvent('mapclick', this, e);
     }
 
+    ,setViewConfig: function(cfg) {
+        var dl = Ext.valueFrom(cfg.defaultLocation, {})
+            ,lat = Ext.valueFrom(dl.lat, 0)
+            ,lng = Ext.valueFrom(dl.lng, 0)
+            ,zoom = Ext.valueFrom(dl.zoom, 3);
+
+        if (!Ext.isEmpty(cfg.url)) {
+            this.map.eachLayer(
+                function(l) {
+                    if(l && l.setUrl) {
+                        l.setUrl(cfg.url);
+                    }
+                }
+            );
+        }
+
+        this.map.setView(
+            new LL.LatLng(lat, lng)
+            ,zoom
+            ,{
+                reset: true
+            }
+        );
+    }
+
     ,setView: function(ll, z, o) {
         this.map.setView(ll, z, o);
     }

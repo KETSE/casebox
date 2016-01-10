@@ -19,7 +19,8 @@ class Config extends Object
         $dd = &$d['data'];
 
         $p = array(
-            'pid' => empty($d['pid'])
+            'id' => $this->id
+            ,'pid' => empty($d['pid'])
                 ? null
                 : $this->getDMPid($d['pid'])
             ,'param' => $dd['_title']
@@ -43,15 +44,11 @@ class Config extends Object
     {
         parent::updateCustomData();
 
-        $od = $this->oldObject->getData();
-
-        $id = DM\Config::toId($od['data']['_title'], 'param');
-
         $d = &$this->data;
         $dd = &$d['data'];
 
         $p = array(
-            'id' => $id
+            'id' => $d['id']
             ,'pid' => empty($d['pid'])
                 ? null
                 : $this->getDMPid($d['pid'])
@@ -65,7 +62,11 @@ class Config extends Object
             $p['order'] = $dd['order'];
         }
 
-        DM\Config::update($p);
+        if (DM\Config::exists($d['id'])) {
+            DM\Config::update($p);
+        } else {
+            DM\Config::create($p);
+        }
     }
 
     public function delete($permanent = false)
@@ -93,13 +94,23 @@ class Config extends Object
     protected function getDMPid($pid)
     {
         $rez = null;
-        $name = Objects::getName($pid);
-        $id = DM\Config::toId($name, 'param');
 
-        if (is_numeric($id)) {
-            $rez = $id;
+        $r = DM\Config::read($pid);
+
+        if (!empty($r)) {
+            $rez = $r['id'];
         }
 
         return $rez;
+    }
+
+    protected function moveCustomDataTo($targetId)
+    {
+        DM\Config::update(
+            array(
+                'id' => $this->id
+                ,'pid' => $targetId
+            )
+        );
     }
 }

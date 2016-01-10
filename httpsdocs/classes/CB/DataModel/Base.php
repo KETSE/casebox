@@ -57,7 +57,7 @@ class Base
             ')';
 
         //add database record
-        DB\dbQuery($sql, $cp['values']) or die(DB\dbQueryError());
+        DB\dbQuery($sql, $cp['values']);
 
         $rez = DB\dbLastInsertId();
 
@@ -113,7 +113,7 @@ class Base
             FROM ' . static::getTableName() . '
             WHERE id = $1',
             $id
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r;
@@ -142,7 +142,7 @@ class Base
                 'SELECT *
                 FROM ' . static::getTableName() . '
                 WHERE id in (' . implode(',', $ids) . ')'
-            ) or die(DB\dbQueryError());
+            );
 
             while ($r = $res->fetch_assoc()) {
                 static::decodeJsonFields($r);
@@ -174,7 +174,7 @@ class Base
             $res = DB\dbQuery(
                 'SELECT *
                 FROM ' . static::getTableName()
-            ) or die(DB\dbQueryError());
+            );
 
             while ($r = $res->fetch_assoc()) {
                 static::decodeJsonFields($r);
@@ -208,7 +208,7 @@ class Base
             ' WHERE id = $1';
 
         //add database record
-        DB\dbQuery($sql, $up['values']) or die(DB\dbQueryError());
+        DB\dbQuery($sql, $up['values']);
 
         $rez = (DB\dbAffectedRows() > 0);
 
@@ -261,7 +261,7 @@ class Base
         if (is_scalar($ids)) {
             static::validateParamTypes(array('id' => $ids));
 
-            DB\dbQuery($sql . ' = $1', $ids) or die(DB\dbQueryError());
+            DB\dbQuery($sql . ' = $1', $ids);
 
         } else {
             $ids = Util\toNumericArray($ids);
@@ -269,7 +269,7 @@ class Base
             if (!empty($ids)) {
                 DB\dbQuery(
                     $sql . ' IN (' . implode(',', $ids) . ')'
-                ) or die(DB\dbQueryError());
+                );
             }
         }
 
@@ -307,7 +307,7 @@ class Base
         $rez = null;
 
         if (!is_numeric($idOrName)) {
-            
+
             $sql = 'SELECT id
                 FROM ' . static::getTableName() .
                 ' WHERE ' . $nameField . ' = $1';
@@ -316,16 +316,16 @@ class Base
                 $sql .= ' AND pid = ' . intval($pid);
             }
 
-            $res = DB\dbQuery($sql, $idOrName) or die(DB\dbQueryError());
+            $res = DB\dbQuery($sql, $idOrName);
 
             if ($r = $res->fetch_assoc()) {
                 $rez = $r['id'];
             }
-            
-            if(empty($rez)) {
-              //  trigger_error(" Error on find ID : ".$sql.' $1 = '.$idOrName, E_USER_WARNING);
+
+            if (empty($rez)) {
+                //trigger_error("Error on find ID: ".$sql.' $1 = '.$idOrName, E_USER_WARNING);
             }
-            
+
             $res->close();
 
         } else {

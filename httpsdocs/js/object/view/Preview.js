@@ -299,8 +299,8 @@ Ext.define('CB.object.view.Preview', {
             }
             ,this
         );
-
     }
+
     ,onTaskChanged: function(r, e){
         this.getEl().unmask();
         this.reload();

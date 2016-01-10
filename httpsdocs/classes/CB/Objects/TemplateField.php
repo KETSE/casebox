@@ -37,13 +37,16 @@ class TemplateField extends Object
     {
         parent::createCustomData();
 
-        $p = &$this->data;
-
         $data = $this->collectCustomModelData();
 
         $data['template_id'] = $this->detectParentTemplate();
 
         DM\TemplatesStructure::create($data);
+
+        if ($this->isSolrConfigUpdated()) {
+            $tpl = \CB\Objects::getCachedObject($data['template_id']);
+            $tpl->setSysDataProperty('solrConfigUpdated', true);
+        }
     }
 
     /**
@@ -89,9 +92,16 @@ class TemplateField extends Object
 
         $data = $this->collectCustomModelData();
 
+        $data['id'] = $this->id;
+
         $data['template_id'] = $this->detectParentTemplate();
 
         DM\TemplatesStructure::update($data);
+
+        if ($this->isSolrConfigUpdated()) {
+            $tpl = \CB\Objects::getCachedObject($data['template_id']);
+            $tpl->setSysDataProperty('solrConfigUpdated', true);
+        }
     }
 
     protected function detectParentTemplate($targetPid = false)
@@ -109,6 +119,46 @@ class TemplateField extends Object
         if (!empty($r)) {
             $rez = $r['template_id'];
         }
+
+        return $rez;
+    }
+
+    /**
+     * check if current data updates solr configuration
+     * @return boolean
+     */
+    protected function isSolrConfigUpdated()
+    {
+        $rez= false;
+
+        $old = empty($this->oldObject)
+            ? $this
+            : $this->oldObject;
+        $od = $old->getData();
+        $nd = &$this->data;
+
+        $d1 = &$od['data'];
+        $d2 = &$nd['data'];
+
+        $cfg1 = empty($d1['cfg'])
+            ? array()
+            : Util\toJSONArray($d1['cfg']);
+        $cfg2 = empty($d2['cfg'])
+            ? array()
+            : Util\toJSONArray($d2['cfg']);
+
+        $indexed1 = !empty($cfg1['indexed']) || !empty($cfg1['faceting']);
+        $indexed2 = !empty($cfg2['indexed']) || !empty($cfg2['faceting']);
+
+        $field1 = empty($d1['solr_column_name'])
+            ? ''
+            : $d1['solr_column_name'];
+
+        $field2 = empty($d2['solr_column_name'])
+            ? ''
+            : $d2['solr_column_name'];
+
+        $rez = (($indexed1 != $indexed2) || ($indexed1 && ($field1 != $field2)));
 
         return $rez;
     }

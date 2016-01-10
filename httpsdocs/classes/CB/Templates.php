@@ -14,6 +14,7 @@ class Templates
      */
     public function readAll($p)
     {
+        $p = $p; //dummy codacy assignment
         $rez = DM\Templates::readAllWithData();
 
         foreach ($rez as &$r) {
@@ -98,5 +99,30 @@ class Templates
         }
 
         return $rez;
+    }
+
+    /**
+     * runs script for updating solr data for current template items
+     * @param  int  $templateId
+     * @return json responce
+     */
+    public function updateSolrData($templateId)
+    {
+        $rez = array(
+            'success' => true
+        );
+
+        $tc = Templates\SingletonCollection::getInstance();
+        $tpl = $tc->getTemplate($templateId);
+        $d = $tpl->getData();
+
+        if (!empty($d['sys_data']['solrConfigUpdated'])) {
+            $cmd = 'php -f ' . BIN_DIR . 'update_solr_prepared_data.php -- ' .
+                '-c ' . Config::get('core_name'). ' -a -t ' . $templateId . ' &';
+
+            shell_exec($cmd);
+
+            $tpl->setSysDataProperty('solrConfigUpdated');
+        }
     }
 }

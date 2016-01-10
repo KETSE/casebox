@@ -23,7 +23,7 @@ $res = DB\dbQuery(
     'SELECT *
     FROM ' . \CB\PREFIX . '_casebox.translations
     WHERE `type` in (0, 2)'
-) or die(DB\dbQueryError());
+);
 
 while ($r = $res->fetch_assoc()) {
     foreach ($r as $k => $v) {
@@ -46,7 +46,7 @@ $cores = array();
 $res = DB\dbQuery(
     'SELECT name, cfg
     FROM ' . \CB\PREFIX . '_casebox.cores'
-) or die(DB\dbQueryError());
+);
 
 while ($r = $res->fetch_assoc()) {
     $cfg = Util\jsonDecode($r['cfg']);
@@ -57,8 +57,11 @@ while ($r = $res->fetch_assoc()) {
 
     $res2 = DB\dbQuery(
         'SELECT count(*) `count`
-        FROM ' . $db . '.translations'
-    ); // dont exit if db doesnt have translations
+        FROM ' . $db . '.translations',
+        array(
+            'hideErrors' => true
+        )
+    );
 
     if ($res2) {
         if ($r2 = $res2->fetch_assoc()) {
@@ -82,8 +85,11 @@ if (empty($cores)) {
         $res = DB\dbQuery(
             'SELECT *
             FROM ' . $db . '.translations
-            WHERE `type` in (0, 2)'
-        ) or die(DB\dbQueryError());
+            WHERE `type` in (0, 2)',
+            array(
+                'hideErrors' => true
+            )
+        );
 
         while ($r = $res->fetch_assoc()) {
             foreach ($r as $k => $v) {

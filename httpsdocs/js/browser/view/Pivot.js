@@ -7,7 +7,6 @@ Ext.define('CB.browser.view.Pivot',{
     ,border: false
     ,tbarCssClass: 'x-panel-white'
     ,layout: 'border'
-    ,activeCharts: ['table']
     ,scrollable: true
 
     ,initComponent: function(){
@@ -19,13 +18,6 @@ Ext.define('CB.browser.view.Pivot',{
             }
             ,this.params || {}
         );
-
-        this.seriesStyles = [];
-        for (var i = 0; i < App.colors.length; i++) {
-            this.seriesStyles.push({
-                color: App.colors[i]
-            });
-        }
 
         this.rowsCombo = new Ext.form.ComboBox({
             xtype: 'combo'
@@ -77,12 +69,14 @@ Ext.define('CB.browser.view.Pivot',{
                 text: 'Stats'
                 ,itemId: 'PVStatsLabel'
             })
+
             ,new Ext.Button({
                 text: 'Stats'
                 ,itemId: 'PVStatsButton'
                 ,scale: 'medium'
                 ,menu: []
             })
+
             ,new Ext.Button({
                 qtip: L.Pivot
                 ,text: L.Pivot
@@ -95,6 +89,7 @@ Ext.define('CB.browser.view.Pivot',{
                 ,scope: this
                 ,handler: this.onChangeChartButtonClick
             })
+
             ,new Ext.Button({
                 qtip: L.ChartArea
                 ,text: L.Bar
@@ -107,6 +102,7 @@ Ext.define('CB.browser.view.Pivot',{
                 ,scope: this
                 ,handler: this.onChangeChartButtonClick
             })
+
             ,new Ext.Button({
                 qtip: L.ChartArea
                 ,text: L.Column
@@ -123,25 +119,21 @@ Ext.define('CB.browser.view.Pivot',{
             ,this.colsCombo
         );
 
-        this.chartDataStore = new Ext.data.JsonStore({
-            model: 'GenericCount'
-            ,data: []
-        });
-
-        this.chartContainer = new Ext.Panel({
+        this.chartBlock = new CB.widget.block.Pivot({
             region: 'center'
             ,scrollable: true
             ,border: false
-            ,layout: {
-                type: 'vbox'
-                ,pack: 'top'
+            ,listeners: {
+                scope: this
+                ,cellclick: this.onTableCellClick
             }
+
         });
 
         Ext.apply(this, {
             title: L.Pivot
             ,header: false
-            ,items: this.chartContainer
+            ,items: this.chartBlock
             ,listeners: {
                 scope: this
                 ,activate: this.onActivate
@@ -167,6 +159,7 @@ Ext.define('CB.browser.view.Pivot',{
     ,onActivate: function() {
         this.selectedFacets = [];
 
+        delete this.chartData;
         delete this.selectedStat;
 
         this.fireEvent(
@@ -191,7 +184,7 @@ Ext.define('CB.browser.view.Pivot',{
     }
 
     ,onChangeChartButtonClick: function(b, e) {
-        this.activeCharts = [b.config.chart];
+        this.chartData.charts = [b.config.chart];
         // if(b.pressed) {
         //     this.activeCharts.push(b.config.chart);
         // } else {
@@ -202,249 +195,57 @@ Ext.define('CB.browser.view.Pivot',{
     }
 
     ,onChangeChart: function() {
-        var i, j
-            ,BC = this.refOwner.buttonCollection
-            ,showTable = (this.activeCharts.indexOf('table') > -1)
-            ,showBarChart = (this.activeCharts.indexOf('stackedBars') > -1)
-            ,showColumnChart = (this.activeCharts.indexOf('stackedColumns') > -1);
+        var BC = this.refOwner.buttonCollection
+            ,ch = this.chartData.charts;
 
-        BC.get('PVtable').toggle(showTable, true);
-        BC.get('PVbarchart').toggle(showBarChart, true);
-        BC.get('PVcolumnchart').toggle(showColumnChart, true);
+        BC.get('PVtable').toggle(ch.indexOf('table') > -1, true);
+        BC.get('PVbarchart').toggle(ch.indexOf('stackedBars') > -1, true);
+        BC.get('PVcolumnchart').toggle(ch.indexOf('stackedColumns') > -1, true);
 
-        this.loadChartData();
-
-        this.chartContainer.removeAll(true);
-
-        if(showTable) {
-            var html = '';
-
-            var hr = '<th> &nbsp; </th>';
-            Ext.iterate(
-                this.pivot.titles[1]
-                ,function(k, v, o) {
-                    hr += '<th title="' + Ext.String.htmlEncode(v) +'">' +
-                        Ext.String.htmlEncode(App.shortenString(v, 10)) + '</th>';
-                }
-                ,this
-            );
-            html += '<tr>' + hr + '<th>' + L.Total + '</th></tr>';
-
-            Ext.iterate(
-                this.pivot.titles[0]
-                ,function(k, v, o) {
-                    if(Ext.isEmpty(this.refs[k + '_t'])) {
-                        return;
-                    }
-
-                    var r = '<th style="text-align:left" title="' + Ext.String.htmlEncode(v) + '">' +
-                        Ext.String.htmlEncode(App.shortenString(v, 25)) + '</th>';
-
-                    Ext.iterate(
-                        this.pivot.titles[1]
-                        ,function(q, z, y) {
-                            r += '<td f="' + k + '|' + q + '">' + Ext.valueFrom(this.refs[k + '_' + q], '') + '</td>';
-                        }
-                        ,this
-                    );
-
-                    html += '<tr>' + r + '<td class="total" f="'+ k +'|">' + Ext.valueFrom(this.refs[k + '_t'], '') + '</td></tr>';
-                }
-                ,this
-            );
-
-            var total = 0;
-            var r = '<th>' + L.Total + '</th>';
-            Ext.iterate(
-                this.pivot.titles[1]
-                ,function(q, z, y) {
-                    var nr = Ext.valueFrom(this.refs['t_' + q], '');
-                    r += '<td class="total" f="|'+ q +'">' + Ext.util.Format.number(nr, '0.##') + '</td>';
-                    if(Ext.isNumeric(nr)) {
-                        total += nr;
-                    }
-                }
-                ,this
-            );
-
-            //get stats value if set
-            var value = this.getFacetCount(this.pivot);
-
-            html += '<tr>' + r + '<td class="total">' + Ext.util.Format.number(value ? value : total, '0.##') + '</td></tr>';
-
-            html = '<table class="pivot">' + html + '</table>';
-
-            var table = this.chartContainer.add({
-                xtype: 'panel'
-                ,border: false
-                ,autoHeight: true
-                ,padding: 10
-                ,scrollable:true
-                ,html: html
-                ,listeners: {
-                    scope: this
-                    ,afterrender: function(p) {
-                        var a = p.getEl().query('td');
-                        for (var i = 0; i < a.length; i++) {
-                            Ext.get(a[i]).on('click', this.onTableCellClick, this);
-                        }
-                    }
-                }
-            });
-        }
-
-        if(showBarChart) {
-            this.addChart('bar');
-        }
-        if(showColumnChart) {
-            this.addChart('column');
-        }
-
-        this.chartContainer.updateLayout();
+        this.chartBlock.changeCharts(ch);
     }
 
-    ,addChart: function(chartType) {
-        /* create data, stores and charts on the fly */
-        var series = [
-                {
-                    xField: this.selectedFacets[0]
-                    ,yField: []
-                    ,title: []
-                },{
-                    xField: this.selectedFacets[1]
-                    ,yField: []
-                    ,title: []
-                }
-            ]
-            ,data = [[], []];
+    ,onStoreLoad: function(store, recs, successful, eOpts) {
+        if(!this.rendered ||
+            !this.getEl().isVisible(true) ||
+            (successful !== true)
+        ) {
+            return;
+        }
 
-        Ext.iterate(
-            this.pivot.titles[0]
-            ,function(k, v, o) {
-                //add fields and titles
-                series[1].yField.push('f' + k);
-                series[1].title.push(v);
+        var rd = store.proxy.reader.rawData
+            ,selectedValues = {};
 
-                //add data
-                var r = {};
-                r[this.selectedFacets[0]] = '"' + v + '"';
-                Ext.iterate(
-                    this.pivot.titles[1]
-                    ,function(q, z, y) {
-                        var w = Ext.valueFrom(this.refs[k + '_' + q], '');
-                        r['f' + q] = Ext.isEmpty(w) ? 0 : w;
-                    }
-                    ,this
-                );
-                data[0].push(r);
+        if(this.chartData) {
+            if(this.selectedFacets) {
+                selectedValues = {
+                    xfield: this.selectedFacets[0]
+                    ,yfield: this.selectedFacets[1]
+                };
             }
-            ,this
-        );
 
-        Ext.iterate(
-            this.pivot.titles[1]
-            ,function(k, v, o) {
-                //add fields and titles
-                series[0].yField.push('f' + k);
-                series[0].title.push(v);
+            selectedValues.charts = this.chartData.charts;
+        }
 
-                //add data
-                var r = {};
-                r[this.selectedFacets[1]] = '"' + v + '"';
-                Ext.iterate(
-                    this.pivot.titles[0]
-                    ,function(q, z, y) {
-                        var w = Ext.valueFrom(this.refs[q + '_' + k], '');
-                        r['f' + q] = Ext.isEmpty(w) ? 0 : w;
-                    }
-                    ,this
-                );
-                data[1].push(r);
-            }
-            ,this
-        );
+        this.chartData = this.chartBlock.loadData(rd, selectedValues);
 
-        var chartItems = []
-            ,i = 0;
+        this.selectedFacets = [
+            this.chartData.xField
+            ,this.chartData.yField
+        ];
 
-        // for (i = 0; i < series.length; i++) {
-            var serie = series[i];
+        this.loadAvailableFacets(rd.facets);
 
-            var cfg = {
-                height: Math.max(data[i].length * 25, 400)
-                ,width: '100%'
-                ,store: new Ext.data.JsonStore({
-                    fields: [serie.xField].concat(serie.yField)
-                    ,proxy: {
-                        type: 'memory'
-                        ,reader: {
-                            type: 'json'
-                        }
-                    }
-                    ,data: data[i]
-                })
-                ,items: [{
-                    type  : 'text',
-                    text  : ' ',
-                    x : 40, //the sprite x position
-                    y : 12  //the sprite y position
-                }]
-                ,axes: [{
-                    type: 'category'
-                    ,position: (chartType == 'bar') ? 'left' : 'bottom'
-                    ,fields: serie.xField
-                    ,grid: true
-                    ,minimum: 0
-                }, {
-                    type: 'numeric'
-                    ,position: (chartType == 'column') ? 'left' : 'bottom'
-                    ,fields: serie.yField
-                    ,grid: true
-                }]
+        this.updateStatsMenu();
 
-                ,legend: {
-                    position: 'right'
-                    ,boxStrokeWidth: 0
-                    // ,labelFont: '12px Helvetica'
-                }
-                ,seriesStyles: this.seriesStyles
-                ,series: [
-                    Ext.apply(
-                        serie
-                        ,{
-                            type: chartType
-                            // ,axis: 'bottom'
-                            ,stacked: true
-                            ,style: {
-                                opacity: 0.80
-                            }
-                            ,highlight: {
-                                'stroke-width': 2
-                                ,stroke: '#fff'
-                            }
-                            // ,label: {
-                            //     display: 'insideEnd'
-                            // }
-                        }
-                    )
-                ]
-            };
-
-            chartItems.push(
-                Ext.create(
-                    'Ext.chart.Chart'
-                    ,cfg
-                )
-            );
-        // }
-
-        this.chartContainer.add(chartItems);
+        this.onChangeChart();
     }
 
-    ,loadAvailableFacets: function() {
+    ,loadAvailableFacets: function(facets) {
         var data = [];
+
         Ext.iterate(
-            this.data.facets
+            facets
             ,function(key, val, o) {
                 if(Ext.isEmpty(this.selectedFacets)) {
                     this.selectedFacets = [key];
@@ -453,7 +254,7 @@ Ext.define('CB.browser.view.Pivot',{
                 }
                 data.push({
                     id: key
-                    ,name: Ext.valueFrom(val['title'], L['facet_'+key])
+                    ,name: Ext.valueFrom(val['title'], L['facet_' + key])
                 });
             }
             ,this
@@ -464,149 +265,11 @@ Ext.define('CB.browser.view.Pivot',{
         this.colsCombo.setValue(this.selectedFacets[1]);
     }
 
-    ,loadChartData: function() {
-        var data = {};
-
-        // loading facets list
-        Ext.iterate(
-            this.data.facets
-            ,function(key, val, o) {
-                data[key] = CB.facet.List.prototype.getFacetData(key, val.items);
-
-                for (var i = 0; i < data[key].length; i++) {
-                    if(Ext.isObject(data[key][i].items)) {
-                        data[key][i].name = data[key][i].items.name;
-                        data[key][i].count = data[key][i].items.count;
-                    }
-                    data[key][i].name = App.shortenString(data[key][i].name, 30);
-                }
-            }
-            ,this
-        );
-
-        // create refs object for common usage
-        this.refs = {};
-        if(!Ext.isEmpty(this.data.pivot)) {
-            var i, j, f1, f2, value;
-
-            data = this.data.pivot[this.selectedFacets.join(',')];
-
-            if(data && data.data) {
-                for (i = 0; i < data.data.length; i++) {
-                    f1 = data.data[i];
-                    if(!Ext.isEmpty(f1.pivot)) {
-                        for (j = 0; j < f1.pivot.length; j++) {
-                            f2 = f1.pivot[j];
-
-                            value = this.getFacetCount(f2);
-
-                            if(value > 0) {
-                                this.refs[f1.value + '_' + f2.value] = value;
-
-                                if(Ext.isEmpty(this.refs['t_' + f2.value])) {
-                                    this.refs['t_' + f2.value] = 0;
-                                }
-
-                                if(Ext.isNumeric(value)) {
-                                    this.refs['t_' + f2.value] += value;
-                                }
-                            }
-                        }
-                    }
-
-                    value = this.getFacetCount(f1);
-                    if(value > 0) {
-                        this.refs[f1.value + '_t'] = this.getFacetCount(f1);
-                    }
-                }
-            }
-        }
-    }
-
-    ,getFacetCount: function(f) {
-        var rez = 0
-            ,sf = this.selectedStat;
-
-        if(sf &&
-            sf.field &&
-            f.stats &&
-            f.stats.stats_fields &&
-            f.stats.stats_fields[sf.field]
-        ) {
-            if(f.stats.stats_fields[sf.field][sf.type]) {
-                rez = f.stats.stats_fields[sf.field][sf.type];
-            }
-
-        } else if(f.count){
-            rez = f.count;
-        }
-
-        return rez;
-    }
-
-    ,onStoreLoad: function(store, recs, successful, eOpts) {
-        if(!this.rendered ||
-            !this.getEl().isVisible(true) ||
-            (successful !== true)
-        ) {
-            return;
-        }
-        this.data = store.proxy.reader.rawData;
-
-        this.pivot = {
-            data: {}
-            ,titles: [] // 2 levels, for both facets
-        };
-
-        if(this.data.pivot) {
-            if(Ext.isEmpty(this.selectedFacets)) {
-                //just get the facets the server returned the pivot for
-                var key = '';
-                Ext.iterate(
-                    this.data.pivot
-                    ,function(k, v) {
-                        key = k;
-                    }
-                    ,this
-                );
-
-                this.selectedFacets = key.split(',');
-            }
-
-            var selectedFacets = this.selectedFacets.join(',');
-            if(this.data.pivot[selectedFacets]) {
-                Ext.copyTo(this.pivot, this.data.pivot[selectedFacets], 'data,titles,stats');
-            }
-
-        } else if(this.viewParams) {
-            var vp = this.viewParams;
-
-            if(vp.pivot_type) {
-                this.activeCharts = Ext.isString(vp.pivot_type)
-                    ? [vp.pivot_type]
-                    : vp.pivot_type;
-            }
-
-            if(vp.rows && !Ext.isEmpty(vp.rows.facet)) {
-                this.selectedFacets[0] = vp.rows.facet;
-            }
-            if(vp.cols && !Ext.isEmpty(vp.cols.facet)) {
-                this.selectedFacets[1] = vp.cols.facet;
-            }
-        }
-
-        this.loadAvailableFacets();
-
-        this.updateStatsMenu();
-
-        this.onChangeChart();
-    }
-
     ,updateStatsMenu: function() {
         var BC = this.refOwner.buttonCollection
             ,b = BC.get('PVStatsButton')
             ,l = BC.get('PVStatsLabel')
-            ,d = this.data;
+            ,d = this.chartData;
 
         this.statsEnabled = !Ext.isEmpty(d.stats);
 
@@ -709,11 +372,6 @@ Ext.define('CB.browser.view.Pivot',{
             }
 
         b.setText(txt);
-    }
-
-    ,onChartItemClick: function(o){
-        var rec = this.chartDataStore.getAt(o.index);
-        Ext.example.msg('Item Selected', 'You chose {0}.', rec.get('name'));
     }
 
     ,onFacetChange: function(combo, records, index) {

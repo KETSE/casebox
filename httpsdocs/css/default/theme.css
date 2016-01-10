@@ -14,8 +14,8 @@
 .ib-cancel{background-image: url(b/cancel.png); min-width: 38px}
 .ib-create{background-image: url(b/ic_add_circle_black_36dp.png); min-width: 38px}
 .ib-del{background-image: url(b/delete.png); min-width: 38px}
-.ib-done{background-image: url(b/ic_done_black_36dp.png); min-width: 38px}
-.ib-done-all{background-image: url(b/ic_done_all_black_36dp.png); min-width: 38px}
+.ib-done, .ib-complete{background-image: url(b/ic_done_black_36dp.png); min-width: 38px}
+.ib-done-all, .ib-close{background-image: url(b/ic_done_all_black_36dp.png); min-width: 38px}
 .ib-download{background-image: url(b/download.png); min-width: 38px}
 .ib-edit{background-image: url(b/clipboard.png); min-width: 38px}
 .ib-edit-obj{background-image: url(b/edit.png); min-width: 38px}
@@ -33,7 +33,7 @@
 .ib-refresh{background-image: url(b/refresh.png); min-width: 38px}
 .ib-restore{background-image: url(b/restore.png); min-width: 38px}
 .ib-reorder{background-image: url(b/ic_reorder_black_36dp.png); min-width: 38px}
-.ib-repeat{background-image: url(b/ic_repeat_black_36dp.png); min-width: 38px}
+.ib-repeat, .ib-reopen{background-image: url(b/ic_repeat_black_36dp.png); min-width: 38px}
 .ib-save{background-image: url(b/save.png); min-width: 38px}
 .ib-search{background-image: url(b/ic_search_black_36dp.png); min-width: 38px}
 .ib-search-negative{background-image: url(b/ic_search_black_36dp_negative.png); min-width: 38px}
@@ -43,6 +43,7 @@
 .ib-task-new{background-image: url(b/task-new.png); min-width: 38px}
 .ib-trash{background-image: url(b/trash.png); min-width: 38px}
 .ib-upload{background-image: url(b/upload.png); min-width: 38px}
+.ib-updateSolrData{background-image: url(b/ic_autorenew_black_36dp.png); min-width: 38px}
 .ib-view-list{background-image: url(b/list.png); min-width: 38px}
 .ib-view-tasks{background-image: url(b/tasks.png); min-width: 38px}
 .ib-view-calendar{background-image: url(b/calendar.png); min-width: 38px}

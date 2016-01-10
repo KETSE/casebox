@@ -22,13 +22,13 @@ class File extends Object
         //disable default log from parent Object class
         //we'll set comments add as comment action for parent
 
-        $disableActivityLogStatus = \CB\Config::getFlag('disableActivityLog');
+        $disableLogFlag = \CB\Config::getFlag('disableActivityLog');
 
         \CB\Config::setFlag('disableActivityLog', true);
 
         $rez = parent::create($p);
 
-        \CB\Config::setFlag('disableActivityLog', $disableActivityLogStatus);
+        \CB\Config::setFlag('disableActivityLog', $disableLogFlag);
 
         $p = &$this->data;
 
@@ -197,8 +197,6 @@ class File extends Object
      */
     protected function updateParentFollowers()
     {
-        $p = &$this->data;
-
         $posd = $this->parentObj->getSysData();
 
         $newUserIds = array();

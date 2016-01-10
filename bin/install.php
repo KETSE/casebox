@@ -16,20 +16,18 @@ namespace CB\Install;
  *
  * Requirements:
  *     on Windows platform path to mysql/bin should be added to "Path" environment variable
- * 
+ *
  * php install.php --arg1=value1 --arg2=value2 ... OR --config=/path/to/config.ini
- * 
+ *
  */
 
 use CB;
-
-
 
 /*define some basic directories*/
 $binDirectorty = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 $cbHome = dirname($binDirectorty) . DIRECTORY_SEPARATOR;
 
-require_once $cbHome.'httpsdocs/lib/Util.php';
+require_once $cbHome . 'httpsdocs/lib/Util.php';
 
 /* check if we are running under root / Administrator user */
 
@@ -37,19 +35,21 @@ switch (CB\Util\getOS()) {
 
     case 'WIN':
 
-        $returned_user_state = shell_exec(dirname(__FILE__).DIRECTORY_SEPARATOR.'get_user_state.bat');
+        $returned_user_state = shell_exec(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'get_user_state.bat');
         $user_state = preg_replace('/\n|\r/si', '', $returned_user_state);
+
         if ($user_state != 'admin') {
-            die( "This script should be run under \"Administrator\"\n" );
+            die("This script should be run under \"Administrator\"\n");
         }
         break;
 
     case "LINUX":
-        $currentUser = empty($_SERVER['USER']) ? @$_SERVER['USERNAME'] : $_SERVER['USER'];
+        $currentUser = empty($_SERVER['USER'])
+            ? @$_SERVER['USERNAME']
+            : $_SERVER['USER'];
 
         if (!in_array($currentUser, array('root'))) {
             echo "\033[31mThis script should be run under \"root\" \033[0m\n";
-         //   die("try command #sudo php install.php\n");
         }
 
         break;
@@ -79,9 +79,22 @@ try {
 
 require_once \CB\LIB_DIR.'install_functions.php';
 
-$cfg = \CB\Install\cliLoadConfig(isset($options) ? $options:null);
+$cliCfg = \CB\Install\cliLoadConfig(
+    isset($options)
+    ? $options
+    : null
+);
 
-    \CB\Install\displaySystemNotices();
+/* for interactive mode the priority is active config.ini
+otherwise - the config specified in params */
+if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+    $cfg += $cliCfg;
+
+} else {
+    $cfg = $cliCfg + $cfg;
+}
+
+\CB\Install\displaySystemNotices();
 
 if (\CB\Util\getOS() != "WIN") {
     //ask for apache user and set ownership for some folders
@@ -99,9 +112,9 @@ $tryInitDBConfig = 0;
 do {
     initDBConfig($cfg);
     $tryInitDBConfig++;
-   if($tryInitDBConfig > 3) {
-       trigger_error("ERROR: Cannot configure database connections !!!", E_USER_ERROR);
-   }
+    if ($tryInitDBConfig > 3) {
+        trigger_error("ERROR: Cannot configure database connections !!!", E_USER_ERROR);
+    }
 } while (!verifyDBConfig($cfg));
 
 //specify server_name
@@ -118,7 +131,7 @@ if (!empty($l)) {
 }
 
 if (confirm('solr_create_cores')) {
-//init solr connection
+    //init solr connection
     initSolrConfig($cfg);
 }
 
@@ -190,14 +203,14 @@ foreach ($requiredDirs as $dir) {
     }
 }
 
-
-if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE'))
-//---------- create solr symlinks for casebox config sets
-        if (createSolrConfigsetsSymlinks($cfg)) {
+if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+    //---------- create solr symlinks for casebox config sets
+    if (createSolrConfigsetsSymlinks($cfg)) {
         echo "Solr configsets symlinks created sucessfully.\n\r";
     } else {
         echo "Error creating symlinks to solr configsets.\n\r";
     }
+}
 
 //try to create log core
 if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {

@@ -514,7 +514,7 @@ Ext.define('CB.UploadWindow', {
                 ,hidden: true
             })
             ,cancel: new Ext.Action({
-                text: Ext.MessageBox.buttonText.cancel
+                text: L.Cancel
                 ,iconCls: 'i-cancel'
                 ,handler: this.onCancelClick
                 ,scope: this
@@ -558,7 +558,7 @@ Ext.define('CB.UploadWindow', {
         this.cancelSplitButton = new Ext.SplitButton({
             xtype: 'splitbutton'
             ,iconCls: 'i-cancel'
-            ,text: Ext.MessageBox.buttonText.cancel
+            ,text: L.Cancel
             ,handler: this.onCancelClick
             ,scope: this
             ,disabled: true

@@ -203,7 +203,8 @@ class Service
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
 
-        $data = curl_exec($ch);
+        // $data =
+        curl_exec($ch);
 
         if (curl_errno($ch)) {
             throw new \Exception("curl_error:" . curl_error($ch).$this->debugInfo(), 1);

@@ -338,7 +338,7 @@ Ext.define('CB.notifications.View', {
             ,this
         );
 
-        this.checkNotificationsTask.delay(1000 * 20); //20 seconds
+        this.checkNotificationsTask.delay(1000 * 60 * 1); //1 min
     }
 
     ,processGetNew: function(r, e) {

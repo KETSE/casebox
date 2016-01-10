@@ -97,7 +97,7 @@ switch ($obj->getType()) {
                     AND f.id = $2';
         }
 
-        $res = DB\dbQuery($sql, array($id, $version_id)) or die(DB\dbQueryError());
+        $res = DB\dbQuery($sql, array($id, $version_id));
 
         if ($r = $res->fetch_assoc()) {
             if (!empty($r['filename']) && file_exists($filesPreviewDir . $r['filename'])) {
@@ -135,7 +135,7 @@ switch ($obj->getType()) {
                         SET ladate = CURRENT_TIMESTAMP
                         WHERE id = $1',
                         $id
-                    ) or die(DB\dbQueryError());
+                    );
                 }
             } elseif (!empty($preview['html'])) {
                 echo $preview['html'];

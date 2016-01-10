@@ -113,7 +113,6 @@ class DatesFacet extends StringsFacet
         }
 
         foreach ($cfg['queries'] as $key => $query) {
-            $qk = $cfg['name'].'_'.$key;
             if (!empty($this->solrData[$query])) {
                 $name = L\get($query);
                 if (empty($name)) {

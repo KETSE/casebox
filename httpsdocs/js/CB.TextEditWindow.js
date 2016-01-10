@@ -52,7 +52,7 @@ Ext.define('CB.TextEditWindow', {
                     ,handler: this.doSubmit
                     ,scope: this
                 },{
-                    text: Ext.MessageBox.buttonText.cancel
+                    text: L.Cancel
                     ,handler: this.doClose
                     ,scope: this
                 }

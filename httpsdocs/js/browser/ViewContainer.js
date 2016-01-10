@@ -470,6 +470,13 @@ Ext.define('CB.browser.ViewContainer', {
                     ,showObjectPropertiesPanel: false
                     ,getProperty: getPropertyHandler
                 })
+                ,new CB.browser.view.Dashboard({
+                    border: false
+                    ,refOwner: this
+                    ,store: this.store
+                    ,showObjectPropertiesPanel: false
+                    ,getProperty: getPropertyHandler
+                })
             ]
             ,listeners: {
                 scope: this
@@ -817,12 +824,11 @@ Ext.define('CB.browser.ViewContainer', {
 
         //dont load calendar view when view bound are not set
         var vp = this.getActiveView().getViewParams(options);
-        if( (vp === false) ||
+        if ((vp === false) ||
             (
                 !Ext.isEmpty(vp) && (vp.from == 'calendar') &&
                 (Ext.isEmpty(vp.dateStart) || Ext.isEmpty(vp.dateEnd))
-            )
-        ) {
+        )) {
             return false;
         }
 
@@ -838,9 +844,11 @@ Ext.define('CB.browser.ViewContainer', {
         var ep = store.proxy.extraParams
             ,lastSearchId = false
             ,currentSearchId = false;
+
         if(ep.search && ep.search.template_id) {
             lastSearchId = ep.search.template_id;
         }
+
         if(options.search && options.search.template_id) {
             currentSearchId = options.search.template_id;
         }
@@ -861,6 +869,7 @@ Ext.define('CB.browser.ViewContainer', {
         var page = Ext.valueFrom(options.page, 1);
         store.currentPage = page;
         options.page = page;
+
         if(!Ext.isDefined(options.start)) {
             options.start = (page - 1) * store.pageSize;
         }

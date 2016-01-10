@@ -47,7 +47,7 @@ class Templates extends Base
             LEFT JOIN objects o
                 ON t.id = o.id
             WHERE t.is_folder = 0'
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $r['cfg'] = Util\toJSONArray($r['cfg']);
@@ -74,7 +74,7 @@ class Templates extends Base
             WHERE `type` = $1
             ORDER BY id',
             $type
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $rez[] = $r['id'];
@@ -138,7 +138,7 @@ class Templates extends Base
                 ,$targetId
                 ,$pid
             )
-        ) or die(DB\dbQueryError());
+        );
 
         return (DB\dbAffectedRows() > 0);
     }

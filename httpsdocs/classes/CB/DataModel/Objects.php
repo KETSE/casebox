@@ -43,7 +43,7 @@ class Objects extends Base
                     ON t.id = o.id
                 WHERE t.id in (' . implode(',', $ids) .')';
 
-            $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+            $res = DB\dbQuery($sql);
 
             while ($r = $res->fetch_assoc()) {
                 $r['data'] = Util\jsonDecode($r['data']);
@@ -96,7 +96,7 @@ class Objects extends Base
                 $sourceId
                 ,$targetId
             )
-        ) or die(DB\dbQueryError());
+        );
 
         return (DB\dbAffectedRows() > 0);
     }

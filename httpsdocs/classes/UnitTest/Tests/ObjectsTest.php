@@ -91,37 +91,37 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
 
         // second read created object
         $obj->load($td['id']);
-        $read_td = $obj->getData();
+        $readTd = $obj->getData();
 
         $vtd = $td;
         $vtd['cfg'] = Util\toJsonArray($td['cfg']);
 
         $this->assertArraySubset(
             $vtd,
-            $read_td,
+            $readTd,
             false,
-            ' Error read template data ' . print_r($read_td, true)
+            ' Error read template data ' . print_r($readTd, true)
         );
 
         // third update created object
 
-        $td['visible'] = 0;
-        $td['order'] = 2;
-        $td['iconCls'] = '';
+        $td['data']['visible'] = 0;
+        $td['data']['order'] = 2;
+        $td['data']['iconCls'] = '';
 
         $obj->update($td);
 
         $obj->load($td['id']);
-        $read_td = $obj->getData();
+        $readTd = $obj->getData();
 
         $vtd = $td;
         $vtd['cfg'] = Util\toJsonArray($td['cfg']);
 
         $this->assertArraySubset(
             $vtd,
-            $read_td,
+            $readTd,
             false,
-            ' error on updated template data '.print_r($read_td, true)
+            ' error on updated template data '.print_r($readTd, true)
         );
     }
 

@@ -121,7 +121,7 @@ Ext.define('CB.object.edit.Window', {
             })
 
             ,cancel: new Ext.Action({
-                text: Ext.MessageBox.buttonText.cancel
+                text: L.Cancel
                 ,iconCls: 'i-cancel'
                 ,hidden: true
                 ,scope: this
@@ -257,22 +257,19 @@ Ext.define('CB.object.edit.Window', {
             ,items: []
         });
 
-        this.gridContainer = Ext.create({
-            xtype: 'panel'
-            ,border: false
+        this.gridContainer = Ext.create('CB.object.plugin.ObjectProperties', {
+            border: false
             ,autoHeight: true
             ,items: []
         });
 
         this.gridContainer.params = this.data;
 
-        this.gridContainer.onTaskChanged = Ext.Function.createSequence(
-            CB.object.plugin.ObjectProperties.prototype.onTaskChanged
+        this.gridContainer.onItemChange = Ext.Function.createSequence(
+            this.gridContainer.onItemChange
             ,Ext.Function.bind(this.loadPreviewData, this)
             ,this.gridContainer
         );
-
-        this.gridContainer.attachEvents = CB.object.plugin.ObjectProperties.prototype.attachEvents;
 
         this.pluginsContainer = Ext.create({
             xtype: 'CBObjectProperties'

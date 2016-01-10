@@ -72,15 +72,13 @@ class Base
     public function onSolrQueryWarmUp(&$p)
     {
         $ip = &$p['inputParams'];
-        $params = &$p['params'];
+        // $params = &$p['params'];
         $data = &$p['data'];
         $requiredIds = &$p['requiredIds'];
 
         if (@$ip['view']['type'] !== $this->fromParam) {
             return;
         }
-
-        $userLanguage = \CB\Config::get('user_language');
 
         $displayColumns = $this->getDC();
 
@@ -113,7 +111,7 @@ class Base
 
         $template = $objClass->getTemplate();
 
-        foreach ($customColumns as $fieldName => &$col) {
+        foreach ($customColumns as &$col) { //$fieldName
             //detect field name
             $customField = $col['fieldName'];
             $templateField = $template->getField($customField);
@@ -161,14 +159,12 @@ class Base
             return;
         }
 
-        $sp = &$p['params'];
+        // $sp = &$p['params'];
         $result = &$p['result'];
         $view = &$result['view'];
         $data = &$result['data'];
 
         $rez = array();
-
-        $userLanguage = \CB\Config::get('user_language');
 
         $displayColumns = $this->getDC();
 
@@ -608,6 +604,7 @@ class Base
      */
     public function getSolrFields($nodeId = false, $templateId = false)
     {
+        $nodeId = $nodeId; // dummy codacy assignment
         $rez = array(
             'fields' => array()
             ,'sort' => array()

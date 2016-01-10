@@ -11,8 +11,6 @@ use CB\DataModel as DM;
 
 class NotificationsTest extends \PHPUnit_Framework_TestCase
 {
-    private $DB;
-
     public function setUp()
     {
         $this->oldValues = array(
@@ -61,8 +59,8 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         //add a comment to obj 1 with user 1 referencing user 2
         $firstUserId = $this->userIds[0];
         $secondUserId = $this->userIds[1];
-        $thirdUserId = $this->userIds[2];
-        $forthUserId = $this->userIds[3];
+        // $thirdUserId = $this->userIds[2];
+        // $forthUserId = $this->userIds[3];
 
         $rootUserId = $this->oldValues['user_id'];
 
@@ -114,8 +112,8 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
             $this->checkLastNotification(
                 $secondUserId,
                 $lastNotification
-              ),
-            'Wrong last notification : Last ('. print_r($lastNotification,true).')'
+            ),
+            'Wrong last notification : Last ('. print_r($lastNotification, true) . ')'
         );
 
         //check notifications for root user, he also should receive a new notification from andrew
@@ -136,11 +134,11 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         //code for 3 and more users notifications grouping
         //and check root notifications with each comment
         for ($i = 0; $i < 4; $i++) {
-            
+
             //$_SESSION['user']['id'] = $this->userIds[$i];
             \CB\User::setAsLoged($this->userIds[$i], $_SESSION['key']);
             $commentData['data']['_title'] = 'Comment from user #' . $i .'.';
-         
+
             $this->createObject($commentData);
 
             $this->assertTrue(
@@ -213,6 +211,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         $obj->update($data);
 
         foreach ($this->objectIds as $id) {
+            $obj = \CB\Objects::getCachedObject($id);
             $obj->delete(false);
         }
 
@@ -220,8 +219,10 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         $recs = DM\Notifications::getUnseen();
         foreach ($recs as $action) {
             $userData = \CB\User::getPreferences($action['to_user_id']);
-            $sender = \CB\Notifications::getSender($action['from_user_id']);
-            $body = \CB\Notifications::getMailBodyForAction($action, $userData);
+            // $sender =
+            \CB\Notifications::getSender($action['from_user_id']);
+            // $body =
+            \CB\Notifications::getMailBodyForAction($action, $userData);
         }
     }
 
@@ -350,7 +351,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         //check if counts are not empty
         $countResult = $api->getNew(array());
         if (($countResult['success'] !== true) || empty($countResult['data'])) {
-            trigger_error(print_r($countResult,true),E_USER_ERROR);
+            trigger_error(print_r($countResult, true), E_USER_ERROR);
 
             return $rez;
         }
@@ -369,7 +370,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         //$_SESSION['user']['id'] = $currentUser;
          \CB\User::setAsLoged($currentUser, $_SESSION['key']);
         if (!$rez) {
-            trigger_error(print_r($n,true),E_USER_ERROR);
+            trigger_error(print_r($n, true), E_USER_ERROR);
         }
 
         return $rez;
@@ -379,6 +380,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
     {
 
         //remove users and objects
+        DM\Users::delete($this->userIds);
 
         \CB\Config::setFlag('disableSolrIndexing', $this->oldValues['solrIndexing']);
 

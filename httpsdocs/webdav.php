@@ -10,9 +10,8 @@ namespace CB;
  * @license https://www.casebox.org/license/ AGPLv3
  */
 
-
 // server urls 'https://casebox.org/dav/{core}/edit-{id}/'
-define ('URIPREFIX', 'dav');
+define('URIPREFIX', 'dav');
 
 // small hack for init.php: allowing it to work without being authenticated
 $webDAVMode = 1;
@@ -92,7 +91,7 @@ $server->addPlugin($tffp);
 
 // LibreOffice will NOT remove LOCK after closing the file
 // in EDIT mode disable locking, so everyone can save the file
-//if ($_SERVER['HTTP_USER_AGENT'] != 'LibreOffice')  {   // WORD requires locking. and ($env['mode'] != 'edit')
+//if ($_SERVER['HTTP_USER_AGENT'] != 'LibreOffice') {   // WORD requires locking. and ($env['mode'] != 'edit')
     $lockBackend = new \Sabre\DAV\Locks\Backend\File($lockFile);
     $lockPlugin = new \Sabre\DAV\Locks\Plugin($lockBackend);
 
@@ -111,33 +110,21 @@ $storageBackend = new WebDAV\PropertyStorageBackend();
 $propertyStorage = new \Sabre\DAV\PropertyStorage\Plugin($storageBackend);
 $server->addPlugin($propertyStorage);
 
-
 $cbLockPlugin = new WebDAV\LockPlugin();
 $server->addPlugin($cbLockPlugin);
-
-
-
-
 
 // And off we go!
 $server->exec();
 
-
-
-
-
-
-
-
-
 //------------------------------------------------------------------------------
-function initEnv() {
+function initEnv()
+{
     $ary = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
     // error_log("initEnv: " . $_SERVER['REQUEST_URI']);
     // echo(print_r($ary, true));
 
     // remove URIPREFIX
-    $t = array_shift($ary);
+    array_shift($ary);
 
     $r = [];
 
@@ -173,7 +160,7 @@ function initEnv() {
         // i.e. dav client should not try to get out of this folder
         $r['rootFolder'] = '/' . $r['editFolder'];
 
-    // } elseif (preg_match('/^dav-(.*)$/', $ary[0], $m)) {    # /dav-{core}/
+        // } elseif (preg_match('/^dav-(.*)$/', $ary[0], $m)) {    # /dav-{core}/
     } else {
         // $r['core'] = $m[1];
         $r['mode'] = 'browse';
@@ -184,4 +171,3 @@ function initEnv() {
 
     return $r;
 }
-

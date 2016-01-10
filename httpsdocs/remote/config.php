@@ -156,7 +156,8 @@ $API = array_merge(
         ,'CB_Templates' => array(
             'methods'=>array(
                 'readAll'=> array('len' => 1)
-                ,'getTemplatesStructure'=> array('len'=>0)
+                ,'getTemplatesStructure'=> array('len' => 0)
+                ,'updateSolrData'=> array('len'=> 1)
             )
         )
 

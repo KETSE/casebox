@@ -2,8 +2,9 @@
 namespace CB\TreeNode;
 
 use CB\Config;
-use CB\Util;
+use CB\Path;
 use CB\User;
+use CB\Util;
 
 class Base implements \CB\Interfaces\TreeNode
 {
@@ -147,7 +148,7 @@ class Base implements \CB\Interfaces\TreeNode
     {
         $rez = array();
 
-        if (!$this->acceptedPath($pathArray, $requestParams)) {
+        if (!$this->acceptedPath($pathArray, $rp)) {
             return $rez;
         }
 
@@ -167,44 +168,116 @@ class Base implements \CB\Interfaces\TreeNode
             $rez['type'] = 'activityStream';
         }
 
+        //update autodetected view if manually selected by user
         if (!empty($rp['userViewChange'])) {
             $rez['type']  = empty($rp['view'])
                 ? $rp['from']
                 : $rp['view'];
         }
 
-        if (!empty($rez)) {
-            if (!empty($cfg['views'][$rez['type']])) {
-                $rez = array_merge($rez, $cfg['views'][$rez['type']]);
+        $rez = $this->adjustViewConfig($rez, $rp);
 
-            } elseif (($rez['type'] == 'activityStream') && !empty($cfg['views']['stream'])) {
-                $rez = array_merge($rez, $cfg['views']['stream']);
-            }
+        return $rez;
+    }
+
+    /**
+     * analize and adjust view config if needed
+     * @param  array $viewConfig
+     * @param  array $rp
+     * @return array
+     */
+    public function adjustViewConfig($viewConfig, &$rp)
+    {
+        if (empty($viewConfig)) {
+            return array();
+        }
+
+        $rez = $viewConfig;
+        $cfg = &$this->config;
+
+        if (!empty($cfg['views'][$rez['type']])) {
+            $rez = array_merge($rez, $cfg['views'][$rez['type']]);
+
+        } elseif (($rez['type'] == 'activityStream') && !empty($cfg['views']['stream'])) {
+            $rez = array_merge($rez, $cfg['views']['stream']);
+        }
+
+        //dashboards extention check
+        if (!empty($rez['extends'])) {
+            $rez = Config::extend('dashboards', $rez);
+        }
+
+        switch ($rez['type']) {
 
             //backward compatibility check
-            switch ($rez['type']) {
-                case 'pivot':
-                case 'charts':
-                    if (!empty($cfg['stats'])) {
-                        $stats = array();
-                        foreach ($cfg['stats'] as $item) {
-                            $stats[] = array(
-                                'title' => Util\detectTitle($item)
-                                ,'field' => $item['field']
-                            );
-                        }
-                        $rez['stats'] = $stats;
+            case 'pivot':
+            case 'charts':
+                if (!empty($cfg['stats'])) {
+                    $stats = array();
+                    foreach ($cfg['stats'] as $item) {
+                        $stats[] = array(
+                            'title' => Util\detectTitle($item)
+                            ,'field' => $item['field']
+                        );
+                    }
+                    $rez['stats'] = $stats;
+                }
+
+                $rez['sort'] = null;
+
+                //check renamed options
+                if (isset($rez['chart_type']) && empty($rez['chartType'])) {
+                    $rez['chartType'] = $rez['chart_type'];
+                    unset($rez['chart_type']);
+                }
+                if (isset($rez['pivot_type']) && empty($rez['pivotType'])) {
+                    $rez['pivotType'] = $rez['pivot_type'];
+                    unset($rez['pivot_type']);
+                }
+                break;
+
+            case 'dashboard':
+                //analize dashboard items and merge referenced config if any
+                if (empty($rez['items'])) {
+                    $rez['items'] = array();
+                }
+
+                $this->subClasses = array();
+                $copyConfigProperties = ['title', 'cellCls', 'rowspan', 'colspan', 'width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight'];
+
+                foreach ($rez['items'] as $k => $v) {
+                    if (!empty($v['extends'])) {
+                        $rez['items'][$k] = Config::extend('treeNodes', $v);
                     }
 
-                    $rez['sort'] = null;
-                    // $rez['rows'] = 0;
-                    break;
+                    $clsArr = Path::getNodeClasses($rez['items']);
+                    if (!empty($clsArr)) {
+                        $class = current($clsArr);
 
-                default: // grid
-                    // if (!empty($cfg['view']['group'])) {
-                    //     $rez['group'] = $cfg['view']['group'];
-                    // }
-            }
+                        if (isset($v['pid'])) {
+                            $class->id = $v['pid'];
+                        }
+
+                        $this->subClasses[$k] = $class;
+                        $path = array($class);
+                        $customRp = $rp;
+                        unset($customRp['userViewChange']);
+                        $vc = $class->getViewConfig($path, $customRp);
+
+                        $rez['items'][$k] = array_merge(
+                            $vc,
+                            array_intersect_key($v, array_flip($copyConfigProperties))
+                        );
+                    }
+
+                }
+
+                break;
+
+            default: // grid
+                // if (!empty($cfg['view']['group'])) {
+                //     $rez['group'] = $cfg['view']['group'];
+                // }
         }
 
         return $rez;

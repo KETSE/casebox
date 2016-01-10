@@ -18,8 +18,8 @@ use Sabre\HTTP;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
-class CreationDate extends DAV\Property {
-
+class CreationDate extends DAV\Property
+{
     /**
      * time
      *
@@ -32,8 +32,8 @@ class CreationDate extends DAV\Property {
      *
      * @param int|DateTime $time
      */
-    public function __construct($time) {
-
+    public function __construct($time)
+    {
         if ($time instanceof \DateTime) {
             $this->time = $time;
         } elseif (is_int($time) || ctype_digit($time)) {
@@ -50,13 +50,14 @@ class CreationDate extends DAV\Property {
     /**
      * serialize
      *
-     * @param DAV\Server $server
-     * @param \DOMElement $prop
+     * @param  DAV\Server  $server
+     * @param  \DOMElement $prop
      * @return void
      */
-    public function serialize(DAV\Server $server, \DOMElement $prop) {
-
-        $doc = $prop->ownerDocument;
+    public function serialize(DAV\Server $server, \DOMElement $prop)
+    {
+        $server = $server; //dummy codacy assignment
+        // $doc = $prop->ownerDocument;
         //$prop->setAttribute('xmlns:b','urn:uuid:c2f41010-65b3-11d1-a29f-00aa00c14882/');
         //$prop->setAttribute('b:dt','dateTime.rfc1123');
         $prop->nodeValue = HTTP\Util::toHTTPDate($this->time);
@@ -68,11 +69,9 @@ class CreationDate extends DAV\Property {
      *
      * @return \DateTime
      */
-    public function getTime() {
-
+    public function getTime()
+    {
         return $this->time;
 
     }
-
 }
-

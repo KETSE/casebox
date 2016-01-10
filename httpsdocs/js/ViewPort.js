@@ -483,7 +483,7 @@ Ext.define('CB.ViewPort', {
         if(App.loginData.admin) {
             managementItems.push(
                 {
-                    text: 'Reload templates'
+                    text: L.ReloadTemplates
                     ,iconCls: 'icon-templates'
                     ,handler: function(){
                         reloadTemplates();

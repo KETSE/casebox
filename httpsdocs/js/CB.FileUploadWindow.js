@@ -66,7 +66,7 @@ Ext.define('CB.FilesConfirmationWindow', {
         }
 
         buttons.push({
-            text: Ext.MessageBox.buttonText.cancel
+            text: L.Cancel
             ,name: 'cancel'
             ,scope: this
             ,handler: this.onButtonClick

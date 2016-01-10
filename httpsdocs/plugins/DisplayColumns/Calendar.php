@@ -87,7 +87,6 @@ class Calendar extends Base
      */
     protected function getActiveColoringField($p)
     {
-        $result = &$p['result'];
         $ip = &$p['inputParams'];
         $view = &$ip['view'];
         $facets = &$ip['facets'];

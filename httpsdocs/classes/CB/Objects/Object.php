@@ -242,7 +242,6 @@ class Object
 
         $p['data'] = Util\toJSONArray(@$p['data']);
         $p['sys_data'] = Util\toJSONArray(@$p['sys_data']);
-        $sd = &$p['sys_data'];
 
         //filter fields
         $this->filterHTMLFields($p['data']);
@@ -427,7 +426,7 @@ class Object
 
         $p = &$this->data;
 
-        $tableFields = array(
+        $this->tableFields = array(
             'pid'
             ,'user_id'
             ,'system'
@@ -494,10 +493,6 @@ class Object
     protected function updateCustomData()
     {
         $d = &$this->data;
-
-        if (!empty($this->template)) {
-            $templateData = $this->template->getData();
-        }
 
         if (empty($d['data'])) {
             $d['data'] = array();
@@ -661,10 +656,9 @@ class Object
         $sd = &$d['sys_data'];
 
         $tpl = $this->getTemplate();
+        $tplCfg = array();
 
         $languages = Config::get('languages');
-
-        $defaultLanguage = Config::get('default_language');
 
         if (!empty($tpl)) {
             $fields = $tpl->getFields();
@@ -722,9 +716,10 @@ class Object
                     }
                 }
             }
+
+            $tplCfg = $tpl->getData()['cfg'];
         }
 
-        $tplCfg = $tpl->getData()['cfg'];
 
         if (!empty($tplCfg['copySolrFields'])) {
             foreach ($tplCfg['copySolrFields'] as $fns => $sc) {
@@ -771,7 +766,9 @@ class Object
     public function updateSolrData()
     {
         $this->load();
-        $this->collectSolrData();
+
+        // $this->collectSolrData(); // called by updateSysData
+
         $this->updateSysData();
     }
 
@@ -854,7 +851,7 @@ class Object
         return $value;
     }
 
-    public function getLookupValues($fields, &$resultingTemplateField = null)
+    public function getLookupValues($fields, &$resultField = null)
     {
         $rez = array();
         $fields = Util\toTrimmedArray($fields, '.');
@@ -869,7 +866,7 @@ class Object
                 $tf = $tpl->getField($fn);
 
                 if (!empty($tf)) {
-                    $resultingTemplateField = $tf;
+                    $resultField = $tf;
                     $v = $o->getFieldValue($fn);
 
                     if (!empty($v)) {
@@ -904,7 +901,31 @@ class Object
      */
     public function getActionFlags($userId = false)
     {
+        $userId = $userId; //dummy assignment for codacy
+
         return array();
+    }
+
+    /**
+     *  get actions html row for preview
+     * @return array
+     */
+    public function getPreviewActionsRow()
+    {
+        $rez = array();
+        $flags = $this->getActionFlags();
+
+        foreach ($flags as $k => $v) {
+            if (!empty($v)) {
+                $rez[] = "<a action=\"$k\" class=\"item-action ib-$k\">" . L\get(ucfirst($k)) . '</a>';
+            }
+        }
+
+        $rez = empty($rez)
+            ? ''
+            : '<div class="task-actions">' . implode(' ', $rez) . '</div>';
+
+        return $rez;
     }
 
     /**
@@ -954,7 +975,7 @@ class Object
      */
     protected function deleteCustomData($permanent)
     {
-
+        $permanent = $permanent; // dummy codacy assignment
     }
 
     /**
@@ -1528,6 +1549,7 @@ class Object
     */
     protected function moveCustomDataTo($targetId)
     {
+        $targetId = $targetId; //dummy assignment for codacy
 
     }
 
@@ -1740,7 +1762,10 @@ class Object
             $top = '<table class="obj-preview"><tbody>'.$top.'</tbody></table><br />';
         }
 
-        $rez = array($top, $bottom);
+        $rez = array(
+            $this->getPreviewActionsRow() . $top,
+            $bottom
+        );
 
         $eventParams['result'] = &$rez;
 

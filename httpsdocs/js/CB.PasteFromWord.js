@@ -28,7 +28,7 @@ Ext.define('CB.PasteFromWord', {
             ]
             ,buttons: [
                 { text: L.Insert, handler: this.doSubmit, scope: this}
-                ,{ text: Ext.MessageBox.buttonText.cancel, handler: this.doClose, scope: this}
+                ,{ text: L.Cancel, handler: this.doClose, scope: this}
             ]
         });
 

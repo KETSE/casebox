@@ -90,7 +90,7 @@ function initTranslations()
         'SELECT name, ' . implode(',', $languages) . '
         FROM ' . \CB\PREFIX . '_casebox.translations
         WHERE `type` < 2'
-    ) or die(DB\dbQueryError());
+    );
 
     // if ($rez = $res->fetch_all(MYSQLI_ASSOC)) {
         // foreach ($rez as &$r) {
@@ -109,7 +109,7 @@ function initTranslations()
         'SELECT *
         FROM translations
         WHERE `type` < 2'
-    ) or die(DB\dbQueryError());
+    );
 
     // if ($rez = $res->fetch_all(MYSQLI_ASSOC)) {
     //     foreach ($rez as &$r) {

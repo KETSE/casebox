@@ -84,7 +84,7 @@ class TaskTypes extends \CB\TreeNode\Base
         $res = DB\dbQuery(
             'SELECT name, iconCls FROM templates WHERE id = $1',
             $id
-        ) or die(DB\dbQueryError());
+        );
         if ($r = $res->fetch_assoc()) {
             $rez = $r['name'];
             $this->iconCls = $r['iconCls'];

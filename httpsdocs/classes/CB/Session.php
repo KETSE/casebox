@@ -77,7 +77,7 @@ class Session implements \SessionHandlerInterface
      * @param  varchar $name      session name
      * @return bool
      */
-    public function open($save_path, $name)
+    public function open($savePath, $name)
     {
         $this->lifetime = ini_get('session.cookie_lifetime');
 

@@ -61,7 +61,7 @@ class Actions
                 WHERE pid = $1
                     AND id IN ('.implode(',', $p['sourceIds']).')',
                 $p['targetId']
-            ) or die(DB\dbQueryError());
+            );
 
             if ($r = $res->fetch_assoc()) {
                 return L\get('CannotCopyObjectToItself');
@@ -115,7 +115,7 @@ class Actions
             WHERE t1.id in ('.implode(',', $sourceIds).')
                 AND t1.dstatus = 0',
             $targetId
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r['id'];
@@ -278,7 +278,7 @@ class Actions
                 t.id = ti.id '.$this->securitySetsFilter.'
             WHERE t.id in ('.implode(',', $objectIds).')
                 AND t.dstatus = 0'
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $accessibleIds[] = $r['id'];
@@ -357,7 +357,7 @@ class Actions
                     t.id = ti.id '.$this->securitySetsFilter.'
                 WHERE t.pid = $1 AND t.dstatus = 0',
                 $objectId
-            ) or die(DB\dbQueryError());
+            );
 
             $childIds = array();
             while ($r = $res->fetch_assoc()) {

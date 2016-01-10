@@ -33,7 +33,7 @@ class Sessions extends Base
                     OR (expires IS NULL)
                 )',
             $id
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r;
@@ -57,14 +57,14 @@ class Sessions extends Base
                 ,$pid
                 ,$lifetime
             )
-        ) or die(DB\dbQueryError());
+        );
 
         return (DB\dbAffectedRows() > 0);
     }
 
     public static function replace($data)
     {
-        $res = DB\dbQuery(
+        DB\dbQuery(
             'INSERT INTO sessions
             (id, pid, expires, user_id, data)
             VALUES($1, $2, TIMESTAMPADD(SECOND, $3, CURRENT_TIMESTAMP), $4, $5)
@@ -80,7 +80,7 @@ class Sessions extends Base
                 ,$data['user_id']
                 ,$data['data']
             )
-        ) or die(DB\dbQueryError());
+        );
 
         return (DB\dbAffectedRows() > 0);
     }
@@ -90,12 +90,12 @@ class Sessions extends Base
      */
     public static function cleanExpired()
     {
-        $res = DB\dbQuery(
+        DB\dbQuery(
             'DELETE
             FROM sessions
             WHERE (expires < CURRENT_TIMESTAMP)
                 OR (last_action < TIMESTAMPADD( DAY, -3, CURRENT_TIMESTAMP))'
-        ) or die(DB\dbQueryError());
+        );
 
         return (DB\dbAffectedRows() > 0);
     }
@@ -105,7 +105,7 @@ class Sessions extends Base
         DB\dbQuery(
             'DELETE FROM sessions WHERE user_id = $1',
             $userId
-        ) or die(DB\dbQueryError());
+        );
 
         return (DB\dbAffectedRows() > 0);
     }

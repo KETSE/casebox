@@ -19,7 +19,7 @@ if (!$cd['success']) {
 if (empty($cd['last_start_time'])) {
     DB\dbQuery(
         'UPDATE notifications SET seen = 1 WHERE seen = 0'
-    ) or die(DB\dbQueryError());
+    );
 
     exit();
 }

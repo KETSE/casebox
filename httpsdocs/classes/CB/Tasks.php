@@ -92,7 +92,6 @@ class Tasks
         }
 
         $obj = Objects::getCachedObject($p['id']);
-        $data = $obj->getData();
 
         if ($obj->getUserStatus() != Objects\Task::$USERSTATUS_ONGOING) {
             throw new \Exception(L\get('Task_already_completed'));
@@ -201,6 +200,7 @@ class Tasks
      */
     public static function setTasksActionFlags(&$tasksDataArray, $userId = false)
     {
+        $userId = $userId; // dummy codacy assignment
         $taskTemplates = DM\Templates::getIdsByType('task');
 
         foreach ($tasksDataArray as &$d) {

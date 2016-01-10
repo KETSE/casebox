@@ -40,7 +40,7 @@ class Files extends Base
             LEFT JOIN files_content fc ON f.content_id = fc.id
             WHERE f.id = $1',
             $id
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r;
@@ -67,7 +67,7 @@ class Files extends Base
                 JOIN files_content c
                     ON f.content_id = c.id
                 WHERE f.id in (' . implode(',', $ids) . ')'
-            ) or die(DB\dbQueryError());
+            );
 
             while ($r = $res->fetch_assoc()) {
                 $rez[$r['id']] = $r['type'];
@@ -93,7 +93,7 @@ class Files extends Base
                 FROM files
                 WHERE id in (' . implode(',', $ids) .')';
 
-            $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+            $res = DB\dbQuery($sql);
             while ($r = $res->fetch_assoc()) {
                 $rez[$r['id']] = $r['content_id'];
             }
@@ -121,7 +121,7 @@ class Files extends Base
                     ON f.content_id = c.id
                 WHERE f.id in (' . implode(',', $ids) .')';
 
-            $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+            $res = DB\dbQuery($sql);
             while ($r = $res->fetch_assoc()) {
                 $rez[$r['id']] = $r['path'] . DIRECTORY_SEPARATOR . $r['content_id'];
             }
@@ -144,7 +144,7 @@ class Files extends Base
             WHERE content_id = $1
             ORDER BY id';
 
-        $res = DB\dbQuery($sql, $contentId) or die(DB\dbQueryError());
+        $res = DB\dbQuery($sql, $contentId);
         while ($r = $res->fetch_assoc()) {
             $rez[] = $r['id'];
         }
@@ -185,7 +185,7 @@ class Files extends Base
                 ON t.id = ti.id
             WHERE f.id = $1',
             $id
-        ) or die(DB\dbQueryError());
+        );
 
         while ($r = $res->fetch_assoc()) {
             $r['path'] = str_replace(',', '/', $r['path']);
@@ -216,7 +216,7 @@ class Files extends Base
                 ON f.content_id = c.id
             WHERE f.id = $1',
             $id
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $rez = $r;
@@ -263,6 +263,6 @@ class Files extends Base
                 ,$targetId
                 ,User::getId()
             )
-        ) or die(DB\dbQueryError());
+        );
     }
 }

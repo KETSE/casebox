@@ -58,10 +58,10 @@ if (!empty($platformConfig['comments_email'])) {
 } else { //backward compatibile check
     $res = DB\dbQuery(
         'SELECT `value`
-        FROM casebox.config
+        FROM `' . PREFIX . '_casebox`.config
         WHERE param = $1',
         'comments_config'
-    ) or die(DB\dbQueryError());
+    );
     if ($r = $res->fetch_assoc()) {
         $mailServer = Util\jsonDecode($r['value']);
     }
@@ -74,7 +74,7 @@ $res = DB\dbQuery(
     FROM `' . PREFIX . '_casebox`.cores
     WHERE `active` = 1',
     array()
-) or die(DB\dbQueryError());
+);
 
 while ($r = $res->fetch_assoc()) {
     $mailServer['cores'][$r['name']] = array();

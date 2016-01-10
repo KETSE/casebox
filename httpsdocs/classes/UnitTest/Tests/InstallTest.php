@@ -13,7 +13,8 @@ class InstallTest extends \PHPUnit_Framework_TestCase
         $cfg = \CB\Config::loadConfigFile(\CB_DOC_ROOT . 'config.ini');
 
         $this->assertEquals(
-            CB_ROOT_PATH . 'backup' . DIRECTORY_SEPARATOR, \CB\Install\defineBackupDir($cfg)
+            CB_ROOT_PATH . 'backup' . DIRECTORY_SEPARATOR,
+            \CB\Install\defineBackupDir($cfg)
         );
     }
 
@@ -44,7 +45,7 @@ class InstallTest extends \PHPUnit_Framework_TestCase
         $content = array_filter(explode("\n", $content));
 
         $this->assertEquals('optimizing', end($content));
-        
+
     }
 
     public function testcliGetConfigFile()
@@ -65,17 +66,16 @@ class InstallTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($cfg['solr_port'], $realConf['solr_port']);
         $cfg = \CB\Install\cliLoadConfig(['config' => $configFile, 'solr_port' => 8180]);
         $this->assertEquals($cfg['solr_port'], 8180);
-        
-        $configTestFile = TEST_PATH . 'test.ini';
+
         $cfg = \CB\Install\cliLoadConfig(['config' => $configFile, 'su_db_pass' => '1234567', 'core_root_pass' => '1234567' ]);
-        
+
         $this->assertEquals($cfg['su_db_pass'], '1234567');
         $this->assertEquals($cfg['core_root_pass'], '1234567');
-        
+
         $cfg = \CB\Install\cliLoadConfig([ 'su_db_pass' => '1234567', 'core_root_pass' => '1234567' ]);
-        
+
         $this->assertEquals($cfg['su_db_pass'], '1234567');
         $this->assertEquals($cfg['core_root_pass'], '1234567');
-        
+
     }
 }

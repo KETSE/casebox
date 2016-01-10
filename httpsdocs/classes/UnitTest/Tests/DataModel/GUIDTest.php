@@ -12,7 +12,7 @@ class GUIDTest extends \PHPUnit_Framework_TestCase
     {
         //try create with no data to receive exception
         try {
-            $id = DM\GUID::create(array());
+            DM\GUID::create(array());
             $this->assertTrue(false, 'No exception on create with empty data');
 
         } catch (\Exception $e) {

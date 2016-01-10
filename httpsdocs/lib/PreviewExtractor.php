@@ -35,7 +35,7 @@ class PreviewExtractor
 
     public function removeFromQueue($id)
     {
-        dbQuery('delete from file_previews where id = $1', $id) or die(DB\dbQueryError());
+        dbQuery('delete from file_previews where id = $1', $id);
     }
 
     public function purify($html, $options = array())
@@ -90,7 +90,7 @@ class PreviewExtractor
                 'UPDATE file_previews
                 SET `status` = 3
                 WHERE status = 2'
-            ) or die(DB\dbQueryError());
+            );
 
             DB\commitTransaction();
         }

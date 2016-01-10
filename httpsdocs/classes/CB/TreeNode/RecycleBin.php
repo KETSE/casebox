@@ -88,7 +88,7 @@ class RecycleBin extends Base
         }
 
         if (is_numeric($this->lastNode->id)) {
-            $p['pid'] = $pid;
+            $p['pid'] = $this->lastNode->id;
         }
 
         $p['dstatus'] = 1;

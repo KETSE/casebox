@@ -3,7 +3,6 @@
 namespace CB\DataModel;
 
 use CB\DB;
-use CB\Config;
 
 class Core extends Base
 {
@@ -31,7 +30,7 @@ class Core extends Base
     {
         $rez = false;
 
-        $dbName = Config::get('prefix') . '_' . $p['name'];
+        $dbName = \CB\Config::get('prefix') . '_' . $p['name'];
 
         if (DB\dbQuery('CREATE DATABASE `' . $dbName . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
             $rez = parent::create($p);
@@ -48,8 +47,8 @@ class Core extends Base
     public static function read($idOrName)
     {
         $id = static::toId($idOrName);
-        
-        if(!$id) {
+
+        if (!$id) {
             trigger_error('can\'t get core id from name:'.$idOrName, E_USER_WARNING);
         }
 
@@ -89,9 +88,9 @@ class Core extends Base
         $rez = parent::delete($id);
 
         if ($rez) {
-            $dbName = Config::get('prefix') . '_' . $data['name'];
+            $dbName = \CB\Config::get('prefix') . '_' . $data['name'];
 
-            DB\dbQuery("DROP DATABASE `$dbName`") or die(DB\dbQueryError());
+            DB\dbQuery("DROP DATABASE `$dbName`");
         }
 
         return $rez;

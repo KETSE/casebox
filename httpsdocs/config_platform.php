@@ -63,7 +63,7 @@ $cfg['SOLR_CLIENT'] = 'Apache/Solr/Service.php';
 $cfg['MINIFY_PATH'] = DOC_ROOT . 'libx/min/';
 $cfg['TIKA_SERVER'] = DOC_ROOT . 'libx/tika-server.jar';
 
-if (file_exists(DOC_ROOT.'config.ini')) {
+if (file_exists(DOC_ROOT . 'config.ini')) {
     //load main config so that we can connect to casebox db and read configuration for core
     $cfg = Config::loadConfigFile(DOC_ROOT.'config.ini') + $cfg;
 
@@ -73,7 +73,10 @@ if (file_exists(DOC_ROOT.'config.ini')) {
     }
 
 } else {
-    trigger_error("WARNING: file not exists ".DOC_ROOT.'config.ini', E_USER_WARNING);
+    //Usually this appears when installing casebox and
+    //a message instead of a complex error should be enough
+    echo "Config file doesnt exist\n";
+    // trigger_error("WARNING: file not exists " . DOC_ROOT . 'config.ini', E_USER_WARNING);
 }
 
 //define global prefix used

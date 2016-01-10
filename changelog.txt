@@ -1,3 +1,45 @@
+CaseBox 1.9.565 (2016-01-10)
+==============================
+- Testing Travis build errors (tests adjustment)
+
+CaseBox 1.9.561 (2016-01-04)
+==============================
+- #9897 Fix CSS for Arabic Language on faceting block
+
+Fixed Bugs:
+----------
+- action buttons from popup window preview didnt work
+
+CaseBox 1.9.560 (2015-12-30)
+==============================
+- added translation for "Cancel" word
+- changed totals calculation for pivot table
+
+Fixed Bugs:
+----------
+- errors on core_create
+
+CaseBox 1.9.559 (2015-12-23)
+==============================
+- #9874 Trigger reindexing after making changes that affect SOLR
+
+Notes:
+----------
+- updated translations in _casebox.sql
+
+CaseBox 1.9.558 (2015-12-17)
+==============================
+- #9843 Dashboards
+- renamed view config options:
+    pivot_type -> pivotType
+    chart_type -> chartType
+- issue #30 unable to install casebox
+
+Important Notes:
+----------
+- config model have to be updated by executing shell command:
+    php 20150826_core_config_model.php -c < core_name>
+
 CaseBox 1.9.557 (2015-12-01)
 ==============================
 - #8753 Request to add a column "Приемная" to the Consultation search results  закрыта

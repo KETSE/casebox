@@ -635,7 +635,6 @@ class Search extends Solr\Client
             return;
         }
 
-        $p = &$this->params;
         $ids = array_keys($shortcutsArray);
 
         $objects = Objects::getCachedObjects($ids);

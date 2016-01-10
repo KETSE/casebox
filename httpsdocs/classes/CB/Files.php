@@ -24,7 +24,6 @@ class Files
 
         $d = &$rez['data'];
         $d['path'] = str_replace(',', '/', $d['path']);
-        $a = explode('.', $d['name']);
 
         $t = strtotime($d['cdate']);
         $dateFormat = getOption('long_date_format');
@@ -291,9 +290,8 @@ class Files
     {
         //if no filenames already exists in target then the result will be an empty array
         $rez = array();
-        $userLanguageIndex = Config::get('user_language_index');
 
-        foreach ($F as $fk => $f) {
+        foreach ($F as $f) {
             if ($this->fileExists($pid, $f['name'], @$f['dir'])) {
                 $rez[] = $f;
             }
@@ -547,7 +545,7 @@ class Files
         /* here we'll iterate all files and comparing the md5 with already contained
         files will upload only new contents to our store. Existent contents will be reused
         */
-        foreach ($p['files'] as $fk => &$f) {
+        foreach ($p['files'] as &$f) {
             if ($f['error'] == UPLOAD_ERR_NO_FILE) {
                 continue;
             }
@@ -768,13 +766,14 @@ class Files
 
     public function removeContentId($id)
     {
+        $id = $id; //dummy codacy assignment
     }
 
     public static function minimizeUploadedFile(&$file)
     {
         switch ($file['type']) {
             case 'application/pdf':
-                $r = shell_exec('gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dNOPAUSE -dQUIET -dBATCH -sOutputFile='.$file['tmp_name'].'_min '.$file['tmp_name']);
+                shell_exec('gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dNOPAUSE -dQUIET -dBATCH -sOutputFile='.$file['tmp_name'].'_min '.$file['tmp_name']);
                 if (file_exists($file['tmp_name'].'_min')) {
                     $file['tmp_name'] .='_min';
                     $file['size'] = filesize($file['tmp_name']);
@@ -836,7 +835,7 @@ class Files
         $previewFilename = $filesPreviewDir . $rez['filename'];
 
         $fn = $filesDir . $content['path'] . DIRECTORY_SEPARATOR . $content['id'];
-        $nfn = $filesPreviewDir . $content['id'] . '_.' . $ext;
+        // $nfn = $filesPreviewDir . $content['id'] . '_.' . $ext;
 
         if (!file_exists($fn)) {
             \CB\debug('Error accessing file preview ('.$id.'). Its content (id: '.@$content['id'].') doesnt exist on the disk.');
@@ -1119,7 +1118,7 @@ class Files
             FROM tree
             WHERE id IN ('.implode(', ', $ids).')
             ORDER BY udate DESC, id DESC'
-        ) or die(DB\dbQueryError());
+        );
 
         if ($r = $res->fetch_assoc()) {
             $to_id = $r['id'];
@@ -1131,7 +1130,7 @@ class Files
             SET file_id = $1
             WHERE file_id IN ('.implode(', ', $ids).')',
             $to_id
-        ) or die(DB\dbQueryError());
+        );
 
         $res = DB\dbQuery(
             'INSERT INTO files_versions (file_id, content_id, `date`, name, cid, uid, cdate, udate)
@@ -1147,7 +1146,7 @@ class Files
                 WHERE id <> $1
                     AND id in('.implode(',', $ids).')',
             $to_id
-        ) or die(DB\dbQueryError());
+        );
 
         DB\dbQuery(
             'UPDATE tree
@@ -1160,7 +1159,7 @@ class Files
                 $to_id
                 ,User::getId()
             )
-        ) or die(DB\dbQueryError());
+        );
 
         DM\Tree::update(
             array(
@@ -1171,7 +1170,7 @@ class Files
 
         $ids = array_diff($ids, array($to_id));
 
-        Objects::updateCaseUpdateInfo($id);
+        // Objects::updateCaseUpdateInfo($id);
 
         Solr\Client::runCron();
 

@@ -93,12 +93,22 @@ class UpgradeConfigModel extends Base
      */
     protected function prepare()
     {
+        $ids = DM\Templates::getIdsByType('config');
+
+        if (!empty($ids)) {
+            //set flag that config is already in tree
+            //and we'll
+            $this->skipTreeCration = true;
+
+            return;
+        }
+
         //update template types
         DB\dbQuery(
             "ALTER TABLE `templates`
               CHANGE `type` `type` ENUM('case','object','file','task','user','email','template','field','search','comment','shortcut','menu','config')
               CHARSET utf8 COLLATE utf8_general_ci NULL"
-        ) or die(DB\dbQueryError());
+        );
 
         // set templates template id in config
         $ids = DM\Templates::getIdsByType('template');
@@ -184,11 +194,15 @@ class UpgradeConfigModel extends Base
      */
     public function execute()
     {
-        echo "\nCreate custom templates .. ";
-        $this->addCustomTemplates();
-        echo "Done\n";
+        if (empty($this->skipTreeCration)) {
+            echo "\nCreate custom templates .. ";
+            $this->addCustomTemplates();
+            echo "Done\n";
 
-        $this->syncConfigToTree();
+            $this->syncConfigToTree();
+        }
+
+        $this->syncConfigIds();
     }
 
     /**
@@ -322,5 +336,78 @@ class UpgradeConfigModel extends Base
             )
         );
 
+    }
+
+    /**
+     * sync config table ids with those from tree
+     * @return void
+     */
+    protected function syncConfigIds()
+    {
+        echo "Sync config ids .. ";
+
+        $rootId = Browser::getRootFolderId();
+        $pid = Objects::getChildId($rootId, 'System');
+        $pid = Objects::getChildId($pid, 'Config');
+
+        $ref = array();
+        $left = array();
+        $lastLength = 0;
+
+        $rows = DM\Config::readAll();
+
+        //add root nodes
+        foreach ($rows as &$r) {
+            if (empty($r['pid'])) {
+                $tr = DM\Tree::getChildByName($pid, $r['param']);
+                if (empty($tr)) {
+                    DM\Config::delete($r['id']);
+                } else {
+                    $ref[$r['id']] = &$r;
+                    $r['treeRecord'] = $tr;
+                }
+            } else {
+                $left[] = &$r;
+            }
+        }
+
+        while (!empty($left) && (sizeof($left) != $lastLength)) {
+            $rows = $left;
+            $lastLength = sizeOf($left);
+            $left = array();
+
+            foreach ($rows as &$r) {
+                if (isset($ref[$r['pid']]) && !empty($ref[$r['pid']]['treeRecord'])) {
+                    $ref[$r['id']] = &$r;
+                    $r['treeRecord'] = DM\Tree::getChildByName($ref[$r['pid']]['treeRecord']['id'], $r['param']);
+
+                } else {
+                    $left[] = &$r;
+                }
+            }
+        }
+
+        //iterate and update config table
+        foreach ($ref as &$r) {
+            $tr = $r['treeRecord'];
+            $pid = empty($ref[$r['pid']]['treeRecord'])
+                ? null
+                : $ref[$r['pid']]['treeRecord']['id'];
+
+            DB\dbQuery(
+                'UPDATE config
+                SET
+                    id = $2
+                    ,pid = $3
+                WHERE id = $1',
+                array(
+                    $r['id'],
+                    $tr['id'],
+                    $pid
+                )
+            );
+        }
+
+        echo "Ok \n";
     }
 }

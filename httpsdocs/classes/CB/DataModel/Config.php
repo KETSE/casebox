@@ -41,7 +41,7 @@ class Config extends Base
 
         //backward compatibility
         if (empty($res)) {
-            $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+            $res = DB\dbQuery($sql);
         }
 
         while ($r = $res->fetch_assoc()) {

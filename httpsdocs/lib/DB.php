@@ -91,7 +91,7 @@ function connectWithParams($p)
         $dbh->set_charset('utf8');
 
         // set time zone for database to 00:00
-        $dbh->query('SET @@session.time_zone = "+00:00"') or die(dbQueryError());
+        $dbh->query('SET @@session.time_zone = "+00:00"');
 
         if (!empty($newParams['initsql'])) {
             $dbh->query($newParams['initsql']);
@@ -148,7 +148,7 @@ if (!function_exists(__NAMESPACE__.'\dbQuery')) {
 
         foreach ($parameters as $k => $v) {
             if (!is_scalar($v) && !is_null($v)) {
-                throw new \Exception("param error: ".print_r($parameters, 1)."\n For SQL: $query", 1);
+                throw new \Exception("param error: " . print_r($parameters, 1) . "\n For SQL: $query", 1);
             }
 
             $parameters[$k] = is_int($v)
@@ -167,11 +167,17 @@ if (!function_exists(__NAMESPACE__.'\dbQuery')) {
         \CB\Cache::set('queryParameters', $parameters);
 
         // Call using mysqli_query
-        $sql = preg_replace_callback('/\$([0-9]+)/', __NAMESPACE__.'\dbQueryCallback', $query);
+        $sql = preg_replace_callback('/\$([0-9]+)/', __NAMESPACE__ . '\dbQueryCallback', $query);
 
         \CB\Cache::set('lastSql', $sql);
 
-        return $dbh->query($sql);
+        $rez = $dbh->query($sql);
+
+        if (($rez === false) && empty($parameters['hideErrors'])) {
+            dbQueryError();
+        }
+
+        return $rez;
     }
 }
 
@@ -181,8 +187,6 @@ if (!function_exists(__NAMESPACE__.'\dbQueryError')) {
         if (empty($dbh)) {
             $dbh = \CB\Cache::get('dbh');
         }
-
-        $coreName = \CB\Config::get('core_name');
 
         $rez = date('Y-m-d H:i:s') .
             ": \n\r<br /><hr />Query error (" . $dbh->lastParams['name'] . "): " .
@@ -194,13 +198,13 @@ if (!function_exists(__NAMESPACE__.'\dbQueryError')) {
         if (!empty($lastSql)) {
             $rez .= "\n\r<br /><hr />Query: ".$lastSql.$rez;
         }
-        error_log($rez, 3, \CB\Config::get('error_log', \CB\LOGS_DIR.'cb_error_log'));
+        error_log($rez, 3, \CB\Config::get('error_log', \CB\LOGS_DIR . 'cb_error_log'));
 
         if (defined('CB\\IS_DEBUG_HOST') && !\CB\IS_DEBUG_HOST) {
             $rez ='Query error (' . $dbh->lastParams['name'] . ')';
         }
 
-        throw new \Exception($rez);
+        trigger_error($rez, E_USER_ERROR);
     }
 }
 

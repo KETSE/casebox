@@ -100,7 +100,7 @@ class UpgradeMenuModel extends Base
             "ALTER TABLE `templates`
             CHANGE `type` `type` enum('case','object','file','task','user','email','template','field','search','comment','shortcut','menu')
             COLLATE utf8_general_ci NULL after `is_folder`"
-        ) or die(DB\dbQueryError());
+        );
 
         // set templates template id in config
         $ids = DM\Templates::getIdsByType('template');
@@ -192,7 +192,7 @@ class UpgradeMenuModel extends Base
 
         $this->convertMenuRulesToTree();
 
-        DB\dbQuery('DROP TABLE menu') or die(DB\dbQueryError());
+        DB\dbQuery('DROP TABLE menu');
     }
 
     /**
@@ -203,7 +203,7 @@ class UpgradeMenuModel extends Base
     {
         $o = new \CB\Objects\Object();
 
-        $res = DB\dbQuery('SELECT * FROM menu') or die(DB\dbQueryError());
+        $res = DB\dbQuery('SELECT * FROM menu');
 
         while ($r = $res->fetch_assoc()) {
             // $menu = Util\toTrimmedArray($r['menu'], ',');

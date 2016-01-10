@@ -23,7 +23,7 @@ Ext.define('CB.widget.LeafletWindow', {
             })
 
             ,cancel: new Ext.Action({
-                text: Ext.MessageBox.buttonText.cancel
+                text: L.Cancel
                 ,iconCls: 'i-cancel'
                 ,scope: this
                 ,handler: this.close
@@ -101,17 +101,18 @@ Ext.define('CB.widget.LeafletWindow', {
 
     ,onMapReady: function(p) {
         var d = this.initialConfig.data
-            ,cfg = Ext.valueFrom(d.cfg, {})
-            ,dl = Ext.valueFrom(cfg.defaultLocation, {})
-            ,lat = Ext.valueFrom(dl.lat, 0)
-            ,lng = Ext.valueFrom(dl.lng, 0)
-            ,zoom = Ext.valueFrom(dl.zoom, 10);
+            ,cfg = Ext.valueFrom(d.cfg, {});
 
         if (!Ext.isEmpty(d.value)) {
 
-            var a = d.value.split(',');
-            lat = a[0];
-            lng = a[1];
+            var a = d.value.split(',')
+                ,lat = a[0]
+                ,lng = a[1];
+
+            cfg.defaultLocation = {
+                lat: lat
+                ,lng: lng
+            };
 
             this.latEd.setValue(lat);
             this.longEd.setValue(lng);
@@ -119,24 +120,7 @@ Ext.define('CB.widget.LeafletWindow', {
             this.getMarker().setLatLng(new LL.LatLng(lat, lng));
         }
 
-        if (!Ext.isEmpty(cfg.url)) {
-            p.map.eachLayer(
-                function(l) {
-                    if(l && l.setUrl) {
-                        l.setUrl(cfg.url);
-                    }
-                }
-            );
-        }
-
-        // start the map in South-East England
-        p.setView(
-            new LL.LatLng(lat, lng)
-            ,zoom
-            ,{
-                reset: true
-            }
-        );
+        p.setViewConfig(cfg);
     }
 
     ,onMapClick: function(p, e) {

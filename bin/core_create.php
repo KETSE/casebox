@@ -69,7 +69,7 @@ $dbPass = isset($cfg['su_db_pass'])
 
 $applyDump = true;
 
-if (\CB\DB\dbQuery('use `' . $dbName . '`')) {
+if (\CB\DB\dbQuery('use `' . $dbName . '`', array('hideErrors' => true))) {
     if (confirm('overwrite_existing_core_db')) {
         if (\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') !== false) {
             echo 'Backuping .. ';
@@ -106,7 +106,7 @@ $cbDb = $cfg['prefix'] . '__casebox';
 
 echo 'Registering core .. ';
 \CB\DB\dbQuery(
-    'INSERT INTO ' . $cbDb . ' .cores (name, cfg) VALUES ($1, $2)',
+    'REPLACE INTO ' . $cbDb . ' .cores (name, cfg) VALUES ($1, $2)',
     array($coreName, '{}')
 );
 showMessage();
@@ -123,7 +123,7 @@ do {
     $pass = readParam('core_root_pass');
 } while (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') && empty($pass));
 
-DB\dbQuery("use `$dbName`") or die(DB\dbQueryError());
+DB\dbQuery("use `$dbName`");
 
 if (!empty($email) || !empty($pass)) {
     DM\Users::updateByName(
@@ -137,19 +137,32 @@ if (!empty($email) || !empty($pass)) {
 }
 
 //set core languages
-$sql = 'INSERT INTO `config` (param, `value`)
-    VALUES ($1,$2)
-    ON DUPLICATE KEY UPDATE `value` = $2';
+$sql = 'REPLACE INTO `config` (id, param, `value`)
+    VALUES ($1, $2, $3);';
 
 $language = readParam('core_default_language', 'en');
 
-DB\dbQuery($sql, array('default_language', $language)) or die(DB\dbQueryError());
+DB\dbQuery(
+    $sql,
+    array(
+        DM\Config::toId('default_language', 'param'),
+        'default_language',
+        $language
+    )
+);
 
 $languages = readParam('core_languages', $language);
 
-DB\dbQuery($sql, array('languages', $languages)) or die(DB\dbQueryError());
+DB\dbQuery(
+    $sql,
+    array(
+        DM\Config::toId('languages', 'param'),
+        'languages',
+        $languages
+    )
+);
 
-    createSolrCore($cfg, $coreName);
+createSolrCore($cfg, $coreName);
 
 echo 'Creating language files .. ';
 exec('php "' . $binDirectorty . 'languages_update_js_files.php"');
