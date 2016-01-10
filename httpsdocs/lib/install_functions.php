@@ -481,7 +481,12 @@ function createMainDatabase($cfg)
     $dbUser = isset($cfg['su_db_user']) ? $cfg['su_db_user']: $cfg['db_user'];
     $dbPass = isset($cfg['su_db_pass']) ? $cfg['su_db_pass']: $cfg['db_pass'];
 
-    $r = \CB\DB\dbQuery('use `' . $cbDb . '`');
+    $r = \CB\DB\dbQuery(
+        'use `' . $cbDb . '`',
+        array(
+            'hideErrors' => true
+        )
+    );
     if ($r) {
         if (confirm('overwrite__casebox_db')) {
             if (!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == false)) {
