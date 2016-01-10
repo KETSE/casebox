@@ -69,7 +69,7 @@ $dbPass = isset($cfg['su_db_pass'])
 
 $applyDump = true;
 
-if (\CB\DB\dbQuery('use `' . $dbName . '`')) {
+if (\CB\DB\dbQuery('use `' . $dbName . '`', array('hideErrors' => true))) {
     if (confirm('overwrite_existing_core_db')) {
         if (\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') !== false) {
             echo 'Backuping .. ';
