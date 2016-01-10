@@ -6,6 +6,7 @@ namespace UnitTest;
  */
 
 use CB\Config;
+use CB\DataModel as DM;
 
 class SearchTest extends \PHPUnit_Framework_TestCase
 {
@@ -131,7 +132,8 @@ class SearchTest extends \PHPUnit_Framework_TestCase
             ]
         );
 
-        $_SESSION['user']['id'] = $data['data']['id'];
+        $id = $data['data']['id'];
+        $_SESSION['user']['id'] = $id;
 
         $datas = Data\Providers::searchQueriesData();
 
@@ -145,6 +147,8 @@ class SearchTest extends \PHPUnit_Framework_TestCase
                 $result
             );
         }
+
+        DM\Users::delete($id);
 
         $_SESSION['user']['id'] = 1;
     }

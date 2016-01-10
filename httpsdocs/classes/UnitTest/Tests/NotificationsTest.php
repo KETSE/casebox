@@ -218,8 +218,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         //get unset notifications and and access functions for preparing email
         $recs = DM\Notifications::getUnseen();
         foreach ($recs as $action) {
-            // $userData =
-            \CB\User::getPreferences($action['to_user_id']);
+            $userData = \CB\User::getPreferences($action['to_user_id']);
             // $sender =
             \CB\Notifications::getSender($action['from_user_id']);
             // $body =
@@ -381,6 +380,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
     {
 
         //remove users and objects
+        DM\Users::delete($this->userIds);
 
         \CB\Config::setFlag('disableSolrIndexing', $this->oldValues['solrIndexing']);
 

@@ -86,18 +86,29 @@ class Users extends UsersGroups
 
     /**
      * delete a record by its id
-     * @param  int     $id
+     * @param  []int   $ids
      * @return boolean
      */
-    public static function delete($id)
+    public static function delete($ids)
     {
-        static::validateParamTypes(array('id' => $id));
+        $sql = 'DELETE from ' . static::getTableName() .
+            ' WHERE `type` = $1 and id';
 
-        DB\dbQuery(
-            'DELETE from `' . static::getTableName() . '` ' .
-            'WHERE id = $1 AND `type` = $2',
-            array($id, static::$type)
-        );
+        if (is_scalar($ids)) {
+            static::validateParamTypes(array('id' => $ids));
+
+            DB\dbQuery($sql . ' = $2', array(static::$type, $ids));
+
+        } else {
+            $ids = Util\toNumericArray($ids);
+
+            if (!empty($ids)) {
+                DB\dbQuery(
+                    $sql . ' IN (' . implode(',', $ids) . ')',
+                    static::$type
+                );
+            }
+        }
 
         $rez = (DB\dbAffectedRows() > 0);
 

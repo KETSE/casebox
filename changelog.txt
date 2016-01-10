@@ -1,6 +1,6 @@
-CaseBox 1.9.564 (2016-01-10)
+CaseBox 1.9.565 (2016-01-10)
 ==============================
-- Testing Travis build errors
+- Testing Travis build errors (tests adjustment)
 
 CaseBox 1.9.561 (2016-01-04)
 ==============================

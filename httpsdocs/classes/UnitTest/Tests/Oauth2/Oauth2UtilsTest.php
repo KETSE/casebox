@@ -66,7 +66,7 @@ class Oauth2UtilsTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends test_getLoginUrl
+     * @depends testGetLoginUrl
      */
     public function testCheckLogined()
     {
