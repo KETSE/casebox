@@ -44,53 +44,6 @@ a {color: #15C}
     top: 0 !important;
 }
 
-ul.caselist2 {margin-top: 3px; list-style: disc outside none !important}
-.caselist2  li {margin-left: 20px; color: #555}
-
-.caselist {margin-top: 3px; list-style: none outside none}
-.caselist li {padding-left: 16px; background: url(i/ico/briefcase-small.png) 0 1px no-repeat !important}
-.caselist2 li.new {color: maroon}
-.caselist2 li.old {color: #CCC}
-
-ul.action-list {
-/*font-family: "lucida grande",tahoma,verdana,arial,sans-serif;*/
-font-size: 12px;
-color: #333;
-list-style: none;
-margin-left: 10px;
-padding: 0;
-line-height: 20px;
-}
-.filelist {margin-top: 7px; margin-left: 5px; list-style: none outside none}
-.filelist li {padding-left: 16px; background: url(i/ico/briefcase-small.png) 0 1px no-repeat !important}
-
-.filelist span {
-    float: right;
-    text-align: right;
-    display: inline-block;
-    vertical-align: middle;
-    padding-top: 2px;
-}
-
-.caselist2 span.dt {
-    float: right;
-    text-align: right;
-    display: inline-block;
-    vertical-align: middle;
-    padding-left: 5px;
-}
-
-.caselist2 span.now {
-    font-weight: bold;
-    color: maroon;
-}
-
-.filelist li.pdf {padding-left: 19px; background-image: url(i/ico/document-pdf.png) !important}
-.filelist li.doc {padding-left: 19px; background-image: url(i/ico/document-doc.png) !important}
-.filelist li.img {padding-left: 19px; background-image: url(i/ico/document-img.png) !important}
-.filelist li.mp3 {padding-left: 19px; background-image: url(i/ico/document-mp3.png) !important}
-
-
 .generic-object li {padding-bottom: 5px}
 
 .generic-list {list-style: disc outside none}
@@ -214,18 +167,6 @@ div.decision {background: url(i/ico/auction-hammer.png) 0 0 no-repeat}
 div.complaint {background: url(i/ico/fire.png) 0 0 no-repeat}
 div.echr-app {background: url(i/ico/bank.png) 0 0 no-repeat}
 div.comm {background: url(i/ico/megaphone.png) 0 0 no-repeat}
-
-div.red {
-background: url(i/ico/cross-script.png) 0 0 no-repeat;
-}
-
-div.gray {
-background: url(i/ico/bullet_gray.png) 0 0 no-repeat;
-}
-
-div.green {
-background: url(i/ico/tick.png) 0 0 no-repeat;
-}
 
 a.pdf {
 background: url(i/ico/document-pdf.png) 2px 0 no-repeat;

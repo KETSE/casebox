@@ -460,7 +460,7 @@ Ext.define('CB.browser.view.Calendar', {
     }
 
     ,onRangeSelect: function(c, range, callback){
-        var allday = ((Ext.Date.format(range.StartDate, 'H:i:s') == '00:00:00') && (Ext.Date.format(range.EndDate, 'H:i:s') == '23:59:59') ) ? 1 : -1;
+        var allday = ((Ext.Date.format(range.StartDate, 'H:i:s') === '00:00:00') && (Ext.Date.format(range.EndDate, 'H:i:s') === '23:59:59') ) ? 1 : -1;
         var prefix = (allday == 1) ? 'date' : 'datetime';
         var data = {
             pid: this.refOwner.folderProperties.id
@@ -480,7 +480,7 @@ Ext.define('CB.browser.view.Calendar', {
     }
 
     ,onDayClick: function(c, date, ad, el){
-        var allday = (Ext.Date.format(date, 'H:i:s') == '00:00:00') ? 1 : -1;
+        var allday = (Ext.Date.format(date, 'H:i:s') === '00:00:00') ? 1 : -1;
         var prefix = (allday == 1) ? 'date' : 'datetime';
         var data = {
             pid: this.refOwner.folderProperties.id

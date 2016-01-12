@@ -403,11 +403,11 @@ Ext.define('CB.ProfileForm', {
         }
         var target = e.getTarget();
 
-        if((target.localName == "img") || (target.name == 'change')) {
+        if((target.localName == "img") || (target.name === 'change')) {
             return this.photoField.button.fileInputEl.dom.click();
         }
 
-        if (target.name == 'remove') {
+        if (target.name === 'remove') {
             return this.onPhotoRemoveClick();
         }
     }
@@ -440,7 +440,7 @@ Ext.define('CB.ProfileForm', {
             L.Confirmation
             ,L.RemovePhotoConfirm
             ,function(b, e){
-                if(b == 'yes'){
+                if(b === 'yes'){
                     CB_User.removePhoto( { id: this.data.id }, function(){
                         this.photoView.update([{id: this.data.id }]);
                     }, this);
@@ -911,7 +911,7 @@ Ext.define('CB.SecurityForm', {
             ,icon: Ext.window.MessageBox.INFO
             ,scope: this
             ,fn: function(b, e){
-                if(b == 'yes'){
+                if(b === 'yes'){
                     CB_User.disableTSV(
                         function(r, e){
                             if(r && (r.success === true)) {

@@ -104,37 +104,30 @@ function dateToDateString(date) {
 }
 
 function getItemIcon(d){
+    var rez = Ext.valueFrom(d.iconCls, '');
 
-    if(!Ext.isEmpty(d.iconCls)) {
-        return d.iconCls;
+    if(!rez && Ext.isEmpty(d.template_id) && d['type'] == 2){
+        rez = 'icon-shortcut';
     }
-    if(Ext.isEmpty(d.template_id)){
-        if(d['type'] == 2) {
-            return 'icon-shortcut';
+
+    if (Ext.isEmpty(rez)) {
+        rez = CB.DB.templates.getIcon(d.template_id);
+
+        var type = CB.DB.templates.getType(d.template_id);
+
+        switch(type){
+            case 'file':
+                rez = getFileIcon(d['name']);
+                break;
+
+            case 'task':
+                if(d['task_status'] == 3) {
+                    rez = 'icon-task-completed';
+                }
         }
-
-        return d.iconCls;
     }
 
-    switch( CB.DB.templates.getType(d.template_id) ){
-        case 'file':
-            return getFileIcon(d['name']);
-
-        case 'task':
-            if(d['task_status'] == 3) {
-                return 'icon-task-completed';
-            }
-            //if not completed task - do default
-
-        default:
-            var tr = CB.DB.templates.getById(d.template_id);
-            if(tr) {
-                return tr.get('iconCls');
-            }
-
-            return d.iconCls;
-    }
-
+    return rez;
 }
 
 /**
@@ -325,11 +318,12 @@ setsHaveIntersection = function(set1, set2){
 
 function getMenuUserItems(handler, scope, excludeId){
     var rez = [];
+    excludeId = parseInt(excludeId, 10);
 
     CB.DB.usersStore.each(
         function(u) {
             var d = u.data;
-            if(d.id != excludeId) {
+            if(d.id !== excludeId) {
                 rez.push({
                     text: d.name
                     ,iconCls: d.iconCls

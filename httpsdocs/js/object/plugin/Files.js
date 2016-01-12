@@ -155,7 +155,7 @@ Ext.define('CB.object.plugin.Files', {
         var dropZoneHtml = L.DropZoneMsg;
 
         //show upload zone by default when in window
-        if(this.params && (this.params.from == 'window')) {
+        if(this.params && (this.params.from === 'window')) {
             this.dropPanel.show();
             this.actions.add.setHidden(true);
         } else {

@@ -441,7 +441,7 @@ Ext.define('CB.SecurityWindow', {
             L.Delete
             ,L.DeleteSelectedConfirmationMessage
             ,function(b){
-                if(b == 'yes'){
+                if(b === 'yes'){
                     this.aclStore.remove(ra);
                     this.aclStore.save();
                 }
@@ -608,7 +608,7 @@ Ext.define('CB.SecurityWindow', {
             L.Confirmation
             ,'Are you sure you want to remove child permissions and inherit all permissions from parent?'
             ,function (button){
-                if(button == 'yes'){
+                if(button === 'yes'){
                     CB_Security.removeChildPermissions(
                         {id: this.data.id}
                         ,function(r, e) {
@@ -658,7 +658,7 @@ Ext.define('CB.SecurityWindow', {
     }
 
     ,onCbInheritSet: function(button){
-        if(button == 'yes'){
+        if(button === 'yes'){
             this.getEl().mask(L.loading, 'x-mask-loading');
             CB_Security.setInheritance(
                 {
@@ -676,7 +676,7 @@ Ext.define('CB.SecurityWindow', {
     }
 
     ,onCbInheritRemove: function(button, text, cfg){
-        if( (button == 'yes') || (button == 'no') ){
+        if( (button === 'yes') || (button === 'no') ){
             this.getEl().mask(L.loading, 'x-mask-loading');
             CB_Security.setInheritance(
                 {

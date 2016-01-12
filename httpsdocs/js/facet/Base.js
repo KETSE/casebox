@@ -142,7 +142,7 @@ Ext.define('CB.facet.Base', {
 
         //check if sorting set
         if(this.defaultSort && this.defaultSort.property) {
-            var by = (this.defaultSort.property == 'name')
+            var by = (this.defaultSort.property === 'name')
                 ? 'name'
                 : 'items'
                 ,dir = this.defaultSort.direction;
@@ -216,7 +216,7 @@ Ext.define('CB.facet.Base', {
     }
 
     ,onSortByNameClick: function(b, e) {
-        var sortDir = (this.lastSort != 'nameasc')
+        var sortDir = (this.lastSort !== 'nameasc')
             ? 'asc'
             : 'desc';
 
@@ -228,7 +228,7 @@ Ext.define('CB.facet.Base', {
     }
 
     ,onSortByCountClick: function(b, e) {
-        var sortDir = (this.lastSort != 'countdesc')
+        var sortDir = (this.lastSort !== 'countdesc')
             ? 'desc'
             : 'asc';
 

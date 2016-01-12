@@ -21,7 +21,6 @@ define('CB\\MINIFY_CACHE_DIR', TEMP_DIR.'minify'.DIRECTORY_SEPARATOR);
 define('CB\\TEMPLATES_DIR', SYS_DIR.'templates'.DIRECTORY_SEPARATOR);
 //used to include DB.php into PreviewExtractor scripts and in Files.php to start the extractors.
 define('CB\\LIB_DIR', DOC_ROOT.'lib'.DIRECTORY_SEPARATOR);
-define('CB\\ZEND_PATH', DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'ZF'.DIRECTORY_SEPARATOR.'library'.DIRECTORY_SEPARATOR);
 
 define('CB\\IS_WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) == 'WIN');
 
@@ -33,7 +32,6 @@ define(
     // DOC_ROOT.PATH_SEPARATOR.
     DOC_ROOT.'libx'.PATH_SEPARATOR.
     DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
-    ZEND_PATH. PATH_SEPARATOR.
     DOC_ROOT.'classes'.PATH_SEPARATOR.
     PLUGINS_DIR.PATH_SEPARATOR.
     get_include_path()

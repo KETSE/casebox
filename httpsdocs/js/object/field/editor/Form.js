@@ -289,7 +289,7 @@ Ext.define('CB.object.field.editor.Form', {
      * @return variant
      */
     ,getProperty: function(propertyName){
-        if(propertyName == 'nid') {
+        if(propertyName === 'nid') {
             propertyName = 'id';
         }
         if(this.data && this.data[propertyName]) {

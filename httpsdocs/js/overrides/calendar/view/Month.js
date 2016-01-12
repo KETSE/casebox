@@ -45,9 +45,12 @@ Ext.override(Ext.calendar.view.Month, {
             _colorCls: 'ext-color-' + (evt[M.CalendarId.name] ?
             evt[M.CalendarId.name] : 'default') + (evt._renderAsAllDay ? '-ad': ''),
             _elId: selector + '-' + evt._weekIndex,
-            _isRecurring: evt.Recurrence && evt.Recurrence != '',
-            _isReminder: evt[M.Reminder.name] && evt[M.Reminder.name] != '',
-            Title: (evt[M.IsAllDay.name] ? '' : Ext.Date.format(evt[M.StartDate.name], App.timeFormat + ' ')) + (!title || title.length == 0 ? '(No title)' : title),
+            _isRecurring: evt.Recurrence && !Ext.isEmpty(evt.Recurrence),
+            _isReminder: evt[M.Reminder.name] && !Ext.isEmpty(evt[M.Reminder.name]),
+            Title: (evt[M.IsAllDay.name]
+                ? ''
+                : Ext.Date.format(evt[M.StartDate.name], App.timeFormat + ' ')
+            ) + Ext.valueFrom(title, '(No title)'),
             _operaLT11: this.operaLT11 ? 'ext-operaLT11' : ''
         },
         evt);

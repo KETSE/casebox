@@ -329,13 +329,13 @@ Ext.define('CB.widget.block.Pivot', {
                 }]
                 ,axes: [{
                     type: 'category'
-                    ,position: (chartType == 'bar') ? 'left' : 'bottom'
+                    ,position: (chartType === 'bar') ? 'left' : 'bottom'
                     ,fields: serie.xField
                     ,grid: true
                     ,minimum: 0
                 }, {
                     type: 'numeric'
-                    ,position: (chartType == 'column') ? 'left' : 'bottom'
+                    ,position: (chartType === 'column') ? 'left' : 'bottom'
                     ,fields: serie.yField
                     ,grid: true
                 }]

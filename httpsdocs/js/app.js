@@ -2,7 +2,7 @@ Ext.namespace('App');
 Ext.BLANK_IMAGE_URL = '/css/i/s.gif';
 
 var clog = function(){
-    if(typeof(console) != 'undefined') {
+    if(typeof(console) !== 'undefined') {
         console.log(arguments);
     }
 }
@@ -349,7 +349,7 @@ function initApp() {
                 ,tr = node.data.templateRecord
                 ,th = tr.get('cfg').thesauriId;
 
-            if(th == 'dependent'){
+            if(th === 'dependent'){
                 th = grid.helperTree.getParentValue(node, tr.get('pid'));
             }
             var ts = getThesauriStore(th)
@@ -406,7 +406,7 @@ function initApp() {
                 : v;
 
             var s = rez.toISOString();
-            if(s.substr(-14) == 'T00:00:00.000Z') {
+            if(s.substr(-14) === 'T00:00:00.000Z') {
                 rez = Ext.Date.clearTime(rez, true);
             }
 
@@ -416,7 +416,7 @@ function initApp() {
             }
 
             if(showZeroTime === false) {
-                if(rez.substr(-5, 5) == '00:00') {
+                if(rez.substr(-5, 5) === '00:00') {
                     rez = rez.substr(0, rez.length - 6);
                 }
             }
@@ -441,7 +441,7 @@ function initApp() {
         }
 
         ,filesize: function(v){
-            if(isNaN(v) || Ext.isEmpty(v) || (v == '0') || (v <= 0)) {
+            if(isNaN(v) || Ext.isEmpty(v) || (v === '0') || (v <= 0)) {
                 return '';
             }
 
@@ -699,7 +699,7 @@ function initApp() {
 
         var templateType = CB.DB.templates.getType(config.template_id)
             ,wndCfg = {
-                xtype: (templateType == 'file'
+                xtype: (templateType === 'file'
                     ? 'CBFileEditWindow'
                     : 'CBObjectEditWindow'
                 )
@@ -720,7 +720,7 @@ function initApp() {
                 w.setHeight(winHeight - 20);
             }
 
-            if(templateType == 'file') {
+            if(templateType === 'file') {
                 w.center();
 
                 if(config.name && (detectFileEditor(config.name) !== false)) {
@@ -1097,7 +1097,7 @@ function initApp() {
 
             case 'combo':
                 th = cfg.thesauriId;
-                if(th == 'dependent'){
+                if(th === 'dependent'){
                     th = e.pidValue;
                 }
                 rez = new Ext.form.ComboBox({
@@ -1115,7 +1115,7 @@ function initApp() {
 
             case 'iconcombo':
                 th = cfg.thesauriId;
-                if(th == 'dependent'){
+                if(th === 'dependent'){
                     th = e.pidValue;
                 }
                 rez = new Ext.form.ComboBox({
@@ -1282,7 +1282,7 @@ function initApp() {
                 break;
 
             case 'geoPoint':
-                if(tr && (tr.get('cfg').editor == 'form')) {
+                if(tr && (tr.get('cfg').editor === 'form')) {
                     e.cancel = true;
 
                     rez = Ext.create('CB.LeafletWindow', {
@@ -1561,7 +1561,7 @@ window.ondrop = function(e){
 };
 
 window.ondragleave = function(e){
-    if(!window.dragFromWindow && ( (e.pageX == '0') && (e.pageY == '0') ) ){
+    if(!window.dragFromWindow && ( (e.pageX === '0') && (e.pageY === '0') ) ){
         App.fireEvent('dragfilesleave', e);
     }
     return false;

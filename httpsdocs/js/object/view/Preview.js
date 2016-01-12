@@ -148,7 +148,7 @@ Ext.define('CB.object.view.Preview', {
                                     ,buttons: Ext.MessageBox.OKCANCEL
                                     ,multiline: true
                                     ,fn: function(b, message){
-                                        if(b == 'ok'){
+                                        if(b === 'ok'){
                                             this.getEl().mask(L.CompletingTask + ' ...', 'x-mask-loading');
                                             CB_Tasks.close(this.data.id, this.onTaskChanged, this);
                                         }
@@ -158,7 +158,7 @@ Ext.define('CB.object.view.Preview', {
                                 break;
                             case 'reopen':
                                 Ext.Msg.confirm( L.ReopeningTask, L.ReopenTaskConfirmationMsg, function(b){
-                                        if(b == 'yes'){
+                                        if(b === 'yes'){
                                             this.getEl().mask(L.ReopeningTask + ' ...', 'x-mask-loading');
                                             CB_Tasks.reopen(this.data.id, this.onTaskChanged, this);
                                         }
@@ -175,7 +175,7 @@ Ext.define('CB.object.view.Preview', {
                                     ,buttons: Ext.MessageBox.OKCANCEL
                                     ,multiline: true
                                     ,fn: function(b, message){
-                                        if(b == 'ok') {
+                                        if(b === 'ok') {
                                             CB_Tasks.complete(
                                                 {
                                                     id: this.data.id
@@ -199,7 +199,7 @@ Ext.define('CB.object.view.Preview', {
                                     ,buttons: Ext.MessageBox.OKCANCEL
                                     ,multiline: true
                                     ,fn: function(b, message){
-                                        if(b == 'ok') {
+                                        if(b === 'ok') {
                                             CB_Tasks.setUserStatus(
                                                 {
                                                     id: this.data.id
@@ -225,7 +225,7 @@ Ext.define('CB.object.view.Preview', {
                                     ,buttons: Ext.MessageBox.OKCANCEL
                                     ,multiline: true
                                     ,fn: function(b, message){
-                                        if(b == 'ok') {
+                                        if(b === 'ok') {
                                             CB_Tasks.setUserStatus(
                                                 {
                                                     id: this.data.id
@@ -331,7 +331,7 @@ Ext.define('CB.object.view.Preview', {
         if(this.params) {
             rez.tbar['openExternal'] = {};
 
-            if(CB.DB.templates.getType(this.params.template_id) == 'file') {
+            if(CB.DB.templates.getType(this.params.template_id) === 'file') {
                 if(this.viewingImage) {
                     rez.tbar['fitImage']  = {
                         allowToggle: true

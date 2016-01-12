@@ -93,7 +93,7 @@ class Service
                 require_once 'Apache/Solr/Compatibility/Solr4CompatibilityLayer.php';
             }
 
-    $layer = new \Apache_Solr_Compatibility_Solr4CompatibilityLayer;
+            $layer = new \Apache_Solr_Compatibility_Solr4CompatibilityLayer;
 
             $this->solr_handler = new \Apache_Solr_Service(
                 $this->host,
@@ -302,6 +302,7 @@ class Service
         try {
             $this->solr_handler->deleteByQuery($query);
             $this->commit();
+
         } catch (\Exception $e) {
             $msg = "Cannot delete by query".$this->debugInfo();
             \CB\debug($msg);
@@ -318,6 +319,7 @@ class Service
         try {
             $this->solr_handler->optimize();
             $this->commit();
+
         } catch (\Exception $e) {
             $msg = "Cannot optimize solr core".$this->debugInfo();
             \CB\debug($msg);

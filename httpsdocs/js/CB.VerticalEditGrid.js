@@ -34,7 +34,7 @@ Ext.define('CB.VerticalEditGrid', {
             ,markDirty: false
             ,getRowClass: function( record, index, rowParams, store ){
                 var rez = '';
-                if(record.get('type') == 'H'){
+                if(record.get('type') === 'H'){
                     rez = 'group-titles-colbg';
                     var node = this.grid.helperTree.getNode(record.get('id'));
                     if(node && !Ext.isEmpty(node.data.templateRecord.get('cfg').css)){
@@ -164,7 +164,7 @@ Ext.define('CB.VerticalEditGrid', {
 
                 var tr = n.data.templateRecord;
 
-                if(tr.get('type') == 'H'){
+                if(tr.get('type') === 'H'){
                     meta.css ='vgh';
                 } else {
                     meta.css = 'bgcLG vaT';
@@ -299,7 +299,7 @@ Ext.define('CB.VerticalEditGrid', {
             return rez;
         }
 
-        rez = (record.get('type') == '_objects')
+        rez = (record.get('type') === '_objects')
             ? source.dropAllowed
             : source.dropNotAllowed;
 
@@ -390,7 +390,7 @@ Ext.define('CB.VerticalEditGrid', {
 
         var fieldName = this.columns[cellIndex].dataIndex;
 
-        if(fieldName == 'title'){
+        if(fieldName === 'title'){
             this.editingPlugin.startEdit(record, 1);//begin field edit
         }
     }
@@ -515,7 +515,7 @@ Ext.define('CB.VerticalEditGrid', {
                     ,{
                         id: attr.id
                         ,title: r.get('title')
-                        ,readonly: ((r.get('type') == 'H') || (r.get('cfg').readOnly == 1))
+                        ,readonly: ((r.get('type') === 'H') || (r.get('cfg').readOnly == 1))
                         ,value: Ext.isNumeric(attr.value.value)
                             ? parseFloat(attr.value.value, 10)
                             : attr.value.value
@@ -541,15 +541,15 @@ Ext.define('CB.VerticalEditGrid', {
         }
 
         return (
-            (r.get('type') != 'G')
+            (r.get('type') !== 'G')
             &&
             (
-                (r.get('cfg').showIn != 'top') ||
-                ((r.get('cfg').showIn == 'top') &&
+                (r.get('cfg').showIn !== 'top') ||
+                ((r.get('cfg').showIn === 'top') &&
                     this.includeTopFields
                 )
             ) &&
-            (r.get('cfg').showIn != 'tabsheet') &&
+            (r.get('cfg').showIn !== 'tabsheet') &&
             (node.data.visible !== false)
         );
     }
@@ -574,10 +574,10 @@ Ext.define('CB.VerticalEditGrid', {
             return false;
         }
         var tr = node.data.templateRecord;
-        if((tr.get('type') == 'H') || (tr.get('cfg').readOnly == 1) ){
+        if((tr.get('type') === 'H') || (tr.get('cfg').readOnly == 1) ){
             return false;
         }
-        if(context.field != 'value') {
+        if(context.field !== 'value') {
             return;
         }
 
@@ -596,7 +596,7 @@ Ext.define('CB.VerticalEditGrid', {
         }
 
         /* prepare time fields */
-        if((t == 'time') && !Ext.isEmpty(context.value)) {
+        if((t === 'time') && !Ext.isEmpty(context.value)) {
             var a = context.value.split(':');
             a.pop();
             context.value = a.join(':');
@@ -700,7 +700,7 @@ Ext.define('CB.VerticalEditGrid', {
             ,node = this.helperTree.getNode(nodeId)
             ,tr = node.data.templateRecord;
 
-        if(context.field == 'value'){
+        if(context.field === 'value'){
             /* post process value */
             if(!Ext.isEmpty(context.value) && context.fieldRecord) {
                 switch(context.fieldRecord.get('type')) {

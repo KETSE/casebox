@@ -256,7 +256,7 @@ Ext.define('CB.file.edit.Window', {
 
     ,onPluginContainerLoadData: function(r, e) {
         var w = this.up('window');
-        if(w && w.viewMode == 'edit') {
+        if(w && w.viewMode === 'edit') {
             delete r.data.meta;
         }
 
@@ -271,7 +271,7 @@ Ext.define('CB.file.edit.Window', {
         this.downloadSeparator.setHidden(this.actions.cancel.isHidden());
 
         this.actions.edit.setHidden(
-            (this.viewMode == 'edit') ||
+            (this.viewMode === 'edit') ||
             (this.editType === false) ||
             !Ext.isEmpty(this.loadedVersionId)
         );

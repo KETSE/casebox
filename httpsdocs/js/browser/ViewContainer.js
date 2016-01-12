@@ -578,7 +578,7 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,getProperty: function(propertyName){
-        if(propertyName == 'nid') {
+        if(propertyName === 'nid') {
             propertyName = 'id';
         }
 
@@ -642,7 +642,7 @@ Ext.define('CB.browser.ViewContainer', {
         }
 
         for (i = 0; i < buttonsArray.length; i++) {
-            if((buttonsArray[i] == '-') || (buttonsArray[i] == '->')) {
+            if((buttonsArray[i] === '-') || (buttonsArray[i] === '->')) {
                 this.viewToolbar.add(buttonsArray[i]);
             } else {
                 b = this.buttonCollection.get(buttonsArray[i]);
@@ -826,7 +826,7 @@ Ext.define('CB.browser.ViewContainer', {
         var vp = this.getActiveView().getViewParams(options);
         if ((vp === false) ||
             (
-                !Ext.isEmpty(vp) && (vp.from == 'calendar') &&
+                !Ext.isEmpty(vp) && (vp.from === 'calendar') &&
                 (Ext.isEmpty(vp.dateStart) || Ext.isEmpty(vp.dateEnd))
         )) {
             return false;
@@ -835,7 +835,7 @@ Ext.define('CB.browser.ViewContainer', {
         Ext.apply(options, vp);
 
         //workaround to set from param for search by template
-        if(this.params && this.params.from && (this.params.from != 'tree')) {
+        if(this.params && this.params.from && (this.params.from !== 'tree')) {
             options.from = this.params.from;
         }
 
@@ -916,11 +916,11 @@ Ext.define('CB.browser.ViewContainer', {
         var path1 = Ext.valueFrom(params1.path, '')
             ,path2 = Ext.valueFrom(params2.path, '');
 
-        while ((path1.length > 0) && (path1[0] == '/')) {
+        while ((path1.length > 0) && (path1[0] === '/')) {
             path1 = path1.substr(1);
         }
 
-        while ((path2.length > 0) && (path2[0] == '/')) {
+        while ((path2.length > 0) && (path2[0] === '/')) {
             path2 = path2.substr(1);
         }
 
@@ -998,11 +998,11 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,setParams: function(params){
-        while(!Ext.isEmpty(params.path) && (params.path[0] == '/')) {
+        while(!Ext.isEmpty(params.path) && (params.path[0] === '/')) {
             params.path = params.path.substr(1);
         }
 
-        while(!Ext.isEmpty(params.path) && (params.path[params.path.length -1] == '/')) {
+        while(!Ext.isEmpty(params.path) && (params.path[params.path.length -1] === '/')) {
             params.path = params.path.substr(0, params.path.length -1);
         }
 
@@ -1121,7 +1121,7 @@ Ext.define('CB.browser.ViewContainer', {
         } else {
             var firstObjId = Ext.valueFrom(selection[0].nid, selection[0].id)
                 ,firstObjType = CB.DB.templates.getType(selection[0].template_id)
-                ,firstFileEditor = (firstObjType == 'file')
+                ,firstFileEditor = (firstObjType === 'file')
                     ? detectFileEditor(selection[0].name)
                     : false;
 
@@ -1129,7 +1129,7 @@ Ext.define('CB.browser.ViewContainer', {
             this.actions.copy.setDisabled(false);
 
             this.actions.edit.setDisabled(
-                (firstObjType == 'file') &&
+                (firstObjType === 'file') &&
                 (firstFileEditor === false)
             );
 
@@ -1157,8 +1157,8 @@ Ext.define('CB.browser.ViewContainer', {
             this.actions['delete'].setDisabled(inRecycleBin);
             this.actions.contextDelete.setDisabled(inRecycleBin);
 
-            this.actions.webdavlink.setDisabled(firstObjType != 'file');
-            this.actions.webdavlink.setHidden(firstObjType != 'file' || (firstFileEditor != 'webdav'));
+            this.actions.webdavlink.setDisabled(firstObjType !== 'file');
+            this.actions.webdavlink.setHidden(firstObjType !== 'file' || (firstFileEditor !== 'webdav'));
 
             if(!inRecycleBin && inGridView) {
                 this.actions['delete'].show();
@@ -1229,7 +1229,7 @@ Ext.define('CB.browser.ViewContainer', {
             data.id = data.nid;
         }
 
-        if(templateType == 'file') {
+        if(templateType === 'file') {
             switch(detectFileEditor(data.name)) {
                 case 'text':
                 case 'html':

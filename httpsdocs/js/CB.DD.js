@@ -81,7 +81,7 @@ Ext.define('CB.DD', {
      * @return void
      */
     ,onConfirmExecution: function (b){
-        if(b != 'yes'){
+        if(b !== 'yes'){
             return;
         }
         this.fireEvent('beforeexecute', this.params);
@@ -111,7 +111,7 @@ Ext.define('CB.DD', {
         if(!r || (r.success !== true)) {
             if(r.confirm === true) {
                 Ext.Msg.confirm(L.Confirmation, r.msg, function(b){
-                    if(b == 'yes'){
+                    if(b === 'yes'){
                         this.params.confirmedOverwrite = true;
                         this.onConfirmExecution('yes');
                     }

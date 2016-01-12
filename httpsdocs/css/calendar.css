@@ -521,8 +521,8 @@ td.ext-cal-dtitle-today div {
     -webkit-border-bottom-right-radius:5px;
     border-top-right-radius:5px;
     border-bottom-right-radius:5px;
-    xpadding-left:5px;
 }
+
 .ext-cal-ev-spanright {
     -moz-border-radius-topleft:5px;
     -moz-border-radius-bottomleft:5px;
@@ -530,8 +530,8 @@ td.ext-cal-dtitle-today div {
     -webkit-border-bottom-left-radius:5px;
     border-top-left-radius:5px;
     border-bottom-left-radius:5px;
-    xpadding-right:5px;
 }
+
 /* IE/ Opera: */
 .ext-cal-ev-spanboth .ext-cal-evm {
 	margin: 0;

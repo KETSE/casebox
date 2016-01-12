@@ -176,7 +176,7 @@ Ext.define('CB.plugin.DisplayColumns', {
             ,currentColumns = Ext.apply({}, this.currentColumns)
             ,i
             ,refs = {}
-            ,emptyCurrentColumns = (Ext.encode(currentColumns) == '{}');
+            ,emptyCurrentColumns = (Ext.encode(currentColumns) === '{}');
 
         //create column refs for convenient use
         for (i = 0; i < this.defaultColumns.length; i++) {

@@ -166,7 +166,7 @@ Ext.define('CB.object.edit.Form', {
         this.objectsStore.reload();
 
         /* detect template type of the opened object and create needed grid */
-        var gridType = (CB.DB.templates.getType(this.data.template_id) == 'search')
+        var gridType = (CB.DB.templates.getType(this.data.template_id) === 'search')
             ? 'CBVerticalSearchEditGrid'
             : 'CBVerticalEditGrid';
 
@@ -225,7 +225,7 @@ Ext.define('CB.object.edit.Form', {
             var fields = [];
             this.grid.templateStore.each(
                 function(r) {
-                    if(r.get('cfg').showIn == 'tabsheet') {
+                    if(r.get('cfg').showIn === 'tabsheet') {
                         var cfg = {
                             border: false
                             ,title: r.get('title')
@@ -248,7 +248,7 @@ Ext.define('CB.object.edit.Form', {
                                     this.fireEvent('change');
                                 }
                             }
-                            ,xtype: (r.get('type') == 'html')
+                            ,xtype: (r.get('type') === 'html')
                                 ? 'CBHtmlEditor'
                                 : 'textarea'
                         };
@@ -440,7 +440,7 @@ Ext.define('CB.object.edit.Form', {
             ,menu: {}
         };
 
-        if(CB.DB.templates.getType(this.data.template_id) == 'search') {
+        if(CB.DB.templates.getType(this.data.template_id) === 'search') {
             rez.tbar['search'] = {};
             rez.menu['save'] = {};
         } else {

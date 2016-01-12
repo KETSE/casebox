@@ -263,7 +263,7 @@ Ext.define('CB.controller.Browsing', {
             ,dt = date.toISOString()
             ,sameDate = (c.lastClickedDate == dt);
 
-        if(!sameDate || (av.xtype != 'dayview')) {
+        if(!sameDate || (av.xtype !== 'dayview')) {
             c.onDayClick();
             c.setStartDate(date);
         } else {
@@ -289,7 +289,7 @@ Ext.define('CB.controller.Browsing', {
             return;
         }
 
-        if(query.substr(0,1) == '#') {
+        if(query.substr(0,1) === '#') {
             query = query.substr(1).trim();
             if(!isNaN(query)) {
                 // this.locateObject(query);
@@ -548,7 +548,7 @@ Ext.define('CB.controller.Browsing', {
             ,icon: Ext.window.MessageBox.INFO
             ,scope: this
             ,fn: function(b, e){
-                if(b == 'yes'){
+                if(b === 'yes'){
                     this.OP.down('textarea[cls=comment-input]').reset();
                     callback.apply(this, args);
                 }

@@ -1,3 +1,13 @@
+CaseBox 1.9.566 (2016-01-12)
+==============================
+- removed Zend lib
+- #9874 Trigger reindexing after making changes that affect SOLR
+
+Fixed Bugs:
+----------
+- #10150 Comment indirectly rendered
+- #10039 Error on export data
+
 CaseBox 1.9.565 (2016-01-10)
 ==============================
 - Testing Travis build errors (tests adjustment)

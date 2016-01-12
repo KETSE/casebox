@@ -563,7 +563,7 @@ Ext.define('CB.ViewPort', {
             , title: L.ExitConfirmation
             , msg: L.ExitConfirmationMessage
             , fn: function (btn, text) {
-                if (btn == 'yes') {
+                if (btn === 'yes') {
                     CB_User.logout(function (r, e) {
                         if (r && (r.success === true)) {
                             App.confirmLeave = false;
@@ -737,7 +737,7 @@ Ext.define('CB.ViewPort', {
             L.LanguageChange
             ,L.LanguageChangeMessage
             ,function(pb){
-                if(pb == 'yes') {
+                if(pb === 'yes') {
                     CB_User.setLanguage(d.id, this.processSetUserOption, this);
                 }
                 if(d.ownerCt) {
@@ -764,7 +764,7 @@ Ext.define('CB.ViewPort', {
             L.Theme
             ,L.ThemeChangeMessage
             ,function(pb){
-                if(pb == 'yes') {
+                if(pb === 'yes') {
                     CB_User.setTheme(d.id, this.processSetUserOption, this);
                 }
                 if(d.ownerCt) {
@@ -804,7 +804,7 @@ Ext.define('CB.ViewPort', {
             L.DeleteConfirmation
             ,L.DeleteConfirmationMessage + ' "' + Ext.valueFrom(data.title, data.name) +'"?'
             ,function(btn){
-                if(btn == 'yes') {
+                if(btn === 'yes') {
                     CB_Browser['delete'](data.id, this.onProcessObjectsDeleted, this);
                 }
             }
