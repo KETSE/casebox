@@ -196,7 +196,11 @@ class Comment extends Object
 
                 $templateId = Objects::getTemplateId($match[2]);
                 $obj = Objects::getCachedObject($match[2]);
-                $name = $obj->getHtmlSafeName();
+
+                $name = empty($obj)
+                    ? ''
+                    : $obj->getHtmlSafeName();
+
                 $name = (strlen($name) > 30)
                     ? mb_substr($name, 0, 30) . '&hellip;'
                     : $name;
