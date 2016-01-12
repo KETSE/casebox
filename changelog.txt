@@ -1,3 +1,7 @@
+CaseBox 1.9.568 (2016-01-12)
+==============================
+- #10268 Notification broken
+
 CaseBox 1.9.567 (2016-01-12)
 ==============================
 - check object existance on comment refferences
@@ -11,6 +15,10 @@ Fixed Bugs:
 ----------
 - #10150 Comment indirectly rendered
 - #10039 Error on export data
+
+Notes:
+----------
+- php_imap extension should be enabled in php
 
 CaseBox 1.9.565 (2016-01-10)
 ==============================

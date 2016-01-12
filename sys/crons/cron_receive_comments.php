@@ -107,7 +107,7 @@ foreach ($mailServers as &$cfg) {
         );
 
         // $mailCount = $mailbox->countMessages();
-        $cfg['mailIds'] = $mailbox->searchMailbox('ALL'); //NEW
+        $cfg['mailIds'] = $mailbox->searchMailbox('UNSEEN'); //NEW
         $mailCount = sizeof($cfg['mailIds']);
 
         if ($mailCount > 0) {
