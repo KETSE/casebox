@@ -282,15 +282,6 @@ font-size: 12px;
 /* End of TREE */
 
 
-.icon-padding, .icon-padding .x-grid3-cell-inner { padding-left: 22px !important; min-height: 16px}
-.icon-padding2, .icon-padding2 .x-grid3-cell-inner { padding-left: 44px; background-position: 22px 50% !important }
-.icon-padding3, .icon-padding3 .x-grid3-cell-inner { padding-left: 44px; background-position: 44px 50% !important }
-
-.x-rtl .icon-padding, .x-rtl .icon-padding .x-grid3-cell-inner { padding-right: 22px !important; min-height: 16px; background-position: 100% 50%;}
-
-
-
-
 ::-webkit-scrollbar{height:10px;overflow:visible;width:10px}
 ::-webkit-scrollbar-button{height:0;width:0}
 ::-webkit-scrollbar-track{background: #f2f2f2; border: none; opacity: 0}
@@ -478,7 +469,6 @@ span.icon-right{ float: right; width: 18px; display: inline-block !important }
 .icon-bullet_yellow	{ background-image:url(i/ico/bullet_yellow.png) !important; background-repeat: no-repeat}
 .icon-bullet_gray	{ background-image:url(i/ico/bullet_gray.png) !important; background-repeat: no-repeat}
 
-.icon-padding16 { padding-left: 16px !important; min-height: 16px !important }
 .icon-pin		{ background-image:url(i/ico/pin.png) !important; background-position: 0 50%; background-repeat: no-repeat }
 
 .thesauri_set li{ padding-left: 20px }
@@ -638,21 +628,12 @@ padding: 0 2px;
 .rg-ct{ padding: 4px 1px !important; float: left !important }
 .icon-hammer-screwdriver{ background-image: url(i/ico/hammer-screwdriver.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-wrench-screwdriver{ background-image: url(i/ico/wrench-screwdriver.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.preview * { font-size: 13px }
-.preview th, .preview td { padding-left: 10px; padding-right: 10px; color: #000000 !important }
-.preview table { border-bottom: 1px solid lightgray }
-.preview table.title th{ font-weight: bold; background-color: #eaeaea; padding: 3px 10px; height: 38px }
-.preview table.title th.file{ font-weight: normal; text-align: left; width: 1%; white-space: nowrap }
-.preview table.title th.file table{ border:0 }
-.preview table.title th.file td{ padding: 0;white-space: nowrap; vertical-align: top }
-.preview table.title td{ padding: 3px 10px }
 
 .icon-application-tree{ background-image: url(i/ico/application-tree.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-tag{ background-image: url(i/ico/tag.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-tag-label{ background-image: url(i/ico/tag-label.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-tag-label-small{ background-image: url(i/ico/tag-label-small.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-tag-medium {background-image: url(i/ico/tag-medium.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.icon-tag-small{ background-image: url(i/ico/tag-small.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-tag-plus{ background-image: url(i/ico/tag--plus.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-folder, .x-tree-node-collapsed .icon-tree-folder, .x-tree-node-leaf .icon-tree-folder{ background-image: url(i/ico/folder.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-folder-search-result{ background-image: url(i/ico/folder-search-result.png) !important; background-position: 0 50%; background-repeat: no-repeat}

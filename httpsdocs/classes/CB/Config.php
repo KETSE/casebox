@@ -389,7 +389,9 @@ class Config extends Singleton
             // path to photos folder
             ,'photos_path' => $filesDir . '_photo' . $ds
 
-            ,'core_url' => $config['server_name'] . $coreName.'/'
+            ,'core_url' => $config['server_name'] . $coreName .'/'
+
+            ,'core_uri' => '/' . $coreName .'/'
 
             ,'upload_temp_dir' => TEMP_DIR . $coreName . $ds
 

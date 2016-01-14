@@ -271,15 +271,15 @@ Ext.define('CB.browser.view.Pivot',{
             ,l = BC.get('PVStatsLabel')
             ,d = this.chartData;
 
-        this.statsEnabled = !Ext.isEmpty(d.stats);
+        this.statsEnabled = d.view && !Ext.isEmpty(d.view.stats);
 
         b.setHidden(!this.statsEnabled);
         l.setHidden(!this.statsEnabled);
 
         if (this.statsEnabled) {
             if(!this.selectedStat) {
-                if(d.view && d.view.stats) {
-                    this.selectedStat = d.view.stats;
+                if(d.view && d.view.selectedStat) {
+                    this.selectedStat = d.view.selectedStat;
                 }  else {
                     this.selectedStat = {};
                 }
@@ -295,23 +295,24 @@ Ext.define('CB.browser.view.Pivot',{
             var menu = b.getMenu()
                 ,statsFunctions = ['min', 'max', 'sum', 'count', 'missing']
                 ,items = []
-                ,checked;
+                ,checked
+                ,stats = d.view.stats;
 
             //add none value
-            d.stats.unshift({title: L.none, field: ''});
+            stats.unshift({title: L.none, field: ''});
 
-            for (var i = 0; i < d.stats.length; i++) {
-                checked = (this.selectedStat.field == d.stats[i].field);
+            for (var i = 0; i < stats.length; i++) {
+                checked = (this.selectedStat.field == stats[i].field);
 
                 if(checked) {
-                    this.selectedStat.title = d.stats[i].title;
+                    this.selectedStat.title = stats[i].title;
                 }
 
                 items.push({
                     xtype: 'menucheckitem'
                     ,group: 'StatsField'
-                    ,text: d.stats[i].title
-                    ,field: d.stats[i].field
+                    ,text: stats[i].title
+                    ,field: stats[i].field
                     ,checked: checked
                     ,scope: this
                     ,handler: this.onStatFieldChangeClick

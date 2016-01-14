@@ -333,7 +333,16 @@ class Base
                     : $fv['cfg'];
 
                 if (!empty($cfg['scope']) && substr($cfg['scope'], 0, 1) == '/') {
-                    $cfg['scope'] = $this->thesauriIds[$cfg['scope']]['id'];
+                    if (!empty($this->thesauriIds[$cfg['scope']]['id'])) {
+                        $cfg['scope'] = $this->thesauriIds[$cfg['scope']]['id'];
+
+                    } else {
+                        $cfg['scope'] = \CB\Path::getId($cfg['scope']);
+                    }
+                }
+
+                if (!empty($fv['readOnly'])) {
+                    $cfg['readOnly'] = true;
                 }
 
                 if (!empty($cfg)) {

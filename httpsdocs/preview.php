@@ -67,10 +67,11 @@ $objType = $obj->getType();
 
 // if external window then print the toolbar
 if (empty($_GET['i'])) {
+    require_once(LIB_DIR . 'MinifyCache.php');
     echo '<html><head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="/css/tasks.css" /></head>
-        <body>
+        <link rel="stylesheet" type="text/css" href="' . $coreUrl . substr(getMinifyGroupUrl('preview'), 1) . '" /></head>
+        <body class="external">
     ';
     if ($objType == 'file') {
         $toolbarItems[] = '<a href="' . $coreUrl . 'download/' . $id . '/">' . L\get('Download') .'</a>';
@@ -146,9 +147,17 @@ switch ($obj->getType()) {
         break;
 
     default:
+        $preview = array();
         $o = new Objects();
-        $preview = $o->getPreview($id);
-        echo implode("\n", $preview);
+        $pd = $o->getPluginsData(array('id' => $id));
+
+        if (!empty($pd['data']['objectProperties'])) {
+            $data = $pd['data']['objectProperties']['data'];
+            $title = '<div class="obj-header"><b class="">' . $data['name'] . '</div>';
+            $preview = $data['preview'];
+        }
+
+        echo $title . implode("\n", $preview);
         break;
 }
 

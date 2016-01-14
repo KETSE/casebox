@@ -502,14 +502,27 @@ class Search extends Solr\Client
             \CB\fireEvent('beforeSolrQuery', $eventParams);
 
             $this->replaceSortFields();
+            $query = $this->escapeLuceneChars($this->query);
 
-            $this->results = $this->search(
-                $this->escapeLuceneChars($this->query),
-                $this->start,
-                $this->rows,
-                $this->params
-            );
-        } catch ( \Exception $e ) {
+            try {
+                $this->results = $this->search(
+                    $query,
+                    $this->start,
+                    $this->rows,
+                    $this->params
+                );
+
+            } catch (\Exception $e) {
+                //try to execute without sort param, could be multivalued
+                unset($this->params['sort']);
+                $this->results = $this->search(
+                    $query,
+                    $this->start,
+                    $this->rows,
+                    $this->params
+                );
+            }
+        } catch (\Exception $e) {
             throw new \Exception("An error occured: \n\n {$e->__toString()}");
         }
     }

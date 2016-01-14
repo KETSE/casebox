@@ -136,33 +136,6 @@
 .drag-drop-move .x-dd-drop-icon{background-image:url(s/document--arrow.png)}
 .drag-drop-shortcut .x-dd-drop-icon{background-image:url(s/external.png)}
 
-/* preview */
-.preview-thumb {
-/*    opacity: 1;
-    transition: opacity .25s ease-in-out;
-    -o-transition: opacity .25s ease-in-out;
-    -moz-transition: opacity .25s ease-in-out;
-    -webkit-transition: opacity .25s ease-in-out;
-
-*/
-    width: 128px;
-    height: 128px;
-    background-image: url(l/none-icon.png);
-    opacity: 1;
-    transition: opacity .25s ease-in-out;
-    -moz-transition: opacity .25s ease-in-out;
-    -webkit-transition: opacity .25s ease-in-out;
-    border: 1px solid #FFF;
-    padding: 3px;
-}
-
-.preview-thumb:hover {
-    /*opacity: 0.5*/
-    border: 1px solid #BBB;
-    background-color: #edeff4;
-    border-radius: 4;
-}
-
 .pr-th-doc, .pr-th-docx {background-image: url(l/word.png) }
 .pr-th-pdf {background-image: url(l/pdf.png) }
 

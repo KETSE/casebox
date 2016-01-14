@@ -524,6 +524,7 @@ class Task extends Object
         $ownerRow = '';
         $assigneeRow = '';
         $contentRow = '';
+        $coreUri = \CB\Config::get('core_uri');
 
         //create date and status row
         $ed = $this->getEndDate();
@@ -548,7 +549,7 @@ class Task extends Object
 
             $ownerRow = '<tr><td class="prop-key">'.L\get('Owner').':</td><td>' .
                 '<table class="prop-val people"><tbody>' .
-                '<tr><td class="user"><img class="photo32" src="photo/' . $v . '.jpg?32=' . User::getPhotoParam($v) .
+                '<tr><td class="user"><img class="photo32" src="' . $coreUri . 'photo/' . $v . '.jpg?32=' . User::getPhotoParam($v) .
                 '" style="width:32px; height: 32px" alt="' . $cn . '" title="' . $cn . '"></td>' .
                 '<td><b>' . $cn . '</b><p class="gr">'.L\get('Created') . ': ' .
                 '<span class="dttm" title="' . $cd . '">' . $cdt . '</span></p></td></tr></tbody></table>' .
@@ -579,7 +580,7 @@ class Task extends Object
                 }
 
                 $assigneeRow .= '<tr><td class="user"><div style="position: relative">'.
-                    '<img class="photo32" src="photo/'.$id.'.jpg?32=' . User::getPhotoParam($id).
+                    '<img class="photo32" src="' . $coreUri . 'photo/'.$id.'.jpg?32=' . User::getPhotoParam($id).
                     '" style="width:32px; height: 32px" alt="'.$un.'" title="'.$un.'">'.
                 ($completed ? '<img class="done icon icon-tick-circle" src="/css/i/s.gif" />': "").
                 '</div></td><td><b>'.$un.'</b>'.

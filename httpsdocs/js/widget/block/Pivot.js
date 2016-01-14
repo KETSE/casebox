@@ -25,6 +25,8 @@ Ext.define('CB.widget.block.Pivot', {
         }
         ,d = {};
 
+        this.selectedStat = null;
+
         if (overrides) {
             Ext.apply(rez, overrides);
         }
@@ -43,21 +45,21 @@ Ext.define('CB.widget.block.Pivot', {
                     ,this
                 );
 
-                key = key.split(',');
-                rez.xField = key[0];
-                rez.yField = key[1];
+                var q = key.split(',');
+                rez.xField = q[0];
+                rez.yField = q[1];
             }
 
-            // var selectedFacets = this.selectedFacets.join(',');
             if(data.pivot[key]) {
                 Ext.copyTo(rez, data.pivot[key], 'data,titles,stats');
             }
         }
 
-        this.stats = rez.stats;
-
         if(data.view) {
             var vp = data.view;
+            rez.view = vp;
+
+            this.selectedStat = vp.selectedStat;
 
             if(Ext.isEmpty(rez.charts)  && vp.pivotType) {
                 rez.charts = Ext.isString(vp.pivotType)
@@ -185,7 +187,7 @@ Ext.define('CB.widget.block.Pivot', {
                         ,this
                     );
 
-                    html += '<tr>' + r + '<td class="total" f="'+ k +'|">' + Ext.valueFrom(data.refs[k + '_t'], '') + '</td></tr>';
+                    html += '<tr>' + r + '<td class="total" f="'+ k +'|">' + Ext.util.Format.number(Ext.valueFrom(data.refs[k + '_t'], ''), '0.##') + '</td></tr>';
                 }
                 ,this
             );
@@ -377,7 +379,7 @@ Ext.define('CB.widget.block.Pivot', {
 
     ,getFacetCount: function(f) {
         var rez = 0
-            ,sf = this.stats;
+            ,sf = this.selectedStat;
 
         if(sf &&
             sf.field &&

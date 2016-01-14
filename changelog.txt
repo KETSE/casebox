@@ -1,3 +1,11 @@
+CaseBox 1.9.569 (2016-01-14)
+==============================
+- #10324 User language was reset & and email notifications in wrong language
+- #10323 User 'nora' can't see tasks, but is in all security groups
+- #10288 Object preview in direct link doesn't use the CSS? + user avatars not shown in tasks
+- #9488 Problems when accessing a folder by clicking on a link in notifications tab
+- #10302 Stats component not working
+
 CaseBox 1.9.568 (2016-01-12)
 ==============================
 - #10268 Notification broken

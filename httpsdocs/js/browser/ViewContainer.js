@@ -771,6 +771,12 @@ Ext.define('CB.browser.ViewContainer', {
         //switch from NotificationView if active
         if(!this.isRequestFromObjectChange) {
             this.containersPanel.setActiveItem(this.cardContainer);
+            var proxy = this.store.proxy;
+            App.controller.onVCViewLoaded(
+                proxy
+                ,Ext.valueFrom(proxy.reader.rawData, {})
+                ,proxy.extraParams
+            );
         } else {
             delete this.isRequestFromObjectChange;
         }

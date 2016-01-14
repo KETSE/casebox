@@ -306,7 +306,10 @@ class Browser
                     $rez['search'][] = $r['search'];
                 }
             } catch (\Exception $e) {
-                \CB\debug(get_class($class) . ' exception on getChildren', $this->requestParams);
+                \CB\debug(
+                    get_class($class) . " exception on getChildren\n" . $e->getTraceAsString(),
+                    $this->requestParams
+                );
             }
         }
     }

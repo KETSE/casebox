@@ -212,6 +212,7 @@ class Base implements \CB\Interfaces\TreeNode
             //backward compatibility check
             case 'pivot':
             case 'charts':
+
                 if (!empty($cfg['stats'])) {
                     $stats = array();
                     foreach ($cfg['stats'] as $item) {
@@ -221,6 +222,13 @@ class Base implements \CB\Interfaces\TreeNode
                         );
                     }
                     $rez['stats'] = $stats;
+
+                    if (!empty($rp['selectedStat']['field'])) {
+                        $rez['selectedStat'] = $rp['selectedStat'];
+                    } elseif (!empty($rez['defaultStats'])) {
+                        $rez['selectedStat'] = $rez['defaultStats'];
+                    }
+                    unset($rez['defaultStats']);
                 }
 
                 $rez['sort'] = null;
@@ -442,10 +450,11 @@ class Base implements \CB\Interfaces\TreeNode
                     ,'facet2' => $cols
                 );
 
-                if (!empty($rp['selectedStat'])) {
+                if (!empty($rp['selectedStat']['field'])) {
                     $config['stats'] = $rp['selectedStat'];
-                } elseif (!empty($cfg['view']['stats'])) {
-                    $config['stats'] = $cfg['view']['stats'];
+
+                } elseif (!empty($rp['view']['selectedStat'])) {
+                    $config['stats'] = $rp['view']['selectedStat'];
                 }
 
                 $facets[] = \CB\Facets::getFacetObject($config);

@@ -19,6 +19,7 @@ return array_merge(
             ,'//css/tasks.css'
             ,'//css/taskbar.css'
             ,'//css/casebox.css'
+            ,'//css/preview.css'
             ,'//css/common.css'
             ,'//css/facets.css'
             ,'//css/obj_plugins.css'
@@ -31,6 +32,14 @@ return array_merge(
             ,'//libx/highlight/default.css'
 
             ,'//css/fix.css'
+        )
+
+        ,'preview' => array(
+            '//css/preview.css'
+            ,'//css/tasks.css'
+            ,'//css/template_icons.css'
+            ,'//css/common.css'
+
         )
 
         ,'js' => array(
