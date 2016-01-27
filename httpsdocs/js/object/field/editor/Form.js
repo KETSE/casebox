@@ -138,6 +138,7 @@ Ext.define('CB.object.field.editor.Form', {
                 scope: this
                 ,show: function(){
                     this.store.removeAll();
+                    this.resetPage = true;
                     if((!Ext.isDefined(this.cfg.autoLoad)) || (this.cfg.autoLoad === true)) {
                         this.onGridReloadTask();
                     }
@@ -374,7 +375,10 @@ Ext.define('CB.object.field.editor.Form', {
 
         params.from = 'formEditor';
 
-        var resetPage = (this.store.proxy.extraParams.query !== params.query);
+        var resetPage = this.resetPage || (this.store.proxy.extraParams.query !== params.query);
+        delete this.resetPage;
+
+        this.store.setPageSize(Ext.valueFrom(params.limit, 25));
 
         this.store.proxy.extraParams = params;
         if(resetPage) {

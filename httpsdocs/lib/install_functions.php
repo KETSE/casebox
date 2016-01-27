@@ -792,7 +792,7 @@ function cliGetAllOptions()
         $optName .= '::';
     }
 
-    array_push($longopts, 'config::');
+    array_push($longopts, 'config:');
     array_push($longopts, 'file:');
 
     $cliOptions = getopt('f:', $longopts);
@@ -854,16 +854,9 @@ function cliLoadConfig($options = null)
     }
 
     //define working mode
-    if (!empty($cfg)) {
-        // define('CB\\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')', false);
-        \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
-        // $cfg = $cfg + $options['config'];
-    } else {
-        \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
-    }
+    \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', empty($cfg));
 
     // initialize default values in cofig if not detected
-
     $defaultValues = getDefaultConfigValues();
 
     if (is_array($cfg)) {

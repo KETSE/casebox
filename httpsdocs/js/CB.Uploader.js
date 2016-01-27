@@ -232,7 +232,7 @@ Ext.define('CB.Uploader', {
                     CB_Browser.confirmUploadRequest({response: 'cancel'}, this.onConfirmResponseProcess, this);
                 }
             }, this, false, this.serverResponse.suggestedFilename);
-        }else{
+        } else {
             if (w.forAll) {
                 this.store.each(
                     function(r){

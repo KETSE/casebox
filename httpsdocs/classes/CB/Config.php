@@ -936,6 +936,7 @@ class Config extends Singleton
 
                 } elseif (substr($property, -3) !== '_DC') { //_DC's could have reference to predefined config sets
                     \CB\debug($cfg['core_name'] . ': Error parsing json config for property "' . $property . '".');
+                    unset($cfg[$property]);
                 }
             }
         }

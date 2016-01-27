@@ -834,7 +834,7 @@ function initApp() {
             zipped = false;
         }
 
-        var url = '/' + App.config.coreName + '/download/'+fileId;
+        var url = '/' + App.config.coreName + '/download/' + fileId;
 
         if(!Ext.isEmpty(versionId)) {
             url += '&v='+versionId;
@@ -844,7 +844,7 @@ function initApp() {
             url += '&z=1';
         }
 
-        window.open(url, '_blank');
+        window.open(url, 'cbfd' + fileId);
     };
 
     App.getTypeEditor = function(type, e){

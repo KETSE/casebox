@@ -178,6 +178,8 @@ Ext.define('CB.browser.view.Charts', {
         this.chartData.charts = [b.itemId.split('chart').shift()];
 
         this.onChangeChart();
+
+        this.chartBlock.changeCharts(this.chartData.charts);
     }
 
     ,onChangeChart: function() {
@@ -187,8 +189,6 @@ Ext.define('CB.browser.view.Charts', {
         BC.get('barchart').toggle(ch.indexOf('bar') > -1, true);
         BC.get('columnchart').toggle(ch.indexOf('column') > -1, true);
         BC.get('piechart').toggle(ch.indexOf('pie') > -1, true);
-
-        this.chartBlock.changeCharts(ch);
     }
 
     ,onStoreLoad: function(store, recs, successful, eOpts) {
@@ -203,9 +203,15 @@ Ext.define('CB.browser.view.Charts', {
     }
 
     ,loadRemoteData: function(rd) {
-        var selectedValues = {};
+        var selectedValues = {
+            charts: ['bar']
+        };
 
-        rd.sorter = this.detectSorter(Ext.valueFrom(rd.view, {}));
+        rd.sorter = this.detectSorter(
+            (rd.sort && rd.direction)
+            ? rd
+            : Ext.valueFrom(rd.view, {})
+        );
 
         if(this.chartData) {
             if(this.selectedFacets) {
@@ -223,7 +229,7 @@ Ext.define('CB.browser.view.Charts', {
 
         this.loadAvailableFacets(rd.facets);
 
-        // this.onChangeChart();
+        this.onChangeChart();
     }
 
     ,loadAvailableFacets: function(facets) {

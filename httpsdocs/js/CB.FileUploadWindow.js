@@ -82,7 +82,7 @@ Ext.define('CB.FilesConfirmationWindow', {
                 ,boxLabel: L.ApplyForAll
                 ,style: 'margin-top: 25px'
                 ,listeners:{
-                    check: function(cb, checked){
+                    change: function(cb, checked){
                         this.forAll = checked;
                         this.renameButton.setDisabled(checked);
                     }

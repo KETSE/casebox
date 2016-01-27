@@ -1,3 +1,15 @@
+CaseBox 1.9.570 (2016-01-27)
+==============================
+- #10590 Перенос папки данными - не работает кнопка Apply for all / экспортировать данные в большом количестве не получается
+- #10512 add custom Search Query
+- #10398 View=Charts, Sorting doesn't work
+- #10392 При копировании писем из одного дела в другое система задает вопрос о замене
+
+Fixed Bugs:
+----------
+- #10478 system user cannot be added as lawyer in a case
+- #10400 DC not displaying all data
+
 CaseBox 1.9.569 (2016-01-14)
 ==============================
 - #10324 User language was reset & and email notifications in wrong language

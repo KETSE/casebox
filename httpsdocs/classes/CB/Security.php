@@ -181,22 +181,47 @@ class Security
             }
         }
 
+        $where = 'WHERE did IS NULL AND ' . $filterDisabled .
+            (empty($where) ? '' : ' AND '.implode(' AND ', $where));
+
+        //find total records count
         $res = DB\dbQuery(
-            'SELECT id
-                ,`name`
-                ,`first_name`
-                ,`last_name`
-                ,`email`
-                ,`system`
-                ,`enabled`
-                ,`type`
-                ,`sex`
-            FROM users_groups
-            WHERE did IS NULL AND ' . $filterDisabled .
-            (empty($where) ? '' : ' AND '.implode(' AND ', $where)) .
-            ' ORDER BY `type`, 2 LIMIT 100',
+            'SELECT count(*) `total`
+            FROM users_groups ' . $where,
             $params
         );
+
+        if ($r = $res->fetch_assoc()) {
+            $rez['total'] = $r['total'];
+        }
+        $res->close();
+
+        //retreive the data
+        $limit = (empty($p['limit']) || !is_numeric($p['limit']))
+            ? 100
+            : $p['limit'];
+
+        $page = (empty($p['page']) || !is_numeric($p['page']))
+            ? 1
+            : $p['page'];
+
+        $start = (empty($p['start']) || !is_numeric($p['start']))
+            ? ($page -1) * $limit
+            : $p['start'];
+
+        $sql = 'SELECT id
+            ,`name`
+            ,`first_name`
+            ,`last_name`
+            ,`email`
+            ,`system`
+            ,`enabled`
+            ,`type`
+            ,`sex`
+        FROM users_groups ' . $where .
+        ' ORDER BY `type`, 2 LIMIT ' . $limit . ' OFFSET '. $start;
+
+        $res = DB\dbQuery($sql, $params);
 
         while ($r = $res->fetch_assoc()) {
             if ($r['type'] == 1) {
