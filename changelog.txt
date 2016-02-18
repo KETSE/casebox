@@ -1,3 +1,11 @@
+CaseBox 1.9.571 (2016-02-18)
+==============================
+- #11047 Can some fields be hidden on some permission users for example name of victim and compliant against name.
+- #11045 titles of taxonomies do not show when the text is long
+- #10755 Pie chart not showing some legend text
+- #11065 Header appears two times in object preview rendering
+- #11023 Custom icons not shown in GridView
+
 CaseBox 1.9.570 (2016-01-27)
 ==============================
 - #10590 Перенос папки данными - не работает кнопка Apply for all / экспортировать данные в большом количестве не получается

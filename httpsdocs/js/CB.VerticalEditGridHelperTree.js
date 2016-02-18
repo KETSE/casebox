@@ -456,6 +456,7 @@ Ext.define('CB.VerticalEditGridHelperTree', {
         var dn = this.addNode(node.parentNode, node.data.templateRecord, node.nextSibling);
         this.addNodes(dn);
         node.data.templateRecord.get('cfg').maxInstances--;
+        this.updateVisibility();
     }
 
     ,deleteDuplicate: function(nodeId){

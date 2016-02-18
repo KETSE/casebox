@@ -285,6 +285,7 @@ class Template extends Object
         $rez = null;
         foreach ($this->data['fieldsByIndex'] as $fv) {
             if (($fv['id'] == $field['id'])) {
+                //no header found
                 return $rez;
             }
             if (($fv['pid'] == $field['pid']) && ($fv['type'] == 'H')) {

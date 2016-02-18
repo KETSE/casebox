@@ -162,8 +162,7 @@ Ext.define('CB.widget.block.Pivot', {
             Ext.iterate(
                 data.titles[1]
                 ,function(k, v, o) {
-                    hr += '<th title="' + Ext.String.htmlEncode(v) +'">' +
-                        Ext.String.htmlEncode(App.shortenString(v, 10)) + '</th>';
+                    hr += '<th title="' + Ext.String.htmlEncode(v) +'">' + v + '</th>';
                 }
                 ,this
             );
@@ -217,6 +216,7 @@ Ext.define('CB.widget.block.Pivot', {
                 xtype: 'panel'
                 ,border: false
                 ,autoHeight: true
+                ,width: '99%'
                 ,padding: 10
                 ,html: html
                 ,listeners: {
@@ -334,6 +334,9 @@ Ext.define('CB.widget.block.Pivot', {
                     ,position: (chartType === 'bar') ? 'left' : 'bottom'
                     ,fields: serie.xField
                     ,grid: true
+                    ,label: {
+                         rotation: {degrees: 315}
+                    }
                     ,minimum: 0
                 }, {
                     type: 'numeric'
