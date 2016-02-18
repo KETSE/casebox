@@ -143,6 +143,30 @@ class Template extends Object
      */
     protected function updateCustomData()
     {
+        $od = $this->oldObject->getData();
+        $d = &$this->data;
+
+        //check if need to set solrConfigUpdated flag
+        $cfg1 = empty($od['data']['cfg'])
+            ? array()
+            : Util\toJSONArray($od['data']['cfg']);
+
+        $cfg2 = empty($d['data']['cfg'])
+            ? array()
+            : Util\toJSONArray($d['data']['cfg']);
+
+        $csf1 = empty($cfg1['copySolrFields'])
+            ? array()
+            : $cfg1['copySolrFields'];
+
+        $csf2 = empty($cfg2['copySolrFields'])
+            ? array()
+            : $cfg2['copySolrFields'];
+
+        if ($csf1 != $csf2) {
+            $d['sys_data']['solrConfigUpdated'] = true;
+        }
+
         parent::updateCustomData();
 
         /* saving template data to templates and templates_structure tables */
@@ -261,6 +285,7 @@ class Template extends Object
         $rez = null;
         foreach ($this->data['fieldsByIndex'] as $fv) {
             if (($fv['id'] == $field['id'])) {
+                //no header found
                 return $rez;
             }
             if (($fv['pid'] == $field['pid']) && ($fv['type'] == 'H')) {

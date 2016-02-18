@@ -136,6 +136,7 @@ Ext.define('CB.widget.block.Chart', {
                 ,store: this.chartDataStore
                 ,series: [{
                     type: 'pie',
+                    donut: 1,
                     angleField: 'count',
                     label: {
                         field: 'name',
@@ -238,7 +239,12 @@ Ext.define('CB.widget.block.Chart', {
         var cfg = Ext.clone(this.chartConfigs[charts[0]]);
 
         if(!Ext.isEmpty(cfg)) {
-            cfg.height = Math.max(cfg.store.getCount() * 25, 300);
+            // cfg.height = Math.max(cfg.store.getCount() * 25, 300);
+            cfg.height = this.body.getHeight() - 20;
+
+            cfg.insetPadding = (charts[0] === 'pie')
+                ? 75
+                : 35;
 
             this.chart = Ext.create(
                 'Ext.chart.Chart'

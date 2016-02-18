@@ -116,7 +116,7 @@ CB.ObjectsFieldCommonFunctions = {
     }
 
     ,getObjectsStore: function(){
-        if(this.cfg.source == 'thesauri') {
+        if(this.cfg.source === 'thesauri') {
             return this.getThesauriStore();
         }
 
@@ -138,7 +138,7 @@ CB.ObjectsFieldCommonFunctions = {
     ,getThesauriStore: function(){
         var thesauriId = this.cfg.thesauriId;
 
-        if(this.cfg.thesauriId == 'dependent'){
+        if(this.cfg.thesauriId === 'dependent'){
             fieldName = this.data.record.store.fields.findIndex('name', 'field_id');
             fieldName = (fieldName < 0) ? 'id': 'field_id';
 
@@ -233,7 +233,7 @@ Ext.define('CB.ObjectsComboField', {
             this.store.on('load', this.onStoreLoad, this);
             this.store.load();
         }
-        var customIcon = (this.cfg.renderer == 'listGreenIcons') ? 'icon-element' : '';
+        var customIcon = (this.cfg.renderer === 'listGreenIcons') ? 'icon-element' : '';
         var plugins = [];
 
         Ext.apply(this, {
@@ -447,7 +447,7 @@ Ext.define('CB.ObjectsTriggerField', {
     }
 
     ,onTriggerClick: function(e){
-        if(this.cfg.source == 'thesauri'){
+        if(this.cfg.source === 'thesauri'){
             this.form = new CB.ObjectsSelectionPopupList({
                 data: this.data
                 ,value: this.getValue()
@@ -651,7 +651,7 @@ Ext.define('CB.ObjectsSelectionForm', {
             ,hidden: !this.cfg.multiValued
             ,tpl: new Ext.XTemplate(
                 '<span class="fwB">'+L.Value+':</span><ul class="clean"><tpl for=".">'
-                ,'<li class="lh20 icon-padding16 '+ ((this.cfg.renderer == 'listGreenIcons') ? 'icon-element' : '{iconCls}') + '"> &nbsp; {name} <span style="display: inline-block; width: 14px"><span class="buttons"><a href="#" class="icon-close-light" style="display:inline-block; width: 20px;text-decoration: none" title="'+L.Remove+'">&nbsp; &nbsp;</a></span></span></li>'
+                ,'<li class="lh20 icon-padding16 '+ ((this.cfg.renderer === 'listGreenIcons') ? 'icon-element' : '{iconCls}') + '"> &nbsp; {name} <span style="display: inline-block; width: 14px"><span class="buttons"><a href="#" class="icon-close-light" style="display:inline-block; width: 20px;text-decoration: none" title="'+L.Remove+'">&nbsp; &nbsp;</a></span></span></li>'
                 ,'</tpl></ul>'
                 ,{compiled: true}
             )

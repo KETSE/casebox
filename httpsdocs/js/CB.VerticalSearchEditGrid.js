@@ -56,11 +56,11 @@ Ext.define('CB.VerticalSearchEditGrid', {
 
     //grid, record, field, value, row, column, cancel
     ,newOnBeforeEditProperty: function(editor, context, eOpts){ //e
-        if(context.field != 'cond') {
+        if(context.field !== 'cond') {
             return this.oldOnBeforeEditProperty(editor, context, eOpts);
         }
 
-        if(context.record.get('type') == 'H') {
+        if(context.record.get('type') === 'H') {
             context.cancel = true;
             return;
         }

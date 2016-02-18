@@ -178,7 +178,7 @@ Ext.define('CB.browser.view.Grid', {
                             ,sm = g.getSelectionModel()
                             ,t = e.getTarget();
 
-                        if((sm.selType != 'checkboxmodel') && t) {
+                        if((sm.selType !== 'checkboxmodel') && t) {
                             t = Ext.get(t);
                             var s = t.getViewSize();
 

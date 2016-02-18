@@ -306,9 +306,15 @@ class Browser
                     $rez['search'][] = $r['search'];
                 }
             } catch (\Exception $e) {
-                \CB\debug(get_class($class) . ' exception on getChildren', $this->requestParams);
+                \CB\debug(
+                    get_class($class) . " exception on getChildren\n" . $e->getTraceAsString(),
+                    $this->requestParams
+                );
             }
         }
+
+        $this->setCustomIcons($rez['data']);
+
     }
 
     protected function sortResult()
@@ -522,18 +528,7 @@ class Browser
         $p['skipSecurity'] = true;
         $rez = $search->query($p);
 
-        foreach ($rez['data'] as &$doc) {
-            $ids[] = $doc['id'];
-        }
-
-        $recs = DM\Tree::readByIds($ids, true);
-
-        foreach ($rez['data'] as &$doc) {
-            if (!empty($recs[$doc['id']]['cfg']['iconCls'])) {
-                $doc['iconCls'] = $recs[$doc['id']]['cfg']['iconCls'];
-            }
-        }
-
+        $this->setCustomIcons($rez['data']);
 
         if (empty($rez['DC'])) {
             $rez['DC'] = array(
@@ -984,6 +979,27 @@ class Browser
         }
 
         return $data;
+    }
+
+    /**
+     * set custom items for given records
+     * @param array $records
+     */
+    protected function setCustomIcons(&$records)
+    {
+        $ids = [];
+
+        foreach ($records as &$r) {
+            $ids[] = $r['id'];
+        }
+
+        $recs = DM\Tree::readByIds($ids, true);
+
+        foreach ($records as &$r) {
+            if (!empty($recs[$r['id']]['cfg']['iconCls'])) {
+                $r['iconCls'] = $recs[$r['id']]['cfg']['iconCls'];
+            }
+        }
     }
 
     /**

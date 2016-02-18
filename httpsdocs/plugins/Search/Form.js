@@ -64,7 +64,7 @@ Ext.define('CB.plugin.Search.Form', {
     onAfterRender: function(){
         for(var i in this.grid.colModel.config){
             var el = this.grid.colModel.config[i];
-            if(el.dataIndex == 'info'){
+            if(el.dataIndex === 'info'){
                 el.editor = new Ext.form.ComboBox({
                     typeAhead: true
                     ,triggerAction: 'all'

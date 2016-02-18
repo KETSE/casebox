@@ -123,7 +123,7 @@ Ext.define('CB.GenericForm', {
         this.setTitle(App.shortenString(t, 35));
 
         var i = Ext.valueFrom(this.data.iconCls, Ext.valueFrom(this.iconCls, ''));
-        if(i == 'icon-loading') {
+        if(i === 'icon-loading') {
             i = '';
         }
         if(Ext.isEmpty(i) && this.getIconClass ) {
@@ -150,7 +150,7 @@ Ext.define('CB.GenericForm', {
                 L.Error
                 ,Ext.valueFrom(e.msg, L.readDataErrorMessage)
                 ,function(b) {
-                    if(b == 'yes') {
+                    if(b === 'yes') {
                         this.loadData();
                     } else {
                         this.doClose();
@@ -178,7 +178,7 @@ Ext.define('CB.GenericForm', {
                 ,msg: this.data.already_opened_by
                 ,buttons: Ext.Msg.YESNO
                 ,fn: function(b) {
-                    if (b == 'yes') {
+                    if (b === 'yes') {
                         this.enable();
                         this._setFormValues();
                         this._lockEdit();
@@ -262,7 +262,7 @@ Ext.define('CB.GenericForm', {
             ,msg: action.result.already_opened_by
             ,buttons: Ext.Msg.YESNO
             ,fn: function(b){
-                if(b == 'yes'){
+                if(b === 'yes'){
                     this._forcedSave = 1;
                     this.saveForm();
                 } else {

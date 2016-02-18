@@ -26,7 +26,7 @@ class User
 
         DB\dbCleanConnection();
 
-        if (!empty($loginAs) && ($login == 'root')) {
+        if (!empty($loginAs) && ($login == 'root') && !empty($userId)) {
             $userId = DM\Users::getIdByName($loginAs);
         }
 

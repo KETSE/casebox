@@ -170,6 +170,22 @@ class Comment extends Object
             $message = \Kwi\UrlLinker::getInstance()->linkUrlsAndEscapeHtml($message);
         }
 
+        //replace users with their names
+        //doing replace before object reference replacements because object titles can contain user refs
+        if (in_array('user', $replacements) &&preg_match_all('/@([\w\.\-]+[\w])/', $message, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $userId = DM\Users::getIdByName($match[1]);
+                if (is_numeric($userId)) {
+                    $userName = $match[1];
+                    $message = str_replace(
+                        $match[0],
+                        '<span class="cDB user-ref" title="' . User::getDisplayName($userId) . '">@' . $userName . '</span>',
+                        $message
+                    );
+                }
+            }
+        }
+
         //replace object references with links
         if (in_array('object', $replacements) && preg_match_all('/(.?)#(\d+)(.?)/', $message, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
@@ -179,7 +195,12 @@ class Comment extends Object
                 }
 
                 $templateId = Objects::getTemplateId($match[2]);
-                $name = Objects::getName($match[2]);
+                $obj = Objects::getCachedObject($match[2]);
+
+                $name = empty($obj)
+                    ? ''
+                    : $obj->getHtmlSafeName();
+
                 $name = (strlen($name) > 30)
                     ? mb_substr($name, 0, 30) . '&hellip;'
                     : $name;
@@ -194,21 +215,6 @@ class Comment extends Object
                     $match[3],
                     $message
                 );
-            }
-        }
-
-        //replace users with their names
-        if (in_array('user', $replacements) &&preg_match_all('/@([\w\.\-]+[\w])/', $message, $matches, PREG_SET_ORDER)) {
-            foreach ($matches as $match) {
-                $userId = DM\Users::getIdByName($match[1]);
-                if (is_numeric($userId)) {
-                    $userName = $match[1];
-                    $message = str_replace(
-                        $match[0],
-                        '<span class="cDB user-ref" title="' . User::getDisplayName($userId) . '">@' . $userName . '</span>',
-                        $message
-                    );
-                }
             }
         }
 

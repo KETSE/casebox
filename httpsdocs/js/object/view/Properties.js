@@ -21,7 +21,7 @@ Ext.define('CB.object.view.Properties', {
         var objType = '';
         if(!Ext.isEmpty(this.loadedParams)) {
             objType = CB.DB.templates.getType(this.loadedParams.template_id);
-            if((objType != 'file') || detectFileEditor(this.loadedParams.name)) {
+            if((objType !== 'file') || detectFileEditor(this.loadedParams.name)) {
                 rez.tbar['edit'] = {};
             }
         }

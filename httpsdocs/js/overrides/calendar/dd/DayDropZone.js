@@ -14,7 +14,7 @@ Ext.override(Ext.calendar.dd.DayDropZone, {
             end,
             evtEl,
             dayCol;
-        if (data.type == 'caldrag') {
+        if (data.type === 'caldrag') {
             if (!this.dragStartMarker) {
                 // Since the container can scroll, this gets a little tricky.
                 // There is no el in the DOM that we can measure by default since
@@ -56,7 +56,7 @@ Ext.override(Ext.calendar.dd.DayDropZone, {
 
             box.width = dayCol.getWidth();
 
-            if (data.type == 'eventdrag') {
+            if (data.type === 'eventdrag') {
                 if (this.dragOffset === undefined) {
                     this.dragOffset = n.timeBox.y - box.y;
                     box.y = n.timeBox.y - this.dragOffset;
@@ -70,7 +70,7 @@ Ext.override(Ext.calendar.dd.DayDropZone, {
                 this.shim(n.date, box);
                 text = this.moveText;
             }
-            if (data.type == 'eventresize') {
+            if (data.type === 'eventresize') {
                 if (!this.resizeDt) {
                     this.resizeDt = n.date;
                 }

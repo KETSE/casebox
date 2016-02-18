@@ -70,7 +70,7 @@ Ext.define('CB.Uploader', {
 
     /* check if Browser supports file uploading from desktop */
     ,browserUploadingSupport: function(){
-        return (typeof(FileReader) != 'undefined');
+        return (typeof(FileReader) !== 'undefined');
     }
     /* XHR listeners */
     ,onFileUploadStart: function(e){
@@ -132,7 +132,7 @@ Ext.define('CB.Uploader', {
     /* end of XHR listeners */
 
     ,onUploadFailure: function(r, e){
-        if(r.type == 'filesexist'){
+        if(r.type === 'filesexist'){
             r.count = this.getGroupPendingFilesCount(this.uploadingFile.get('group'));
             this.serverResponse = r;
 
@@ -216,9 +216,9 @@ Ext.define('CB.Uploader', {
 
     ,onConfirmResponse: function(w){
         this.uploadingFile.set('response', w.response);
-        if(w.response == 'rename'){
+        if(w.response === 'rename'){
             Ext.Msg.prompt(L.Rename, L.NewFileName, function(btn, text){
-                if ((btn == 'ok') && !Ext.isEmpty(text)) {
+                if ((btn === 'ok') && !Ext.isEmpty(text)) {
                     CB_Browser.confirmUploadRequest(
                         {
                             response: 'rename'
@@ -232,7 +232,7 @@ Ext.define('CB.Uploader', {
                     CB_Browser.confirmUploadRequest({response: 'cancel'}, this.onConfirmResponseProcess, this);
                 }
             }, this, false, this.serverResponse.suggestedFilename);
-        }else{
+        } else {
             if (w.forAll) {
                 this.store.each(
                     function(r){

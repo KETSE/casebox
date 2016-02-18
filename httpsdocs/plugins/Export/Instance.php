@@ -48,7 +48,7 @@ class Instance
         }
 
         $colTitles = array();
-        foreach ($columns as $name => &$col) {
+        foreach ($columns as $name => $col) {
             $colTitles[] = empty($defaultColumns[$name])
                 ? @Util\coalesce($col['title'], $name)
                 : $defaultColumns[$name]['title'];

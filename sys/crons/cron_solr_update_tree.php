@@ -45,6 +45,7 @@ try {
         echo "optimizing\n";
         $solr->optimize();
         DB\dbQuery($last_action_sql, $cron_id) or die('error updating crons last action');
+
     } else {
         $solr->updateTree(
             array(

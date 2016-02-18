@@ -283,7 +283,7 @@ Ext.define('CB.facet.List', {
 
         if(el) {
             //check Show all click
-            if(el.className == 'click') {
+            if(el.className === 'click') {
                 this.addCls('facet-expanded');
                 this.updateLayout();
             }
@@ -334,7 +334,7 @@ Ext.define('CB.facet.List', {
             id += date_local_to_ISO_string(to);
             name += Ext.Date.format(to, App.dateFormat);
         }
-        if(id == '-') {
+        if(id === '-') {
             return;
         }
         this.store.loadData(

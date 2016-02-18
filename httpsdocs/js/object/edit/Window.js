@@ -318,7 +318,7 @@ Ext.define('CB.object.edit.Window', {
         //hide infopanel switcher by default, for vertical layout
         this.actions.showInfoPanel.setHidden(true);
 
-        if((this.templateCfg.layout === 'horizontal') || (this.templateType == 'file')) {
+        if((this.templateCfg.layout === 'horizontal') || (this.templateType === 'file')) {
             this.complexFieldContainer.flex = 1;
             this.complexFieldContainer.layout = 'fit';
 
@@ -568,7 +568,7 @@ Ext.define('CB.object.edit.Window', {
         this.objectsStore.reload();
 
         /* detect template type of the opened object and create needed grid */
-        var gridType = (this.templateType == 'search')
+        var gridType = (this.templateType === 'search')
             ? 'CBVerticalSearchEditGrid'
             : 'CBVerticalEditGrid';
 
@@ -639,7 +639,7 @@ Ext.define('CB.object.edit.Window', {
             var fields = [];
             this.grid.templateStore.each(
                 function(r) {
-                    if(r.get('cfg').showIn == 'tabsheet') {
+                    if(r.get('cfg').showIn === 'tabsheet') {
                         var cfg = {
                             border: false
                             ,isTemplateField: true
@@ -662,7 +662,7 @@ Ext.define('CB.object.edit.Window', {
                                     this.fireEvent('change');
                                 }
                             }
-                            ,xtype: (r.get('type') == 'html')
+                            ,xtype: (r.get('type') === 'html')
                                 ? 'CBHtmlEditor'
                                 : 'textarea'
                         };
@@ -715,7 +715,7 @@ Ext.define('CB.object.edit.Window', {
     }
 
     ,updateButtons: function() {
-        if(this.viewMode == 'preview') {
+        if(this.viewMode === 'preview') {
             this.actions.edit.show();
             this.actions.save.hide();
             this.actions.cancel.hide();
@@ -785,12 +785,12 @@ Ext.define('CB.object.edit.Window', {
         }
 
         var subscription = Ext.valueFrom(commonParams.subscription, 'ignore');
-        this.actions.notifyOn.setHidden(subscription == 'watch');
-        this.actions.notifyOff.setHidden(subscription == 'ignore');
+        this.actions.notifyOn.setHidden(subscription === 'watch');
+        this.actions.notifyOff.setHidden(subscription === 'ignore');
     }
 
     ,onSubscriptionButtonClick: function(b, e) {
-        var type = (b.itemId == 'notifyOn')
+        var type = (b.itemId === 'notifyOn')
             ? 'watch'
             : 'ignore';
 
@@ -804,8 +804,8 @@ Ext.define('CB.object.edit.Window', {
                     return;
                 }
 
-                this.actions.notifyOn.setHidden(type == 'watch');
-                this.actions.notifyOff.setHidden(type == 'ignore');
+                this.actions.notifyOn.setHidden(type === 'watch');
+                this.actions.notifyOff.setHidden(type === 'ignore');
             }
             ,this
         );

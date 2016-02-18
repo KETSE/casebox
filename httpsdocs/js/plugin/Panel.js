@@ -129,7 +129,7 @@ Ext.define('CB.plugin.Panel', {
              * to the params
              */
             if(params &&
-                // (CB.DB.templates.getType(params.template_id) != 'task') &&
+                // (CB.DB.templates.getType(params.template_id) !== 'task') &&
                 (params.from !== 'window') &&
                 !Ext.isEmpty(params.name)
             ){

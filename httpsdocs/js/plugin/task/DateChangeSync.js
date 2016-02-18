@@ -15,7 +15,7 @@ Ext.define('CB.plugin.task.DateChangeSync', {
             owner &&
             owner.refOwner &&
             owner.refOwner.data &&
-            (CB.DB.templates.getType(owner.refOwner.data.template_id) == 'task')
+            (CB.DB.templates.getType(owner.refOwner.data.template_id) === 'task')
         ) {
             owner.on('change', this.onFieldChange, this);
         }
@@ -116,7 +116,7 @@ Ext.define('CB.plugin.task.DateChangeSync', {
             ,fieldType = arr[0]
             ,fieldSuffix = arr[1]
             ,pairFieldName = fieldType + '_' + (
-                (fieldSuffix == 'start')
+                (fieldSuffix === 'start')
                 ? 'end'
                 : 'start'
             )

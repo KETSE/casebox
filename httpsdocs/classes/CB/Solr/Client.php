@@ -269,7 +269,7 @@ class Client extends Service
 
         } elseif (!empty($p['id'])) {
             $ids = \CB\Util\toNumericArray($p['id']);
-            $where = '(t.id in (0'.implode(',', $ids).') ) and (t.id > $1)';
+            $where = '(t.id in (0'.implode(',', $ids).')) and (t.id > $1)';
         }
 
         $sql = 'SELECT t.id
@@ -333,6 +333,8 @@ class Client extends Service
 
                 $this->addDocuments($docs);
 
+                $this->commit();
+
                 /* reset updated flag into database for processed documents */
                 DB\dbQuery(
                     'UPDATE tree
@@ -344,8 +346,6 @@ class Client extends Service
                 );
 
                 $this->updateCronLastActionTime(@$p['cron_id']);
-
-                $this->commit();
 
                 $indexedDocsCount += sizeof($docs);
             }

@@ -585,7 +585,7 @@ Ext.define('CB.object.ViewContainer', {
             ti.menu
             ,function(k, v, o) {
 
-                if(k == '-') {
+                if(k === '-') {
                     this.menu.add('-');
                 } else {
                     var b = (this.menuItemConfigs[k])
@@ -594,7 +594,7 @@ Ext.define('CB.object.ViewContainer', {
 
                     if(b) {
                         if ((!isFirstItem) &&
-                          (v.addDivider == 'top')
+                          (v.addDivider === 'top')
                         ) {
                             this.menu.add('-');
                         }
@@ -617,8 +617,8 @@ Ext.define('CB.object.ViewContainer', {
 
         var subscription = Ext.valueFrom(this.loadedData.subscription, 'ignore');
 
-        this.actions.notifyOn.setHidden(subscription == 'watch');
-        this.actions.notifyOff.setHidden(subscription == 'ignore');
+        this.actions.notifyOn.setHidden(subscription === 'watch');
+        this.actions.notifyOff.setHidden(subscription === 'ignore');
 
         // hide all bottons from toolbar
         Ext.iterate(
@@ -966,7 +966,7 @@ Ext.define('CB.object.ViewContainer', {
     }
 
     ,onSubscriptionButtonClick: function(b, e) {
-        var type = (b.itemId == 'notifyOn')
+        var type = (b.itemId === 'notifyOn')
             ? 'watch'
             : 'ignore';
 
@@ -980,8 +980,8 @@ Ext.define('CB.object.ViewContainer', {
                     return;
                 }
 
-                this.actions.notifyOn.setHidden(type == 'watch');
-                this.actions.notifyOff.setHidden(type == 'ignore');
+                this.actions.notifyOn.setHidden(type === 'watch');
+                this.actions.notifyOff.setHidden(type === 'ignore');
             }
             ,this
         );

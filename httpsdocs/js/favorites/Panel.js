@@ -109,7 +109,7 @@ Ext.define('CB.Favorites.Panel', {
                 L.Star
                 ,L.SetStarNameMsg
                 ,function(b, name) {
-                    if(b == 'ok') {
+                    if(b === 'ok') {
                         data.name = name;
 
                         var d = {

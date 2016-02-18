@@ -101,7 +101,7 @@ class SearchResults extends Dbnode
      */
     public function getViewConfig(&$pathArray, &$rp)
     {
-        $copyParams = array('view', 'stats');
+        $copyParams = array('view', 'views', 'stats');
 
         $sp = $this->getSearchParams($rp);
 

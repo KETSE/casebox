@@ -389,7 +389,9 @@ class Config extends Singleton
             // path to photos folder
             ,'photos_path' => $filesDir . '_photo' . $ds
 
-            ,'core_url' => $config['server_name'] . $coreName.'/'
+            ,'core_url' => $config['server_name'] . $coreName .'/'
+
+            ,'core_uri' => '/' . $coreName .'/'
 
             ,'upload_temp_dir' => TEMP_DIR . $coreName . $ds
 
@@ -934,6 +936,7 @@ class Config extends Singleton
 
                 } elseif (substr($property, -3) !== '_DC') { //_DC's could have reference to predefined config sets
                     \CB\debug($cfg['core_name'] . ': Error parsing json config for property "' . $property . '".');
+                    unset($cfg[$property]);
                 }
             }
         }

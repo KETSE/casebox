@@ -1,3 +1,53 @@
+CaseBox 1.9.571 (2016-02-18)
+==============================
+- #11047 Can some fields be hidden on some permission users for example name of victim and compliant against name.
+- #11045 titles of taxonomies do not show when the text is long
+- #10755 Pie chart not showing some legend text
+- #11065 Header appears two times in object preview rendering
+- #11023 Custom icons not shown in GridView
+
+CaseBox 1.9.570 (2016-01-27)
+==============================
+- #10590 Перенос папки данными - не работает кнопка Apply for all / экспортировать данные в большом количестве не получается
+- #10512 add custom Search Query
+- #10398 View=Charts, Sorting doesn't work
+- #10392 При копировании писем из одного дела в другое система задает вопрос о замене
+
+Fixed Bugs:
+----------
+- #10478 system user cannot be added as lawyer in a case
+- #10400 DC not displaying all data
+
+CaseBox 1.9.569 (2016-01-14)
+==============================
+- #10324 User language was reset & and email notifications in wrong language
+- #10323 User 'nora' can't see tasks, but is in all security groups
+- #10288 Object preview in direct link doesn't use the CSS? + user avatars not shown in tasks
+- #9488 Problems when accessing a folder by clicking on a link in notifications tab
+- #10302 Stats component not working
+
+CaseBox 1.9.568 (2016-01-12)
+==============================
+- #10268 Notification broken
+
+CaseBox 1.9.567 (2016-01-12)
+==============================
+- check object existance on comment refferences
+
+CaseBox 1.9.566 (2016-01-12)
+==============================
+- removed Zend lib
+- #9874 Trigger reindexing after making changes that affect SOLR
+
+Fixed Bugs:
+----------
+- #10150 Comment indirectly rendered
+- #10039 Error on export data
+
+Notes:
+----------
+- php_imap extension should be enabled in php
+
 CaseBox 1.9.565 (2016-01-10)
 ==============================
 - Testing Travis build errors (tests adjustment)

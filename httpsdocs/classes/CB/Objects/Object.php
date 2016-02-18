@@ -1723,7 +1723,9 @@ class Object
                         : ' style="padding-left: '.($headerField['level'] * 20).'px"'
                     ) . '>' . $headerField['title'] . '</th></tr>';
                 }
-                $previousHeader = $headerField;
+                if (empty($previousHeader) || (($previousHeader['level'] <= $f['tf']['level']) && !empty($headerField))) {
+                    $previousHeader = $headerField;
+                }
 
                 $body .= '<tr>';
                 if (empty($f['tf']['cfg']['noHeader'])) {

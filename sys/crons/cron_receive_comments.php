@@ -27,7 +27,8 @@ $site_path = realpath(
 
 include $site_path.DIRECTORY_SEPARATOR.'config_platform.php';
 
-require_once 'mail_functions.php';
+require_once 'php-imap/src/PhpImap/IncomingMail.php';
+require_once 'php-imap/src/PhpImap/Mailbox.php';
 
 $cfg = Cache::get('platformConfig');
 
@@ -89,7 +90,7 @@ foreach ($mailServers as &$cfg) {
             ? $cfg['email']
             : $cfg['user'];
 
-        $mailConf = array(
+        $mc = array(
             'host' => $cfg['host']
             ,'port' => $cfg['port']//Util\coalesce(@$cfg['port'], 993)
             ,'ssl' =>  (@$cfg['ssl'] == true)
@@ -97,9 +98,17 @@ foreach ($mailServers as &$cfg) {
             ,'password' => $cfg['pass']
         );
 
-        $mailbox = new \Zend\Mail\Storage\Imap($mailConf);
+        $mailbox = new \PhpImap\Mailbox(
+            '{' . $mc['host'] . ':' . $mc['port'] . '/imap' .
+            ($mc['ssl'] ? '/ssl' : '') .'}INBOX',
+            $user,
+            $mc['password'],
+            TEMP_DIR
+        );
 
-        $mailCount = $mailbox->countMessages();
+        // $mailCount = $mailbox->countMessages();
+        $cfg['mailIds'] = $mailbox->searchMailbox('UNSEEN'); //NEW
+        $mailCount = sizeof($cfg['mailIds']);
 
         if ($mailCount > 0) {
             $cfg['mailbox'] = &$mailbox;
@@ -107,7 +116,7 @@ foreach ($mailServers as &$cfg) {
             $rez = processMails($cfg);
 
             if (!empty($rez)) {
-                echo $user . ' on ' . $mailConf['host'] . '. mail count: ' . $mailCount . $rez;
+                echo $user . ' on ' . $mc['host'] . '. mail count: ' . $mailCount . $rez;
             }
         }
 
@@ -151,10 +160,11 @@ foreach ($mailServers as $mailConf) {
                 continue;
             }
 
-            $emailFrom = extractEmailFromText($mail['from']);   // user email
-            $emailTo = extractEmailFromText($mail['to']);  // <comments@casebox.org>
+            // $emailTo = extractEmailFromText($mail['to']);  // <comments@casebox.org>
+            $mailsTo = array_keys($mail['to']);
+            $emailTo = array_shift($mailsTo);
 
-            $userId = DM\Users::getIdByEmail($emailFrom);
+            $userId = DM\Users::getIdByEmail($mail['fromAddress']);
 
             $_SESSION['user'] = array('id' => $userId);
 
@@ -165,7 +175,7 @@ foreach ($mailServers as $mailConf) {
                 ,'cid' => $userId
                 ,'template_id' => $templateId
                 ,'data' => array(
-                    '_title' => removeContentExtraBlock($mail['content'], $emailFrom, $emailTo)
+                    '_title' => removeContentExtraBlock($mail['content'], $mail['fromAddress'], $emailTo)
                 )
                 ,'sys_data' => array(
                     'mailId' => $mail['id']
@@ -180,7 +190,7 @@ foreach ($mailServers as $mailConf) {
                     saveObjectAttachments($commentId, $mail['attachments']);
                 }
             } catch (Exception $e) {
-                \CB\debug('Cannot create comment from ' . $mail['from'], $data);
+                \CB\debug('Cannot create comment from ' . $mail['fromAddress'], $data);
             }
 
             $deleteMailIds[] = $mail['id'];
@@ -203,12 +213,13 @@ function processMails(&$mailServer)
     $newMails = 0;
 
     //iterate and process each mail
-    foreach ($mailServer['mailbox'] as $k => $mail) {
+    foreach ($mailServer['mailIds'] as $id) {
+         $mail = $mailServer['mailbox']->getMail($id);
         try {
-            if ($mail->hasFlag(\Zend\Mail\Storage::FLAG_SEEN) || empty($mail->subject)) {
+            if (empty($mail->subject)) {
                 continue;
             }
-        } catch (\InvalidArgumentException $e) {
+        } catch (\Exception $e) {
             $rez .= "Cant read this mail, probably empty subject.\n";
             continue;
         }
@@ -230,31 +241,23 @@ function processMails(&$mailServer)
             $date = date('Y-m-d H:i:s', $date);
 
             /* get contents and attachments */
-            $parts = getMailContentAndAtachment($mail);
-            $content = null;
-            $attachments = array();
-            foreach ($parts as $p) {
-                //content, filename, content-type
-                if (!$p['attachment'] && !$content) {
-                    $content = $p['content'];
-                } else {
-                    $attachments[] = $p;
-                }
-            }
-            /* end of get contents and attachments */
+            $content = $mail->textPlain;
+            $attachments = $mail->getAttachments();
 
             $mailServer['cores'][$matches[2]]['mails'][] = array(
-                'id' => $mailServer['mailbox']->getUniqueId($k)
+                'id' => $id //$mailServer['mailbox']->getUniqueId($k)
                 ,'pid' => $matches[3]
-                ,'from' => $mail->from
+                ,'fromName' => $mail->fromName //$mail->from
+                ,'fromAddress' => $mail->fromAddress //$mail->from
                 ,'to' => $mail->to
+                ,'toString' => $mail->toString  //$mail->to
                 ,'date' => $date
                 ,'subject' => $subject
                 ,'content' => $content
                 ,'attachments' => $attachments
             );
         } else {
-            $dids[] = $mailServer['mailbox']->getUniqueId($k);
+            $dids[] = $id; //$mailServer['mailbox']->getUniqueId($k);
         }
     }
 
@@ -326,7 +329,7 @@ function deleteMails(&$mailBox, $idsArray)
 
     foreach ($idsArray as $id) {
         try {
-            $mailBox->removeMessage($id);
+            $mailBox->deleteMail($id);
         } catch (\Exception $e) {
             try {
                 //$mailBox->getNumberByUniqueId()
@@ -337,5 +340,74 @@ function deleteMails(&$mailBox, $idsArray)
         }
     }
 
+    $mailBox->expungeDeletedMails();
+
     return $rez;
+}
+
+//**********************************************************************************************************************
+
+/**
+ * save attachments array for a given object id
+ * @param  int $objectId
+ * @param  array &$attachments attachments array info
+ * @return void
+ */
+function saveObjectAttachments($objectId, &$attachments)
+{
+    /**
+     *   array (
+            '1682242924670150914' =>
+            PhpImap\IncomingMailAttachment::__set_state(array(
+               'id' => '1682242924670150914',
+               'name' => '120x150_bulls_on_parade.jpg',
+               'filePath' => 'D:\\devel\\www\\casebox\\data\\tmp\\289_1682242924670150914_120x150_bulls_on_parade.jpg',
+               'disposition' => 'attachment',
+            )),
+          ),
+    */
+
+    $filesApiObject = new \CB\Api\Files();
+
+    foreach ($attachments as $d) {
+        if (empty($d['disposition']) || ($d['disposition'] !== 'attachment')) {
+            continue;
+        }
+
+        //call the api method
+        $filesApiObject->upload(
+            array(
+                'pid' => $objectId
+                ,'localFile' => $d['filePath']
+                ,'oid' => \CB\User::getId()
+                ,'filename' => $d['name']
+                // ,'content-type' => $d['content-type']
+                ,'fileExistAction' => 'autorename'
+            )
+        );
+
+        unlink($d['name']);
+    }
+}
+
+//**********************************************************************************************************************
+function decodeSubject($str)
+{
+    preg_match_all("/=\?([^\?]*?)\?B\?([^\?]+)\?=(?:\s+)?/i", $str, $arr);
+    for ($i=0; $i < count($arr[1]); $i++) {
+        if (isset($arr[1][$i])&&$arr[1][$i]) {
+            $CHARSET = $arr[1][$i];
+            $str = str_replace(
+                $arr[0][$i],
+                iconv(
+                    $CHARSET,
+                    'UTF-8',
+                    base64_decode($arr[2][$i])
+                ),
+                $str
+            );
+        }
+    }
+
+    return $str;
 }

@@ -364,7 +364,7 @@ Ext.define('CB.UsersGroupsTree', {
             ,listeners:{
                 scope: this
                 ,nodedragover: function(o){
-                    if( (o.point != 'append')
+                    if( (o.point !== 'append')
                         || (o.target == o.dropNode.parentNode)
                         || (o.target.getDepth() != 1)
                         || (o.target.data.nid < 1)
@@ -430,7 +430,7 @@ Ext.define('CB.UsersGroupsTree', {
                                 (selection[0].parentNode.data.nid <1)
                             );
                             this.actions.rename.setDisabled(
-                                selection[0].data.type != '1'
+                                selection[0].data.type !== '1'
                             );
                         }
                     }
@@ -510,7 +510,7 @@ Ext.define('CB.UsersGroupsTree', {
     ,onItemContextMenu: function(tree, record, item, index, e, eOpts) {
         e.stopEvent();
 
-        if(record.data.type == '1') {
+        if(record.data.type === '1') {
             if(!this.contextMenu) {
                 this.contextMenu = new Ext.menu.Menu({
                     items: [
@@ -572,7 +572,7 @@ Ext.define('CB.UsersGroupsTree', {
             L.Group
             ,L.Name
             ,function(b, text){
-                if((b == 'ok') && !Ext.isEmpty(text)){
+                if((b === 'ok') && !Ext.isEmpty(text)){
                     var rec = {
                         name: text
                         ,title: text
@@ -601,7 +601,7 @@ Ext.define('CB.UsersGroupsTree', {
             L.ExtractUser
             ,L.ExtractUserMessage.replace('{user}', n.data.name).replace('{group}', n.parentNode.data.text)
             ,function(b){
-                if(b == 'yes') {
+                if(b === 'yes') {
                     CB_UsersGroups.deassociate(
                         n.data.nid
                         ,n.parentNode.data.nid
@@ -669,7 +669,7 @@ Ext.define('CB.UsersGroupsTree', {
                 ,this.targetNode.data.text.split('<')[0] + ' <span class="cG">(' + this.targetNode.data.users + ')</span>'
             );
         }
-        if(this.sourceNode.parentNode.data.nid == '-1') {
+        if(this.sourceNode.parentNode.data.nid === '-1') {
             this.sourceNode.remove(true);
         }
     }
@@ -686,7 +686,7 @@ Ext.define('CB.UsersGroupsTree', {
                 this.deletedUserData = n.data;
                 Ext.MessageBox.confirm(L.Confirmation, L.DeleteUser + ' "'+n.data.text+'"?',
                 function(btn, text){
-                    if(btn == 'yes'){
+                    if(btn === 'yes'){
                         n = this.getSelectionModel().getSelection()[0];
                         CB_UsersGroups.deleteUser(n.data.nid, this.processDelNode, this);
                     }
@@ -696,7 +696,7 @@ Ext.define('CB.UsersGroupsTree', {
             case 1:
                 Ext.MessageBox.confirm(L.Confirmation, L.DeleteGroupConfirmationMessage + ' "'+n.data.text+'"?',
                 function(btn, text){
-                    if(btn == 'yes') {
+                    if(btn === 'yes') {
                         CB_Security.destroyUserGroup(
                             n.data.nid
                             ,this.processDestroyUserGroup
@@ -1145,7 +1145,7 @@ Ext.define('CB.UsersGroupsForm', {
             this.updatePhoto(response.data.photo);
             this.setDisabled(false);
 
-            this.actions.disableTSV.setDisabled(!this.canEditUserData || (response.data.tsv == 'none'));
+            this.actions.disableTSV.setDisabled(!this.canEditUserData || (response.data.tsv === 'none'));
             this.actions.enableUser.setHidden(enabled);
             this.actions.disableUser.setHidden(!enabled);
 
@@ -1236,7 +1236,7 @@ Ext.define('CB.UsersGroupsForm', {
 
     ,onEditUsernameClick: function(){
         Ext.Msg.prompt(L.ChangeUsername, L.ChangeUsernameMessage, function(btn, text){
-            if (btn == 'ok'){
+            if (btn === 'ok'){
                 if(Ext.isEmpty(text)) {
                     return Ext.Msg.alert(L.Error, L.UsernameCannotBeEmpty);
                 }
@@ -1299,7 +1299,7 @@ Ext.define('CB.UsersGroupsForm', {
             L.Disable + ' ' + L.TSV
             ,L.DisableTSVConfirmation
             ,function(b){
-                if(b == 'yes') {
+                if(b === 'yes') {
                     CB_UsersGroups.disableTSV(
                         this.data.id
                         ,this.processDisableTSV
@@ -1488,7 +1488,7 @@ Ext.define('CB.UsersGroups', {
                 ,msg: L.SaveChangesConfirmationMessage
                 ,scope: this
                 ,fn: function(btn, text){
-                    if (btn == 'yes') {
+                    if (btn === 'yes') {
                         this.form.saveData();
                     } else{
                         this._forceSelection = 1;

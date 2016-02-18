@@ -36,10 +36,11 @@
 .cRequired{ color: #C00 }
 .cM, .cM *{ color: maroon !important }
 .cDB, .cDB *{ color: #356AA0 !important } /*DiggBlue*/
-.bgcLG{ background-color: #eee }
+.bgcLG, .bgclg{ background-color: #eee }
 .bgcW{ background-color: #FFF !important }
 .bgcY{ background-color: #FFFF88 !important } /*Interactive action yellow*/
 .bgcLR{ background-color: #FFCCCC !important }
+.gr {color: #777}
 
 .bgpLT{ background-position: 0 2px}
 .op02{opacity: 0.2}
@@ -295,6 +296,17 @@ a.file{min-height: 16px; display: inline-block}
 .i24{width: 24px; height: 24px}
 .i32{width: 32px; height: 32px}
 .i40{width: 40px; height: 40px}
+
+.icon-padding, .icon-padding .x-grid3-cell-inner { padding-left: 22px !important; min-height: 16px}
+.icon-padding2, .icon-padding2 .x-grid3-cell-inner { padding-left: 44px; background-position: 22px 50% !important }
+.icon-padding3, .icon-padding3 .x-grid3-cell-inner { padding-left: 44px; background-position: 44px 50% !important }
+
+.x-rtl .icon-padding, .x-rtl .icon-padding .x-grid3-cell-inner { padding-right: 22px !important; min-height: 16px; background-position: 100% 50%;}
+.icon-padding16 { padding-left: 16px !important; min-height: 16px !important }
+
+
+.icon-tag-small{ background-image: url(i/ico/tag-small.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+
 .bgs32{background-size: 32px 32px}
 .wsNW {white-space: nowrap}
 .click, .header-click{ cursor: hand; cursor: pointer; text-decoration: none }

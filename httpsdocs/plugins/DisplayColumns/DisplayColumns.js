@@ -176,7 +176,7 @@ Ext.define('CB.plugin.DisplayColumns', {
             ,currentColumns = Ext.apply({}, this.currentColumns)
             ,i
             ,refs = {}
-            ,emptyCurrentColumns = (Ext.encode(currentColumns) == '{}');
+            ,emptyCurrentColumns = (Ext.encode(currentColumns) === '{}');
 
         //create column refs for convenient use
         for (i = 0; i < this.defaultColumns.length; i++) {
@@ -211,9 +211,14 @@ Ext.define('CB.plugin.DisplayColumns', {
                     column.dataIndex = key;
                     // column.stateId = key;
                     column.header = Ext.valueFrom(column.header, column.title);
+
+                    //no need to specify custom renderer for date fields
+                    //just set its type to date and specify desired format
+
                     switch(column.type) {
                         case 'date':
-                            column.renderer = App.customRenderers.datetime;
+                            column.xtype = 'datecolumn';
+                            // column.renderer = App.customRenderers.datetime;
                             break;
 
                         default:

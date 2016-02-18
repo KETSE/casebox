@@ -86,7 +86,7 @@ Ext.define('CB.object.plugin.SystemProperties', {
 
         if(this.params) {
 
-            if(CB.DB.templates.getType(this.params.template_id) == 'file') {
+            if(CB.DB.templates.getType(this.params.template_id) === 'file') {
                 rez.menu['metadata']  = {order: 17};
                 rez.menu['webdavlink']  = {order: 18};
                 rez.menu['permalink']  = {order: 19};
