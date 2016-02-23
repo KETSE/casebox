@@ -12,6 +12,42 @@ Prerequisites
 
 Optionally, install OpenOffice/LibreOffice to get .docx, .xls, .odt preview.
 
+
+How to install prerequisites on CentOS
+*******************************************
+Install PHP, Apache from REMI56 repository:
+
+.. code-block:: bash
+
+    > yum –enablerepo=remi,remi-php56 update -y
+
+Install ImageMagick & imagick.
+
+.. code-block:: bash
+
+    > yum install make
+    > yum install gcc
+    > yum --enablerepo=remi,remi-php56 install php-fpm php-devel php-pear
+    > yum install ImageMagick ImageMagick-devel
+    > pecl install imagick
+    > echo "extension=imagick.so" > /etc/php.d/imagick.ini
+
+Install dependencies to run phpUnitTests
+********************************************
+Make sure you have these installed:
+
+::
+
+  php5-readline
+  php5-phar
+  php5-curl
+  php5-openssl
+  php5-mbstring
+
+For code coverage to run, xdebug is required, see this article for example Installing `Xdebug on CentOS`_
+
+
+
 Bare-bone server install
 **************************
 If you deploy Casebox on a freshly installed server, here are the instruction how to install all required software.
@@ -136,3 +172,4 @@ See ``/CB/install/cron/readme.txt`` for instructions: you need to edit the cront
 
 .. _SOLR: http://lucene.apache.org/solr/
 .. _archive: https://github.com/KETSE/casebox/archive/master.zip
+.. _Xdebug on CentOS: http://programming-review.com/installing-xdebug-on-centos/

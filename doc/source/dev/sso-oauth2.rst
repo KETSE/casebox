@@ -6,6 +6,7 @@ Single Sign-in with OAuth2
 ``oauth2_credentials_google``
 
 .. code-block:: json
+
     {
         "web": {
             "client_id": "49165442952-1b0ehojs8u4cm5b45fe0c2cifl06c3a3.apps.googleusercontent.com",

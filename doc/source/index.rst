@@ -25,7 +25,7 @@ The main documentation is organized into a three sections:
    user/index
    user/two-step-verification
    user/features
-   
+
 
 
 .. toctree::
@@ -43,7 +43,8 @@ The main documentation is organized into a three sections:
    admin/filters
    admin/searches
    admin/smartfolders
-   
+   admin/views
+
 
 
 .. toctree::
@@ -52,13 +53,14 @@ The main documentation is organized into a three sections:
    :caption: Developer Manual
 
    dev/index
+   dev/architecture
+   dev/core
    dev/install
    dev/config
-   dev/core-management
    dev/templates
    dev/fields
    dev/tree
-   dev/grid
+   dev/display-columns
    dev/filter
    dev/search
    dev/files
@@ -66,6 +68,10 @@ The main documentation is organized into a three sections:
    dev/multilingual
    dev/admin-tasks
    dev/doc-edit
+   dev/sso-oauth2
+   dev/multilingual
+   dev/solr
+   dev/app-development
    dev/faq
 
 
