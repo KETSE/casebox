@@ -253,7 +253,7 @@ Ext.define('CB.object.plugin.Comments', {
         var msg = this.addCommentField.getValue().trim();
 
         if(Ext.isEmpty(msg)) {
-            return;
+            return Ext.Msg.alert(L.Error, L.SpecifyComment);
         }
 
         this.addCommentField.disable();

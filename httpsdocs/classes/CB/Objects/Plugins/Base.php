@@ -13,7 +13,7 @@ class Base
     }
     /**
      * get plugin data for given object id
-     * @return array ext direct responce
+     * @return array ext direct response
      */
     public function getData($id = false)
     {

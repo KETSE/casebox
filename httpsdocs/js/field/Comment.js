@@ -248,6 +248,7 @@ Ext.define('CB.field.Comment', {
             if(stats.total > 0) {
                 t = stats.total + ' ' + Ext.String.uncapitalize(L.Files);
                 label.setValue(t);
+                this.filesCount = stats.total;
             } else {
                 label.setValue('');
             }

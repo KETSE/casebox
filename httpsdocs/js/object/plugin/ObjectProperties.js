@@ -107,6 +107,24 @@ Ext.define('CB.object.plugin.ObjectProperties', {
             }
             ,this
         );
+
+        a = this.getEl().query('span.time-spent');
+
+        Ext.each(
+            a
+            ,function(t){
+                Ext.get(t).addListener(
+                    'click'
+                    ,this.onTimeSpentClick
+                    ,this
+                );
+            }
+            ,this
+        );
+
+    }
+
+    ,onTimeSpentClick: function(b, e) {
     }
 
     ,onItemActionClick: function(ev, el){

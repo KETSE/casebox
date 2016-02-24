@@ -462,6 +462,26 @@ function formatMysqlTime($date, $format = false)
     return date(str_replace('%', '', $format), strtotime($date));
 }
 
+/**
+ * format seconds into time string (hh:mm:ss)
+ * @param  int $seconds
+ * @return string
+ */
+function formatSeconds($seconds)
+{
+    $sec = $seconds % 60; //51
+    $seconds -= $sec; //60
+    $seconds = floor($seconds / 60);
+    $min = $seconds % 60;
+    $hours = floor($seconds / 60);
+
+    $rez = empty($hours)
+        ? sprintf('%02d:%02d', $min, $sec)
+        : sprintf('%02d:%02d:%02d', $hours, $min, $sec);
+
+    return $rez;
+}
+
 function clientToMysqlDate($date)
 {
     if (empty($date)) {
@@ -885,13 +905,14 @@ function is_cli()
  * @param type $array
  * @return boolean
  */
-function checkKeyExists($keys, $array) {
-    
+function checkKeyExists($keys, $array)
+{
     $result = false;
-    foreach($keys as $key) {
-        if(array_key_exists($key, $array)) {
+    foreach ($keys as $key) {
+        if (array_key_exists($key, $array)) {
             $result = true;
         }
     }
+
    return $result;
 }

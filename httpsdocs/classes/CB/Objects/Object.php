@@ -276,16 +276,8 @@ class Object
         $sd = &$d['sys_data'];
         $tpl = $this->getTemplate();
 
-        //add creator as follower by default, but not for folder template
         if (empty($sd['wu'])) {
             $sd['wu'] = array();
-        }
-
-        if ($d['template_id'] != Config::get('default_folder_template')) {
-            if (!in_array($d['cid'], $sd['wu'])) {
-                $sd['wu'][] = intval($d['cid']);
-                $rez[] = intval($d['cid']);
-            }
         }
 
         if (!empty($tpl)) {
@@ -1052,7 +1044,11 @@ class Object
             $userId = User::getId();
         }
 
-        return ($d['cid'] == $userId);
+        $ownerId = empty($d['oid'])
+            ? $d['cid']
+            : $d['oid'];
+
+        return ($ownerId == $userId);
     }
 
     /**
@@ -1747,6 +1743,19 @@ class Object
             }
         }
 
+        //add time spent row if template is marked with "timeTracking"
+        if (!empty($template->getData()['cfg']['timeTracking'])) {
+            $timeSpent = $this->getTimeSpent();
+            // Always show spent time for templates with timeTracking so we can click on it
+            // to display the plugin
+            // if ($timeSpent > 0) {
+                $body .= '<tr><td class="prop-key">' . L\get('TimeSpent') . '</td>' .
+                    '<td class="prop-val"><span class="time-spent click">' .
+                    Util\formatSeconds($timeSpent) .
+                    '</span></td></tr>';
+            // }
+        }
+
         if (!empty($gf['bottom'])) {
             foreach ($gf['bottom'] as $f) {
                 $v = $template->formatValueForDisplay($f['tf'], $f);
@@ -1772,6 +1781,22 @@ class Object
         $eventParams['result'] = &$rez;
 
         \CB\fireEvent('generatePreview', $eventParams);
+
+        return $rez;
+    }
+
+    /**
+     * get time spent value that is set in sys_data
+     * @return int seconds
+     */
+    public function getTimeSpent()
+    {
+        $rez = 0;
+
+        $sd = $this->getSysData();
+        if (!empty($sd['timeSpent'])) {
+            $rez = $sd['timeSpent'];
+        }
 
         return $rez;
     }

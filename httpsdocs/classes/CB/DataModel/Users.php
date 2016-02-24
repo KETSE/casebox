@@ -129,7 +129,7 @@ class Users extends UsersGroups
             FROM `' . static::getTableName() . '`
             WHERE id = $1  AND `type` = $2' .
             ($onlyActive
-                ? ' AND enabled = 1'
+                ? ' AND enabled = 1 AND did IS NULL'
                 : ''
             );
 
@@ -160,7 +160,7 @@ class Users extends UsersGroups
             FROM `' . static::getTableName() . '`
             WHERE name = $1  AND `type` = $2' .
             ($onlyActive
-                ? ' AND enabled = 1'
+                ? ' AND enabled = 1 AND did IS NULL'
                 : ''
             );
 
