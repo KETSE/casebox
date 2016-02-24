@@ -1,3 +1,11 @@
+CaseBox 1.9.572 (2016-02-24)
+==============================
+- #10672 Bug dev Casebox / took ownership, cannot close task
+- #10433 impossible to write an empty comment with just an attachment
+- #8658 When deleting a user, email address cannot be used again
+- #11183 Broken task preview
+- #11152 Do not add Owner/Creator in User Watch List (subscribe)
+
 CaseBox 1.9.571 (2016-02-18)
 ==============================
 - #11047 Can some fields be hidden on some permission users for example name of victim and compliant against name.

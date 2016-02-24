@@ -801,6 +801,10 @@ class Objects
             return $rez;
         }
 
+        if (!empty($templateData['cfg']['timeTracking']) && !in_array('TimeTracking', $objectPlugins)) {
+            array_unshift($objectPlugins, 'TimeTracking');
+        }
+
         foreach ($objectPlugins as $pluginName) {
             $class = '\\CB\\Objects\\Plugins\\'.ucfirst($pluginName);
             $pClass = new $class($id);

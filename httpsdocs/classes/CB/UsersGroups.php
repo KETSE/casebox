@@ -274,15 +274,15 @@ class UsersGroups
         }
 
         //check if user with such email doesn exist
-        $user_id = DM\Users::getIdByEmail($p['email']);
-        if (!empty($user_id)) {
+        $userId = DM\Users::getIdByEmail($p['email']);
+        if (!empty($userId)) {
             throw new \Exception(L\get('UserEmailExists'));
         }
 
         /*check user existance, if user already exists but is deleted
         then its record will be used for new user */
-        $user_id = DM\Users::getIdByName($p['name']);
-        if (!empty($user_id)) {
+        $userId = DM\Users::getIdByName($p['name']);
+        if (!empty($userId)) {
             throw new \Exception(L\get('User_exists'));
         }
 
@@ -290,35 +290,41 @@ class UsersGroups
             'name' => $p['name']
             ,'first_name' => $p['first_name']
             ,'last_name' => $p['last_name']
+            ,'photo' => null
             ,'cid' => User::getId()
             ,'language_id' => Config::get('language_index')
             ,'email' => $p['email']
+            ,'cfg' => '{}'
+            ,'data' => '{}'
+            ,'enabled' => 1
+            ,'did' => null
+            ,'ddate' => null
         );
 
         if (!empty($p['password']) && !empty($p['psw_setup']['ps']) && ($p['psw_setup']['ps'] == 2)) {
             $params['password'] = $p['password'];
         }
 
-        $user_id = DM\Users::getIdByName($p['name'], false);
-        if (!empty($user_id)) {
+        $userId = DM\Users::getIdByName($p['name'], false);
+        if (!empty($userId)) {
             //update
-            $params['id'] = $user_id;
+            $params['id'] = $userId;
             DM\Users::update($params);
 
             /* in case it was a deleted user we delete all old acceses */
-            DB\dbQuery('DELETE FROM users_groups_association WHERE user_id = $1', $user_id);
-            DB\dbQuery('DELETE FROM tree_acl WHERE user_group_id = $1', $rez['data']['id']);
+            DB\dbQuery('DELETE FROM users_groups_association WHERE user_id = $1', $userId);
+            DB\dbQuery('DELETE FROM tree_acl WHERE user_group_id = $1', $userId);
             /* end of in case it was a deleted user we delete all old acceses */
         } else {
             //create
-            $user_id = DM\Users::create($params);
+            $userId = DM\Users::create($params);
         }
 
         $rez = array(
             'success' => true
-            ,'data' => array('id' => $user_id)
+            ,'data' => array('id' => $userId)
         );
-        $p['id'] = $user_id;
+        $p['id'] = $userId;
 
         // associating user to group if group was specified
         if (isset($p['group_id']) && is_numeric($p['group_id'])) {
@@ -328,7 +334,7 @@ class UsersGroups
                 ON duplicate KEY
                 UPDATE cid = $3',
                 array(
-                    $user_id
+                    $userId
                     ,$p['group_id']
                     ,User::getId()
                 )
@@ -340,7 +346,7 @@ class UsersGroups
 
         //check if send invite is set and create notification
         if (!empty($p['psw_setup']['ps']) && ($p['psw_setup']['ps'] == 1)) {
-            $this->sendResetPasswordMail($user_id, 'invite');
+            $this->sendResetPasswordMail($userId, 'invite');
         }
 
         Security::calculateUpdatedSecuritySets();

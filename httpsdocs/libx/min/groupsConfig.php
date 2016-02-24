@@ -176,6 +176,7 @@ return array_merge(
             ,'//js/object/plugin/Tasks.js'
             ,'//js/object/plugin/Versions.js'
             ,'//js/object/plugin/CurrentVersion.js'
+            ,'//js/object/plugin/TimeTracking.js'
             ,'//js/file/edit/Window.js'
             ,'//js/CB.WebdavWindow.js'
 

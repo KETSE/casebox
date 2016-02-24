@@ -523,7 +523,7 @@ CREATE TABLE `templates` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `pid` int(11) unsigned DEFAULT NULL,
   `is_folder` tinyint(1) unsigned DEFAULT '0',
-  `type` enum('case','object','file','task','user','email','template','field','search','comment','shortcut','menu','config') DEFAULT NULL,
+  `type` enum('case','object','file','task','user','email','template','field','search','comment','shortcut','menu','config','time_tracking') DEFAULT NULL,
   `name` varchar(100) DEFAULT NULL,
   `l1` varchar(100) DEFAULT NULL,
   `l2` varchar(100) DEFAULT NULL,

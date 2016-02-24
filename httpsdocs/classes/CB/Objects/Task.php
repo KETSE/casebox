@@ -87,6 +87,12 @@ class Task extends Object
         $d = &$this->data;
         $sd = &$d['sys_data'];
 
+        //add creator as follower for tasks
+        if (!in_array($d['cid'], $sd['wu'])) {
+            $sd['wu'][] = intval($d['cid']);
+            $rez[] = intval($d['cid']);
+        }
+
         /** add newly assigned users to followers */
         $oldAssigned = array();
         if (!empty($this->oldObject)) {
@@ -606,14 +612,19 @@ class Task extends Object
 
         //insert rows
         $p = $pb[0];
+
         $pos = strrpos($p, '<tbody>');
-        $p = substr($p, $pos + 7);
-        $pos = strrpos($p, '</tbody>');
         if ($pos !== false) {
-            $p = substr($p, 0, $pos);
+            $p = substr($p, $pos + 7);
+            $pos = strrpos($p, '</tbody>');
+            if ($pos !== false) {
+                $p = substr($p, 0, $pos);
+            }
+        } else {
+            $p = '';
         }
 
-        $pb[0] = $this->getPreviewActionsRow() .
+         $pb[0] = $this->getPreviewActionsRow() .
             '<table class="obj-preview"><tbody>' .
             $dateLines .
             $p .
