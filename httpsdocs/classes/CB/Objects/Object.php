@@ -1956,11 +1956,11 @@ class Object
 
                 $value = empty($ov)
                     ? ''
-                    : ('<div class="old-value">' . $template->formatValueForDisplay($field, $ov, false) . '</div>');
+                    : ('<div class="old-value">' . $template->formatValueForDisplay($field, $ov, false, true) . '</div>');
 
                 $value .= empty($nv)
                     ? ''
-                    : ('<div class="new-value">' . $template->formatValueForDisplay($field, $nv, false) . '</div>');
+                    : ('<div class="new-value">' . $template->formatValueForDisplay($field, $nv, false, true) . '</div>');
 
                 $rez[$title] = $value;
             }

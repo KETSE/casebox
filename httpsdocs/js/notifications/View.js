@@ -12,7 +12,25 @@ Ext.define('CB.notifications.View', {
 
         //define actions
         this.actions = {
-            markAllAsRead: new Ext.Action({
+            markAsUnread: new Ext.Action({
+                // iconCls: 'im-assignment'
+                itemId: 'markAsUnread'
+                ,scale: 'medium'
+                ,text: L.MarkAsUnread
+                ,disabled: true
+                ,scope: this
+                ,handler: this.onMarkAsUnreadClick
+            })
+            ,showUnread: new Ext.Action({
+                // iconCls: 'im-assignment'
+                itemId: 'showUnread'
+                ,scale: 'medium'
+                ,enableToggle: true
+                ,text: L.ShowUnread
+                ,scope: this
+                ,handler: this.onShowUnreadClick
+            })
+            ,markAllAsRead: new Ext.Action({
                 iconCls: 'im-assignment'
                 ,itemId: 'markAllAsRead'
                 ,scale: 'medium'
@@ -37,6 +55,14 @@ Ext.define('CB.notifications.View', {
                 ,hidden: true
                 ,handler: this.onPreviewClick
             })
+
+            ,close: new Ext.Action({
+                iconCls: 'im-cancel'
+                ,itemId: 'close'
+                ,scale: 'medium'
+                ,scope: this
+                ,handler: this.onCloseClick
+            })
         };
 
         this.defineStore();
@@ -49,17 +75,27 @@ Ext.define('CB.notifications.View', {
                 scale: 'medium'
             }
             ,items: [
-                this.actions.markAllAsRead
+                this.actions.markAsUnread
+                ,this.actions.showUnread
+                ,this.actions.markAllAsRead
                 ,'->'
                 ,this.actions.reload
                 ,this.actions.preview
+                ,this.actions.close
             ]
         });
 
         Ext.apply(this, {
-            items: [
-                this.getGridConfig()
-            ]
+            items: [{
+                xtype: 'panel'
+                ,cls: 'taC'
+                ,bodyStyle: 'background-color: #e9eaed'
+                ,border: false
+                ,scrollable: 'y'
+                ,items: [
+                    this.getGridConfig()
+                ]
+            }]
             ,listeners: {
                 scope: this
                 ,activate: this.onActivateEvent
@@ -68,7 +104,7 @@ Ext.define('CB.notifications.View', {
 
         this.callParent(arguments);
 
-        this.grid = this.items.getAt(0);
+        this.grid = this.items.getAt(0).items.getAt(0);
         this.checkNotificationsTask = new Ext.util.DelayedTask(
             this.onCheckNotificationsTask
             ,this
@@ -174,6 +210,8 @@ Ext.define('CB.notifications.View', {
             xtype: 'grid'
             ,loadMask: false
             ,border: false
+            ,cls: 'notifications-grid'
+            ,width: 500
             ,bodyStyle: {
                 border: 0
             }
@@ -186,6 +224,10 @@ Ext.define('CB.notifications.View', {
                 ,loadMask: false
                 ,stripeRows: false
                 ,emptyText: L.NoData
+                ,listeners: {
+                    scope: this
+                    ,itemcontextmenu: this.onItemContextMenu
+                }
             }
 
             ,listeners:{
@@ -244,6 +286,11 @@ Ext.define('CB.notifications.View', {
                     ,read: d.read
                 }
             );
+            clog('this.lastSelectedRecord.get(read)', this.lastSelectedRecord.get('read'));
+            this.actions.markAsUnread.setDisabled(!this.lastSelectedRecord.get('read'));
+
+        } else {
+            this.actions.markAsUnread.setDisabled(true);
         }
     }
 
@@ -272,9 +319,45 @@ Ext.define('CB.notifications.View', {
         var rec = this.store.findRecord('id', r.data.id);
         if(rec) {
             rec.set('read', true);
+            this.actions.markAsUnread.setDisabled(false);
         }
 
         this.fireNotificationsUpdated();
+    }
+
+    ,onMarkAsUnreadClick: function(b, e) {
+        var recs = this.grid.getSelectionModel().getSelection();
+
+        CB_Notifications.markAsUnread(
+            {
+                id: recs[0].get('id')
+                ,ids: recs[0].get('ids')
+            }
+            ,this.onMarkAsUnreadProcess
+            ,this
+        );
+    }
+
+    ,onMarkAsUnreadProcess: function(r, e) {
+        if(!r || (r.success !== true)) {
+            return;
+        }
+
+        var rec = this.store.findRecord('id', r.data.id);
+        if(rec) {
+            rec.set('read', false);
+            this.actions.markAsUnread.setDisabled(true);
+        }
+
+        this.fireNotificationsUpdated();
+    }
+
+    ,onShowUnreadClick: function(b, e) {
+        if(b.pressed) {
+            this.store.filter('read', false);
+        } else {
+            this.store.clearFilter();
+        }
     }
 
     ,onActivateEvent: function() {
@@ -403,5 +486,24 @@ Ext.define('CB.notifications.View', {
     ,onPreviewClick: function(b, e) {
         App.explorer.objectPanel.expand();
         this.actions.preview.hide();
+    }
+
+    ,onCloseClick: function(b, e) {
+        App.mainViewPort.onToggleNotificationsViewClick(b, e);
+    }
+
+    ,onItemContextMenu: function(view, record, item, index, e, eOpts) {
+        e.stopEvent();
+        if(Ext.isEmpty(this.contextMenu)){
+            this.contextMenu = new Ext.menu.Menu({
+                items: [
+                    this.actions.markAsUnread
+                ]
+            });
+
+        }
+        this.contextMenu.node = record;
+
+        this.contextMenu.showAt(e.getXY());
     }
 });

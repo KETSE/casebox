@@ -216,3 +216,14 @@ span.order-arrows b.arrow-down {
 .notif a.user {
   font-weight: bold;
 }
+
+.notifications-grid {
+  margin: auto;
+}
+.notifications-grid .x-grid-item-container {
+    max-width: 500px;
+}
+
+.notifications-grid .x-grid-cell-inner {
+  white-space: normal;
+}

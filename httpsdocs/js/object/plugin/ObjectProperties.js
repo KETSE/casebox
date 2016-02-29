@@ -125,6 +125,7 @@ Ext.define('CB.object.plugin.ObjectProperties', {
     }
 
     ,onTimeSpentClick: function(b, e) {
+        clog('time-spent clicked');
     }
 
     ,onItemActionClick: function(ev, el){

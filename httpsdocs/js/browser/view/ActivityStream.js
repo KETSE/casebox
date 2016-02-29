@@ -119,7 +119,7 @@ Ext.define('CB.browser.view.ActivityStream',{
             tpl: tpl
             ,store: this.store
             ,deferInitialRefresh: false
-            ,itemSelector: 'div.as-item'//'tr.as-record'
+            ,itemSelector: 'tr.as-record' // 'div.as-item'
             // ,overItemCls:'as-record-over'
             ,focusCls: ''
             ,scrollable: true

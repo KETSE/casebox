@@ -373,6 +373,7 @@ Ext.define('CB.object.field.editor.Form', {
             params = this.getSearchParams();
         }
 
+        this.actions.showSelection.setPressed(false);
         params.from = 'formEditor';
 
         var resetPage = this.resetPage || (this.store.proxy.extraParams.query !== params.query);

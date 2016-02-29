@@ -118,6 +118,27 @@ class Notifications
     }
 
     /**
+     * mark a notification record as unread
+     * @param  array $p containing "id" (returned client side id) and "ids"
+     * @return json  response
+     */
+    public function markAsUnread($p)
+    {
+        $rez = array('success' => false);
+
+        if (!empty($p['ids'])) {
+            DM\Notifications::markAsRead($p['ids'], User::getId(), 0);
+
+            $rez = array(
+                'success' => true
+                ,'data' => $p
+            );
+        }
+
+        return $rez;
+    }
+
+    /**
      * mark all unread user notifications  as read
      * @return json response
      */
@@ -484,7 +505,8 @@ class Notifications
             if (!empty($oldData[$fieldName])) {
                 $oldValue = array();
                 foreach ($oldData[$fieldName] as $v) {
-                    $v = $tpl->formatValueForDisplay($field, $v, true);
+                    $v = $tpl->formatValueForDisplay($field, $v, true, true);
+
                     if (!empty($v)) {
                         $oldValue[] = $v;
                     }
@@ -496,7 +518,8 @@ class Notifications
             if (!empty($newData[$fieldName])) {
                 $newValue = array();
                 foreach ($newData[$fieldName] as $v) {
-                    $v = $tpl->formatValueForDisplay($field, $v, true);
+                    $v = $tpl->formatValueForDisplay($field, $v, true, true);
+
                     if (!empty($v)) {
                         $newValue[] = $v;
                     }

@@ -1,3 +1,15 @@
+CaseBox 1.9.573 (2016-02-29)
+==============================
+- #10292 Notifications toolbar improvements
+- #11472 Improvements to User menu & Notifications list
+- #11042 stability of fields
+- #11358 Search menu not ok: wrong icons & deleted search tmpl appear
+- #11147 Object DIFF in email notification shows same value
+- #11470 If I click inside a comment in Activity Stream, the list is scrolled to the top
+- #11400 "Next" button in Activity Stream doesn't work the first time
+- #11044 first and second levels
+- #10835 'Tree' translation not applied
+
 CaseBox 1.9.572 (2016-02-24)
 ==============================
 - #10672 Bug dev Casebox / took ownership, cannot close task

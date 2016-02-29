@@ -298,12 +298,13 @@ class Template extends Object
 
     /**
      * formats a value for display according to it's field definition
-     * @param  array | int $field array of field properties or field id
-     * @param  variant     $value field value to be formated
-     * @param  boolean     $html  default true - format for html, otherwise format for text display
+     * @param  array | int $field    array of field properties or field id
+     * @param  variant     $value    field value to be formated
+     * @param  boolean     $html     default true - format for html, otherwise format for text display
+     * @param  boolean     $showInfo add info if not empty to the end of returned result
      * @return varchar     formated value
      */
-    public static function formatValueForDisplay($field, $value, $html = true)
+    public static function formatValueForDisplay($field, $value, $html = true, $showInfo = false)
     {
         $cacheVarName = '';
 
@@ -313,9 +314,14 @@ class Template extends Object
 
         //condition is specified for values from search templates
         $condition = null;
+        $info = null;
         if (is_array($value)) {
             if (isset($value['cond'])) {
                 $condition = Template::formatConditionForDisplay($field, $value['cond'], $html).' ';
+            }
+
+            if (!empty($value['info'])) {
+                $info = $value['info'];
             }
 
             if (isset($value['value'])) {
@@ -333,7 +339,7 @@ class Template extends Object
                 ? $field['name']
                 : $field['id'];
 
-            $cacheVarName = 'dv' . $html . '_'. $fid . '_' . $value;
+            $cacheVarName = 'dv' . $html . '_' . $showInfo . '_'. $fid . '_' . $value;
 
             //check if value is in cache and return
             if (Cache::exist($cacheVarName)) {
@@ -566,6 +572,10 @@ class Template extends Object
                         $value = htmlspecialchars($value, ENT_COMPAT);
                     }
             }
+        }
+
+        if ($showInfo) {
+            $value .= ' &nbsp; <span style="color: gray">' . Util\adjustTextForDisplay($info) . '</span>';
         }
 
         if ($cacheValue) {

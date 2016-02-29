@@ -592,8 +592,8 @@ Ext.define('CB.object.edit.Window', {
                     ,listeners: {
                         scope: this
 
-                        ,beforeedit: this.saveScroll
-                        ,edit: this.restoreScroll
+                        // ,beforeedit: this.saveScroll
+                        // ,edit: this.restoreScroll
 
                         ,savescroll: this.saveScroll
                         ,restorescroll: this.restoreScroll

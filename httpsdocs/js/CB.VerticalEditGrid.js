@@ -67,6 +67,9 @@ Ext.define('CB.VerticalEditGrid', {
                     ,beforeedit: this.onBeforeEditProperty
                     ,edit: this.onAfterEditProperty
                 }
+                ,onEditorTab: function(editingPlugin, e) {
+                    clog('da!');
+                }
             }
         );
 
@@ -482,15 +485,21 @@ Ext.define('CB.VerticalEditGrid', {
         var nodesList = this.helperTree.queryNodeListBy(this.helperNodesFilter.bind(this))
             ,ids = this.store.collect('id')
             ,update = false
-            ,i, idx;
+            ,i, idx, id, r;
 
         //check if store records should be updated
         for (i = 0; i < nodesList.length; i++) {
-            idx = ids.indexOf(nodesList[i].data.id);
+            id = nodesList[i].data.id;
+            idx = ids.indexOf(id);
             if(idx < 0) {
                 update = true;
             } else {
                 ids.splice(idx, 1);
+                //check if value not reset
+                r = this.store.getById(id);
+                if(r && nodesList[i].data.value.value !== r.data.value) {
+                    r.data.value = nodesList[i].data.value.value;
+                }
             }
         }
 
@@ -507,7 +516,7 @@ Ext.define('CB.VerticalEditGrid', {
         var records = [];
         for (i = 0; i < nodesList.length; i++) {
             var attr = nodesList[i].data;
-            var r  = attr.templateRecord;
+            r  = attr.templateRecord;
 
             records.push(
                 Ext.create(
@@ -761,11 +770,17 @@ Ext.define('CB.VerticalEditGrid', {
             );
         }
 
+        this.fireEvent('savescroll', this);
+
         if(!this.syncRecordsWithHelper()) {
             this.getView().refresh();
+        } else {
+            this.fireEvent('restorescroll', this);
         }
 
-        this.gainFocus();
+        //the grid shouldnt be focused all the time,
+        //the user can click outside of the grid
+        // this.gainFocus();
     }
 
     ,getFieldValue: function(field_id, duplication_id){
