@@ -5,6 +5,13 @@ Ext.define('CB.object.view.Properties', {
 
     ,alias: 'widget.CBObjectProperties'
 
+
+    ,initComponent: function(){
+        this.callParent(arguments);
+
+        this.on('timespentclick', this.onTimeSpentClick, this);
+    }
+
     ,getContainerToolbarItems: function() {
         var rez = {
             tbar: {}
@@ -107,6 +114,12 @@ Ext.define('CB.object.view.Properties', {
     ,onLoadData: function(r, e) {
         this.update('');
         this.callParent(arguments);
+
+        var ttp = this.down('CBObjectPluginTimeTracking');
+
+        if(!Ext.isEmpty(ttp)) {
+            ttp.hide();
+        }
     }
 
     ,clear: function(){
@@ -136,4 +149,16 @@ Ext.define('CB.object.view.Properties', {
         }
     }
 
+    ,onTimeSpentClick: function(cmp) {
+        var ttp = this.down('CBObjectPluginTimeTracking');
+
+        if(Ext.isEmpty(ttp)) {
+            return;
+        }
+        ttp.show();
+        this.updateLayout();
+        ttp.getEl().scrollIntoView(this.body, false, false, true);
+        this.body.scrollBy(0, 40, false);
+        ttp.focus(false, 100);
+    }
 });

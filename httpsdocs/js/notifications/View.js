@@ -77,8 +77,8 @@ Ext.define('CB.notifications.View', {
             ,items: [
                 this.actions.markAsUnread
                 ,this.actions.showUnread
-                ,this.actions.markAllAsRead
                 ,'->'
+                ,this.actions.markAllAsRead
                 ,this.actions.reload
                 ,this.actions.preview
                 ,this.actions.close
@@ -244,7 +244,7 @@ Ext.define('CB.notifications.View', {
     ,actionRenderer: function(v, m, r, ri, ci, s){
         var uid = r.get('user_id')
             ,rez = '<table cellpadding="0" cellspacing="0" border="0">' +
-                '<tr><td style="padding: 3px"><img class="i32" src="/' +
+                '<tr><td style="padding: 3px" class="vaT"><img class="i32" src="/' +
             App.config.coreName +
             '/photo/' + uid + '.jpg?32=' +
             CB.DB.usersStore.getPhotoParam(uid) +
@@ -259,11 +259,18 @@ Ext.define('CB.notifications.View', {
     ,onRowClick: function(grid, record, tr, rowIndex, e, eOpts) {
         var el = e.getTarget('.obj-ref');
         if(el) {
-            App.openObjectWindow({
-                id: el.getAttribute('itemid')
-                ,template_id: el.getAttribute('templateid')
-                ,name: el.getAttribute('title')
-            });
+            // App.openObjectWindow({
+            //     id: el.getAttribute('itemid')
+            //     ,template_id: el.getAttribute('templateid')
+            //     ,name: el.getAttribute('title')
+            // });
+            this.fireEvent(
+                'selectionchange'
+                ,{
+                    id: el.getAttribute('itemid')
+                    ,read: d.read
+                }
+            );
         }
 
         if(this.lastSelectedRecord == record) {
@@ -279,14 +286,14 @@ Ext.define('CB.notifications.View', {
         if(!Ext.isEmpty(selected)) {
             var d = selected[0].data;
 
-            this.fireEvent(
-                'selectionchange'
-                ,{
-                    id: d.object_id
-                    ,read: d.read
-                }
-            );
-            clog('this.lastSelectedRecord.get(read)', this.lastSelectedRecord.get('read'));
+            // this.fireEvent(
+            //     'selectionchange'
+            //     ,{
+            //         id: d.object_id
+            //         ,read: d.read
+            //     }
+            // );
+
             this.actions.markAsUnread.setDisabled(!this.lastSelectedRecord.get('read'));
 
         } else {

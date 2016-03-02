@@ -1,3 +1,11 @@
+CaseBox 1.9.574 (2016-03-02)
+==============================
+- #11043 Tabs
+- #10221 Time Tracking feature
+- #11719 fields not ordered according to Order
+- #11720 After recent update, vGrid has focus problems
+- #11636 Writing value in vGrid dropdown field shows an ID after commit
+
 CaseBox 1.9.573 (2016-02-29)
 ==============================
 - #10292 Notifications toolbar improvements

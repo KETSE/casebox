@@ -513,6 +513,9 @@ class Objects
             case 'shortcut':
                 return new Objects\Shortcut($objectId);
                 break;
+            case 'time_tracking':
+                return new Objects\TimeTracking($objectId);
+                break;
             default:
                 return new Objects\Object($objectId);
                 break;
@@ -801,8 +804,9 @@ class Objects
             return $rez;
         }
 
-        if (!empty($templateData['cfg']['timeTracking']) && !in_array('TimeTracking', $objectPlugins)) {
-            array_unshift($objectPlugins, 'TimeTracking');
+        if (!empty($templateData['cfg']['timeTracking']) && !in_array('timeTracking', $objectPlugins)) {
+            $firstEl = array_shift($objectPlugins);
+            array_unshift($objectPlugins, $firstEl, 'timeTracking');
         }
 
         foreach ($objectPlugins as $pluginName) {

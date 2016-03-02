@@ -11,7 +11,6 @@ Ext.define('CB.plugin.Panel', {
     extend: 'Ext.Panel'
     ,alias: 'CBPluginPanel'
 
-    ,autoHeight: true
     ,scrollable: true
     ,cls: 'plugins-panel'
     ,padding:0

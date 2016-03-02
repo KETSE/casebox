@@ -747,6 +747,12 @@ class Object
             $rez['comment_date'] = $sd['lastComment']['date'];
         }
 
+        // add time spent info if present
+        if (!empty($sd['spentTime'])) {
+            $rez['time_spent_i'] = $sd['spentTime']['sec'];
+            $rez['time_spent_money_f'] = $sd['spentTime']['money'];
+        }
+
         $this->data['sys_data']['solr'] = $rez;
     }
 
@@ -1751,7 +1757,8 @@ class Object
             // if ($timeSpent > 0) {
                 $body .= '<tr><td class="prop-key">' . L\get('TimeSpent') . '</td>' .
                     '<td class="prop-val"><span class="time-spent click">' .
-                    Util\formatSeconds($timeSpent) .
+                    Util\formatSeconds($timeSpent['sec']) .
+                    ' / $' . number_format($timeSpent['money'], 2) .
                     '</span></td></tr>';
             // }
         }
@@ -1791,11 +1798,14 @@ class Object
      */
     public function getTimeSpent()
     {
-        $rez = 0;
+        $rez = [
+            'sec' => 0,
+            'money' => 0
+        ];
 
         $sd = $this->getSysData();
-        if (!empty($sd['timeSpent'])) {
-            $rez = $sd['timeSpent'];
+        if (!empty($sd['spentTime'])) {
+            $rez = $sd['spentTime'];
         }
 
         return $rez;

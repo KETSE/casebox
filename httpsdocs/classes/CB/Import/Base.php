@@ -324,6 +324,10 @@ class Base
                     ,'order' => $order
                 );
 
+                if (!empty($fv['ru'])) {
+                    $data['ru'] = $fv['ru'];
+                }
+
                 if (!empty($fv['solr_column_name'])) {
                     $data['solr_column_name'] = $fv['solr_column_name'];
                 }
@@ -343,6 +347,9 @@ class Base
 
                 if (!empty($fv['readOnly'])) {
                     $cfg['readOnly'] = true;
+                }
+                if (!empty($fv['value'])) {
+                    $cfg['value'] = $fv['value'];
                 }
 
                 if (!empty($cfg)) {
