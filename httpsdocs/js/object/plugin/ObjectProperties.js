@@ -17,7 +17,7 @@ Ext.define('CB.object.plugin.ObjectProperties', {
 
         this.callParent(arguments);
 
-        this.enableBubble(['timespentclick']);
+        this.enableBubble(['timespentclick', 'addtimespentclick']);
     }
 
     ,onLoadData: function(r, e) {
@@ -124,10 +124,28 @@ Ext.define('CB.object.plugin.ObjectProperties', {
             ,this
         );
 
+        a = this.getEl().query('a.add-time-spent');
+
+        Ext.each(
+            a
+            ,function(t){
+                Ext.get(t).addListener(
+                    'click'
+                    ,this.onAddTimeSpentClick
+                    ,this
+                );
+            }
+            ,this
+        );
+
     }
 
     ,onTimeSpentClick: function(b, e) {
         this.fireEvent('timespentclick', this);
+    }
+
+    ,onAddTimeSpentClick: function(b, e) {
+        this.fireEvent('addtimespentclick', this, e);
     }
 
     ,onItemActionClick: function(ev, el){

@@ -210,6 +210,7 @@ Ext.define('CB.notifications.View', {
             xtype: 'grid'
             ,loadMask: false
             ,border: false
+            ,hideHeaders: true
             ,cls: 'notifications-grid'
             ,width: 500
             ,bodyStyle: {
@@ -230,6 +231,10 @@ Ext.define('CB.notifications.View', {
                 }
             }
 
+            ,features: [{
+                ftype: 'rowbody'
+                ,setupRowData: this.setupRowBodyData
+            }]
             ,listeners:{
                 scope: this
                 ,rowclick: this.onRowClick
@@ -243,12 +248,24 @@ Ext.define('CB.notifications.View', {
 
     ,actionRenderer: function(v, m, r, ri, ci, s){
         var uid = r.get('user_id')
-            ,rez = '<table cellpadding="0" cellspacing="0" border="0">' +
+            ,rez;
+
+        if(r.get('expandable')) {
+            if(Ext.isEmpty(r.get('body'))) {
+                rez = '<span class="i-bullet-arrow-down action-btn" title="' + L.Expand + '">&nbsp;</span>';
+            } else {
+                rez = '<span class="i-bullet-arrow-up action-btn" title="' + L.Collapse + '">&nbsp;</span>';
+            }
+        }
+
+        rez += '<span class="i-preview action-btn" title="' + L.Preview + '">&nbsp;</span> ' +
+            '<table cellpadding="0" cellspacing="0" border="0">' +
                 '<tr><td style="padding: 3px" class="vaT"><img class="i32" src="/' +
             App.config.coreName +
             '/photo/' + uid + '.jpg?32=' +
             CB.DB.usersStore.getPhotoParam(uid) +
-            '"></td><td style="padding-top: 3px" class="pl7 vaT notif">' + v + '</td></tr></table>'
+            '"></td><td style="padding-top: 3px" class="pl7 vaT notif">' +
+            v + '</td></tr></table>'
             ;
 
         m.tdCls = r.get('read') ? '': 'notification-record-unread';
@@ -256,25 +273,84 @@ Ext.define('CB.notifications.View', {
         return rez;
     }
 
-    ,onRowClick: function(grid, record, tr, rowIndex, e, eOpts) {
-        var el = e.getTarget('.obj-ref');
-        if(el) {
-            // App.openObjectWindow({
-            //     id: el.getAttribute('itemid')
-            //     ,template_id: el.getAttribute('templateid')
-            //     ,name: el.getAttribute('title')
-            // });
-            this.fireEvent(
-                'selectionchange'
-                ,{
-                    id: el.getAttribute('itemid')
-                    ,read: d.read
-                }
-            );
+    ,setupRowBodyData: function(record, rowIndex, rowValues) {
+        if(Ext.isEmpty(record.get("body"))) {
+            return;
         }
 
-        if(this.lastSelectedRecord == record) {
-            this.onSelectionChange(grid, [record], eOpts);
+        var headerCt = this.view.headerCt,
+            colspan = headerCt.getColumnCount();
+
+        // Usually you would style the my-body-class in CSS file
+        Ext.apply(rowValues, {
+            rowBody: record.get("body"),
+            rowBodyCls: "my-body-class",
+            rowBodyColspan: colspan
+        });
+    }
+
+    ,onRowClick: function(grid, record, tr, rowIndex, e, eOpts) {
+        var el = e.getTarget('.obj-ref')
+            ,selectionData = null;
+        if(el) {
+            selectionData = {
+                id: el.getAttribute('itemid')
+                ,read: d.read
+            };
+        }
+
+        el = e.getTarget('.action-btn');
+        if(el) {
+            switch(el.title) {
+                case L.Expand:
+                    record.set('body', L.LoadingData + ' ...');
+                    el.classList.add('i-bullet-arrow-up');
+                    el.classList.remove('i-bullet-arrow-down');
+                    el.title = L.Collapse;
+                    CB_Notifications.getDetails(
+                        {
+                            ids: record.get('ids')
+                        }
+                        ,this.onGetDetailsProcess
+                        ,this
+                    );
+                    break;
+
+                case L.Collapse:
+                    record.set('body', null);
+                    el.classList.add('i-bullet-arrow-down');
+                    el.classList.remove('i-bullet-arrow-up');
+                    el.title = L.Expand;
+                    break;
+
+                case L.Preview:
+                    selectionData = {
+                        id: record.get('object_id')
+                        ,read: record.get('read')
+
+                    };
+                    break;
+
+            }
+        }
+
+        if(selectionData) {
+            this.fireEvent(
+                'selectionchange'
+                ,selectionData
+            );
+
+        }
+    }
+
+    ,onGetDetailsProcess: function(r, e) {
+        if(r.success !== true) {
+            return;
+        }
+
+        var rec = this.store.findRecord('ids', r.ids, 0, false, false, true);
+        if(rec) {
+            rec.set('body', r.data);
         }
     }
 
@@ -285,14 +361,6 @@ Ext.define('CB.notifications.View', {
 
         if(!Ext.isEmpty(selected)) {
             var d = selected[0].data;
-
-            // this.fireEvent(
-            //     'selectionchange'
-            //     ,{
-            //         id: d.object_id
-            //         ,read: d.read
-            //     }
-            // );
 
             this.actions.markAsUnread.setDisabled(!this.lastSelectedRecord.get('read'));
 

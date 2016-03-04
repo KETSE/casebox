@@ -70,6 +70,7 @@ $API = array_merge(
                 ,'markAsRead'=> array('len' => 1)
                 ,'markAsUnread'=> array('len' => 1)
                 ,'markAllAsRead'=> array('len' => 0)
+                ,'getDetails'=> array('len' => 1)
             )
         )
 

@@ -3,6 +3,7 @@
 namespace CB;
 
 use CB\DataModel as DM;
+use CB\Objects\Comment;
 
 class Notifications
 {
@@ -152,6 +153,60 @@ class Notifications
     }
 
     /**
+     * get details for given notification ids
+     * @param  array $p
+     * @return json  response
+     */
+    public function getDetails($p)
+    {
+        $rez = array(
+            'success' => true
+            ,'ids' => $p['ids']
+            ,'data' => ''
+        );
+
+        //collect action log ids
+        $logIds = [];
+        $recs = DM\Notifications::readByIds($p['ids']);
+        foreach ($recs as $r) {
+            $logIds = array_merge($logIds, Util\toNumericArray($r['action_ids']));
+        }
+        $logIds = array_unique($logIds);
+
+        $recs = DM\Log::getRecords($logIds);
+        // $rez['data'].= var_export($recs, 1);
+        foreach ($recs as $r) {
+            $d = Util\jsonDecode($r['data']);
+
+            $html = '<hr />' . User::getDisplayName($r['user_id']) .
+                ', <span class="gr" title="' .
+                Util\formatMysqlTime($r['action_time']) .
+                '">' . Util\formatAgoTime($r['action_time']) . '</span>';
+
+            switch ($r['action_type']) {
+                case 'comment':
+                    $html .= '<br />' . Comment::processAndFormatMessage($d['comment']);
+                    break;
+
+                default:
+                    $obj = Objects::getCachedObject($r['object_id']);
+                    $diff = $obj->getDiff($d);
+                    if (!empty($diff)) {
+                        $html .= "<table class=\"as-diff\">";
+                        foreach ($diff as $fn => $fv) {
+                            $html .= "<tr><th>$fn</th><td>$fv</td></tr>";
+                        }
+                        $html .= "</table>";
+                    }
+            }
+
+            $rez['data'] = $html . $rez['data'];
+        }
+
+        return $rez;
+    }
+
+    /**
      * get action records and group them for notifications display
      * @param  varchar $sql
      * @param  array   $params sql params
@@ -207,6 +262,10 @@ class Notifications
                         '<div class="cG" style="padding-top: 2px">' . Util\formatAgoTime($r['action_time']). '</div>'
 
             );
+
+            if (in_array($r['action_type'], ['create', 'update', 'comment'])) {
+                $record['expandable'] = true;
+            }
 
             if (is_numeric($record['ids'])) {
                 $record['id'] = $record['ids'];

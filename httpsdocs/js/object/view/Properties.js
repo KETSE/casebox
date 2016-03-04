@@ -10,6 +10,7 @@ Ext.define('CB.object.view.Properties', {
         this.callParent(arguments);
 
         this.on('timespentclick', this.onTimeSpentClick, this);
+        this.on('addtimespentclick', this.onAddTimeSpentClick, this);
     }
 
     ,getContainerToolbarItems: function() {
@@ -155,10 +156,24 @@ Ext.define('CB.object.view.Properties', {
         if(Ext.isEmpty(ttp)) {
             return;
         }
-        ttp.show();
-        this.updateLayout();
-        ttp.getEl().scrollIntoView(this.body, false, false, true);
-        this.body.scrollBy(0, 40, false);
-        ttp.focus(false, 100);
+        if(!ttp.getEl().isVisible(true)) {
+            ttp.show();
+            this.updateLayout();
+            ttp.getEl().scrollIntoView(this.body, false, false, true);
+            this.body.scrollBy(0, 40, false);
+            ttp.focus(false, 100);
+        } else {
+            ttp.getEl().scrollIntoView(this.body, false, false, true);
+        }
+    }
+
+    ,onAddTimeSpentClick: function(cmp, e) {
+        var ttp = this.down('CBObjectPluginTimeTracking');
+
+        if(Ext.isEmpty(ttp)) {
+            return;
+        }
+
+        ttp.onAddClick(cmp, e);
     }
 });

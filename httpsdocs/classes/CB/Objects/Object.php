@@ -1759,7 +1759,8 @@ class Object
                     '<td class="prop-val"><span class="time-spent click">' .
                     Util\formatSeconds($timeSpent['sec']) .
                     ' / $' . number_format($timeSpent['money'], 2) .
-                    '</span></td></tr>';
+                    '</span> <a class="add-time-spent i-add click"></a>' .
+                    '</td></tr>';
             // }
         }
 

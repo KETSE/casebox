@@ -1,3 +1,9 @@
+CaseBox 1.9.575 (2016-03-04)
+==============================
+- added direct "add" button for time-spent
+- #10292 Notifications toolbar improvements
+- #11748 Plugin showing Record title, creation date etc (the header) in Edit mode doesn't appear
+
 CaseBox 1.9.574 (2016-03-02)
 ==============================
 - #11043 Tabs

@@ -49,6 +49,7 @@ Ext.define('CB.object.edit.Window', {
 
         //create and add title view
         this.titleView = new CB.object.TitleView();
+        this.titleContainer.add(this.titleView);
 
         if(this.templateType == 'time_tracking') {
             this.titleContainer.hide();
