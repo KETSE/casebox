@@ -1,3 +1,7 @@
+CaseBox 1.9.577 (2016-03-07)
+==============================
+- #8900 Locked first Column/Row in PivotGrid & Export PivotTable to Excel
+
 CaseBox 1.9.576 (2016-03-07)
 ==============================
 - #11752 contentItems object plugin

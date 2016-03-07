@@ -156,18 +156,44 @@ Ext.define('CB.widget.block.Pivot', {
         this.removeAll(true);
 
         if(charts.indexOf('table') > -1) {
-            var html = '';
+            var columns = [{
+                    text: '#'
+                    ,locked: true
+                    ,width: 200
+                    ,dataIndex: 'title'
+                }]
+                ,fields= [{
+                    name: 'fid'
+                },{
+                    name: 'title'
+                },{
+                    name: 'total'
+                },]
+                ,recs = [];
 
-            var hr = '<th> &nbsp; </th>';
+            //form columns array
             Ext.iterate(
                 data.titles[1]
                 ,function(k, v, o) {
-                    hr += '<th title="' + Ext.String.htmlEncode(v) +'">' + v + '</th>';
+                    columns.push({
+                        text: Ext.String.htmlEncode(v)
+                        ,width: 40
+                        ,dataIndex: 'f_' + k
+                    });
+                    fields.push({
+                        name: 'f_' + k
+                    });
                 }
                 ,this
             );
-            html += '<tr>' + hr + '<th>' + L.Total + '</th></tr>';
 
+            columns.push({
+                text: L.Total
+                ,width: 40
+                ,dataIndex: 'total'
+            });
+
+            //form data records
             Ext.iterate(
                 data.titles[0]
                 ,function(k, v, o) {
@@ -175,29 +201,36 @@ Ext.define('CB.widget.block.Pivot', {
                         return;
                     }
 
-                    var r = '<th style="text-align:left" title="' + Ext.String.htmlEncode(v) + '">' +
-                        Ext.String.htmlEncode(App.shortenString(v, 25)) + '</th>';
+                    var r = {
+                        fid: k
+                        ,title: Ext.String.htmlEncode(v)
+                    };
 
                     Ext.iterate(
                         data.titles[1]
                         ,function(q, z, y) {
-                            r += '<td f="' + k + '|' + q + '">' + Ext.valueFrom(data.refs[k + '_' + q], '') + '</td>';
+                            r['f_' + q] = Ext.valueFrom(data.refs[k + '_' + q], '');
                         }
                         ,this
                     );
-
-                    html += '<tr>' + r + '<td class="total" f="'+ k +'|">' + Ext.util.Format.number(Ext.valueFrom(data.refs[k + '_t'], ''), '0.##') + '</td></tr>';
+                    r['total'] = Ext.util.Format.number(Ext.valueFrom(data.refs[k + '_t'], ''), '0.##');
+                    recs.push(r);
                 }
                 ,this
             );
 
+            //add total row
             var total = 0;
-            var r = '<th>' + L.Total + '</th>';
+            var r = {
+                fid: 'total'
+                ,title: L.Total
+            };
+
             Ext.iterate(
                 data.titles[1]
                 ,function(q, z, y) {
                     var nr = Ext.valueFrom(data.refs['t_' + q], '');
-                    r += '<td class="total" f="|'+ q +'">' + Ext.util.Format.number(nr, '0.##') + '</td>';
+                    r['f_' + q] = Ext.util.Format.number(nr, '0.##');
                     if(Ext.isNumeric(nr)) {
                         total += nr;
                     }
@@ -207,26 +240,27 @@ Ext.define('CB.widget.block.Pivot', {
 
             //get stats value if set
             var value = this.getFacetCount(data);
+            r['total'] = Ext.util.Format.number(value ? value : total, '0.##');
 
-            html += '<tr>' + r + '<td class="total">' + Ext.util.Format.number(value ? value : total, '0.##') + '</td></tr>';
+            recs.push(r);
 
-            html = '<table class="pivot">' + html + '</table>';
-
+            //adding grid
             var table = this.add({
-                xtype: 'panel'
-                ,border: false
-                ,autoHeight: true
+                xtype: 'grid'
+                ,flex: 1
                 ,width: '99%'
                 ,padding: 10
-                ,html: html
+                ,store: Ext.create('Ext.data.JsonStore', {
+                    fields: fields
+                    ,data: recs
+                })
+                ,columnLines: true
+                ,columns: columns
+                ,viewConfig: {
+                    stripeRows: true
+                }
                 ,listeners: {
                     scope: this
-                    ,afterrender: function(p) {
-                        var a = p.getEl().query('td');
-                        for (var i = 0; i < a.length; i++) {
-                            Ext.get(a[i]).on('click', this.onTableCellClick, this);
-                        }
-                    }
                 }
             });
         }
@@ -397,6 +431,67 @@ Ext.define('CB.widget.block.Pivot', {
         } else if(f.count){
             rez = f.count;
         }
+
+        return rez;
+    }
+
+    ,getHtml: function() {
+        var rez = ''
+            ,data = this.chartData
+            ,hr = '<th> &nbsp; </th>';
+
+        Ext.iterate(
+            data.titles[1]
+            ,function(k, v, o) {
+                hr += '<th title="' + Ext.String.htmlEncode(v) +'">' + v + '</th>';
+            }
+            ,this
+        );
+        rez += '<tr>' + hr + '<th>' + L.Total + '</th></tr>';
+
+        Ext.iterate(
+            data.titles[0]
+            ,function(k, v, o) {
+                if(Ext.isEmpty(data.refs[k + '_t'])) {
+                    return;
+                }
+
+                var r = '<th style="text-align:left" title="' + Ext.String.htmlEncode(v) + '">' +
+                    Ext.String.htmlEncode(App.shortenString(v, 25)) + '</th>';
+
+                Ext.iterate(
+                    data.titles[1]
+                    ,function(q, z, y) {
+                        r += '<td f="' + k + '|' + q + '">' + Ext.valueFrom(data.refs[k + '_' + q], '') + '</td>';
+                    }
+                    ,this
+                );
+
+                rez += '<tr>' + r + '<td class="total" f="'+ k +'|">' + Ext.util.Format.number(Ext.valueFrom(data.refs[k + '_t'], ''), '0.##') + '</td></tr>';
+            }
+            ,this
+        );
+
+        var total = 0;
+        var r = '<th>' + L.Total + '</th>';
+        Ext.iterate(
+            data.titles[1]
+            ,function(q, z, y) {
+                var nr = Ext.valueFrom(data.refs['t_' + q], '');
+                r += '<td class="total" f="|'+ q +'">' + Ext.util.Format.number(nr, '0.##') + '</td>';
+                if(Ext.isNumeric(nr)) {
+                    total += nr;
+                }
+            }
+            ,this
+        );
+
+        //get stats value if set
+        var value = this.getFacetCount(data);
+
+        rez += '<tr>' + r + '<td class="total">' + Ext.util.Format.number(value ? value : total, '0.##') + '</td></tr>';
+
+        rez = '<table class="pivot" border="1" style="border-collapse: collapse">' + rez + '</table>';
 
         return rez;
     }

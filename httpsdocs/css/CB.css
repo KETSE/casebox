@@ -38,7 +38,7 @@ ExtJS3
 
 
 
-body { font-family: arial,sans-serif; font-size: 12px }
+body, .x-grid-rowbody { font-family: arial,sans-serif; font-size: 12px }
 select { font-family: arial,sans-serif; font-size: 13px }
 
 

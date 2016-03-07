@@ -178,14 +178,14 @@ class Notifications
         foreach ($recs as $r) {
             $d = Util\jsonDecode($r['data']);
 
-            $html = '<hr />' . User::getDisplayName($r['user_id']) .
-                ', <span class="gr" title="' .
+            $html = '<hr /><b class="user">' . User::getDisplayName($r['user_id']) .
+                '</b>, <span class="gr" title="' .
                 Util\formatMysqlTime($r['action_time']) .
                 '">' . Util\formatAgoTime($r['action_time']) . '</span>';
 
             switch ($r['action_type']) {
                 case 'comment':
-                    $html .= '<br />' . Comment::processAndFormatMessage($d['comment']);
+                    $html .= '<br />' . nl2br(Comment::processAndFormatMessage($d['comment']));
                     break;
 
                 default:

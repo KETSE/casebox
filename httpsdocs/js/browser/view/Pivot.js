@@ -78,43 +78,56 @@ Ext.define('CB.browser.view.Pivot',{
             })
 
             ,new Ext.Button({
-                qtip: L.Pivot
-                ,text: L.Pivot
-                ,itemId: 'PVtable'
+                text: L.View
+                ,itemId: 'PVViewButton'
                 ,scale: 'medium'
-                ,chart: 'table'
-                ,enableToggle: true
-                ,allowDepress: false
-                // ,iconCls: 'ib-table'
-                ,scope: this
-                ,handler: this.onChangeChartButtonClick
+                ,menu: [
+                    {
+                        qtip: L.Pivot
+                        ,text: L.Pivot
+                        ,itemId: 'PVtable'
+                        ,scale: 'medium'
+                        ,chart: 'table'
+                        ,scope: this
+                        ,handler: this.onChangeChartButtonClick
+                    }
+
+                    ,{
+                        qtip: L.ChartArea
+                        ,text: L.Bar
+                        ,itemId: 'PVbarchart'
+                        ,scale: 'medium'
+                        ,chart: 'stackedBars'
+                        ,scope: this
+                        ,handler: this.onChangeChartButtonClick
+                    }
+
+                    ,{
+                        qtip: L.ChartArea
+                        ,text: L.Column
+                        ,itemId: 'PVcolumnchart'
+                        ,scale: 'medium'
+                        ,chart: 'stackedColumns'
+                        ,scope: this
+                        ,handler: this.onChangeChartButtonClick
+                    }
+                ]
             })
 
             ,new Ext.Button({
-                qtip: L.ChartArea
-                ,text: L.Bar
-                ,itemId: 'PVbarchart'
+                text: L.Options
+                ,itemId: 'PVOptionsButton'
                 ,scale: 'medium'
-                ,chart: 'stackedBars'
-                ,enableToggle: true
-                ,allowDepress: false
-                // ,iconCls: 'ib-chart-bar'
-                ,scope: this
-                ,handler: this.onChangeChartButtonClick
+                ,menu: [
+                    {
+                        text: L.Export
+                        ,chart: 'stackedColumns'
+                        ,scope: this
+                        ,handler: this.onExportButtonClick
+                    }
+                ]
             })
 
-            ,new Ext.Button({
-                qtip: L.ChartArea
-                ,text: L.Column
-                ,itemId: 'PVcolumnchart'
-                ,scale: 'medium'
-                ,chart: 'stackedColumns'
-                ,enableToggle: true
-                ,allowDepress: false
-                // ,iconCls: 'ib-chart-column'
-                ,scope: this
-                ,handler: this.onChangeChartButtonClick
-            })
             ,this.rowsCombo
             ,this.colsCombo
         );
@@ -171,9 +184,9 @@ Ext.define('CB.browser.view.Pivot',{
                 ,'PVStatsLabel'
                 ,'PVStatsButton'
                 ,'-'
-                ,'PVtable'
-                ,'PVbarchart'
-                ,'PVcolumnchart'
+                ,'PVViewButton'
+                ,'-'
+                ,'PVOptionsButton'
                 ,'-'
                 ,'reload'
                 ,'apps'
@@ -196,11 +209,8 @@ Ext.define('CB.browser.view.Pivot',{
 
     ,onChangeChart: function() {
         var BC = this.refOwner.buttonCollection
-            ,ch = this.chartData.charts;
-
-        BC.get('PVtable').toggle(ch.indexOf('table') > -1, true);
-        BC.get('PVbarchart').toggle(ch.indexOf('stackedBars') > -1, true);
-        BC.get('PVcolumnchart').toggle(ch.indexOf('stackedColumns') > -1, true);
+            ,ch = this.chartData.charts
+            ,vb = BC.get('PVViewButton');
 
         this.chartBlock.changeCharts(ch);
     }
@@ -417,5 +427,22 @@ Ext.define('CB.browser.view.Pivot',{
         }
 
         this.fireEvent('changeparams', params);
+    }
+
+    ,onExportButtonClick: function(b, e) {
+        var html = '<html><head><meta charset="UTF-8"><body>' +
+            this.chartBlock.getHtml() + '</body></html>';
+
+        el = document.createElement('a');
+
+        el.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+        el.target = '_blank';
+        el.download = 'PivotView.html';
+        el.click();
+        /**
+            ,w = window.open(null, 'exportPivotTable');
+        // w.document.head.innerHTML = '<base href="' + base.join('/') + '">';
+        w.document.body.innerHTML = html;
+        w.focus();/**/
     }
 });
