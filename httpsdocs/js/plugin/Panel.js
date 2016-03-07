@@ -95,7 +95,8 @@ Ext.define('CB.plugin.Panel', {
             Ext.iterate(
                 r.data
                 ,function(k, v, o) {
-                    var cl = Ext.util.Format.capitalize(k.substr(0,1)) + k.substr(1);
+                    var cls = Ext.valueFrom(v.class, k)
+                        ,cl = Ext.util.Format.capitalize(cls.substr(0,1)) + cls.substr(1);
                     cl = 'CBObjectPlugin' + cl;
 
                     var c = Ext.create(

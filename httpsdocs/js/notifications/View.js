@@ -248,18 +248,17 @@ Ext.define('CB.notifications.View', {
 
     ,actionRenderer: function(v, m, r, ri, ci, s){
         var uid = r.get('user_id')
-            ,rez;
+            ,rez = '<span class="i-preview action-btn" title="' + L.Preview + '">&nbsp;</span> ';
 
         if(r.get('expandable')) {
             if(Ext.isEmpty(r.get('body'))) {
-                rez = '<span class="i-bullet-arrow-down action-btn" title="' + L.Expand + '">&nbsp;</span>';
+                rez += '<span class="i-bullet-arrow-down action-btn" title="' + L.Expand + '">&nbsp;</span>';
             } else {
-                rez = '<span class="i-bullet-arrow-up action-btn" title="' + L.Collapse + '">&nbsp;</span>';
+                rez += '<span class="i-bullet-arrow-up action-btn" title="' + L.Collapse + '">&nbsp;</span>';
             }
         }
 
-        rez += '<span class="i-preview action-btn" title="' + L.Preview + '">&nbsp;</span> ' +
-            '<table cellpadding="0" cellspacing="0" border="0">' +
+        rez += '<table cellpadding="0" cellspacing="0" border="0">' +
                 '<tr><td style="padding: 3px" class="vaT"><img class="i32" src="/' +
             App.config.coreName +
             '/photo/' + uid + '.jpg?32=' +
@@ -275,6 +274,8 @@ Ext.define('CB.notifications.View', {
 
     ,setupRowBodyData: function(record, rowIndex, rowValues) {
         if(Ext.isEmpty(record.get("body"))) {
+            rowValues.rowBodyCls = this.rowBodyHiddenCls;
+
             return;
         }
 

@@ -809,12 +809,29 @@ class Objects
             array_unshift($objectPlugins, $firstEl, 'timeTracking');
         }
 
-        foreach ($objectPlugins as $pluginName) {
-            $class = '\\CB\\Objects\\Plugins\\'.ucfirst($pluginName);
-            $pClass = new $class($id);
-            $prez = $pClass->getData();
+        foreach ($objectPlugins as $k => $v) {
+            $className = '';
+            if (is_scalar($v)) {
+                $className = $v;
+                $v = [];
 
-            $rez['data'][$pluginName] = $prez;
+            } else {
+                $className = $k;
+                if (!empty($v['class'])) {
+                    $className = $v['class'];
+                }
+            }
+            $pindex = is_numeric($k)
+                ? $className
+                : $k;
+
+            $v['objectId'] = $id;
+            $fullClassName = '\\CB\\Objects\\Plugins\\' . ucfirst($className);
+            $pClass = new $fullClassName($v);
+            $prez = $pClass->getData();
+            $prez['class'] = $className;
+
+            $rez['data'][$pindex] = $prez;
         }
 
         //set system properties to common if SystemProperties plugin is not required

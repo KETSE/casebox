@@ -7,9 +7,14 @@ class Base
     // id of the objects for which the plugin is displayed
     protected $id = null;
 
-    public function __construct($id = null)
+    public function __construct($config = [])
     {
-        $this->id = $id;
+        if (!empty($config['objectId'])) {
+            $this->id = $config['objectId'];
+            unset($config['objectId']);
+        }
+
+        $this->config = $config;
     }
     /**
      * get plugin data for given object id
