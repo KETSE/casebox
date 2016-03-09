@@ -127,6 +127,7 @@ Ext.define('CB.object.plugin.TimeTracking', {
             pid: this.params.id
             ,template_id: tpl.get('id')
             ,path: this.params.path
+            ,alignWindowTo: e.getXY()
         };
 
         this.fireEvent('createobject', d, e);

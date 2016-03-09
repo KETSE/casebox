@@ -1,3 +1,11 @@
+CaseBox 1.9.578 (2016-03-09)
+==============================
+- add show/hide legend under Options menu for all charts
+- time add window appear near clicked button
+- changes animation on piechart hover
+- pivot view adjustments
+- #11815 IMG preview not working
+
 CaseBox 1.9.577 (2016-03-07)
 ==============================
 - #8900 Locked first Column/Row in PivotGrid & Export PivotTable to Excel

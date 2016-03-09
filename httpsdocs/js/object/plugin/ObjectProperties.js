@@ -144,7 +144,7 @@ Ext.define('CB.object.plugin.ObjectProperties', {
         this.fireEvent('timespentclick', this);
     }
 
-    ,onAddTimeSpentClick: function(b, e) {
+    ,onAddTimeSpentClick: function(e) {
         this.fireEvent('addtimespentclick', this, e);
     }
 

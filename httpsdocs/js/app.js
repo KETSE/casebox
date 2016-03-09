@@ -726,8 +726,13 @@ function initApp() {
                 if(config.name && (detectFileEditor(config.name) !== false)) {
                     w.maximize();
                 }
-            } else if(!w.existing) {
-                App.alignWindowNext(w);
+            } else {
+                if(config.alignWindowTo) {
+                    App.alignWindowToCoords(w, config.alignWindowTo);
+
+                } else if(!w.existing) {
+                    App.alignWindowNext(w);
+                }
             }
 
             delete w.existing;
@@ -782,6 +787,37 @@ function initApp() {
         pos[0] = x;
 
         w.setXY(pos);
+    };
+
+    App.alignWindowToCoords = function (win, coords) {
+        var vpEl = App.mainViewPort.getEl();
+        win.alignTo(vpEl, 'br-br?');
+
+        //get anchored position
+        var pos = win.getXY()
+            ,w = win.getWidth()
+            ,h = win.getHeight();
+
+        //move above status bar and a bit from right side
+        pos[0] -= 15;
+        pos[1] -= 5;
+
+        //position to center and below of given coords
+        var x = pos[0];
+
+        pos[0] = coords[0] - w / 2;
+        pos[1] = coords[1] + 10;
+
+        // check if window didnt go outside of viewport
+        if (pos[0] + w > vpEl.getWidth()) {
+            pos[0] = vpEl.getWidth() - w - 10;
+        }
+
+        if (pos[1] + h > vpEl.getHeight()) {
+            pos[1] = vpEl.getHeight() - h - 20;
+        }
+
+        win.setXY(pos);
     };
 
     App.isFolder = function(template_id){

@@ -58810,7 +58810,7 @@ CREATE TABLE `translations` (
   UNIQUE KEY `UNIQUE_translations__name` (`name`),
   KEY `FK_translations__pid` (`pid`),
   CONSTRAINT `FK_translations__pid` FOREIGN KEY (`pid`) REFERENCES `translations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3158 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3159 DEFAULT CHARSET=utf8;
 
 /*Data for the table `translations` */
 
@@ -60994,11 +60994,13 @@ insert  into `translations`(`id`,`pid`,`name`,`en`,`es`,`ge`,`fr`,`hy`,`pt`,`ro`
 
 (3154,NULL,'SpecifyComment','Please specify a comment.','Please specify a comment.','Please specify a comment.','Please specify a comment.','Please specify a comment.','Please specify a comment.','Please specify a comment.','Please specify a comment.','Please specify a comment.','Please specify a comment.',2,NULL,0),
 
-(3155,NULL,'TimeSpent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent',1,NULL,0),
+(3155,NULL,'TimeSpent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent',0,NULL,0),
 
 (3156,NULL,'MarkAsUnread','Mark as unread','Mark as unread','Mark as unread','Mark as unread','Mark as unread','Mark as unread','Mark as unread','Mark as unread','Mark as unread','Mark as unread',2,NULL,0),
 
-(3157,NULL,'ShowUnread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread',2,NULL,0);
+(3157,NULL,'ShowUnread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread',2,NULL,0),
+
+(3158,NULL,'ShowLegend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend',2,NULL,0);
 
 /*Table structure for table `zone` */
 
@@ -61875,7 +61877,6 @@ BEGIN
 		ADD COLUMN `caption` VARCHAR(150) NULL AFTER `zone_name`,
 		ADD COLUMN `gmt_offset` INT NULL AFTER `caption`;
 	END IF;
-
 	update zone set gmt_offset = (SELECT tz.gmt_offset
 		FROM `timezone` tz
 		WHERE tz.zone_id=zone.zone_id AND tz.time_start < UNIX_TIMESTAMP(UTC_TIMESTAMP()) AND tz.dst = 0

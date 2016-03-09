@@ -109,7 +109,7 @@ Ext.define('CB.widget.block.Chart', {
                         ,fields: ['name']
                         ,grid: true
                         ,label: {
-                             rotation: {degrees: 315}
+                            rotation: {degrees: -90}
                         }
                     }
                 ]
@@ -136,19 +136,29 @@ Ext.define('CB.widget.block.Chart', {
                 ,store: this.chartDataStore
                 ,series: [{
                     type: 'pie',
-                    donut: 1,
+                    donut: 0,
                     angleField: 'count',
                     label: {
                         field: 'name',
                         display: 'outside',
                         calloutLine: true
                     },
-                    showInLegend: true,
-                    highlight: true,
-                    highlightCfg: {
-                        'stroke-width': 20,
+                    showInLegend: true
+                    ,highlight: true
+                    ,highlightCfg: {
+                        'stroke-width': 1,
                         stroke: '#fff'
                     }
+                    ,tips: {
+                        trackMouse: true
+                        ,style: 'background: #FFF; overflow: visible'
+                        ,height: 20
+                        ,width: 200
+                        ,renderer: function(storeItem, item) {
+                            this.setTitle(storeItem.get('name') + ': ' + storeItem.get('count'));
+                        }
+                    }
+
                     ,listeners: {
                         scope: this
                         ,itemclick: this.onChartItemClick
@@ -246,6 +256,13 @@ Ext.define('CB.widget.block.Chart', {
                 ? 75
                 : 35;
 
+            cfg.legend = (this.showLegend !== false)
+                ? {
+                    position: 'right'
+                    ,boxStrokeWidth: 0
+                }
+                : false;
+
             this.chart = Ext.create(
                 'Ext.chart.Chart'
                 ,cfg
@@ -260,4 +277,9 @@ Ext.define('CB.widget.block.Chart', {
     ,onChartItemClick: function(o, e) {
         this.fireEvent('itemclick', o, e);
     }
+
+    ,setLegendVisible: function(visible) {
+        this.showLegend = visible;
+    }
+
 });

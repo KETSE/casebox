@@ -668,6 +668,7 @@ Ext.define('CB.browser.ViewContainer', {
         delete this.params.view;
         delete this.params.start;
         delete this.params.page;
+        delete this.params.from;
 
         this.onSetToolbarItems(null);
 

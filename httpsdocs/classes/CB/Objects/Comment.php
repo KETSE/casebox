@@ -30,18 +30,14 @@ class Comment extends Object
 
         //disable default log from parent Object class
         //we'll set comments add as comment action for parent
-        \CB\debug('disabling logs');
         \CB\Config::setFlag('disableActivityLog', true);
 
         $rez = parent::create($p);
 
-        \CB\debug('enabling logs');
         \CB\Config::setFlag('disableActivityLog', false);
 
-        \CB\debug('updating parent followers');
         $this->updateParentFollowers();
 
-        \CB\debug('add comment log action');
         $this->logAction(
             'comment',
             array(

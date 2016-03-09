@@ -77,9 +77,13 @@ Ext.define('CB.object.plugin.Base', {
     }
 
     ,setTitle: function(title) {
-        var tbar = this.dockedItems.items[0]
-            ,label = tbar.items.get(0);
-        label.setText(title);
+        if(this.dockedItems) {
+            var tbar = this.dockedItems.items[0]
+                ,label = tbar.items.get(0);
+            label.setText(title);
+        } else {
+            this.callParent(arguments);
+        }
     }
 
     /**

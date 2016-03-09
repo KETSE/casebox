@@ -10,10 +10,6 @@ Ext.define('CB.widget.block.Pivot', {
     ,width: 400
     ,height: 400
 
-    ,onTableCellClick: function(ev, el, p) {
-        this.fireEvent('cellclick', ev, el, p);
-    }
-
     ,loadData: function(data, overrides) {
         var rez = {
             data: {}
@@ -159,15 +155,19 @@ Ext.define('CB.widget.block.Pivot', {
             var columns = [{
                     text: '#'
                     ,locked: true
+                    ,tdCls: 'fwB'
                     ,width: 200
+                    ,renderer: this.cellRenderer
                     ,dataIndex: 'title'
                 }]
                 ,fields= [{
                     name: 'fid'
+                    ,type: 'number'
                 },{
                     name: 'title'
                 },{
                     name: 'total'
+                    ,type: 'number'
                 },]
                 ,recs = [];
 
@@ -176,12 +176,16 @@ Ext.define('CB.widget.block.Pivot', {
                 data.titles[1]
                 ,function(k, v, o) {
                     columns.push({
-                        text: Ext.String.htmlEncode(v)
-                        ,width: 40
+                        text: v
+                        ,width: 50
+                        ,cls: 'fwB'
+                        ,align: 'right'
+                        ,renderer: this.cellRenderer
                         ,dataIndex: 'f_' + k
                     });
                     fields.push({
                         name: 'f_' + k
+                        ,type: 'number'
                     });
                 }
                 ,this
@@ -189,7 +193,10 @@ Ext.define('CB.widget.block.Pivot', {
 
             columns.push({
                 text: L.Total
-                ,width: 40
+                ,width: 50
+                ,align: 'right'
+                ,cls: 'fwB cG'
+                ,tdCls: 'fwB cG'
                 ,dataIndex: 'total'
             });
 
@@ -203,7 +210,7 @@ Ext.define('CB.widget.block.Pivot', {
 
                     var r = {
                         fid: k
-                        ,title: Ext.String.htmlEncode(v)
+                        ,title: v
                     };
 
                     Ext.iterate(
@@ -261,6 +268,7 @@ Ext.define('CB.widget.block.Pivot', {
                 }
                 ,listeners: {
                     scope: this
+                    ,celldblclick: this.onCellDblClick
                 }
             });
         }
@@ -301,7 +309,7 @@ Ext.define('CB.widget.block.Pivot', {
 
                 //add data
                 var r = {};
-                r[d.xField] = '"' + v + '"';
+                r[d.xField] = htmlEntityDecode(v); //'"' + v + '"';
                 Ext.iterate(
                     d.titles[1]
                     ,function(q, z, y) {
@@ -324,7 +332,7 @@ Ext.define('CB.widget.block.Pivot', {
 
                 //add data
                 var r = {};
-                r[d.yField] = '"' + v + '"';
+                r[d.yField] = htmlEntityDecode(v); //'"' + v + '"';
                 Ext.iterate(
                     d.titles[0]
                     ,function(q, z, y) {
@@ -369,7 +377,11 @@ Ext.define('CB.widget.block.Pivot', {
                     ,fields: serie.xField
                     ,grid: true
                     ,label: {
-                         rotation: {degrees: 315}
+                         rotation: {
+                            degrees: (chartType === 'bar')
+                                ? 0
+                                : 270
+                        }
                     }
                     ,minimum: 0
                 }, {
@@ -379,11 +391,12 @@ Ext.define('CB.widget.block.Pivot', {
                     ,grid: true
                 }]
 
-                ,legend: {
-                    position: 'right'
-                    ,boxStrokeWidth: 0
-                    // ,labelFont: '12px Helvetica'
-                }
+                ,legend: (this.showLegend !== false)
+                    ? {
+                        position: 'right'
+                        ,boxStrokeWidth: 0
+                    }
+                    : false
                 ,seriesStyles: this.seriesStyles
                 ,series: [
                     Ext.apply(
@@ -412,6 +425,33 @@ Ext.define('CB.widget.block.Pivot', {
         // }
 
         return this.add(chartItems);
+    }
+
+    ,cellRenderer: function(value, metaData, record) {
+        if(value === 0) {
+            return '';
+        }
+
+        if(record.get('title') == L.Total) {
+            metaData.tdCls = 'fwB cG';
+        }
+
+        return value;
+    }
+
+    ,onCellDblClick: function(grid, td, cellIndex, record, tr, rowIndex, e, eOpts) {
+        var row = record.get('fid')
+            ,col = grid.headerCt.visibleColumnManager.getHeaderAtIndex(cellIndex).dataIndex
+            ,filter = [
+                isNaN(row)
+                    ? null
+                    : row
+                ,(col == 'total')
+                    ? null
+                    : col.substr(2)
+            ];
+
+        this.fireEvent('filterclick', filter);
     }
 
     ,getFacetCount: function(f) {
@@ -494,5 +534,9 @@ Ext.define('CB.widget.block.Pivot', {
         rez = '<table class="pivot" border="1" style="border-collapse: collapse">' + rez + '</table>';
 
         return rez;
+    }
+
+    ,setLegendVisible: function(visible) {
+        this.showLegend = visible;
     }
 });

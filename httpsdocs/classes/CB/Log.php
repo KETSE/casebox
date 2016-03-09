@@ -20,7 +20,6 @@ class Log
     public static function add(&$p)
     {
         $userId = User::getId();
-        \CB\debug('adding to log', $p);
         //check if log not disabled
         if (Config::getFlag('disableActivityLog') || empty($userId)) {
             return;
