@@ -62,7 +62,7 @@ class Notifications
                 : intval($p['fromId']);
 
             $rez['data'] = $this->getRecords($p);
-            $rez['lastSeenId'] = User::getUserConfigParam('lastSeenActionId', 0);
+            $rez['lastSeenActionId'] = User::getUserConfigParam('lastSeenActionId', 0);
 
             User::setUserConfigParam('lastNotifyTime', Util\dateISOToMysql('now'));
 
@@ -88,7 +88,7 @@ class Notifications
             $userId = User::getId();
         }
 
-        if (is_numeric($actionId)) {
+        if (is_numeric($actionId) and ($actionId > 0)) {
             User::setUserConfigParam('lastSeenActionId', $actionId, $userId);
             DM\Notifications::markAsSeenUpToActionId($actionId, $userId);
             $rez = array('success' => true);

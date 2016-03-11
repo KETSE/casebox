@@ -152,7 +152,11 @@ Ext.define('CB.notifications.View', {
         var rd = store.proxy.reader.rawData;
 
         if(rd && (rd.success === true)) {
-            this.lastSeenActionId = rd.lastSeenActionId;
+            this.lastSeenActionId = Ext.valueFrom(rd.lastSeenActionId, 0);
+            if((this.lastSeenActionId < 1) && !Ext.isEmpty(records)) {
+                this.lastSeenActionId = Ext.valueFrom(records[0].data.action_id, 0);
+            }
+
             this.updateSeenRecords();
         }
     }
@@ -336,11 +340,12 @@ Ext.define('CB.notifications.View', {
         }
 
         if(selectionData) {
-            this.fireEvent(
-                'selectionchange'
-                ,selectionData
-            );
+            //set cuttentSelection so that browser controller gets data that data
+            //to show on preview expand
+            this.currentSelection = [selectionData];
+            this.onPreviewClick();
 
+            this.fireEvent('selectionchange', selectionData);
         }
     }
 
@@ -530,8 +535,8 @@ Ext.define('CB.notifications.View', {
             }
         }
 
-        if(r.lastSeenId && (r.lastSeenId > this.lastSeenActionId)) {
-            this.lastSeenActionId = r.lastSeenId;
+        if(r.lastSeenActionId && (r.lastSeenActionId > this.lastSeenActionId)) {
+            this.lastSeenActionId = r.lastSeenActionId;
             this.updateSeenRecords();
         }
     }

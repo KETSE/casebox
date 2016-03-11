@@ -126,7 +126,7 @@ Ext.define('CB.browser.view.ActivityStream',{
             ,listeners: {
                 scope: this
                 ,selectionchange: this.onSelectionChange
-                ,containerclick: this.onContainerClick
+                ,beforecontainermousedown: this.onBeforeContainerMouseDown
             }
         });
 
@@ -244,10 +244,11 @@ Ext.define('CB.browser.view.ActivityStream',{
         }
     }
 
-    ,onContainerClick: function(view, e, eOpts) {
+    ,onBeforeContainerMouseDown: function(dv, e, eOpts) {
         var el = e.getTarget('.asNext');
 
         if(el) {
+            e.stopEvent();
             this.fireEvent(
                 'changeparams'
                 ,{

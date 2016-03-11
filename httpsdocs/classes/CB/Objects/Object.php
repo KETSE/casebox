@@ -132,12 +132,14 @@ class Object
         //fire create event
         \CB\fireEvent('nodeDbCreate', $this);
 
-        $this->logAction(
-            'create',
-            array(
-                'mentioned' => $this->lastMentionedUserIds
-            )
-        );
+        if (empty($p['draft'])) {
+            $this->logAction(
+                'create',
+                array(
+                    'mentioned' => $this->lastMentionedUserIds
+                )
+            );
+        }
 
         return $this->id;
     }

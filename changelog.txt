@@ -1,3 +1,12 @@
+CaseBox 1.9.579 (2016-03-11)
+==============================
+- #11400 "Next" button in Activity Stream doesn't work the first time
+- #10221 Time Tracking feature
+- #11882 Same notification comes several times
+- #11847 BUG / notifications repeat themselves over and over
+- #11856 Record preview doesn't appear in Notifications when Preview is OFF
+- #11887 multiValued object field doesn't work
+
 CaseBox 1.9.578 (2016-03-09)
 ==============================
 - add show/hide legend under Options menu for all charts

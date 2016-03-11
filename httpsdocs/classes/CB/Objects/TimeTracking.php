@@ -71,11 +71,14 @@ class TimeTracking extends Object
 
     protected function getTimeCost()
     {
-        $rez = \CB\fireEvent('onGetTimeCost', $this);
+        $rez = 10;
 
-        if (empty($rez)) {
-            $rez = 10;
-        }
+        $eventParams = [
+            'object' => &$this,
+            'result' => &$rez
+        ];
+
+        \CB\fireEvent('onGetTimeCost', $eventParams);
 
         return $rez;
     }
