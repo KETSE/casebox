@@ -25,7 +25,7 @@ Ext.define('CB.object.plugin.ContentItems', {
         var tpl = new Ext.XTemplate(
             '<table class="block-plugin">'
             ,'<tpl for=".">'
-            ,'<tr>'
+            ,'<tr class="{[ (xindex > this.displayLimit) ? \'more\' : ""]}">'
             ,'    <td class="obj">'
             ,'        <img class="i16u {iconCls}" src="'+ Ext.BLANK_IMAGE_URL +'">'
             ,'    </td>'
@@ -39,6 +39,9 @@ Ext.define('CB.object.plugin.ContentItems', {
             ,'</tr>'
             ,'</tpl>'
             ,'</table>'
+            ,'<tpl if="this.itemCount &gt; this.displayLimit">'
+            ,'<div class="toggle taC"><u class="click">' + L.ShowAll + '</u></div>'
+            ,'</tpl>'
         );
 
         this.store = new Ext.data.JsonStore({
@@ -51,10 +54,12 @@ Ext.define('CB.object.plugin.ContentItems', {
             tpl: tpl
             ,store: this.store
             ,autoHeight: true
+            ,cls: 'limited-list'
             ,itemSelector:'tr'
             ,listeners: {
                 scope: this
                 ,itemclick: this.onItemClick
+                ,containerclick: this.onContainerClick
             }
         });
 
@@ -88,6 +93,19 @@ Ext.define('CB.object.plugin.ContentItems', {
             r.data[i].iconCls = getItemIcon(r.data[i]);
         }
         this.store.loadData(r.data);
+
+        //set list display items limit
+        this.dataView.tpl.displayLimit = Ext.valueFrom(r.limit, 5);
+        this.dataView.tpl.itemCount = this.store.getCount();
+
+        if(!Ext.isEmpty(r.title)) {
+            var title = r.title.replace('{total}', this.store.getCount());
+            this.setTitle(title);
+        }
+
+        if(!Ext.isEmpty(r.menu)) {
+            this.createMenu = r.menu
+        }
     }
 
     ,onItemClick: function (cmp, record, item, index, e, eOpts) {//dv, index, el, e
@@ -101,6 +119,15 @@ Ext.define('CB.object.plugin.ContentItems', {
             this.showActionsMenu(e.getXY());
         } else if(te.hasCls('click')) {
             this.openObjectProperties(this.store.getAt(index).data);
+        }
+    }
+
+    ,onContainerClick: function(view, e, eOpts) {
+        var el = e.getTarget('.toggle');
+
+        if(el) {
+            this.addCls('list-expanded');
+            this.updateLayout();
         }
     }
 

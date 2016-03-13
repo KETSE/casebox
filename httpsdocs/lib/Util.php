@@ -731,15 +731,21 @@ function jsonDecode($var)
  */
 function detectTitle(&$arr)
 {
-    $l = \CB\Config::get('user_language');
+    $rez = '';
+    if (is_scalar($arr)) {
+        $rez = $arr;
 
-    $rez = @coalesce(
-        $arr[$l],
-        $arr['title_'.$l],
-        $arr['title'],
-        $arr['name'],
-        $arr['fieldName']
-    );
+    } else {
+        $l = \CB\Config::get('user_language');
+
+        $rez = @coalesce(
+            $arr[$l],
+            $arr['title_'.$l],
+            $arr['title'],
+            $arr['name'],
+            $arr['fieldName']
+        );
+    }
 
     return $rez;
 }

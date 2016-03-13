@@ -353,7 +353,8 @@ class Browser
             if (!empty($r['cfg'])) {
                 $fieldConfig = $r['cfg'];
 
-                if (!empty($r['cfg']['fq'])) {
+                //dont add filter when ids are given (showing selected value)
+                if (empty($p['ids']) && !empty($r['cfg']['fq'])) {
                     $p['fq'] = $r['cfg']['fq'];
                 }
             }
@@ -467,7 +468,7 @@ class Browser
                     break;
             }
         }
-        if (!empty($pids)) {
+        if (empty($p['ids']) && !empty($pids)) {
             if (empty($p['descendants'])) {
                 $p['pid'] = $pids;
             } elseif (@$p['source'] !== 'field') {

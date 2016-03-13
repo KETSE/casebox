@@ -4,10 +4,20 @@ Ext.define('CB.object.plugin.TimeTracking', {
     extend: 'CB.object.plugin.Base'
     ,alias: 'CBObjectPluginTimeTracking'
 
+    ,xtype: 'CBObjectPluginTimeTracking'
+
+    ,cls: 'obj-plugin'
+
     ,initComponent: function(){
 
         this.actions = {
-           start: new Ext.Action({
+           add: new Ext.Action({
+                iconCls: 'i-plus'
+                ,scope: this
+                ,handler: this.onAddClick
+            })
+
+           ,start: new Ext.Action({
                 iconCls: 'i-start'
                 ,scope: this
                 ,handler: this.onStartClick
@@ -23,15 +33,12 @@ Ext.define('CB.object.plugin.TimeTracking', {
             '<table class="block-plugin">'
             ,'<tpl for=".">'
             ,'<tr>'
-            ,'    <td class="obj">'
-            ,'        <img class="i16u {iconCls}" src="'+ Ext.BLANK_IMAGE_URL +'">'
+            ,'    <td>'
+            ,'        <span class="click" title="{[ displayDateTime(values.cdate) ]}">{[ displayDateTime(values.date) ]}</span> &nbsp;'
+            ,'        <span class="click">{user}</span>'
             ,'    </td>'
             ,'    <td>'
-            ,'        <span class="click">{name}</span><br />'
-            ,'        <span class="gr" title="{[ displayDateTime(values.cdate) ]}">{user}, {ago_text}</span>'
-            ,'    </td>'
-            ,'    <td class="elips">'
-            ,'        <span class="click menu"></span>'
+            ,'        {time}'
             ,'    </td>'
             ,'</tr>'
             ,'</tpl>'
@@ -57,19 +64,24 @@ Ext.define('CB.object.plugin.TimeTracking', {
 
         Ext.apply(this, {
             title: L.TimeSpent
-            ,items: this.dataView
+            ,autoHeight: true
+            ,anchor: '100%'
+            ,items: [
+                this.dataView
+            ]
+
         });
 
         this.callParent(arguments);
+
+        App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
+    }
+
+    ,onObjectsDeleted: function(ids) {
+        this.store.deleteIds(ids);
     }
 
     ,onLoadData: function(r, e) {
-        if(Ext.isEmpty(r.data)) {
-            return;
-        }
-        for (var i = 0; i < r.data.length; i++) {
-            r.data[i].iconCls = getItemIcon(r.data[i]);
-        }
         this.store.loadData(r.data);
     }
 
@@ -83,30 +95,13 @@ Ext.define('CB.object.plugin.TimeTracking', {
             this.clickedItemData = this.store.getAt(index).data;
             this.showActionsMenu(e.getXY());
         } else if(te.hasCls('click')) {
-            this.openObjectProperties(this.store.getAt(index).data);
+            var data = Ext.clone(this.store.getAt(index).data);
+            data.view = 'edit';
+            this.openObjectProperties(data);
         }
     }
 
     ,showActionsMenu: function(coord){
-        if(Ext.isEmpty(this.puMenu)) {
-            this.puMenu = new Ext.menu.Menu({
-                items: [
-                   {
-                        text: L.Open
-                        ,scope: this
-                        ,handler: this.onOpenClick
-                    },'-',{
-                        text: L.Delete
-                        ,iconCls: 'i-trash'
-                        ,scope: this
-                        ,handler: this.onDeleteItemClick
-                    }
-                    ,this.actions.permalink
-                ]
-            });
-        }
-
-        this.puMenu.showAt(coord);
     }
 
     ,onDeleteItemClick: function(b, e) {
@@ -122,31 +117,19 @@ Ext.define('CB.object.plugin.TimeTracking', {
     }
 
     ,onAddClick: function(b, e) {
-        if(this.pmenu) {
-            this.pmenu.destroy();
+        var tpl = CB.DB.templates.findRecord('type', 'time_tracking', 0, false, false, true);
+
+        if(Ext.isEmpty(tpl)) {
+            return Ext.Msg.alert(L.Error, 'Time tracking template not found.');
         }
-        this.pmenu = new Ext.menu.Menu({items: []});
 
-        updateMenu(
-            {menu: this.pmenu}
-            ,this.createMenu
-            ,this.onCreateObjectClick
-            ,this
-        );
-        this.pmenu.showBy(b.getEl());
-    }
+        var d = {
+            pid: this.params.id
+            ,template_id: tpl.get('id')
+            ,path: this.params.path
+            ,alignWindowTo: e.getXY()
+        };
 
-    ,onCreateObjectClick: function(b, e) {
-        var d = b.config.data;
-        d.pid = this.params.id;
-        d.path = this.params.path;
         this.fireEvent('createobject', d, e);
-    }
-
-    ,onPermalinkClick: function(b, e) {
-        window.prompt(
-            'Copy to clipboard: Ctrl+C, Enter'
-            , window.location.origin + '/' + App.config.coreName + '/view/' + this.clickedItemData.id + '/'
-        );
     }
 });

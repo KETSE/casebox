@@ -74,6 +74,16 @@ Ext.define('CB.browser.view.Charts', {
             ]
         });
 
+        this.showLegendMenuItem = Ext.create({
+            xtype: 'menucheckitem'
+            ,text: L.ShowLegend
+            ,checked: true
+            ,listeners: {
+                scope: this
+                ,checkchange: this.onShowLegendClick
+            }
+        });
+
         this.refOwner.buttonCollection.addAll(
             new Ext.Button({
                 text: L.Bar //L.ChartArea
@@ -112,6 +122,14 @@ Ext.define('CB.browser.view.Charts', {
             })
             ,this.facetsCombo
             ,this.sortButton
+            ,new Ext.Button({
+                text: L.Options
+                ,itemId: 'CVOptionsButton'
+                ,scale: 'medium'
+                ,menu: [
+                    this.showLegendMenuItem
+                ]
+            })
         );
 
         this.chartBlock = new CB.widget.block.Chart({
@@ -165,6 +183,8 @@ Ext.define('CB.browser.view.Charts', {
                 ,'columnchart'
                 // ,'stackedcolumnchart'
                 ,'piechart'
+                ,'-'
+                ,'CVOptionsButton'
                 ,'-'
                 ,'reload'
                 ,'apps'
@@ -322,4 +342,11 @@ Ext.define('CB.browser.view.Charts', {
 
         return this.callParent(arguments);
     }
+
+    ,onShowLegendClick: function(cb, checked, eOpts) {
+        this.chartBlock.setLegendVisible(checked);
+
+        this.chartBlock.changeCharts(this.chartData.charts);
+    }
+
 });

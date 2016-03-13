@@ -55,11 +55,13 @@ Ext.define('Notification', {
         ,{name: 'user_id', type: 'int'}
         ,{name: 'object_id', type: 'int'}
         ,{name: 'action_id', type: 'int'}
+        ,{name: 'expandable',  type: 'bool'}
         ,{name: 'text',  type: 'string'}
         ,{name: 'date_text',  type: 'string'}
         ,{name: 'read',  type: 'bool'}
         ,{name: 'seen',  type: 'bool'}
         ,'data'
+        ,{name: 'body',  type: 'string'}
     ]
 });
 

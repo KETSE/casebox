@@ -78,13 +78,15 @@ Ext.define('CB.plugin.Search.Button', {
 
         templates.each(
             function(t){
-                menu.add({
-                    iconCls: t.data.iconCls
-                    ,data: {template_id: t.data.id}
-                    ,text: t.data.title
-                    ,scope: this
-                    ,handler: this.onButtonClick
-                });
+                if(t.data.dstatus == '0') {
+                    menu.add({
+                        iconCls: t.data.iconCls
+                        ,data: {template_id: t.data.id}
+                        ,text: t.data.title
+                        ,scope: this
+                        ,handler: this.onButtonClick
+                    });
+                }
             }
             ,this
         );

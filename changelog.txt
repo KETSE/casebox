@@ -1,3 +1,58 @@
+CaseBox 1.9.580 (2016-03-13)
+==============================
+- #11898 Improvements for Header & MaxInstances
+
+CaseBox 1.9.579 (2016-03-11)
+==============================
+- #11400 "Next" button in Activity Stream doesn't work the first time
+- #10221 Time Tracking feature
+- #11882 Same notification comes several times
+- #11847 BUG / notifications repeat themselves over and over
+- #11856 Record preview doesn't appear in Notifications when Preview is OFF
+- #11887 multiValued object field doesn't work
+
+CaseBox 1.9.578 (2016-03-09)
+==============================
+- add show/hide legend under Options menu for all charts
+- time add window appear near clicked button
+- changes animation on piechart hover
+- pivot view adjustments
+- #11815 IMG preview not working
+
+CaseBox 1.9.577 (2016-03-07)
+==============================
+- #8900 Locked first Column/Row in PivotGrid & Export PivotTable to Excel
+
+CaseBox 1.9.576 (2016-03-07)
+==============================
+- #11752 contentItems object plugin
+
+CaseBox 1.9.575 (2016-03-04)
+==============================
+- added direct "add" button for time-spent
+- #10292 Notifications toolbar improvements
+- #11748 Plugin showing Record title, creation date etc (the header) in Edit mode doesn't appear
+
+CaseBox 1.9.574 (2016-03-02)
+==============================
+- #11043 Tabs
+- #10221 Time Tracking feature
+- #11719 fields not ordered according to Order
+- #11720 After recent update, vGrid has focus problems
+- #11636 Writing value in vGrid dropdown field shows an ID after commit
+
+CaseBox 1.9.573 (2016-02-29)
+==============================
+- #10292 Notifications toolbar improvements
+- #11472 Improvements to User menu & Notifications list
+- #11042 stability of fields
+- #11358 Search menu not ok: wrong icons & deleted search tmpl appear
+- #11147 Object DIFF in email notification shows same value
+- #11470 If I click inside a comment in Activity Stream, the list is scrolled to the top
+- #11400 "Next" button in Activity Stream doesn't work the first time
+- #11044 first and second levels
+- #10835 'Tree' translation not applied
+
 CaseBox 1.9.572 (2016-02-24)
 ==============================
 - #10672 Bug dev Casebox / took ownership, cannot close task

@@ -3,6 +3,7 @@
 namespace CB;
 
 use CB\DataModel as DM;
+use CB\Objects\Comment;
 
 class Notifications
 {
@@ -61,7 +62,7 @@ class Notifications
                 : intval($p['fromId']);
 
             $rez['data'] = $this->getRecords($p);
-            $rez['lastSeenId'] = User::getUserConfigParam('lastSeenActionId', 0);
+            $rez['lastSeenActionId'] = User::getUserConfigParam('lastSeenActionId', 0);
 
             User::setUserConfigParam('lastNotifyTime', Util\dateISOToMysql('now'));
 
@@ -87,7 +88,7 @@ class Notifications
             $userId = User::getId();
         }
 
-        if (is_numeric($actionId)) {
+        if (is_numeric($actionId) and ($actionId > 0)) {
             User::setUserConfigParam('lastSeenActionId', $actionId, $userId);
             DM\Notifications::markAsSeenUpToActionId($actionId, $userId);
             $rez = array('success' => true);
@@ -118,6 +119,27 @@ class Notifications
     }
 
     /**
+     * mark a notification record as unread
+     * @param  array $p containing "id" (returned client side id) and "ids"
+     * @return json  response
+     */
+    public function markAsUnread($p)
+    {
+        $rez = array('success' => false);
+
+        if (!empty($p['ids'])) {
+            DM\Notifications::markAsRead($p['ids'], User::getId(), 0);
+
+            $rez = array(
+                'success' => true
+                ,'data' => $p
+            );
+        }
+
+        return $rez;
+    }
+
+    /**
      * mark all unread user notifications  as read
      * @return json response
      */
@@ -128,6 +150,60 @@ class Notifications
         return array(
             'success' => true
         );
+    }
+
+    /**
+     * get details for given notification ids
+     * @param  array $p
+     * @return json  response
+     */
+    public function getDetails($p)
+    {
+        $rez = array(
+            'success' => true
+            ,'ids' => $p['ids']
+            ,'data' => ''
+        );
+
+        //collect action log ids
+        $logIds = [];
+        $recs = DM\Notifications::readByIds($p['ids']);
+        foreach ($recs as $r) {
+            $logIds = array_merge($logIds, Util\toNumericArray($r['action_ids']));
+        }
+        $logIds = array_unique($logIds);
+
+        $recs = DM\Log::getRecords($logIds);
+        // $rez['data'].= var_export($recs, 1);
+        foreach ($recs as $r) {
+            $d = Util\jsonDecode($r['data']);
+
+            $html = '<hr /><b class="user">' . User::getDisplayName($r['user_id']) .
+                '</b>, <span class="gr" title="' .
+                Util\formatMysqlTime($r['action_time']) .
+                '">' . Util\formatAgoTime($r['action_time']) . '</span>';
+
+            switch ($r['action_type']) {
+                case 'comment':
+                    $html .= '<br />' . nl2br(Comment::processAndFormatMessage($d['comment']));
+                    break;
+
+                default:
+                    $obj = Objects::getCachedObject($r['object_id']);
+                    $diff = $obj->getDiff($d);
+                    if (!empty($diff)) {
+                        $html .= "<table class=\"as-diff\">";
+                        foreach ($diff as $fn => $fv) {
+                            $html .= "<tr><th>$fn</th><td>$fv</td></tr>";
+                        }
+                        $html .= "</table>";
+                    }
+            }
+
+            $rez['data'] = $html . $rez['data'];
+        }
+
+        return $rez;
     }
 
     /**
@@ -186,6 +262,10 @@ class Notifications
                         '<div class="cG" style="padding-top: 2px">' . Util\formatAgoTime($r['action_time']). '</div>'
 
             );
+
+            if (in_array($r['action_type'], ['create', 'update', 'comment'])) {
+                $record['expandable'] = true;
+            }
 
             if (is_numeric($record['ids'])) {
                 $record['id'] = $record['ids'];
@@ -484,7 +564,8 @@ class Notifications
             if (!empty($oldData[$fieldName])) {
                 $oldValue = array();
                 foreach ($oldData[$fieldName] as $v) {
-                    $v = $tpl->formatValueForDisplay($field, $v, true);
+                    $v = $tpl->formatValueForDisplay($field, $v, true, true);
+
                     if (!empty($v)) {
                         $oldValue[] = $v;
                     }
@@ -496,7 +577,8 @@ class Notifications
             if (!empty($newData[$fieldName])) {
                 $newValue = array();
                 foreach ($newData[$fieldName] as $v) {
-                    $v = $tpl->formatValueForDisplay($field, $v, true);
+                    $v = $tpl->formatValueForDisplay($field, $v, true, true);
+
                     if (!empty($v)) {
                         $newValue[] = $v;
                     }

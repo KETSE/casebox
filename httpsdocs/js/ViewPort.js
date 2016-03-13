@@ -70,7 +70,6 @@ Ext.define('CB.ViewPort', {
             }
             ,this.buttons.create
             ,this.buttons.toggleFilterPanel
-            ,this.buttons.toggleNotificationsView
         ];
 
         //add config buttons if present
@@ -86,27 +85,6 @@ Ext.define('CB.ViewPort', {
                 ,this
             );
         }
-
-        //add rest buttons
-        items.push(
-            '->'
-            ,{
-                scale: 'large'
-                ,arrowVisible: false
-                ,cls: 'user-menu-button'
-                ,iconCls: 'bgs32'
-                ,menuAlign: 'bl-br'
-                ,menu: []
-                ,name: 'userMenu'
-                ,listeners: {
-                    menushow: this.onButtonMenuShow
-                }
-            }
-            ,{
-                text: '<span style="margin-right: 10px">&nbsp;</span>'
-                ,xtype: 'tbtext'
-            }
-        );
 
         //application main left bar (left docked)
         App.mainLBar = new Ext.Toolbar({
@@ -187,12 +165,20 @@ Ext.define('CB.ViewPort', {
             ,style:'background: #f4f4f4; border: 0;'
             ,items: [
                 this.breadcrumb
-                // ,'->'
                 ,this.searchField
+                ,this.buttons.toggleNotificationsView
                 ,{
+                    scale: 'large'
+                    ,arrowVisible: false
+                    ,cls: 'user-menu-button'
+                    ,iconCls: 'bgs32'
+                    ,menu: []
+                    ,name: 'userMenu'
+                },{
                     xtype: 'tbspacer'
                     ,width: 10
                 }
+
             ]
         });
 
@@ -255,8 +241,8 @@ Ext.define('CB.ViewPort', {
             ,toggleNotificationsView: new Ext.Action({
                 tooltip: L.Notifications
                 ,itemId: 'toggleNotifications'
-                ,enableToggle: true
-                ,iconCls: 'im-notifications-negative'
+                // ,enableToggle: true
+                ,iconCls: 'im-notifications'
                 ,cls: 'numbersButton'
                 ,text: ''
                 ,scale: 'large'
@@ -346,19 +332,12 @@ Ext.define('CB.ViewPort', {
     }
 
     ,onToggleNotificationsViewClick: function(b, e) {
-        var cpl = App.explorer.containersPanel.getLayout();
+        var cpl = App.explorer.containersPanel.getLayout()
+            ,hideNotifications = cpl.activeItem.isXType('CBNotificationsView');
 
-        cpl.setActiveItem(b.pressed ? 1 : 0);
+        cpl.setActiveItem(hideNotifications ? 0 : 1);
 
-        if(b.pressed) {
-            App.mainViewPort.breadcrumb.setValue([
-                {
-                    id: -1
-                    ,name: L.Notifications
-                }
-            ]);
-            // set Notifications title
-        } else {
+        if(hideNotifications) {
             //set browser title
             var proxy = App.explorer.store.getProxy()
                 ,action = Ext.valueFrom(proxy.reader.rawData, {})
@@ -369,14 +348,22 @@ Ext.define('CB.ViewPort', {
                 ,action
                 ,options
             );
+        } else {
+            // set Notifications title
+            App.mainViewPort.breadcrumb.setValue([
+                {
+                    id: -1
+                    ,name: L.Notifications
+                }
+            ]);
         }
     }
 
     ,onLogin: function(){
         /* adding menu items */
-        var um, umIdx = App.mainLBar.items.findIndex( 'name', 'userMenu');
+        var um, umIdx = App.mainTBar.items.findIndex( 'name', 'userMenu');
         if(umIdx > -1) {
-            um = App.mainLBar.items.getAt(umIdx);
+            um = App.mainTBar.items.getAt(umIdx);
             um.setIcon('/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg?32=' + CB.DB.usersStore.getPhotoParam(App.loginData.id));
         }
 
@@ -493,24 +480,11 @@ Ext.define('CB.ViewPort', {
         }
 
         if(!Ext.isEmpty(managementItems)) {
-            App.mainLBar.insert(
-                App.mainLBar.items.getCount() - 2
-                ,{
-                    qtip: L.Settings
-                    ,iconCls: 'im-settings-negative'
-                    ,arrowVisible: false
-                    ,hideOnClick: false
-                    ,scale: 'large'
-                    ,menuAlign: 'bl-br'
-                    ,menu: managementItems
-                    ,listeners: {
-                        menushow: this.onButtonMenuShow
-                    }
-                }
-            );
+            managementItems.push('-');
+            for (var i = managementItems.length - 1; i >= 0; i--) {
+                um.menu.insert(2, managementItems[i]);
+            }
         }
-
-        App.mainLBar.doLayout();
 
         /* end of adding menu items */
 

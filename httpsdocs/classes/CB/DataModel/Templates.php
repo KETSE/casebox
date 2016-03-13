@@ -43,9 +43,12 @@ class Templates extends Base
         $res = DB\dbQuery(
             'SELECT t.*
                 ,o.data
+                ,tt.dstatus
             FROM ' . static::getTableName() . ' t
             LEFT JOIN objects o
                 ON t.id = o.id
+            LEFT JOIN tree tt
+                ON t.id = tt.id
             WHERE t.is_folder = 0'
         );
 

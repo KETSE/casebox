@@ -76,6 +76,16 @@ Ext.define('CB.object.plugin.Base', {
         return [];
     }
 
+    ,setTitle: function(title) {
+        if(this.dockedItems) {
+            var tbar = this.dockedItems.items[0]
+                ,label = tbar.items.get(0);
+            label.setText(title);
+        } else {
+            this.callParent(arguments);
+        }
+    }
+
     /**
      * placeholder to get and array of itemIds for components to be displayed in container toolbar
      * @return array

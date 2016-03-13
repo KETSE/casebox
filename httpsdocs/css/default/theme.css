@@ -102,6 +102,7 @@
 .x-menu-item .ib-task-new{background-image: url(s/task.png); background-position: 0 50%; background-repeat: no-repeat}
 
 
+.i-add {background-image: url(s/ic_add_black_18dp.png); background-position: 0 50%; background-repeat: no-repeat; min-height: 18px;}
 .i-arrow-right {background-image: url(s/ic_keyboard_arrow_right_black_18dp.png); background-position: 0 50%; background-repeat: no-repeat; min-height: 18px;}
 .i-attach {background-image: url(s/ic_attach_file_black_18dp.png); background-position: 0 50%; background-repeat: no-repeat; min-height: 18px;}
 .i-refresh {background-image: url(s/refresh.png); background-position: 0 50%; background-repeat: no-repeat}
@@ -112,7 +113,8 @@
 .i-magnifier, .x-grid-tree-node-expanded .i-magnifier{background-image: url(s/magnifier.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-building, .x-grid-tree-node-expanded .i-building{background-image: url(s/building.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-book-open, .x-grid-tree-node-expanded .i-book-open{background-image: url(s/book-open.png); background-position: 0 50%; background-repeat: no-repeat}
-.i-bullet-arrow-down{background-image: url(s/bullet_arrow_down.png); background-position: 0 50%; background-repeat: no-repeat}
+.i-bullet-arrow-down{background-image: url(s/ic_keyboard_arrow_down_black_18dp.png); background-position: 0 50%; background-repeat: no-repeat}
+.i-bullet-arrow-up{background-image: url(s/ic_keyboard_arrow_up_black_18dp.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-chat-bubble{background-image: url(s/ic_chat_bubble_black_18dp_1x_gray.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-check-alt{background-image: url(s/check-alt.png)}
 .i-cancel{background-image: url(s/cancel.png)}
@@ -123,6 +125,7 @@
 .i-table-export{background-image: url(s/table-export-gray.png)}
 .i-cross{background-image: url(s/cross.png)}
 .i-plus{background-image: url(s/plus.png)}
+.i-preview{background-image: url(s/ic_visibility_black_18dp.png)}
 .i-restore{background-image: url(s/ic_reply_black_18dp.png)}
 .i-settings{background-image: url(s/ic_settings_black_18dp.png)}
 .i-start{background-image: url(s/ic_play_arrow_black_18dp.png)}
@@ -215,4 +218,52 @@ span.order-arrows b.arrow-down {
 
 .notif a.user {
   font-weight: bold;
+}
+
+.notifications-grid {
+  margin: auto;
+}
+.notifications-grid .x-grid-item-container {
+    max-width: 500px;
+}
+
+.notifications-grid .x-grid-cell-inner {
+  white-space: normal;
+}
+
+.notifications-grid .action-btn {
+display: block;
+float: right;
+margin: 0 2px;
+width: 18px;
+background-position: 0 50%;
+opacity: 0.3;
+}
+
+.notifications-grid .action-btn:hover {
+opacity: 1;
+cursor: pointer;
+cursor: hand;
+}
+
+.notifications-grid .x-grid-rowbody {
+  padding: 10px;
+  text-align: left;
+  background-color: white;
+}
+
+.x-grid-rowbody hr {
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background-color: #eaeaea;
+}
+
+.add-time-spent{
+  padding-left: 18px;
+  opacity: 0.3;
+}
+.add-time-spent:hover{
+  opacity: 1;
 }

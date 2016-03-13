@@ -61,6 +61,7 @@ Ext.define('CB.object.field.editor.Form', {
                 ,this.title
             );
         }
+        this.showSelectionButton = new Ext.button.Button(this.actions.showSelection);
 
         this.gridView = new CB.browser.view.Grid({
             border: false
@@ -147,7 +148,7 @@ Ext.define('CB.object.field.editor.Form', {
                 ,change: this.onChange
             }
             ,buttons:[
-                ,this.actions.showSelection
+                ,this.showSelectionButton
                 ,this.actions.sortValue
                 ,'->'
                 ,{
@@ -366,6 +367,7 @@ Ext.define('CB.object.field.editor.Form', {
             this.gridReloadTask = new Ext.util.DelayedTask(this.doReloadGrid, this);
         }
         this.gridReloadTask.delay(500);
+        this.showSelectionButton.setPressed(false);
     }
 
     ,doReloadGrid: function(params){

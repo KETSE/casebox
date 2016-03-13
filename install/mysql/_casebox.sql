@@ -58810,7 +58810,7 @@ CREATE TABLE `translations` (
   UNIQUE KEY `UNIQUE_translations__name` (`name`),
   KEY `FK_translations__pid` (`pid`),
   CONSTRAINT `FK_translations__pid` FOREIGN KEY (`pid`) REFERENCES `translations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3156 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3159 DEFAULT CHARSET=utf8;
 
 /*Data for the table `translations` */
 
@@ -60878,7 +60878,7 @@ insert  into `translations`(`id`,`pid`,`name`,`en`,`es`,`ge`,`fr`,`hy`,`pt`,`ro`
 
 (3093,NULL,'IgnoreText','<b>Ignore</b>','<b>Ignore</b>','<b>Ignore</b>','<b>Ignore</b>','<b>Ignore</b>','<b>Ignore</b>','<b>Ignore</b>','<b>Ignore</b>','<b>Ignore</b>','<b>Ignore</b>',2,NULL,0),
 
-(3094,NULL,'MarkAllAsRead','Mark all read','Mark all read','Mark all read','Mark all read','Mark all read','Mark all read','Mark all read','Mark all read','Mark all read','Mark all read',2,NULL,0),
+(3094,NULL,'MarkAllAsRead','Mark all as read','Mark all as read','Mark all as read','Mark all as read','Mark all as read','Mark all as read','Mark all as read','Mark all as read','Mark all as read','Mark all as read',2,NULL,0),
 
 (3095,NULL,'NNOthers','{count} others','{count} others','{count} others','{count} others','{count} others','{count} others','alții {count}','другие {count}','{count} others','{count} others',0,'used for Notification display records (user1, user2 and 2 others)',0),
 
@@ -60994,7 +60994,13 @@ insert  into `translations`(`id`,`pid`,`name`,`en`,`es`,`ge`,`fr`,`hy`,`pt`,`ro`
 
 (3154,NULL,'SpecifyComment','Please specify a comment.','Please specify a comment.','Please specify a comment.','Please specify a comment.','Please specify a comment.','Please specify a comment.','Please specify a comment.','Please specify a comment.','Please specify a comment.','Please specify a comment.',2,NULL,0),
 
-(3155,NULL,'TimeSpent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent',1,NULL,0);
+(3155,NULL,'TimeSpent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent','Time spent',0,NULL,0),
+
+(3156,NULL,'MarkAsUnread','Mark as unread','Mark as unread','Mark as unread','Mark as unread','Mark as unread','Mark as unread','Mark as unread','Mark as unread','Mark as unread','Mark as unread',2,NULL,0),
+
+(3157,NULL,'ShowUnread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread',2,NULL,0),
+
+(3158,NULL,'ShowLegend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend',2,NULL,0);
 
 /*Table structure for table `zone` */
 

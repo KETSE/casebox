@@ -290,11 +290,17 @@ Ext.define('CB.ObjectsComboField', {
         }
 
         this.callParent([v]);
-        var text = this.store.getTexts(v);
+
+        var text = this.store.getTexts(v)
+            ,r = this.findRecordByValue(v);
+
+        if(r) {
+            this.objectsStore.checkRecordExistance(r.data);
+        }
 
         //delete this.customIcon;
         if(Ext.isEmpty(text) && this.objectsStore){
-            var r = this.objectsStore.findRecord('id', v, 0, false, false, true);
+            r = this.objectsStore.findRecord('id', v, 0, false, false, true);
 
             if(r){
                 if(this.icon) {

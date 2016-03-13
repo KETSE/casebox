@@ -67,6 +67,7 @@ Ext.define('CB.VerticalEditGrid', {
                     ,beforeedit: this.onBeforeEditProperty
                     ,edit: this.onAfterEditProperty
                 }
+                ,onSpecialKey: this.onCellEditingSpecialKey
             }
         );
 
@@ -482,15 +483,21 @@ Ext.define('CB.VerticalEditGrid', {
         var nodesList = this.helperTree.queryNodeListBy(this.helperNodesFilter.bind(this))
             ,ids = this.store.collect('id')
             ,update = false
-            ,i, idx;
+            ,i, idx, id, r;
 
         //check if store records should be updated
         for (i = 0; i < nodesList.length; i++) {
-            idx = ids.indexOf(nodesList[i].data.id);
+            id = nodesList[i].data.id;
+            idx = ids.indexOf(id);
             if(idx < 0) {
                 update = true;
             } else {
                 ids.splice(idx, 1);
+                //check if value not reset
+                r = this.store.getById(id);
+                if(r && nodesList[i].data.value.value !== r.data.value) {
+                    r.data.value = nodesList[i].data.value.value;
+                }
             }
         }
 
@@ -507,7 +514,7 @@ Ext.define('CB.VerticalEditGrid', {
         var records = [];
         for (i = 0; i < nodesList.length; i++) {
             var attr = nodesList[i].data;
-            var r  = attr.templateRecord;
+            r  = attr.templateRecord;
 
             records.push(
                 Ext.create(
@@ -581,6 +588,8 @@ Ext.define('CB.VerticalEditGrid', {
             return;
         }
 
+        delete context.grid.pressedSpecialKey;
+
         var pw = this.findParentByType(CB.GenericForm, false)
             || this.refOwner
         ; //CB.Objects & CB.TemplateEditWindow
@@ -649,19 +658,38 @@ Ext.define('CB.VerticalEditGrid', {
     ,gainFocus: function(position){
         var sm = this.getSelectionModel()
             ,navModel = this.getNavigationModel()
-            ,lastFocused = navModel.getLastFocused();
+            ,lastFocused = navModel.getLastFocused()
+            ,rez = Ext.clone(lastFocused);
 
 
         if(lastFocused && !isNaN(lastFocused.rowIdx)){
+            if(position === 'next') {
+                if(lastFocused.colIdx < (this.visibleColumnManager.columns.length-1)) {
+                    rez.colIdx++;
+                } else {
+                    if(lastFocused.rowIdx < (this.store.getCount() -1)) {
+                        rez.rowIdx++;
+                        rez.colIdx = 1;
+                    } else {
+                        rez = null;
+                    }
+                }
+            }
+            var cell = Ext.isEmpty(rez)
+                ? lastFocused
+                : rez;
+
             sm.select({
-                row: lastFocused.rowIdx
-                ,column: lastFocused.colIdx
+                row: cell.rowIdx
+                ,column: cell.colIdx
             });
 
-            navModel.setPosition(lastFocused.rowIdx, lastFocused.colIdx);
+            navModel.setPosition(cell.rowIdx, cell.colIdx);
 
-            navModel.focusPosition(lastFocused);
+            navModel.focusPosition(cell);
         }
+
+        return rez;
     }
 
     ,addKeyMaps: function(c) {
@@ -686,6 +714,32 @@ Ext.define('CB.VerticalEditGrid', {
             ,this.addKeyMaps
             ,this
         );
+    }
+
+    ,onCellEditingSpecialKey: function(ed, field, e) {
+        var key = e.getKey();
+        switch(key) {
+            case e.TAB:
+                ed.completeEdit();
+
+                var pos = ed.grid.gainFocus('next');
+
+                if(pos) {
+                    e.stopEvent();
+
+                    this.startEditByPosition({
+                        row: pos.rowIdx
+                        ,column: pos.colIdx
+                    });
+                }
+                break;
+
+            case e.ENTER:
+            case e.ESC:
+                ed.grid.pressedSpecialKey = key;
+                break;
+        }
+
     }
 
     ,onSaveObjectEvent: function (key, event){
@@ -761,11 +815,19 @@ Ext.define('CB.VerticalEditGrid', {
             );
         }
 
+        this.fireEvent('savescroll', this);
+
         if(!this.syncRecordsWithHelper()) {
             this.getView().refresh();
+        } else {
+            this.fireEvent('restorescroll', this);
         }
 
-        this.gainFocus();
+        //the grid shouldnt be focused all the time,
+        //the user can click outside of the grid
+        if(this.pressedSpecialKey) {
+            this.gainFocus();
+        }
     }
 
     ,getFieldValue: function(field_id, duplication_id){

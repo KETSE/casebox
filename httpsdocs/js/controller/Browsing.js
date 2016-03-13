@@ -385,14 +385,17 @@ Ext.define('CB.controller.Browsing', {
      */
     ,updatePreview: function(customParams) {
         var vc = this.VC
-            ,fp = vc.folderProperties;
-
-        var data = customParams;
+            ,fp = vc.folderProperties
+            ,data = customParams;
 
         //if custom params are empty then try to load current view selection
         //or the currently opened object
         if(Ext.isEmpty(data)) {
-            var s = vc.cardContainer.getLayout().activeItem.currentSelection;
+            var ai = vc.containersPanel.getLayout().activeItem
+                ,s = (ai.xtype == 'CBNotificationsView')
+                    ? ai.currentSelection
+                    : ai.getLayout().activeItem.currentSelection;
+
             data = Ext.isEmpty(s)
                 ? {
                     id: fp.id
@@ -405,6 +408,7 @@ Ext.define('CB.controller.Browsing', {
                     ,template_id: s[0].template_id
                     ,can: s[0].can
                 };
+
         } else {
             data = {
                 id: Ext.valueFrom(Ext.valueFrom(data.target_id, data.nid), data.id)

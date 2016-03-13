@@ -142,7 +142,7 @@ class CreateMenu
                 ,'ugids' => empty($d['user_group_ids'])
                     ? array()
                     : Util\toNumericArray($d['user_group_ids'])
-                ,'menu' => $d['menu']
+                ,'menu' => @$d['menu']
             );
         }
 

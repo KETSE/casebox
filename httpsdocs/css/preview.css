@@ -25,7 +25,7 @@ table{
 */
     width: 128px;
     height: 128px;
-    background-image: url(l/none-icon.png);
+    background-image: url(default/l/none-icon.png);
     opacity: 1;
     transition: opacity .25s ease-in-out;
     -moz-transition: opacity .25s ease-in-out;

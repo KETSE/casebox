@@ -231,13 +231,14 @@ class Notifications extends Base
      * mark user notifications as read
      * @param  int[] $ids
      * @param  int   $userId
+     * @param  int   $value
      * @return void
      */
-    public static function markAsRead($ids, $userId)
+    public static function markAsRead($ids, $userId, $value = 1)
     {
         //validate params
         \CB\raiseErrorIf(
-            !is_numeric($userId),
+            !is_numeric($userId) || !is_numeric($value),
             'ErroneousInputData'
         );
 
@@ -246,9 +247,12 @@ class Notifications extends Base
         if (!empty($ids)) {
             DB\dbQuery(
                 'UPDATE `' . static::getTableName() . '`
-                SET `read` = 1
+                SET `read` = $2
                 WHERE user_id = $1 AND id IN (' . implode(',', $ids) .')',
-                $userId
+                [
+                    $userId,
+                    $value
+                ]
             );
         }
     }

@@ -53,7 +53,7 @@ CB.DB.templateTypes = new Ext.data.ArrayStore({
     idIndex: 0
     ,model: 'Generic2'
     //,fields: ['id', 'name']
-    ,data:  [[null, '-'], ['case', 'case'], ['comment', 'comment'], ['config', 'config'], ['email', 'email'], ['field', 'field'], ['file', 'file'], ['menu', 'menu'], ['object', 'object'], ['search', 'search'], ['shortcut', 'shortcut'], ['task', 'task'], ['template', 'template'], ['user', 'user']]
+    ,data:  [[null, '-'], ['case', 'case'], ['comment', 'comment'], ['config', 'config'], ['email', 'email'], ['field', 'field'], ['file', 'file'], ['menu', 'menu'], ['object', 'object'], ['search', 'search'], ['shortcut', 'shortcut'], ['task', 'task'], ['time_tracking', 'time_tracking'], ['template', 'template'], ['user', 'user']]
     ,getName: getStoreNames
 });
 <?php

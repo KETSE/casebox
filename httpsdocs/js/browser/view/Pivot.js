@@ -64,6 +64,16 @@ Ext.define('CB.browser.view.Pivot',{
             }
         });
 
+        this.showLegendMenuItem = Ext.create({
+            xtype: 'menucheckitem'
+            ,text: L.ShowLegend
+            ,checked: true
+            ,listeners: {
+                scope: this
+                ,checkchange: this.onShowLegendClick
+            }
+        });
+
         this.refOwner.buttonCollection.addAll(
             new Ext.form.Label({
                 text: 'Stats'
@@ -78,45 +88,58 @@ Ext.define('CB.browser.view.Pivot',{
             })
 
             ,new Ext.Button({
-                qtip: L.Pivot
-                ,text: L.Pivot
-                ,itemId: 'PVtable'
+                text: L.View
+                ,itemId: 'PVViewButton'
                 ,scale: 'medium'
-                ,chart: 'table'
-                ,enableToggle: true
-                ,allowDepress: false
-                // ,iconCls: 'ib-table'
-                ,scope: this
-                ,handler: this.onChangeChartButtonClick
+                ,menu: [
+                    {
+                        qtip: L.Pivot
+                        ,text: L.Pivot
+                        ,itemId: 'PVtable'
+                        ,scale: 'medium'
+                        ,chart: 'table'
+                        ,scope: this
+                        ,handler: this.onChangeChartButtonClick
+                    }
+
+                    ,{
+                        qtip: L.ChartArea
+                        ,text: L.Bar
+                        ,itemId: 'PVbarchart'
+                        ,scale: 'medium'
+                        ,chart: 'stackedBars'
+                        ,scope: this
+                        ,handler: this.onChangeChartButtonClick
+                    }
+
+                    ,{
+                        qtip: L.ChartArea
+                        ,text: L.Column
+                        ,itemId: 'PVcolumnchart'
+                        ,scale: 'medium'
+                        ,chart: 'stackedColumns'
+                        ,scope: this
+                        ,handler: this.onChangeChartButtonClick
+                    }
+                ]
             })
 
             ,new Ext.Button({
-                qtip: L.ChartArea
-                ,text: L.Bar
-                ,itemId: 'PVbarchart'
+                text: L.Options
+                ,itemId: 'PVOptionsButton'
                 ,scale: 'medium'
-                ,chart: 'stackedBars'
-                ,enableToggle: true
-                ,allowDepress: false
-                // ,iconCls: 'ib-chart-bar'
-                ,scope: this
-                ,handler: this.onChangeChartButtonClick
+                ,menu: [
+                    this.showLegendMenuItem
+                    ,{
+                        text: L.Export
+                        ,scope: this
+                        ,handler: this.onExportButtonClick
+                    }
+                ]
             })
 
-            ,new Ext.Button({
-                qtip: L.ChartArea
-                ,text: L.Column
-                ,itemId: 'PVcolumnchart'
-                ,scale: 'medium'
-                ,chart: 'stackedColumns'
-                ,enableToggle: true
-                ,allowDepress: false
-                // ,iconCls: 'ib-chart-column'
-                ,scope: this
-                ,handler: this.onChangeChartButtonClick
-            })
-            ,this.rowsCombo
             ,this.colsCombo
+            ,this.rowsCombo
         );
 
         this.chartBlock = new CB.widget.block.Pivot({
@@ -125,7 +148,7 @@ Ext.define('CB.browser.view.Pivot',{
             ,border: false
             ,listeners: {
                 scope: this
-                ,cellclick: this.onTableCellClick
+                ,filterclick: this.onTableCellFilterClick
             }
 
         });
@@ -137,6 +160,7 @@ Ext.define('CB.browser.view.Pivot',{
             ,listeners: {
                 scope: this
                 ,activate: this.onActivate
+                ,deactivate: this.onDeactivate
             }
         });
 
@@ -171,9 +195,9 @@ Ext.define('CB.browser.view.Pivot',{
                 ,'PVStatsLabel'
                 ,'PVStatsButton'
                 ,'-'
-                ,'PVtable'
-                ,'PVbarchart'
-                ,'PVcolumnchart'
+                ,'PVViewButton'
+                ,'-'
+                ,'PVOptionsButton'
                 ,'-'
                 ,'reload'
                 ,'apps'
@@ -181,6 +205,10 @@ Ext.define('CB.browser.view.Pivot',{
                 ,'more'
             ]
         );
+    }
+
+    ,onDeactivate: function() {
+        this.chartBlock.changeCharts([]);
     }
 
     ,onChangeChartButtonClick: function(b, e) {
@@ -196,11 +224,10 @@ Ext.define('CB.browser.view.Pivot',{
 
     ,onChangeChart: function() {
         var BC = this.refOwner.buttonCollection
-            ,ch = this.chartData.charts;
+            ,ch = this.chartData.charts
+            ,vb = BC.get('PVViewButton');
 
-        BC.get('PVtable').toggle(ch.indexOf('table') > -1, true);
-        BC.get('PVbarchart').toggle(ch.indexOf('stackedBars') > -1, true);
-        BC.get('PVcolumnchart').toggle(ch.indexOf('stackedColumns') > -1, true);
+        this.chartBlock.setLegendVisible(this.showLegendMenuItem.checked);
 
         this.chartBlock.changeCharts(ch);
     }
@@ -298,6 +325,10 @@ Ext.define('CB.browser.view.Pivot',{
                 ,checked
                 ,stats = d.view.stats;
 
+            if(!Ext.isArray(stats)) {
+                stats = [stats];
+            }
+
             //add none value
             stats.unshift({title: L.none, field: ''});
 
@@ -384,38 +415,52 @@ Ext.define('CB.browser.view.Pivot',{
         this.fireEvent('reload', this);
     }
 
-    ,onTableCellClick: function(ev, el, p) {
-        if(Ext.isEmpty(el) || Ext.isEmpty(el.textContent)) {
-            return;
-        }
-        var f = el.attributes.getNamedItem('f');
-        if(Ext.isEmpty(f)) {
-            return;
-        }
-
-        f = f.value.split('|');
-
+    ,onTableCellFilterClick: function(filter) {
         var params = {
             view: 'grid'
             ,from: 'grid'
             ,userViewChange: true
             ,filters: Ext.apply({}, this.store.extraParams.filters)
         };
-        if(!Ext.isEmpty(f[0])) {
+
+        if(!Ext.isEmpty(filter[0])) {
             params['filters'][this.selectedFacets[0]] = [{
                 f: this.selectedFacets[0]
                 ,mode: 'OR'
-                ,values: [f[0]]
+                ,values: [filter[0]]
             }];
         }
-        if(!Ext.isEmpty(f[1])) {
+        if(!Ext.isEmpty(filter[1])) {
             params['filters'][this.selectedFacets[1]] = [{
                 f: this.selectedFacets[1]
                 ,mode: 'OR'
-                ,values: [f[1]]
+                ,values: [filter[1]]
             }];
         }
 
         this.fireEvent('changeparams', params);
+    }
+
+    ,onShowLegendClick: function(cb, checked, eOpts) {
+        this.chartBlock.setLegendVisible(checked);
+
+        this.chartBlock.changeCharts(this.chartData.charts);
+    }
+
+    ,onExportButtonClick: function(b, e) {
+        var html = '<html><head><meta charset="UTF-8"><body>' +
+            this.chartBlock.getHtml() + '</body></html>';
+
+        el = document.createElement('a');
+
+        el.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+        el.target = '_blank';
+        el.download = 'PivotView.html';
+        el.click();
+        /**
+            ,w = window.open(null, 'exportPivotTable');
+        // w.document.head.innerHTML = '<base href="' + base.join('/') + '">';
+        w.document.body.innerHTML = html;
+        w.focus();/**/
     }
 });

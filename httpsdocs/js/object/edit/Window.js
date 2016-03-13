@@ -51,6 +51,15 @@ Ext.define('CB.object.edit.Window', {
         this.titleView = new CB.object.TitleView();
         this.titleContainer.add(this.titleView);
 
+        if(this.templateType == 'time_tracking') {
+            this.titleContainer.hide();
+            Ext.apply(this, {
+                minimizable: false
+                ,maximizable: false
+                ,header: false
+            });
+        }
+
         Ext.apply(this, {
             cls: 'x-panel-white'
             ,bodyStyle: 'border: 0; padding: 0; border-top: 1px solid #99bce8'
@@ -205,6 +214,24 @@ Ext.define('CB.object.edit.Window', {
      * @return array
      */
     ,getToolbarButtons: function() {
+        if(this.templateType == 'time_tracking') {
+            return [
+                this.actions.edit
+                ,this.actions.save
+                ,this.actions.cancel
+                ,'->'
+                ,new Ext.Button({
+                    qtip: L.More
+                    ,itemId: 'more'
+                    ,arrowVisible: false
+                    ,iconCls: 'i-points'
+                    ,menu: [
+                        this.actions['delete']
+                    ]
+                })
+            ];
+        }
+
         return [
             this.actions.edit
             ,this.actions.save
@@ -435,6 +462,10 @@ Ext.define('CB.object.edit.Window', {
      * @return void
      */
     ,loadPreviewData: function() {
+        if(this.templateType == 'time_tracking') {
+            return;
+        }
+
         CB_Objects.getPluginsData(
             {
                 id: this.data.id
@@ -592,8 +623,8 @@ Ext.define('CB.object.edit.Window', {
                     ,listeners: {
                         scope: this
 
-                        ,beforeedit: this.saveScroll
-                        ,edit: this.restoreScroll
+                        // ,beforeedit: this.saveScroll
+                        // ,edit: this.restoreScroll
 
                         ,savescroll: this.saveScroll
                         ,restorescroll: this.restoreScroll

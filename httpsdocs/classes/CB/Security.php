@@ -977,7 +977,7 @@ class Security
 
         $p['data']['id'] = $p['data']['user_group_id'];
         $rez['data'][] = $p['data'];
-        \CB\debug($rez);
+
         Security::calculateUpdatedSecuritySets();
         Solr\Client::runBackgroundCron();
 
