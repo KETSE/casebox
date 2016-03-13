@@ -645,6 +645,10 @@ class Object
         //iterate template fields and collect fieldnames
         //to be indexed in solr, as well as title fields
         $rez = [];
+        $children = [];
+        $indexAsChildrenIds = [];
+        $indexAsChildrenIndexes = [];
+        $pids = [];
 
         $d = &$this->data;
         $sd = &$d['sys_data'];
@@ -664,6 +668,13 @@ class Object
             }
 
             foreach ($fields as $f) {
+                if (!empty($f['cfg']['indexAsChildren'])) {
+                    $indexAsChildrenIds[] = $f['id'];
+                    $indexAsChildrenIndexes[$f['id']] = empty($f['cfg']['indexingIdx'])
+                        ? $f['id']
+                        : $f['cfg']['indexingIdx'];
+                }
+
                 if (empty($f['solr_column_name']) && in_array($f['name'], $titleFields)) {
                     $sfn = $f['name'] . '_t';//solr field name
 
@@ -675,6 +686,12 @@ class Object
                 } elseif (!empty($f['cfg']['faceting']) || //backward compatible check
                     !empty($f['cfg']['indexed'])
                 ) {
+                    $pids[$f['id']] = empty($pids[$f['pid']])
+                        ? [$f['pid'], $f['id']]
+                        : array_merge($pids[$f['pid']], [$f['id']]);
+
+                    $childrenRecordIds = array_intersect($pids[$f['id']], $indexAsChildrenIds);
+
                     $values = $this->getFieldValue($f['name']);
 
                     $resultValue = array();
@@ -684,6 +701,12 @@ class Object
                         $value = $this->prepareValueforSolr($f['type'], $v);
                         if (!empty($value)) {
                             $resultValue[] = $value;
+
+                            foreach ($childrenRecordIds as $crId) {
+                                $idx = $this->id . '_' . $indexAsChildrenIndexes[$crId] . '_' . intval($v['idx']);
+                                $children[$idx]['idx'] = $indexAsChildrenIndexes[$crId];
+                                $children[$idx][$f['solr_column_name']] = $value;
+                            }
                         }
                     }
 
@@ -708,6 +731,20 @@ class Object
 
                         $rez[$f['solr_column_name']] = $finalValue;
                     }
+                }
+            }
+
+            if (!empty($children)) {
+                $rez['_childDocuments_'] = [];
+                foreach ($children as $k => $v) {
+                    $rez['_childDocuments_'][] = array_merge(
+                        $v,
+                        [
+                            'id' => $this->id,
+                            'doc_id' => $k,
+                            'child' => 'true'
+                        ]
+                    );
                 }
             }
 

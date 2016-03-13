@@ -166,10 +166,7 @@ class Service
      */
     public function addDocument($d)
     {
-        $doc = new \Apache_Solr_Document();
-        foreach ($d as $fn => $fv) {
-                $doc->$fn = $fv;
-        }
+        $doc = $this->arrayToSolrDocument($d);
 
         try {
             $this->fireEvent('beforeNodeSolrUpdate', $doc);
@@ -227,10 +224,8 @@ class Service
 
         foreach ($docs as $in_doc) {
             if (empty($in_doc['update'])) {
-                $doc = new \Apache_Solr_Document();
-                foreach ($in_doc as $fn => $fv) {
-                    $doc->$fn = $fv;
-                }
+                $doc = $this->arrayToSolrDocument($in_doc);
+
                 $this->fireEvent('beforeNodeSolrUpdate', $doc);
                 $addDocs[] = $doc;
             } else {
@@ -332,5 +327,34 @@ class Service
         return constant('CB\\IS_DEBUG_HOST')
             ? "\n".' ('.$this->host.':'.$this->port.' -> '.$this->core.' )'
             : '';
+    }
+
+    /**
+     * convert an array to solr document class
+     * @param  array                $arr
+     * @return Apache_Solr_Document
+     *
+     */
+    protected function arrayToSolrDocument($arr)
+    {
+        $rez = new \Apache_Solr_Document();
+        $children = empty($arr['_childDocuments_'])
+            ? []
+            : $arr['_childDocuments_'];
+        unset($arr['_childDocuments_']);
+
+        foreach ($arr as $fn => $fv) {
+            $rez->$fn = $fv;
+        }
+
+        if (!empty($children)) {
+            $childDocs = [];
+            foreach ($children as $d) {
+                $childDocs[] = $this->arrayToSolrDocument($d);
+            }
+            $rez->_childDocuments_ = $childDocs;
+        }
+
+        return $rez;
     }
 }

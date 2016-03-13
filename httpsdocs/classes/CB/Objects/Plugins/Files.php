@@ -16,7 +16,7 @@ class Files extends Base
         );
 
         if (empty(parent::getData($id))) {
-            return $rez;
+            return null;
         }
 
         $params = array(

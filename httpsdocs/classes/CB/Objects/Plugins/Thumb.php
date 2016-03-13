@@ -3,7 +3,7 @@
 namespace CB\Objects\Plugins;
 
 use CB\Config;
-use CB\Files;
+use CB\Files as CBFiles;
 use CB\Util;
 
 class Thumb extends Base
@@ -11,7 +11,9 @@ class Thumb extends Base
     public function getData($id = false)
     {
         $rez = array('success'=> true, 'data' => array());
-        parent::getData($id);
+        if (empty(parent::getData($id))) {
+            return null;
+        }
 
         $o = $this->getObjectClass();
         if (empty($o)) {
@@ -22,8 +24,8 @@ class Thumb extends Base
         //dont display thumb for images less then 1MB
         $maxDisplaySize = Util\coalesce(Config::get('images_display_size'), 1024 * 1024);
 
-        if ((substr($data['content_type'], 0, 5) == 'image') && ($data['size'] < $maxDisplaySize)) {
-            $preview = Files::generatePreview($data['id']);
+        if (!empty($data['content_type']) && (substr($data['content_type'], 0, 5) == 'image') && ($data['size'] < $maxDisplaySize)) {
+            $preview = CBFiles::generatePreview($data['id']);
             if (!empty($preview['filename'])) {
                 $fn = Config::get('files_preview_dir') . $preview['filename'];
                 $rez['data']['html'] = $fn;
@@ -32,7 +34,7 @@ class Thumb extends Base
                 }
             }
         } else {
-            $rez['data']['cls'] = 'pr-th-'.\CB\Files::getExtension($data['name']);
+            $rez['data']['cls'] = 'pr-th-' . CBFiles::getExtension($data['name']);
         }
 
         return $rez;

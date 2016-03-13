@@ -751,8 +751,7 @@ class Objects
 
             /* now we'll try to detect plugins config that could be found in following places:
                 1. in config of the template for the given object, named object_plugins
-                2. in core config, property object_type_plugins (config definitions per available template type values: object, case, task etc)
-                3. a generic config,  named default_object_plugins, could be defined in core config
+                2. a generic config,  named default_object_plugins that can be defined in core config
             */
 
             $o = $this->getCachedObject($id);
@@ -773,36 +772,17 @@ class Objects
             ? ''
             : $p['from'];
 
-        if (!empty($from)) {
-            if (isset($templateData['cfg']['object_plugins'])) {
-                $op = $templateData['cfg']['object_plugins'];
-
-                if (!empty($op[$from])) {
-                    $objectPlugins = $op[$from];
-                } else {
-                    //check if config has only numeric keys, i.e. plugins specified directly (without a category)
-                    if (!Util\isAssocArray($op)) {
-                        $objectPlugins = $op;
-                    } else {
-                        $objectPlugins = Config::getObjectTypePluginsConfig(@$templateData['type'], $from);
-                    }
-                }
-            }
-        }
-
-        if (empty($objectPlugins)) {
-            if (!empty($templateData['cfg']['object_plugins'])) {
-                $objectPlugins = $templateData['cfg']['object_plugins'];
-            } else {
-                $objectPlugins = Config::getObjectTypePluginsConfig($templateData['type'], $from);
-            }
-        }
+        $objectPlugins = empty($templateData['cfg']['object_plugins'])
+            ? Config::get('default_object_plugins')
+            : $templateData['cfg']['object_plugins'];
 
         $rez['success'] = true;
 
         if (empty($objectPlugins)) {
             return $rez;
         }
+
+        Util\sortRecordsArray($objectPlugins, 'order', 'asc', 'asInt', true);
 
         if (!empty($templateData['cfg']['timeTracking']) && !in_array('timeTracking', $objectPlugins)) {
             $firstEl = array_shift($objectPlugins);
@@ -826,7 +806,10 @@ class Objects
                 : $k;
 
             $v['objectId'] = $id;
+            $v['context'] = $from;
+
             $fullClassName = '\\CB\\Objects\\Plugins\\' . ucfirst($className);
+
             $pClass = new $fullClassName($v);
             $prez = $pClass->getData();
             $prez['class'] = $className;

@@ -36,8 +36,8 @@ class Search extends Solr\Client
     /*when requesting sort by a field the other convenient sorting field
     can be used designed for sorting. Used for string fields. */
     protected $replaceSortFields = array(
-        'nid' => 'id'
-        ,'name' => 'sort_name'
+        'nid' => 'id',
+        'name' => 'sort_name'
     );
 
     /**
@@ -185,6 +185,10 @@ class Search extends Solr\Client
         if (!empty($p['dstatus'])) {
             $fq = array('dstatus:' . intval($p['dstatus']));
         }
+
+        $fq[] = (empty($p['child']) || ($p['child'] == 'false'))
+            ? 'child:false'
+            : 'child:true';
 
         //check if fq is set and add it to result
         if (!empty($p['fq'])) {

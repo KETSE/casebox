@@ -1,3 +1,8 @@
+CaseBox 1.9.581 (2016-03-13)
+==============================
+- #11888 Refactoring object_type_plugins
+- #11821 Index MaxInstances fields as _childDocuments_ in SOLR
+
 CaseBox 1.9.580 (2016-03-13)
 ==============================
 - #11898 Improvements for Header & MaxInstances
