@@ -644,7 +644,7 @@ class Object
     {
         //iterate template fields and collect fieldnames
         //to be indexed in solr, as well as title fields
-        $rez = array();
+        $rez = [];
 
         $d = &$this->data;
         $sd = &$d['sys_data'];
@@ -1150,6 +1150,7 @@ class Object
                     ,'info' => 1
                     ,'files' => 1
                     ,'cond' => 1
+                    ,'idx' => 1
                 )
             );
 
@@ -1181,7 +1182,7 @@ class Object
         return 0;
     }
 
-    protected function getLinearNodesData(&$data, $sorted = false)
+    protected function getLinearNodesData(&$data, $sorted = false, $maxInstancesIndex = 0)
     {
         $rez = array();
         if (empty($data)) {
@@ -1193,8 +1194,13 @@ class Object
                 $fieldValue = array($fieldValue);
             }
 
+            $idx = $maxInstancesIndex;
             foreach ($fieldValue as $fv) {
-                $value = array('name' => $fieldName);
+                $value = array(
+                    'name' => $fieldName
+                    ,'idx' => $idx++
+                );
+
                 if (is_scalar($fv) ||
                     is_null($fv)
                 ) {
@@ -1215,7 +1221,7 @@ class Object
         foreach ($rez as $fv) {
             $sortedRez[] = $fv;
             if (!empty($fv['childs'])) {
-                $sortedRez = array_merge($sortedRez, $this->getLinearNodesData($fv['childs'], $sorted));
+                $sortedRez = array_merge($sortedRez, $this->getLinearNodesData($fv['childs'], $sorted, $fv['idx']));
             }
         }
 
@@ -1713,22 +1719,25 @@ class Object
                     $v = implode('<br />', $v);
                 }
 
+                if (($f['tf']['type'] == 'H')) {
+                    $style = empty($f['tf']['level'])
+                        ? ''
+                        : 'padding-left: '.($f['tf']['level'] * 20).'px;';
+
+                    $style .= empty($f['tf']['cfg']['style'])
+                        ? ''
+                        : ';' . $f['tf']['cfg']['style'];
+
+                    $body .= '<tr class="prop-header"><th colspan="3" style="'. $style . '">' .
+                        $f['tf']['title'] .
+                        '</th></tr>';
+                    continue;
+                }
+
                 if (!empty($f['tf']['cfg']['hidePreview']) ||
                     (empty($v) && empty($f['info']))
                 ) {
                     continue;
-                }
-
-                $headerField = $template->getHeaderField($f['tf']['id']);
-                if (!empty($headerField) && ($previousHeader != $headerField)) {
-                    $body .= '<tr class="prop-header"><th colspan="3"'.(
-                        empty($headerField['level'])
-                        ? ''
-                        : ' style="padding-left: '.($headerField['level'] * 20).'px"'
-                    ) . '>' . $headerField['title'] . '</th></tr>';
-                }
-                if (empty($previousHeader) || (($previousHeader['level'] <= $f['tf']['level']) && !empty($headerField))) {
-                    $previousHeader = $headerField;
                 }
 
                 $body .= '<tr>';
@@ -1737,7 +1746,7 @@ class Object
                         empty($f['tf']['level'])
                         ? ''
                         : ' style="padding-left: '.($f['tf']['level'] * 20).'px"'
-                    ) . ' class="prop-key">'.$f['tf']['title'].'</td>' .
+                    ) . ' class="prop-key">' . $f['tf']['title'] .'</td>' .
                     '<td class="prop-val">';
                 } else {
                     $body .= '<td class="prop-val" colspan="2">';
