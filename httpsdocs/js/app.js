@@ -1259,6 +1259,12 @@ function initApp() {
                     enableKeyEvents: true
                     ,height: height
                 };
+
+                if (cfg.maxLength) {
+                    edConfig.maxLength = cfg.maxLength;
+                    edConfig.enforceMaxLength = true;
+                }
+
                 if(cfg.mentionUsers) {
                     edConfig.plugins = [{
                         ptype: 'CBPluginFieldDropDownList'

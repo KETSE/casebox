@@ -327,10 +327,6 @@ class Client extends Service
                     $this->prepareDBRecord($r);
 
                     $docs[$r['id']] = $r;
-
-                    if (!empty($r['_childDocuments_']) && $this->deleteNestedDocs) {
-                        $this->deleteByQuery('id:' . $r['id']);
-                    }
                 }
                 $this->updateCronLastActionTime(@$p['cron_id']);
             }
@@ -339,6 +335,8 @@ class Client extends Service
             if (!empty($docs)) {
                 //append file contents for files to content field
                 $this->appendFileContents($docs);
+
+                $this->deleteByQuery('id:(' . implode(' OR ', array_keys($docs)) . ')');
 
                 $this->addDocuments($docs);
 

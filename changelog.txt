@@ -1,3 +1,9 @@
+CaseBox 1.9.582 (2016-03-14)
+==============================
+- #10726 Limit of signs / карточка дела ограничение на 500 знаков с пробелами
+- #11898 Improvements for Header & MaxInstances
+- #11888 Refactoring object_type_plugins
+
 CaseBox 1.9.581 (2016-03-13)
 ==============================
 - #11888 Refactoring object_type_plugins

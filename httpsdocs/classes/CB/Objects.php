@@ -782,12 +782,13 @@ class Objects
             return $rez;
         }
 
-        Util\sortRecordsArray($objectPlugins, 'order', 'asc', 'asInt', true);
-
-        if (!empty($templateData['cfg']['timeTracking']) && !in_array('timeTracking', $objectPlugins)) {
-            $firstEl = array_shift($objectPlugins);
-            array_unshift($objectPlugins, $firstEl, 'timeTracking');
+        if (!empty($templateData['cfg']['timeTracking']) && !isset($objectPlugins['timeTracking'])) {
+            $objectPlugins['timeTracking'] = [
+                'order' => 1
+            ];
         }
+
+        Util\sortRecordsArray($objectPlugins, 'order', 'asc', 'asInt', true);
 
         foreach ($objectPlugins as $k => $v) {
             $className = '';

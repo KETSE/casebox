@@ -167,6 +167,10 @@ Ext.define('CB.VerticalEditGrid', {
 
                 if(tr.get('type') === 'H'){
                     meta.css ='vgh';
+                    if (tr.get('cfg').style) {
+                        meta.tdStyle = tr.get('cfg').style;
+                    }
+
                 } else {
                     meta.css = 'bgcLG vaT';
                     meta.style = 'margin-left: ' + (n.getDepth()-1) + '0px';
@@ -215,6 +219,10 @@ Ext.define('CB.VerticalEditGrid', {
                     return v;
                 }
                 var tr = n.data.templateRecord;
+
+                if ((tr.get('type') == 'H') && tr.get('cfg').style) {
+                    meta.tdStyle = tr.get('cfg').style;
+                }
 
                 //check validation field
                 if (record.get('valid') === false) {
