@@ -1,0 +1,14 @@
+casebox_rest:
+    resource: "@CaseboxRestBundle/Controller/RestApiController.php"
+    type:     rest
+    prefix:   /
+
+casebox_core:
+    resource: "@CaseboxCoreBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
+casebox_rpc:
+    resource: "@CaseboxRpcBundle/Controller/"
+    type:     annotation
+    prefix:   /

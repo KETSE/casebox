@@ -1,0 +1,24 @@
+/var/bootstrap.php.cache
+/var/cache/*
+/var/logs/*
+!var/logs/.gitkeep
+/composer.phar
+/vendor/
+/web/bundles/
+.idea/*
+composer.lock
+tmp/
+var/files/*/_photo/
+# ignore cores custom params
+app/config/*/parameters.yml
+# ignore .sublime files
+*sublime*
+src/caseboxdev/
+/nbproject/
+web/css
+web/js
+web/img
+web/min
+web/files
+var/files/
+!var/files/default/.gitkeep
