@@ -95,7 +95,7 @@ class Service
 
             $layer = new \Apache_Solr_Compatibility_Solr4CompatibilityLayer;
 
-            $this->solr_handler = new \Apache_Solr_Service(
+            $this->solr_handler = new ServiceHandler(
                 $this->host,
                 $this->port,
                 $this->core,

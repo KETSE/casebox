@@ -399,14 +399,16 @@ class Objects
      * @param  int          $id
      * @return varchar|null
      */
-    public static function getName($id)
+    public static function getName($id, $htmlSafe = false)
     {
         $rez = null;
 
         if (!empty($id) && is_numeric($id)) {
             $obj = static::getCachedObject($id);
             if (!empty($obj)) {
-                $rez = $obj->getName();
+                $rez = $htmlSafe
+                    ? $obj->getHtmlSafeName()
+                    : $obj->getName();
             }
         }
 

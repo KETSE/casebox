@@ -401,7 +401,7 @@ Ext.define('CB.object.edit.Window', {
         var map = new Ext.KeyMap(
             c.getEl()
             ,[{
-                key: "s"
+                key: 's'
                 ,ctrl:true
                 ,shift:false
                 ,stopEvent: true
@@ -415,7 +415,7 @@ Ext.define('CB.object.edit.Window', {
             new Ext.util.KeyMap({
                 target: this.grid.getView().getEl()
                 ,binding: [{
-                        key: "s"
+                        key: 's'
                         ,ctrl: true
                         ,shift: false
                         ,stopEvent: true
@@ -740,7 +740,7 @@ Ext.define('CB.object.edit.Window', {
         if(Ext.isEmpty(title)) {
             title = L.New + ' ' + templatesStore.getProperty(templateId, 'name');
         }
-        this.setTitle(title);
+        this.setTitle(Ext.String.htmlEncode(title));
 
         this.setIconCls(getItemIcon(this.data));
     }

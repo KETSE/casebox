@@ -122,16 +122,34 @@ class FacetNav extends Query
         $this->replaceFilterVars($fq);
 
         $s = new \CB\Search();
-        $sr = $s->query(
-            array(
-                'rows' => 0
-                ,'fq' => $fq
-                ,'facet' => true
-                ,'facet.field' => array(
-                    '{!ex=' . $facetField . ' key=' . $facetName . '}' . $facetField
+
+        if (empty($cffc['child'])) {
+            $sr = $s->query(
+                array(
+                    'rows' => 0
+                    ,'fq' => $fq
+                    ,'facet' => true
+                    ,'facet.field' => array(
+                        '{!ex=' . $facetField . ' key=' . $facetName . '}' . $facetField
+                    )
                 )
-            )
-        );
+            );
+
+        } else { //BlockJoin query
+            $sr = $s->query(
+                array(
+                    'query' => '{!parent which=child:false}child:true'
+                    ,'rows' => 0
+                    ,'fq' => $fq
+                    ,'facet' => true
+                    ,'child.facet.field' => $facetField
+                ),
+                'bjf'
+            );
+            //block join is experimental and doesnt support aliasing
+            //for child.facet.field
+            $facetName = $facetField;
+        }
 
         if (!empty($sr['facets']->facet_fields->{$facetName})) {
             $facetClass = Facets::getFacetObject($cffc);

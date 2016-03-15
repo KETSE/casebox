@@ -48,22 +48,24 @@ class Search extends Solr\Client
 
     /**
      * query solr
-     * @param  array $p [description]
+     * @param  array  $p             [description]
+     * @param  string $searchHandler
      * @return array
      */
-    public function query($p)
+    public function query($p, $searchHandler = 'select')
     {
         $this->results = false;
         $this->inputParams = $p;
         $this->facetsSetManually = (
             isset($p['facet']) ||
             isset($p['facet.field']) ||
-            isset($p['facet.query'])
+            isset($p['facet.query']) ||
+            isset($p['child.facet.field'])
         );
 
         $this->prepareParams();
 
-        $this->connect();
+        $this->connect()->setSearchHandler($searchHandler);
 
         $this->executeQuery();
 
@@ -83,7 +85,7 @@ class Search extends Solr\Client
         /* initial parameters */
         $this->query = empty($p['query'])
             ? ''
-            : $this->escapeLuceneChars($p['query']);
+            : $p['query'];
 
         $this->rows = isset($p['rows'])
             ? intval($p['rows'])
@@ -426,6 +428,7 @@ class Search extends Solr\Client
                 ,'facet.range.gap'
                 ,'facet.sort'
                 ,'facet.missing' //"on" ?
+                ,'child.facet.field'
                 ,'stats.field'
             );
 
@@ -443,6 +446,7 @@ class Search extends Solr\Client
                     'facet.field'
                     ,'facet.query'
                     ,'facet.pivot'
+                    ,'child.facet.field'
                     ,'stats.field'
                 );
                 foreach ($copyParams as $pn) {
@@ -506,7 +510,11 @@ class Search extends Solr\Client
             \CB\fireEvent('beforeSolrQuery', $eventParams);
 
             $this->replaceSortFields();
-            $query = $this->escapeLuceneChars($this->query);
+
+            //dont escape query for BlockJoin faceting
+            $query = empty($this->params['child.facet.field'])
+                ? $this->escapeLuceneChars($this->query)
+                : $this->query;
 
             try {
                 $this->results = $this->search(

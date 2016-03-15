@@ -138,7 +138,6 @@ Ext.define('CB.plugin.Panel', {
                     ,params
                     ,'id,pids,path,name,template_id,status,statusCls,cid,cdate_ago_text,uid,udate_ago_text'
                 );
-                data.name = Ext.String.htmlEncode(data.name);
 
                 var titleView = new CB.object.TitleView({
                     data: data

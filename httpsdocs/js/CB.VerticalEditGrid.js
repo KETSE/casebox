@@ -751,9 +751,10 @@ Ext.define('CB.VerticalEditGrid', {
     }
 
     ,onSaveObjectEvent: function (key, event){
-        if(this.editing) {
-            this.stopEditing(false);
+        if(this.editingPlugin.editing) {
+            this.editingPlugin.completeEdit();
         }
+
         this.fireEvent('saveobject', this, event);
     }
 

@@ -1,3 +1,8 @@
+CaseBox 1.9.583 (2016-03-15)
+==============================
+- #11246 Virtual Folders and max instance
+- verticalEditGrid complete editing before Saving on Ctrl + S
+
 CaseBox 1.9.582 (2016-03-14)
 ==============================
 - #10726 Limit of signs / карточка дела ограничение на 500 знаков с пробелами
