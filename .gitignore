@@ -1,22 +1,18 @@
-/var/bootstrap.php.cache
-/var/cache/*
-/var/logs/*
+app/config/*/parameters.yml
+var/bootstrap.php.cache
+var/cache/*
+var/logs/*
 !var/logs/.gitkeep
 !var/files/.gitkeep
-/composer.phar
-/vendor/
-/web/bundles/
+composer.phar
 composer.lock
-tmp/
-# ignore cores custom params
-app/config/*/parameters.yml
-# ignore .sublime files
-*sublime*
-src/caseboxdev/
-/nbproject/
+vendor/
+web/bundles/
 web/css
 web/js
 web/img
 web/min
 web/files
 .idea/*
+*sublime*
+nbproject/
