@@ -2,6 +2,7 @@ app/config/*/parameters.yml
 var/bootstrap.php.cache
 var/cache/*
 var/logs/*
+var/files/*/
 !var/logs/.gitkeep
 !var/files/.gitkeep
 composer.phar
