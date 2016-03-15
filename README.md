@@ -15,5 +15,5 @@ Casebox is being developed by [Ketse](https://www.ketse.com/) & [HURIDOCS](https
 Code status
 -----------
 
-[![Build Status](https://travis-ci.org/KETSE/casebox.svg?branch=devel)](https://travis-ci.org/KETSE/casebox)
-[![Coverage Status](https://coveralls.io/repos/KETSE/casebox/badge.svg?branch=devel&service=github)](https://coveralls.io/github/KETSE/casebox?branch=devel)
+[![Build Status](https://travis-ci.org/KETSE/casebox.svg?branch=v2)](https://travis-ci.org/KETSE/casebox)
+[![Coverage Status](https://coveralls.io/repos/KETSE/casebox/badge.svg?branch=v2&service=github)](https://coveralls.io/github/KETSE/casebox?branch=v2)

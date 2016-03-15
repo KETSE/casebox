@@ -1,14 +1,13 @@
 /var/bootstrap.php.cache
-/var/cache/*
-/var/logs/*
+#/var/cache/*
+#/var/logs/*
 !var/logs/.gitkeep
+!var/files/.gitkeep
 /composer.phar
 /vendor/
 /web/bundles/
-.idea/*
 composer.lock
 tmp/
-var/files/*/_photo/
 # ignore cores custom params
 app/config/*/parameters.yml
 # ignore .sublime files
@@ -20,5 +19,4 @@ web/js
 web/img
 web/min
 web/files
-var/files/
-!var/files/default/.gitkeep
+.idea/*
