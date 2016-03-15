@@ -1,4 +1,0 @@
-Multilingual
-==================================
-
-mirrored title field

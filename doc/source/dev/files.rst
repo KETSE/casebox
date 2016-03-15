@@ -1,5 +1,0 @@
-Files
-===========
-
-- versioning
-- webDav
