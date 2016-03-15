@@ -1,6 +1,6 @@
 /var/bootstrap.php.cache
-#/var/cache/*
-#/var/logs/*
+/var/cache/*
+/var/logs/*
 !var/logs/.gitkeep
 !var/files/.gitkeep
 /composer.phar
