@@ -4,7 +4,9 @@
   "type": "project",
   "config": {
     "preferred-install": "dist",
-    "autoloader-suffix": "Casebox"
+    "autoloader-suffix": "Casebox",
+    "github-protocols": ["https"],
+    "process-timeout": 600
   },
   "autoload": {
     "psr-4": {
