@@ -65,6 +65,7 @@ class FacetNav extends Query
         $pn = $this->lastNode;
         while ($config = array_pop($configs)) {
             $rez[] = $config['field'] . ':' . $pn->id;
+
             $pn = $pn->parent;
         }
 
@@ -114,16 +115,16 @@ class FacetNav extends Query
             ? array()
             : $this->config['fq'];
 
-        $fq = array_merge(
-            $fq,
-            $this->getParentNodeFilters()
-        );
-
-        $this->replaceFilterVars($fq);
-
         $s = new \CB\Search();
 
         if (empty($cffc['child'])) {
+            $fq = array_merge(
+                $fq,
+                $this->getParentNodeFilters()
+            );
+
+            $this->replaceFilterVars($fq);
+
             $sr = $s->query(
                 array(
                     'rows' => 0
@@ -136,11 +137,18 @@ class FacetNav extends Query
             );
 
         } else { //BlockJoin query
+            $query = '{!parent which=child:false}child:true';
+
+            $parentFilters = $this->getParentNodeFilters();
+
+            if (!empty($parentFilters)) {
+                $query .= ' ' . implode(' ', $parentFilters);
+            }
+
             $sr = $s->query(
                 array(
-                    'query' => '{!parent which=child:false}child:true'
+                    'query' => $query
                     ,'rows' => 0
-                    ,'fq' => $fq
                     ,'facet' => true
                     ,'child.facet.field' => $facetField
                 ),

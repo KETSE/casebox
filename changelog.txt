@@ -1,3 +1,7 @@
+CaseBox 1.9.584 (2016-03-16)
+==============================
+- #11246 Virtual Folders and max instance
+
 CaseBox 1.9.583 (2016-03-15)
 ==============================
 - #11246 Virtual Folders and max instance
