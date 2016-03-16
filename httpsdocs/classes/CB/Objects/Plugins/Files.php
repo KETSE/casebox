@@ -16,7 +16,9 @@ class Files extends Base
         );
 
         if (empty(parent::getData($id))) {
-            return null;
+            return $this->isVisible()
+                ? $rez
+                : null;
         }
 
         $params = array(

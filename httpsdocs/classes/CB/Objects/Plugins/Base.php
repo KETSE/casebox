@@ -3,6 +3,7 @@ namespace CB\Objects\Plugins;
 
 use CB\Objects;
 use CB\Util;
+use CB\Templates;
 
 class Base
 {
@@ -85,20 +86,27 @@ class Base
             }
         }
 
-        $ttype = $obj->getTemplate()->getType();
-        // if (get_class($this) == 'CB\\Objects\\Plugins\\Files') {
-        //     echo $ttype;
-        // }
-        //check if template_type is specified
-        if ($rez && !empty($vcfg['template_type'])) {
-            $tt = Util\toTrimmedArray($vcfg['template_type']);
-            $rez = in_array($ttype, $tt);
+        $template = false;
+        if (!empty($obj)) {
+            $template = $obj->getTemplate();
+        } elseif (!empty($this->config['template_id'])) {
+            $template = Templates\SingletonCollection::getInstance()->getTemplate($this->config['template_id']);
         }
 
-        //check if template_type negation is specified
-        if ($rez && !empty($vcfg['!template_type'])) {
-            $tt = Util\toTrimmedArray($vcfg['!template_type']);
-            $rez = !in_array($ttype, $tt);
+        if (!empty($template)) {
+            $ttype = $template->getType();
+
+            //check if template_type is specified
+            if ($rez && !empty($vcfg['template_type'])) {
+                $tt = Util\toTrimmedArray($vcfg['template_type']);
+                $rez = in_array($ttype, $tt);
+            }
+
+            //check if template_type negation is specified
+            if ($rez && !empty($vcfg['!template_type'])) {
+                $tt = Util\toTrimmedArray($vcfg['!template_type']);
+                $rez = !in_array($ttype, $tt);
+            }
         }
 
         //check if context is specified

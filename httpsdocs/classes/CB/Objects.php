@@ -770,10 +770,6 @@ class Objects
             $templateData = $templates->getTemplate($templateId)->getData();
         }
 
-        $from = empty($p['from'])
-            ? ''
-            : $p['from'];
-
         $objectPlugins = empty($templateData['cfg']['object_plugins'])
             ? Config::get('default_object_plugins')
             : $templateData['cfg']['object_plugins'];
@@ -809,7 +805,14 @@ class Objects
                 : $k;
 
             $v['objectId'] = $id;
-            $v['context'] = $from;
+
+            $v['context'] = empty($p['from'])
+                ? ''
+                : $p['from'];
+
+            $v['template_id'] = empty($p['template_id'])
+                ? ''
+                : $p['template_id'];
 
             $fullClassName = '\\CB\\Objects\\Plugins\\' . ucfirst($className);
 
