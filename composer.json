@@ -36,7 +36,10 @@
   "require-dev": {
     "caseboxdev/core-bundle": "@dev",
     "caseboxdev/rpc-bundle": "@dev",
-    "caseboxdev/rest-bundle": "@dev"
+    "caseboxdev/rest-bundle": "@dev",
+    "phpunit/phpunit": "5.2.*",
+    "phpunit/phpunit-story": ">=1.0",
+    "satooshi/php-coveralls": "~0.7@stable"
   },
   "scripts": {
     "post-install-cmd": [
