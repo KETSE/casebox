@@ -39,8 +39,8 @@
     "caseboxdev/rest-bundle": "@dev",
     "phpunit/phpunit": "^5.2.12",
     "phpunit/php-code-coverage": "^3.3.0",
-    "satooshi/php-coveralls": "dev-master",
-    "phpunit/phpcov": "3.*"
+    "satooshi/php-coveralls": "2.*",
+    "phpunit/phpcov": "2.*"
   },
   "scripts": {
     "post-install-cmd": [
