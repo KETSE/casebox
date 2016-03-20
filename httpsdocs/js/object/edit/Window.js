@@ -309,6 +309,9 @@ Ext.define('CB.object.edit.Window', {
                 ,loaded: this.onPluginsContainerLoaded
             }
         });
+
+        this.on('timespentclick', this.onTimeSpentClick, this);
+        this.on('addtimespentclick', this.onAddTimeSpentClick, this);
     }
 
     /**
@@ -1297,5 +1300,15 @@ Ext.define('CB.object.edit.Window', {
 
         this.actions.star.setHidden(isStarred);
         this.actions.unstar.setHidden(!isStarred);
+    }
+
+    ,onTimeSpentClick: function(cmp) {
+        clog('onTimeSpentClick!');
+        this.pluginsContainer.onTimeSpentClick(cmp);
+    }
+
+    ,onAddTimeSpentClick: function(cmp, e) {
+        clog('onAddTimeSpentClick!');
+        this.pluginsContainer.onAddTimeSpentClick(cmp, e);
     }
 });

@@ -534,6 +534,28 @@ Ext.define('CB.VerticalEditGridHelperTree', {
         return index;
     }
 
+    /**
+     * get duplication indexes for given node up to root node
+     * @param  string nodeId
+     * @return array
+     */
+    ,getDuplicationIndexes: function(nodeId){
+        var rez = {}
+            ,node = this.getNode(nodeId)
+            ,idx;
+
+        while(node) {
+            idx = this.getDuplicateIndex(node.data.id);
+            if(idx > -1) {
+                rez[node.data.templateRecord.data.name] = idx;
+            }
+            node = node.parentNode;
+        }
+
+        return rez;
+    }
+
+
     ,isFirstDuplicate: function(nodeId){
         if(!this.isDuplicate(nodeId)) {
             return false;

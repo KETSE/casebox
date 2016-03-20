@@ -57,8 +57,8 @@ class TimeTrackingModel extends Base
                         ,'type' => 'varchar'
                     )
                     ,'cost' => array(
-                        'en' => 'Const'
-                        ,'ru' => 'Цена'
+                        'en' => 'Hourly rare'
+                        ,'ru' => 'Почасовая ставка'
                         ,'type' => 'varchar'
                         ,'cfg' => array(
                             'readOnly' => true

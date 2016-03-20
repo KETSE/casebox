@@ -360,8 +360,8 @@ class Browser
             }
         }
 
-        if (!empty($p['source'])) {
-            if (is_array($p['source'])) { // a custom source
+        if (!empty($fieldConfig['source'])) {
+            if (is_array($fieldConfig['source'])) { // a custom source
                 $rez = array();
 
                 if (empty($p['fieldId'])) {
@@ -381,9 +381,9 @@ class Browser
                 }
             }
 
-            switch ($p['source']) {
+            switch ($fieldConfig['source']) {
                 case 'field':
-                    switch ($p['scope']) {
+                    switch ($fieldConfig['scope']) {
                         case 'project':
                             $ids = DM\Tree::getCaseId(Path::detectRealTargetId($p['path']));
                             break;

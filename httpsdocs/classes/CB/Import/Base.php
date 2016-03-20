@@ -292,6 +292,7 @@ class Base
             //             )
             //         )
 
+            $previousFieldId = null;
             $i = 1;
             foreach ($fields as $fn => $fv) {
                 //check if we have field reference
@@ -304,6 +305,10 @@ class Base
                 $fv['pid'] = $id;
                 $fv['template_id'] = BBM::$cfg['fieldTemplateId'];
 
+                if (!empty($fv['child'])) {
+                    $fv['pid'] = $previousFieldId;
+                }
+
                 $name = empty($fv['en'])
                     ? $fn
                     : $fv['en'];
@@ -313,7 +318,7 @@ class Base
                     : $fv['type'];
 
                 $order = empty($fv['order'])
-                    ? $i++
+                    ? 10 * $i++
                     : $fv['order'];
 
                 $data = array(
@@ -336,11 +341,16 @@ class Base
                     ? array()
                     : $fv['cfg'];
 
+                if (!empty($cfg['savedScope'])) {
+                    $cfg['scope'] = $cfg['savedScope'];
+                    unset($cfg['savedScope']);
+                }
+
                 if (!empty($cfg['scope']) && substr($cfg['scope'], 0, 1) == '/') {
                     if (!empty($this->thesauriIds[$cfg['scope']]['id'])) {
                         $cfg['scope'] = $this->thesauriIds[$cfg['scope']]['id'];
 
-                    } else {
+                    } elseif ($cfg['scope'] == 'root') {
                         $cfg['scope'] = \CB\Path::getId($cfg['scope']);
                     }
                 }
@@ -354,7 +364,7 @@ class Base
 
                 if (!empty($cfg)) {
                     $fv['cfg'] = $cfg;
-                    $data['cfg'] = Util\jsonEncode($cfg);
+                    $data['cfg'] = Util\jsonEncode($cfg, JSON_PRETTY_PRINT);
                 }
 
                 $fv['name'] = $fn;
@@ -362,7 +372,7 @@ class Base
                 $fv['order'] = $order;
                 $fv['data'] = $data;
 
-                $tf->create($fv);
+                $previousFieldId = $tf->create($fv);
             }
 
             /*

@@ -467,7 +467,7 @@ function formatMysqlTime($date, $format = false)
  * @param  int $seconds
  * @return string
  */
-function formatSeconds($seconds)
+function formatSeconds($seconds, $format = 'H:i:s')
 {
     $sec = $seconds % 60; //51
     $seconds -= $sec; //60
@@ -475,9 +475,10 @@ function formatSeconds($seconds)
     $min = $seconds % 60;
     $hours = floor($seconds / 60);
 
-    $rez = empty($hours)
-        ? sprintf('%02d:%02d', $min, $sec)
-        : sprintf('%02d:%02d:%02d', $hours, $min, $sec);
+    $rez = date(
+        $format,
+        strtotime(sprintf('%02d:%02d:%02d', $hours, $min, $sec))
+    );
 
     return $rez;
 }
@@ -702,16 +703,19 @@ function unsetNullValues(&$arr)
 
 /**
  * json encode a variable
- * @param  variant $var
+ * @param  variant  $var
+ * @param  int      $options
  * @return varchar | null
  */
-function jsonEncode($var)
+function jsonEncode($var, $options = 0)
 {
     if (empty($var) && (!is_array($var))) {
         return null;
     }
 
-    return json_encode($var, JSON_UNESCAPED_UNICODE);
+    $options = $options | JSON_UNESCAPED_UNICODE;
+
+    return json_encode($var, $options);
 }
 
 /**

@@ -1,3 +1,8 @@
+CaseBox 1.9.586 (2016-03-20)
+==============================
+- #10221 Time Tracking feature
+- #12080 Send INDEX of multiplied block in custom FN
+
 CaseBox 1.9.585 (2016-03-16)
 ==============================
 - #12014 Can't attach files to new tasks

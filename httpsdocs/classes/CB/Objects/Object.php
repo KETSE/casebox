@@ -1805,7 +1805,7 @@ class Object
             // if ($timeSpent > 0) {
                 $body .= '<tr><td class="prop-key">' . L\get('TimeSpent') . '</td>' .
                     '<td class="prop-val"><span class="time-spent click">' .
-                    Util\formatSeconds($timeSpent['sec']) .
+                    Util\formatSeconds($timeSpent['sec'], 'H:i') .
                     ' / $' . number_format($timeSpent['money'], 2) .
                     '</span> <a class="add-time-spent i-add click"></a>' .
                     '</td></tr>';

@@ -619,14 +619,16 @@ Ext.define('CB.VerticalEditGrid', {
             context.value = a.join(':');
         }
 
-        var col = context.column;
-        var previousEditor = col.getEditor();
+        var col = context.column
+            ,previousEditor = col.getEditor()
+            ,recordId = context.record.get('id');
 
 
         if(this.editors && this.editors[t]) {
             col.setEditor(this.editors[t](this));
         } else {
-            context.fieldRecord = this.helperTree.getNode(context.record.get('id')).data.templateRecord;
+            context.fieldRecord = this.helperTree.getNode(recordId).data.templateRecord;
+            context.duplicationIndexes = this.helperTree.getDuplicationIndexes(recordId);
 
             //check if custom source and send fields
             if(Ext.isObject(context.fieldRecord.get('cfg')['source'])) {

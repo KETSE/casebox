@@ -33,12 +33,15 @@ Ext.define('CB.object.plugin.TimeTracking', {
             '<table class="block-plugin">'
             ,'<tpl for=".">'
             ,'<tr>'
-            ,'    <td>'
+            ,'    <td style="width:60%">'
             ,'        <span class="click" title="{[ displayDateTime(values.cdate) ]}">{[ displayDateTime(values.date) ]}</span> &nbsp;'
             ,'        <span class="click">{user}</span>'
             ,'    </td>'
-            ,'    <td>'
+            ,'    <td style="width:20%">'
             ,'        {time}'
+            ,'    </td>'
+            ,'    <td style="width:20%">'
+            ,'        {cost}'
             ,'    </td>'
             ,'</tr>'
             ,'</tpl>'
@@ -130,6 +133,6 @@ Ext.define('CB.object.plugin.TimeTracking', {
             ,alignWindowTo: e.getXY()
         };
 
-        this.fireEvent('createobject', d, e);
+        App.mainViewPort.fireEvent('createobject', d, e);
     }
 });

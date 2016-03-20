@@ -83,6 +83,16 @@ class TimeTracking extends Object
         return $rez;
     }
 
+    protected function collectSolrData()
+    {
+        $rez = parent::collectSolrData();
+
+        $spent = $this->getSpentTime();
+
+        $this->data['sys_data']['solr']['time_spent_money_f'] = $spent['money'];
+
+    }
+
     /**
      * get spent time for current object
      * @return void
