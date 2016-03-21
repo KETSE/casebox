@@ -1,7 +1,7 @@
 sudo: false
 language: php
 php:
-  - 5.6
+  - 7.0
 
 services:
   - mysql
@@ -36,27 +36,27 @@ install:
 
 before_script:
   # copy and install solr
-   - export SOLR_VERSION="5.2.0"
+   - export SOLR_VERSION="5.5.0"
    - export SOLR_PORT="8983"
-   - bash tests/server/solr/solr5-install.sh
+   - bash src/Tests/solr5.sh --install
    # may take few seconds to start and may not be available when the script is executed
    - sleep 3
   # add solr core cbtest_log
-   - export SOLR_CORENAME="cbtest_log"
-   - export SOLR_CONFIGSET="cbtest_log"
-   - bash tests/server/solr/solr5-addcore.sh
+   - export SOLR_CORENAME="cb_log"
+   - export SOLR_CONFIGSET="cb_log"
+   - bash src/Tests/solr5.sh --addcore
   # add solr core test
-   - export SOLR_CORENAME="cbtest_test"
-   - export SOLR_CONFIGSET="cbtest_default"
-   - bash tests/server/solr/solr5-addcore.sh
+   - export SOLR_CORENAME="cb_default"
+   - export SOLR_CONFIGSET="/var/solr/default/conf"
+   - bash src/Tests/solr5.sh --addcore
   # add php extensions
 #   - phpenv config-add "${TRAVIS_BUILD_DIR}/tests/server/php/config-extensions.ini"
   # autoinstall CASEBOX
    - php tests/auto_install.php
 
 script:
-   - vendor/bin/phpunit -c tests/phpunit-travis.xml 
+   - vendor/bin/phpunit -c src/Tests/phpunit.xml 
 
 after_script:
  - if [ -f vendor/bin/coveralls ] ; then php vendor/bin/coveralls -v || true ; fi
- - bash tests/server/solr/solr5-stop.sh
+ - bash src/Tests/solr5.sh --stop
