@@ -144,6 +144,7 @@ Ext.define('GenericCount', {
     ,fields: [
         {name: 'id', type: 'string'}
         ,{name: 'name',  type: 'string'}
+        ,{name: 'shortname',  type: 'string'}
         ,{name: 'count',  type: 'int'}
     ]
 });

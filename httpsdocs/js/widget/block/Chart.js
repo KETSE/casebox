@@ -51,6 +51,16 @@ Ext.define('CB.widget.block.Chart', {
             ,model: 'GenericCount'
         });
 
+        var tipsCfg = {
+            trackMouse: true
+            ,style: 'background: #FFF; overflow: visible'
+            ,height: 20
+            ,width: 200
+            ,renderer: function(storeItem, item) {
+                this.setTitle(storeItem.get('name') + ': ' + storeItem.get('count'));
+            }
+        };
+
         this.chartConfigs = {
             'bar': {
                 width: '100%'
@@ -65,14 +75,14 @@ Ext.define('CB.widget.block.Chart', {
                     },{
                         type: 'category'
                         ,position: 'left'
-                        ,fields: 'name'
+                        ,fields: 'shortname'
                         ,grid: true
                     }
                 ]
                 ,series: [{
                     type: 'bar'
                     ,axis: 'bottom'
-                    ,xField: 'name'
+                    ,xField: 'shortname'
                     ,yField: 'count'
                     ,style: {
                         opacity: 0.80
@@ -87,6 +97,7 @@ Ext.define('CB.widget.block.Chart', {
                         field: 'count'
                         ,display: 'insideEnd'
                     }
+                    ,tips: tipsCfg
                     ,listeners: {
                         scope: this
                         ,itemclick: this.onChartItemClick
@@ -106,7 +117,7 @@ Ext.define('CB.widget.block.Chart', {
                     }, {
                         type: 'category'
                         ,position: 'bottom'
-                        ,fields: ['name']
+                        ,fields: ['shortname']
                         ,grid: true
                         ,label: {
                             rotate: {degrees: -90}
@@ -115,7 +126,7 @@ Ext.define('CB.widget.block.Chart', {
                 ]
                 ,series: [{
                     type: 'column'
-                    ,xField: 'name'
+                    ,xField: 'shortname'
                     ,yField: ['count']
                     ,stacked: true
                     ,highlight: {
@@ -125,6 +136,7 @@ Ext.define('CB.widget.block.Chart', {
                         field: 'count'
                         ,display: 'insideEnd'
                     }
+                    ,tips: tipsCfg
                     ,listeners: {
                         scope: this
                         ,itemclick: this.onChartItemClick
@@ -139,7 +151,7 @@ Ext.define('CB.widget.block.Chart', {
                     donut: 0,
                     angleField: 'count',
                     label: {
-                        field: 'name',
+                        field: 'shortname',
                         display: 'outside',
                         calloutLine: true
                     },
@@ -149,15 +161,7 @@ Ext.define('CB.widget.block.Chart', {
                         'stroke-width': 1,
                         stroke: '#fff'
                     }
-                    ,tips: {
-                        trackMouse: true
-                        ,style: 'background: #FFF; overflow: visible'
-                        ,height: 20
-                        ,width: 200
-                        ,renderer: function(storeItem, item) {
-                            this.setTitle(storeItem.get('name') + ': ' + storeItem.get('count'));
-                        }
-                    }
+                    ,tips: tipsCfg
 
                     ,listeners: {
                         scope: this
@@ -216,7 +220,8 @@ Ext.define('CB.widget.block.Chart', {
                     } else {
                         d[key][i].count = d[key][i].items;
                     }
-                    d[key][i].name = htmlEntityDecode(App.shortenString(d[key][i].name, 30));
+
+                    d[key][i].shortname = htmlEntityDecode(App.shortenString(d[key][i].name, 30));
                 }
 
                 if(data.sorter) {

@@ -1,3 +1,9 @@
+CaseBox 1.9.588 (2016-03-21)
+==============================
+- #12139 Add hint with title=label for Bar/Column Charts
+- #12136 Use UserSettings.DateFormat for Date columns in DC
+- #12135 Sub-field not shown
+
 CaseBox 1.9.587 (2016-03-21)
 ==============================
 - #11044 first and second levels
