@@ -2,6 +2,7 @@
 namespace CB\Objects;
 
 use CB\Objects;
+use CB\DataModel as DM;
 use CB\Log;
 
 class TimeTracking extends Object
@@ -51,8 +52,7 @@ class TimeTracking extends Object
 
         \CB\Config::setFlag('disableActivityLog', false);
 
-        $this->oldObject->removeParentSpentTime();
-        $this->addParentSpentTime($this);
+        $this->recalculateParentSpentTime();
 
         return $rez;
 
@@ -64,9 +64,9 @@ class TimeTracking extends Object
             $this->load();
         }
 
-        $this->removeParentSpentTime();
-
         parent::delete($persistent);
+
+        $this->recalculateParentSpentTime();
     }
 
     protected function getTimeCost()
@@ -187,17 +187,28 @@ class TimeTracking extends Object
     }
 
     /**
-     * remove spent time from parent object
+     * recalculate spent time from parent object
      * @return void
      */
-    protected function removeParentSpentTime()
+    protected function recalculateParentSpentTime()
     {
-        $parentSpentTime = $this->getParentSpentTime();
-        $spentTime = $this->getSpentTime();
+        $recs = DM\Objects::getChildrenByTemplate(
+            $this->data['pid'],
+            $this->data['template_id']
+        );
 
-        $parentSpentTime['sec'] -= $spentTime['sec'];
-        $parentSpentTime['money'] -= $spentTime['money'];
+        $rez = [
+            'sec' => 0,
+            'money' => 0
+        ];
 
-        $this->setParentSpentTime($parentSpentTime);
+        foreach ($recs as $r) {
+            $rez['sec'] += $r['sys_data']['solr']['time_spent_i'];
+            $rez['money'] += $r['sys_data']['solr']['time_spent_money_f'];
+        }
+
+        $this->setParentSpentTime($rez);
+
+        return $rez;
     }
 }

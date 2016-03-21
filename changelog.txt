@@ -1,3 +1,11 @@
+CaseBox 1.9.587 (2016-03-21)
+==============================
+- #11044 first and second levels
+- #12108 Label for Column Chart are not looking ok
+- #12106 vNodes configs: pid is set to NULL onSave
+- #12078 Headers inside a MaxInstances header is not visible
+- #10221 Time Tracking feature
+
 CaseBox 1.9.586 (2016-03-20)
 ==============================
 - #10221 Time Tracking feature

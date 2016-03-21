@@ -431,13 +431,14 @@ Ext.define('CB.VerticalEditGridHelperTree', {
                 before: function(n) {
                     var tr = n.data.templateRecord
                         ,cfg = tr.get('cfg');
+
                     if(tr &&
                         n.isAncestor(node) &&
                         (
                             cfg.thesauriId === 'dependent' ||
                             Ext.isDefined(cfg.dependency)
                         ) &&
-                        (cfg.source == 'variable') &&
+                        (cfg.scope == 'variable') &&
                         (tr.get('pid') == node.data.templateRecord.get('id')) &&
                         (cfg.readOnly !== true) &&
                         (tr.get('type') === '_objects') //resetting only object fields

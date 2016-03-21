@@ -1226,9 +1226,41 @@ class Object
             return $rez;
         }
 
+        $template = $this->getTemplate();
+        $templateData = $template->getData();
+        $headers = $templateData['headers'];
+
         foreach ($data as $fieldName => $fieldValue) {
             if ($this->isFieldValue($fieldValue)) {
                 $fieldValue = array($fieldValue);
+            }
+
+            $templateField = $template->getField($fieldName);
+            $level = $templateField['level'];
+
+            if ($templateField['type'] == 'H') {
+                $prevHeaderField = $templateField;
+
+            } else {
+                $headerField = (empty($headers[$fieldName]))
+                    ? false
+                    : $headers[$fieldName];
+
+                if (!empty($headerField) &&
+                    (
+                        empty($prevHeaderField) ||
+                        ($headerField['name'] !== $prevHeaderField['name'])
+                    )
+                ) {
+                    $prevHeaderField = $headerField;
+
+                    if (!isset($data[$headerField['name']])) {
+                        $rez[] = [
+                            'name' => $headerField['name']
+                            ,'value' => null
+                        ];
+                    }
+                }
             }
 
             $idx = $maxInstancesIndex;
@@ -1258,7 +1290,14 @@ class Object
         foreach ($rez as $fv) {
             $sortedRez[] = $fv;
             if (!empty($fv['childs'])) {
-                $sortedRez = array_merge($sortedRez, $this->getLinearNodesData($fv['childs'], $sorted, $fv['idx']));
+                $sortedRez = array_merge(
+                    $sortedRez,
+                    $this->getLinearNodesData(
+                        $fv['childs'],
+                        $sorted,
+                        $fv['idx']
+                    )
+                );
             }
         }
 
@@ -1749,9 +1788,9 @@ class Object
         }
 
         if (!empty($gf['body'])) {
-            $previousHeader = '';
             foreach ($gf['body'] as $f) {
                 $v = $template->formatValueForDisplay($f['tf'], @$f);
+
                 if (is_array($v)) {
                     $v = implode('<br />', $v);
                 }

@@ -377,7 +377,7 @@ Ext.define('CB.widget.block.Pivot', {
                     ,fields: serie.xField
                     ,grid: true
                     ,label: {
-                         rotation: {
+                         rotate: {
                             degrees: (chartType === 'bar')
                                 ? 0
                                 : 270

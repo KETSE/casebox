@@ -109,7 +109,7 @@ Ext.define('CB.widget.block.Chart', {
                         ,fields: ['name']
                         ,grid: true
                         ,label: {
-                            rotation: {degrees: -90}
+                            rotate: {degrees: -90}
                         }
                     }
                 ]

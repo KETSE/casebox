@@ -57,6 +57,36 @@ class Objects extends Base
     }
 
     /**
+     * get child records by template for a given parent id
+     * @param  int   $pid
+     * @param  int   $templateId
+     * @param  bool  $active     only active (not deleted) records
+     * @return array
+     */
+    public static function getChildrenByTemplate($pid, $templateId, $active = true)
+    {
+        $rez = array();
+
+        $sql = 'SELECT o.*
+            FROM tree t
+            JOIN objects o
+                ON t.id = o.id
+            WHERE t.pid = $1 AND t.template_id = $2' .
+            ($active ? ' AND t.dstatus = 0' : '');
+
+        $res = DB\dbQuery($sql, [$pid, $templateId]);
+
+        while ($r = $res->fetch_assoc()) {
+            $r['data'] = Util\jsonDecode($r['data']);
+            $r['sys_data'] = Util\jsonDecode($r['sys_data']);
+            $rez[] = $r;
+        }
+        $res->close();
+
+        return $rez;
+    }
+
+    /**
      * check if the record with given id is marked as draft
      * @param  int     $id
      * @return boolean
