@@ -16,11 +16,7 @@ class ContentItems extends Base
         );
 
         if (empty(parent::getData($id))) {
-            return $rez;
-        }
-
-        if (!$this->isVisible()) {
-            return $rez;
+            return null;
         }
 
         $params = $this->getSolrParams();
@@ -59,46 +55,6 @@ class ContentItems extends Base
         return $rez;
     }
 
-    /**
-     * check if current plugin is visible according to its config
-     * @return boolean
-     */
-    protected function isVisible()
-    {
-        $rez = true;
-
-        $config = $this->config;
-        if (!empty($config['fn']['visibility'])) {
-            $rez = $this->getFunctionResult($config['fn']['visibility']);
-
-        } elseif (!empty($config['visibility'])) {
-            $obj = Objects::getCachedObject($this->id);
-            if (!empty($obj)) {
-                foreach ($config['visibility'] as $fn => $fv) {
-                    if (is_scalar($fv)) {
-                        $fv = [$fv];
-                    }
-
-                    $val = @$obj->getFieldValue($fn, 0)['value'];
-                    $fieldRez = false;
-
-                    foreach ($fv as $v) {
-                        if (is_numeric($v)) {
-                            $arr = Util\toNumericArray($val);
-                            $fieldRez = $fieldRez || in_array($v, $arr);
-                        } else {
-                            $fieldRez = $fieldRez || ($v == $val);
-                        }
-                    }
-
-                    $rez = $rez && $fieldRez;
-                }
-            }
-        }
-
-        return $rez;
-    }
-
     protected function getSolrParams()
     {
         $rez = [
@@ -108,19 +64,8 @@ class ContentItems extends Base
 
         $config = $this->config;
 
-        //if config is empty - use old behavior
-        if (empty($config)) {
-            $rez['pid'] = $this->id;
-            $rez['fq'] = ['(template_type:object) OR (target_type:object)'];
-
-            $folderTemplates = \CB\Config::get('folder_templates');
-            if (!empty($folderTemplates)) {
-                $rez['fq'][] = '!template_id:(' .
-                    implode(' OR ', Util\toNumericArray($folderTemplates)) . ')';
-            }
-
-        } elseif (!empty($config['fn']['source'])) {
-            $ids = $this->getFunctionResult($config['fn']['source']);
+        if (!empty($config['fn'])) {
+            $ids = $this->getFunctionResult($config['fn']);
             if (!empty($ids)) {
                 $rez['fq'] = 'id:(' . implode(' OR ', $ids) . ')';
             }
@@ -141,6 +86,16 @@ class ContentItems extends Base
             }
 
             $rez['fq'] = $fq;
+
+        } else {//if config is empty - use old behavior
+            $rez['pid'] = $this->id;
+            $rez['fq'] = ['(template_type:object) OR (target_type:object)'];
+
+            $folderTemplates = \CB\Config::get('folder_templates');
+            if (!empty($folderTemplates)) {
+                $rez['fq'][] = '!template_id:(' .
+                    implode(' OR ', Util\toNumericArray($folderTemplates)) . ')';
+            }
         }
 
         if (!empty($config['sort'])) {

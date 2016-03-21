@@ -89,16 +89,17 @@ Ext.define('CB.object.field.editor.Tag', {
                                 if(!Ext.isEmpty(d.fieldRecord)) {
                                     store.proxy.extraParams.fieldId = d.fieldRecord.get('id');
                                 }
-                                if(!Ext.isEmpty(d.objectId)) {
-                                    store.proxy.extraParams.objectId = d.objectId;
-                                }
-                                if(!Ext.isEmpty(d.pidValue)) {
-                                    store.proxy.extraParams.pidValue = d.pidValue;
-                                }
-                                if(!Ext.isEmpty(d.path)) {
-                                    store.proxy.extraParams.path = d.path;
-                                }
-                                store.proxy.extraParams.objFields = d.objFields;
+                                Ext.copyTo(
+                                    store.proxy.extraParams
+                                    ,d
+                                    ,[
+                                        'objectId'
+                                        ,'pidValue'
+                                        ,'path'
+                                        ,'objFields'
+                                        ,'duplicationIndexes'
+                                    ]
+                                );
                             }
                         }
                         ,load:  function(store, recs, options) {

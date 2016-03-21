@@ -20,12 +20,22 @@ class StringsFacet
 
     public function getSolrParams()
     {
-        return array(
+        $rez = array(
             'facet' => true
             ,'facet.field' => array(
                 '{!ex='.$this->field.' key='.$this->config['name'].'}'.$this->field
             )
         );
+
+        if (!empty($this->config['child'])) {
+            $rez = array(
+                'facet' => true
+                ,'requestHandler' => 'bjf'
+                ,'child.facet.field' => $this->field
+            );
+        }
+
+        return $rez;
     }
 
     public function getFilters(&$p)
@@ -50,8 +60,12 @@ class StringsFacet
     public function loadSolrResult($solrResult)
     {
         $this->solrData = array();
-        if (!empty($solrResult->facet_fields->{$this->config['name']})) {
-            $this->solrData = $solrResult->facet_fields->{$this->config['name']};
+        $index = empty($this->config['child'])
+            ? $this->config['name']
+            : $this->config['field'];
+
+        if (!empty($solrResult->facet_fields->$index)) {
+            $this->solrData = $solrResult->facet_fields->$index;
         }
     }
 

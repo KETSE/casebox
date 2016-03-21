@@ -98,7 +98,7 @@ class Dbnode extends Base
             $id = $this->id;
         }
 
-        $rez = Objects::getName($id);
+        $rez = Objects::getName($id, true);
 
         return $rez;
     }

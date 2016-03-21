@@ -103,7 +103,7 @@ Ext.define('CB.ViewPort', {
             ,layout: 'card'
             ,width: 250
             ,split: {
-                size: 2
+                size: 3
                 ,collapsible: false
             }
             ,collapsible: true

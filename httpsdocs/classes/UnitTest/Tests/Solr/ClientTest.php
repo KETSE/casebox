@@ -33,6 +33,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $doc = new \Apache_Solr_Document();
         $doc->id = 9999;
+        $doc->doc_id = 9999;
         $doc->name="testAddDocument";
         $doc->dstatus = 0;
         $response = $this->solr->addDocument($doc);

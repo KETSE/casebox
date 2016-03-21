@@ -35,16 +35,32 @@ class Collection
         $this->reset();
         /* collecting template_fields */
         $fields = array();
-        $fieldsByIndex = array();
+        $headers = array();
+        $templateId = false;
+        $headerField = false;
+        $prevLevel = 0;
 
         $recs = DM\TemplatesStructure::getFields();
 
         foreach ($recs as $r) {
+            if (($templateId != $r['template_id']) || ($prevLevel != $r['level'])) {
+                unset($headerField);
+                $headerField = false;
+                $prevLevel = $r['level'];
+            }
+
             $templateId = $r['template_id'];
             unset($r['template_id']);
 
+            if ($r['type'] == 'H') {
+                unset($headerField);
+                $headerField = &$r;
+            }
+
+            $headers[$templateId][$r['name']] = &$headerField;
+
             $fields[$templateId][$r['id']] = &$r;
-            $fieldsByIndex[$templateId][] = &$r;
+
             unset($r);
         }
 
@@ -54,9 +70,10 @@ class Collection
             $r['fields'] = empty($fields[$r['id']])
                 ? array()
                 : $fields[$r['id']];
-            $r['fieldsByIndex'] = empty($fieldsByIndex[$r['id']])
+
+            $r['headers'] = empty($headers[$r['id']])
                 ? array()
-                : $fieldsByIndex[$r['id']];
+                : $headers[$r['id']];
 
             /* store template in collection */
             $this->templates[$r['id']] = new \CB\Objects\Template($r['id'], false);

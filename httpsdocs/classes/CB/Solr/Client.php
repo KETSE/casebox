@@ -12,6 +12,8 @@ use CB\DataModel as DM;
 
 class Client extends Service
 {
+    private $deleteNestedDocs = true;
+
     /**
      * running cron for updating tree changes into solr
      */
@@ -257,11 +259,13 @@ class Client extends Service
         $indexedDocsCount = 0;
         $all = !empty($p['all']);
         $nolimit = !empty($p['nolimit']);
+        $this->deleteNestedDocs = true;
 
         /* prepeare where condition for sql depending on incomming params */
         $where = '(t.updated > 0) AND (t.draft = 0) AND (t.id > $1)';
 
         if ($all) {
+            $this->deleteNestedDocs = false;
             $this->deleteByQuery('*:*');
             $where = '(t.id > $1) AND (t.draft = 0) ';
 
@@ -273,6 +277,7 @@ class Client extends Service
         }
 
         $sql = 'SELECT t.id
+                ,t.id doc_id
                 ,t.pid
                 ,ti.pids
                 ,ti.case_id
@@ -331,6 +336,8 @@ class Client extends Service
                 //append file contents for files to content field
                 $this->appendFileContents($docs);
 
+                $this->deleteByQuery('id:(' . implode(' OR ', array_keys($docs)) . ')');
+
                 $this->addDocuments($docs);
 
                 $this->commit();
@@ -375,6 +382,7 @@ class Client extends Service
         }
 
         $sql = 'SELECT ti.id
+                    ,ti.id doc_id
                     ,ti.pids
                     ,ti.case_id
                     ,ti.acl_count
@@ -435,8 +443,8 @@ class Client extends Service
                 $this->commit();
             }
         }
-
     }
+
     private function filterSolrFields(&$doc)
     {
         $some_fields = array('iconCls', 'updated', 'sys_data');

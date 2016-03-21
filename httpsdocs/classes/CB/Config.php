@@ -657,38 +657,6 @@ class Config extends Singleton
     }
 
     /**
-     * get defined plugins for right panel for given object type
-     * @param  varchar $objectType
-     * @param  string  $from       defines subgroup plugin definition (window - object edit window)
-     * @return array
-     */
-    public static function getObjectTypePluginsConfig($objectType, $from = '')
-    {
-        $rez = array();
-        $tmp = static::get('object_type_plugins');
-
-        if (!empty($from)) {
-            $tmp = @$tmp[$from];
-        }
-
-        if (!empty($tmp[$objectType])) {
-            $rez = $tmp[$objectType];
-        } else {
-            $tmp = static::get('default_object_plugins');
-
-            if (!empty($from)) {
-                $tmp = @$tmp[$from];
-            }
-
-            if (!empty($tmp)) {
-                $rez = $tmp;
-            }
-        }
-
-        return $rez;
-    }
-
-    /**
      * return default columns available for griv view
      * @return array
      */
@@ -920,7 +888,6 @@ class Config extends Singleton
             ,'default_DC'
             ,'search_DC'
             ,'default_object_plugins'
-            ,'object_type_plugins'
             ,'treeNodes'
             ,'action_log'
             ,'maintenance'

@@ -167,6 +167,10 @@ Ext.define('CB.VerticalEditGrid', {
 
                 if(tr.get('type') === 'H'){
                     meta.css ='vgh';
+                    if (tr.get('cfg').style) {
+                        meta.tdStyle = tr.get('cfg').style;
+                    }
+
                 } else {
                     meta.css = 'bgcLG vaT';
                     meta.style = 'margin-left: ' + (n.getDepth()-1) + '0px';
@@ -215,6 +219,10 @@ Ext.define('CB.VerticalEditGrid', {
                     return v;
                 }
                 var tr = n.data.templateRecord;
+
+                if ((tr.get('type') == 'H') && tr.get('cfg').style) {
+                    meta.tdStyle = tr.get('cfg').style;
+                }
 
                 //check validation field
                 if (record.get('valid') === false) {
@@ -611,14 +619,16 @@ Ext.define('CB.VerticalEditGrid', {
             context.value = a.join(':');
         }
 
-        var col = context.column;
-        var previousEditor = col.getEditor();
+        var col = context.column
+            ,previousEditor = col.getEditor()
+            ,recordId = context.record.get('id');
 
 
         if(this.editors && this.editors[t]) {
             col.setEditor(this.editors[t](this));
         } else {
-            context.fieldRecord = this.helperTree.getNode(context.record.get('id')).data.templateRecord;
+            context.fieldRecord = this.helperTree.getNode(recordId).data.templateRecord;
+            context.duplicationIndexes = this.helperTree.getDuplicationIndexes(recordId);
 
             //check if custom source and send fields
             if(Ext.isObject(context.fieldRecord.get('cfg')['source'])) {
@@ -743,9 +753,10 @@ Ext.define('CB.VerticalEditGrid', {
     }
 
     ,onSaveObjectEvent: function (key, event){
-        if(this.editing) {
-            this.stopEditing(false);
+        if(this.editingPlugin.editing) {
+            this.editingPlugin.completeEdit();
         }
+
         this.fireEvent('saveobject', this, event);
     }
 

@@ -184,7 +184,6 @@ class Base
 
         //set custom display columns data
         if (!empty($displayColumns['data'])) {
-
             // fill custom columns data
             foreach ($data as &$doc) {
                 if (!is_numeric($doc['id'])) {
@@ -242,7 +241,17 @@ class Base
                     if (empty($col['sortType']) && (empty($col['solr_column_name']))) {
                         switch ($templateField['type']) {
                             case 'date':
+                                if (empty($col['format'])) {
+                                    $col['format'] = \CB\User::getUserConfigParam('short_date_format');
+                                }
+                                $col['sortType'] = 'asDate';
+                                break;
+
                             case 'datetime':
+                                if (empty($col['format'])) {
+                                    $col['format'] = \CB\User::getUserConfigParam('short_date_format') . ' ' .
+                                        \CB\User::getUserConfigParam('time_format');
+                                }
                                 $col['sortType'] = 'asDate';
                                 break;
 

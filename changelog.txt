@@ -1,3 +1,47 @@
+CaseBox 1.9.588 (2016-03-21)
+==============================
+- #12139 Add hint with title=label for Bar/Column Charts
+- #12136 Use UserSettings.DateFormat for Date columns in DC
+- #12135 Sub-field not shown
+
+CaseBox 1.9.587 (2016-03-21)
+==============================
+- #11044 first and second levels
+- #12108 Label for Column Chart are not looking ok
+- #12106 vNodes configs: pid is set to NULL onSave
+- #12078 Headers inside a MaxInstances header is not visible
+- #10221 Time Tracking feature
+
+CaseBox 1.9.586 (2016-03-20)
+==============================
+- #10221 Time Tracking feature
+- #12080 Send INDEX of multiplied block in custom FN
+
+CaseBox 1.9.585 (2016-03-16)
+==============================
+- #12014 Can't attach files to new tasks
+- vertical edit grid adjustments
+
+CaseBox 1.9.584 (2016-03-16)
+==============================
+- #11246 Virtual Folders and max instance
+
+CaseBox 1.9.583 (2016-03-15)
+==============================
+- #11246 Virtual Folders and max instance
+- verticalEditGrid complete editing before Saving on Ctrl + S
+
+CaseBox 1.9.582 (2016-03-14)
+==============================
+- #10726 Limit of signs / карточка дела ограничение на 500 знаков с пробелами
+- #11898 Improvements for Header & MaxInstances
+- #11888 Refactoring object_type_plugins
+
+CaseBox 1.9.581 (2016-03-13)
+==============================
+- #11888 Refactoring object_type_plugins
+- #11821 Index MaxInstances fields as _childDocuments_ in SOLR
+
 CaseBox 1.9.580 (2016-03-13)
 ==============================
 - #11898 Improvements for Header & MaxInstances

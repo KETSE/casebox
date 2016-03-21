@@ -287,15 +287,26 @@ Ext.define('CB.widget.block.Pivot', {
         var d = this.chartData;
 
         /* create data, stores and charts on the fly */
-        var series = [
+        var tipsCfg = {
+            trackMouse: true
+            ,style: 'background: #FFF; overflow: visible'
+            ,height: 20
+            ,width: 200
+            ,renderer: function(storeItem, item) {
+                this.setTitle(item.value.join(': '));
+            }
+        }
+        ,series = [
                 {
                     xField: d.xField
                     ,yField: []
                     ,title: []
+                    ,tips: tipsCfg
                 },{
                     xField: d.yField
                     ,yField: []
                     ,title: []
+                    ,tips: tipsCfg
                 }
             ]
             ,data = [[], []];
@@ -377,7 +388,7 @@ Ext.define('CB.widget.block.Pivot', {
                     ,fields: serie.xField
                     ,grid: true
                     ,label: {
-                         rotation: {
+                         rotate: {
                             degrees: (chartType === 'bar')
                                 ? 0
                                 : 270

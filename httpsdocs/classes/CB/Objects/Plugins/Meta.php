@@ -8,8 +8,11 @@ class Meta extends ObjectProperties
 {
     public function getData($id = false)
     {
-
         $rez = parent::getData($id);
+
+        if (empty($rez)) {
+            return null;
+        }
 
         $template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($rez['data']['template_id']);
         $noTemplateFields = empty($template->getData()['fields']);

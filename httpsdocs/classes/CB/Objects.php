@@ -399,14 +399,16 @@ class Objects
      * @param  int          $id
      * @return varchar|null
      */
-    public static function getName($id)
+    public static function getName($id, $htmlSafe = false)
     {
         $rez = null;
 
         if (!empty($id) && is_numeric($id)) {
             $obj = static::getCachedObject($id);
             if (!empty($obj)) {
-                $rez = $obj->getName();
+                $rez = $htmlSafe
+                    ? $obj->getHtmlSafeName()
+                    : $obj->getName();
             }
         }
 
@@ -751,8 +753,7 @@ class Objects
 
             /* now we'll try to detect plugins config that could be found in following places:
                 1. in config of the template for the given object, named object_plugins
-                2. in core config, property object_type_plugins (config definitions per available template type values: object, case, task etc)
-                3. a generic config,  named default_object_plugins, could be defined in core config
+                2. a generic config,  named default_object_plugins that can be defined in core config
             */
 
             $o = $this->getCachedObject($id);
@@ -769,34 +770,9 @@ class Objects
             $templateData = $templates->getTemplate($templateId)->getData();
         }
 
-        $from = empty($p['from'])
-            ? ''
-            : $p['from'];
-
-        if (!empty($from)) {
-            if (isset($templateData['cfg']['object_plugins'])) {
-                $op = $templateData['cfg']['object_plugins'];
-
-                if (!empty($op[$from])) {
-                    $objectPlugins = $op[$from];
-                } else {
-                    //check if config has only numeric keys, i.e. plugins specified directly (without a category)
-                    if (!Util\isAssocArray($op)) {
-                        $objectPlugins = $op;
-                    } else {
-                        $objectPlugins = Config::getObjectTypePluginsConfig(@$templateData['type'], $from);
-                    }
-                }
-            }
-        }
-
-        if (empty($objectPlugins)) {
-            if (!empty($templateData['cfg']['object_plugins'])) {
-                $objectPlugins = $templateData['cfg']['object_plugins'];
-            } else {
-                $objectPlugins = Config::getObjectTypePluginsConfig($templateData['type'], $from);
-            }
-        }
+        $objectPlugins = empty($templateData['cfg']['object_plugins'])
+            ? Config::get('default_object_plugins')
+            : $templateData['cfg']['object_plugins'];
 
         $rez['success'] = true;
 
@@ -804,10 +780,13 @@ class Objects
             return $rez;
         }
 
-        if (!empty($templateData['cfg']['timeTracking']) && !in_array('timeTracking', $objectPlugins)) {
-            $firstEl = array_shift($objectPlugins);
-            array_unshift($objectPlugins, $firstEl, 'timeTracking');
+        if (!empty($templateData['cfg']['timeTracking']) && !isset($objectPlugins['timeTracking'])) {
+            $objectPlugins['timeTracking'] = [
+                'order' => 1
+            ];
         }
+
+        Util\sortRecordsArray($objectPlugins, 'order', 'asc', 'asInt', true);
 
         foreach ($objectPlugins as $k => $v) {
             $className = '';
@@ -826,7 +805,17 @@ class Objects
                 : $k;
 
             $v['objectId'] = $id;
+
+            $v['context'] = empty($p['from'])
+                ? ''
+                : $p['from'];
+
+            $v['template_id'] = empty($p['template_id'])
+                ? ''
+                : $p['template_id'];
+
             $fullClassName = '\\CB\\Objects\\Plugins\\' . ucfirst($className);
+
             $pClass = new $fullClassName($v);
             $prez = $pClass->getData();
             $prez['class'] = $className;

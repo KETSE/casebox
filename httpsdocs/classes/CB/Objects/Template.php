@@ -123,14 +123,28 @@ class Template extends Object
 
         /* loading template fields */
         $this->data['fields'] = array();
-        $this->data['fieldsByIndex'] = array();
+        $this->data['headers'] = array();
         $this->fieldsOrder = array();
+
+        $headerField = false;
+        $prevLevel = 0;
 
         $recs = DM\TemplatesStructure::getFields($this->id);
 
         foreach ($recs as &$r) {
+            if ($prevLevel != $r['level']) {
+                unset($headerField);
+                $headerField = &$r;
+                $prevLevel = $r['level'];
+            }
+
+            if ($r['type'] == 'H') {
+                unset($headerField);
+                $headerField = &$r;
+            }
+
+            $this->data['headers'][$r['name']] = &$headerField;
             $this->data['fields'][$r['id']] = &$r;
-            $this->data['fieldsByIndex'][] = &$r;
 
             $this->fieldsOrder[$r['name']] = intval($r['order']);
             unset($r);

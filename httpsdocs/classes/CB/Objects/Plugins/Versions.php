@@ -17,16 +17,17 @@ class Versions extends Base
 
         parent::getData($id);
 
-        // echo $this->id.'!!';
         $o = Objects::getCachedObject($this->id);
-        $data = $o->getData();
+        if (!empty($o)) {
+            $data = $o->getData();
 
-        if (!empty($data['versions'])) {
-            $rez['data'] = $data['versions'];
+            if (!empty($data['versions'])) {
+                $rez['data'] = $data['versions'];
 
-            foreach ($rez['data'] as &$version) {
-                $version['ago_text'] = @Util\formatAgoTime(Util\coalesce($version['udate'], $version['cdate']));
-                $version['user'] = @User::getDisplayName(Util\coalesce($version['uid'], $version['uid']), true);
+                foreach ($rez['data'] as &$version) {
+                    $version['ago_text'] = @Util\formatAgoTime(Util\coalesce($version['udate'], $version['cdate']));
+                    $version['user'] = @User::getDisplayName(Util\coalesce($version['uid'], $version['uid']), true);
+                }
             }
         }
 

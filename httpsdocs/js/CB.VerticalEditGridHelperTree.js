@@ -275,13 +275,13 @@ Ext.define('CB.VerticalEditGridHelperTree', {
             return true;
         }
 
-
         var r = node.data.templateRecord;
         var pr = node.parentNode.data.templateRecord;
         if(node.parentNode.data.visible === false) {
             if(node.data.visible !== false) {
-                this.visibilityUpdated = true;
                 node.data.visible = false;
+                node.data.value.value = null;
+                this.visibilityUpdated = true;
             }
         } else { // if parent node is visible
             var v = ''; //dependency value
@@ -292,7 +292,7 @@ Ext.define('CB.VerticalEditGridHelperTree', {
                 va = toNumericArray(v);
             }
 
-            if (pr && (pr.get('type') === 'G')) {
+            if (pr && (['H', 'G'].indexOf(pr.get('type')) > -1)) {
                 if(node.parentNode.data.visible != node.data.visible) {
                     node.data.visible = node.parentNode.data.visible;
                     this.visibilityUpdated = true;
@@ -308,6 +308,7 @@ Ext.define('CB.VerticalEditGridHelperTree', {
                         || (Ext.isDefined(r.get('cfg').dependency) && Ext.isEmpty(parentNodeValue) && !Ext.isEmpty(va)) // OR if the field is dinamic and parent has no selected value
                     ) {
                         node.data.visible = false;
+                        node.data.value.value = null;
                         this.visibilityUpdated = true;
                     }
                 } else { //when record is not visible
@@ -430,12 +431,14 @@ Ext.define('CB.VerticalEditGridHelperTree', {
                 before: function(n) {
                     var tr = n.data.templateRecord
                         ,cfg = tr.get('cfg');
+
                     if(tr &&
                         n.isAncestor(node) &&
                         (
                             cfg.thesauriId === 'dependent' ||
                             Ext.isDefined(cfg.dependency)
                         ) &&
+                        (cfg.scope == 'variable') &&
                         (tr.get('pid') == node.data.templateRecord.get('id')) &&
                         (cfg.readOnly !== true) &&
                         (tr.get('type') === '_objects') //resetting only object fields
@@ -531,6 +534,28 @@ Ext.define('CB.VerticalEditGridHelperTree', {
 
         return index;
     }
+
+    /**
+     * get duplication indexes for given node up to root node
+     * @param  string nodeId
+     * @return array
+     */
+    ,getDuplicationIndexes: function(nodeId){
+        var rez = {}
+            ,node = this.getNode(nodeId)
+            ,idx;
+
+        while(node) {
+            idx = this.getDuplicateIndex(node.data.id);
+            if(idx > -1) {
+                rez[node.data.templateRecord.data.name] = idx;
+            }
+            node = node.parentNode;
+        }
+
+        return rez;
+    }
+
 
     ,isFirstDuplicate: function(nodeId){
         if(!this.isDuplicate(nodeId)) {

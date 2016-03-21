@@ -342,7 +342,7 @@ Ext.define('CB.browser.ViewContainer', {
             ,width: 250
 
             ,split: {
-                size: 2
+                size: 3
                 ,collapsible: false
                 ,style: 'background-color: #dfe8f6'
             }

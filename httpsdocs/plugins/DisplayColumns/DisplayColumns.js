@@ -217,6 +217,7 @@ Ext.define('CB.plugin.DisplayColumns', {
 
                     switch(column.type) {
                         case 'date':
+                        case 'datetime':
                             column.xtype = 'datecolumn';
                             // column.renderer = App.customRenderers.datetime;
                             break;

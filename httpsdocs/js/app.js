@@ -893,6 +893,7 @@ function initApp() {
             ,record: e.record
             ,fieldRecord: e.fieldRecord
             ,objFields: e.objFields
+            ,duplicationIndexes: e.duplicationIndexes
             ,grid: e.grid
             ,pidValue: e.pidValue
             ,objectId: e.objectId
@@ -1259,6 +1260,12 @@ function initApp() {
                     enableKeyEvents: true
                     ,height: height
                 };
+
+                if (cfg.maxLength) {
+                    edConfig.maxLength = cfg.maxLength;
+                    edConfig.enforceMaxLength = true;
+                }
+
                 if(cfg.mentionUsers) {
                     edConfig.plugins = [{
                         ptype: 'CBPluginFieldDropDownList'

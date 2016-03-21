@@ -53,25 +53,22 @@ CB.ObjectsFieldCommonFunctions = {
 
                     ,listeners: {
                         scope: this
-                        ,beforeload: function(store, o ){
+                        ,beforeload: function(store, o){
                             if(this.data){
                                 if (!Ext.isEmpty(this.data.fieldRecord)) {
                                     store.proxy.extraParams.fieldId = this.data.fieldRecord.get('id');
                                 }
-
-                                if (!Ext.isEmpty(this.data.objectId)) {
-                                    store.proxy.extraParams.objectId = this.data.objectId;
-                                }
-
-                                if (!Ext.isEmpty(this.data.pidValue)) {
-                                    store.proxy.extraParams.pidValue = this.data.pidValue;
-                                }
-
-                                if (!Ext.isEmpty(this.data.path)) {
-                                    store.proxy.extraParams.path = this.data.path;
-                                }
-
-                                store.proxy.extraParams.objFields = this.data.objFields;
+                                Ext.copyTo(
+                                    store.proxy.extraParams
+                                    ,this.data
+                                    ,[
+                                        'objectId'
+                                        ,'pidValue'
+                                        ,'path'
+                                        ,'objFields'
+                                        ,'duplicationIndexes'
+                                    ]
+                                );
                             }
                         }
                         ,load:  function(store, recs, options) {
