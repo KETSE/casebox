@@ -11,7 +11,7 @@ cd $(dirname $0)
 export SOLR_VERSION=${SOLR_VERSION:-5.5.0}
 export SOLR_NAME="solr-$SOLR_VERSION"
 export SOLR_DIR="`pwd`/${SOLR_NAME}"
-export SOLR_PORT=${SOLR_PORT:-8983}
+export SOLR_PORT=${SOLR_PORT:-8180}
 export SOLR_SOURCE_URL="http://archive.apache.org/dist/lucene/solr/${SOLR_VERSION}/${SOLR_NAME}.tgz"
 export SOLR_ARCHIVE="${SOLR_NAME}.tgz"
 export SOLR_CONFIGSET=${SOLR_CONFIGSET:-basic}

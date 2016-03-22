@@ -2,7 +2,7 @@ parameters:
     core_name: test
     locale: en
     secret: t3st
-    server_name: 'http://localhost/'
+    server_name: 'http://localhost:8080/'
     prefix: cb
     db_host: 127.0.0.1
     db_port: 3306
@@ -11,7 +11,7 @@ parameters:
     db_pass: test
     solr_schema: http
     solr_host: 127.0.0.1
-    solr_port: 8983
+    solr_port: 8180
     solr_core: test
     solr_core_log: test_log
     solr_username: null
