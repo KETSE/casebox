@@ -1,7 +1,8 @@
+# This file is auto-generated during the composer install
 parameters:
     core_name: test
     locale: en
-    secret: t3st
+    secret: 2d7fa56245fcfd4385b67ff584
     server_name: 'http://localhost:8080/'
     prefix: cb
     db_host: 127.0.0.1
@@ -16,7 +17,6 @@ parameters:
     solr_core_log: test_log
     solr_username: null
     solr_password: null
-    session.lifetime: 4320
     session.lifetime: 4320
     admin_email: admin@example.com
     sender_email: emails.sender@example.com

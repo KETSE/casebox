@@ -14,7 +14,7 @@ addons:
     - realpath
     
   hosts:
-    - localhost
+    - test.casebox.local
 
 before_install:
     - mkdir -p $HOME/download-cache
@@ -34,13 +34,13 @@ install:
 before_script:
   # autoinstall CASEBOX
    - echo "CASEBOX | Index Casebox test core."
-   - bash bin/console casebox:solr:update --all=true --env=test
+   - bash bin/console casebox:solr:update --all=true --env=default
    - echo "CASEBOX | Clear cache."
-   - bash bin/console ca:cl --env=test
+   - bash bin/console ca:cl --env=default
    - echo "CASEBOX | Update Casebox database schema."
    - bash bin/console doctrine:schema:update --force
    - echo "CASEBOX | Add Casebox assests."
-   - bash bin/console casebox:min:assets --env=test
+   - bash bin/console casebox:min:assets --env=default
 
 script:
    # first test RPC
