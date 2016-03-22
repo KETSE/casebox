@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#install nginx on port 8080
+$DIR/nginx/install-nginx.sh
+
 set -e
 set -x
 
@@ -12,8 +15,8 @@ mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'test'@'%'"
 mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'test'@'localhost'"
 
 echo "create MySQL database" 
-mysql -u test --password=test -e "create database IF NOT EXISTS cb_test;"
-mysql -u test --password=test -b cb_test < $ROOT/var/backup/cb_default.sql
+mysql -u test --password=test -e "create database IF NOT EXISTS test;"
+mysql -u test --password=test -b test < $ROOT/var/backup/cb_default.sql
 echo "copy and install solr 5.5.0"
 export SOLR_VERSION="5.5.0"
 export SOLR_PORT="8180"
@@ -30,6 +33,4 @@ export SOLR_CORENAME="test"
 export SOLR_CONFIGSET="/var/solr/default/conf"
 bash $DIR/solr/solr5.sh --addcore
 
-#install nginx on port 8080
-$DIR/nginx/install-nginx.sh
 

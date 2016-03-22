@@ -2,12 +2,14 @@
 
 set -e
 set -x
+apt-get install nginx
+sudo apt-get install php7.0-fpm
 
 DIR=$(realpath $(dirname "$0"))
 USER=$(whoami)
 PHP_VERSION=$(phpenv version-name)
 ROOT=$(realpath "$DIR/../../..")
-PORT=8080
+PORT=9000
 SERVER="/tmp/php.sock"
 
 function tpl {
@@ -21,38 +23,5 @@ function tpl {
         < $1 > $2
 }
 
-# Make some working directories.
-mkdir "$DIR/nginx"
-mkdir "$DIR/nginx/sites-enabled"
-mkdir "$DIR/var"
-
-# Configure the PHP handler.
-if [ "$PHP_VERSION" = 'hhvm' ] || [ "$PHP_VERSION" = 'hhvm-nightly' ]
-then
-    HHVM_CONF="$DIR/nginx/hhvm.ini"
-
-    tpl "$DIR/hhvm.tpl.ini" "$HHVM_CONF"
-
-    cat "$HHVM_CONF"
-
-    hhvm \
-        --mode=daemon \
-        --config="$HHVM_CONF"
-else
-    PHP_FPM_BIN="$HOME/.phpenv/versions/$PHP_VERSION/sbin/php-fpm"
-    PHP_FPM_CONF="$DIR/nginx/php-fpm.conf"
-
-    # Build the php-fpm.conf.
-    tpl "$DIR/php-fpm.tpl.conf" "$PHP_FPM_CONF"
-
-    # Start php-fpm
-    "$PHP_FPM_BIN" --fpm-config "$PHP_FPM_CONF"
-fi
-
-# Build the default nginx config files.
-tpl "$DIR/nginx.tpl.conf" "$DIR/nginx/nginx.conf"
-tpl "$DIR/fastcgi.tpl.conf" "$DIR/nginx/fastcgi.conf"
-tpl "$DIR/default-site.tpl.conf" "$DIR/nginx/sites-enabled/default-site.conf"
-
-# Start nginx.
-nginx -c "$DIR/nginx/nginx.conf"
+tpl .travis_nginx.conf /etc/nginx/nginx.conf
+/etc/init.d/nginx restart
