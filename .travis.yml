@@ -1,0 +1,53 @@
+sudo: false
+language: php
+php:
+  - 7.0
+
+services:
+  - mysql
+
+cache:
+    directories:
+        - $HOME/download-cache
+
+addons:
+  apt:
+    packages:
+    - nginx
+    
+  hosts:
+    - localhost
+
+before_install:
+    - mkdir -p $HOME/download-cache
+    - mkdir -p build/logs
+
+install:
+   - pecl install mbstring
+   - pecl install curl
+   - curl -sS https://getcomposer.org/installer | php
+   - php composer.phar install --no-interaction
+#add databases, install solr with cores install nginx
+   - app/Travis/install.sh
+#   - echo "See php extensions:"
+#   - php -m
+
+
+before_script:
+  # autoinstall CASEBOX
+   - echo "CASEBOX | Index Casebox test core."
+   - bash bin/console casebox:solr:update --all=true --env=test
+   - echo "CASEBOX | Clear cache."
+   - bash bin/console ca:cl --env=test
+   - echo "CASEBOX | Update Casebox database schema."
+   - bash bin/console doctrine:schema:update --force
+   - echo "CASEBOX | Add Casebox assests."
+   - bash bin/console casebox:min:assets --env=test
+
+script:
+   # first test RPC
+   - vendor/bin/phpunit -c vendor/caseboxdev/rpc-bundle/src/Tests/phpunit.xml 
+
+after_script:
+ - if [ -f vendor/bin/coveralls ] ; then php vendor/bin/coveralls -v || true ; fi
+ - bash app/Travis/solr/solr5.sh --stop

@@ -3,6 +3,9 @@
 
 set -e
 
+DIR=$(realpath $(dirname "$0"))
+ROOT=$(realpath "$DIR/../../..")
+
 cd $(dirname $0)
 
 export SOLR_VERSION=${SOLR_VERSION:-5.5.0}
@@ -82,7 +85,7 @@ for CORENAME in $SOLR_CORENAME
 do
 # create core folder 
    mkdir -p "${SOLR_DIR}/server/solr/${CORENAME}/"
-   cp -ar  "${SOLR_DIR}${SOLR_CONFIGSET}" "${SOLR_DIR}/server/solr/${CORENAME}/"
+   cp -ar  "${ROOT}${SOLR_CONFIGSET}" "${SOLR_DIR}/server/solr/${CORENAME}/"
    echo "Configuring Core named ${CORENAME}"
     #exec $CMD
     curl -o /dev/null "http://localhost:${SOLR_PORT}/solr/admin/cores?action=CREATE&name=${CORENAME}&instanceDir=${CORENAME}" > /dev/null 2>&1

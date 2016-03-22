@@ -1,0 +1,32 @@
+parameters:
+    core_name: test
+    locale: en
+    secret: t3st
+    server_name: 'http://localhost/'
+    prefix: cb
+    db_host: 127.0.0.1
+    db_port: 3306
+    db_name: test
+    db_user: test
+    db_pass: test
+    solr_schema: http
+    solr_host: 127.0.0.1
+    solr_port: 8983
+    solr_core: test
+    solr_core_log: test_log
+    solr_username: null
+    solr_password: null
+    session.lifetime: 4320
+    session.lifetime: 4320
+    admin_email: admin@example.com
+    sender_email: emails.sender@example.com
+    comments_pass: null
+    mailer_transport: smtp
+    mailer_host: 127.0.0.1
+    mailer_user: null
+    mailer_password: null
+    convert_doc_unoconv_cmd: '/usr/bin/python3 /usr/bin/unoconv'
+    convert_doc_url: 'http://convert.devops.site/document/convert'
+    converter: unoconv
+    redis_host: 127.0.0.1
+    redis_port: 6379
