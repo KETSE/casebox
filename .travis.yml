@@ -23,10 +23,11 @@ before_install:
     - mkdir -p build/logs
 
 install:
+#add databases, install solr with cores install nginx    
+   - app/Travis/install.sh
+# install application   
    - curl -sS https://getcomposer.org/installer | php
    - php composer.phar install --no-interaction
-#add databases, install solr with cores install nginx
-   - app/Travis/install.sh
 #   - echo "See php extensions:"
 #   - php -m
 
