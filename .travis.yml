@@ -23,7 +23,6 @@ before_install:
     - mkdir -p build/logs
 
 install:
-   - pecl install mbstring
    - pecl install curl
    - curl -sS https://getcomposer.org/installer | php
    - php composer.phar install --no-interaction
