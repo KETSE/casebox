@@ -6,9 +6,6 @@ set -x
 DIR=$(realpath $(dirname "$0"))
 ROOT=$(realpath "$DIR/../..")
 
-#install nginx on port 8080
-$DIR/nginx/install-nginx.sh
-
 mysql -u root -e "CREATE USER 'test'@'%' IDENTIFIED BY 'test'"
 mysql -u root -e "CREATE USER 'test'@'localhost' IDENTIFIED BY 'test'"
 mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'test'@'%'"
