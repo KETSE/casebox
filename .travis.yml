@@ -43,9 +43,9 @@ before_script:
    - bin/console casebox:min:assets --env=default
 
 script:
-   - echo "check nginx"
-   - curl -vsf 'http://localhost:8080/c/default/' &> /dev/stdout
-   - cat /tmp/error.log
+#   - echo "check nginx"
+#   - curl -vsf 'http://localhost:8080/c/default/' &> /dev/stdout
+#   - cat /tmp/error.log
    # first test RPC
    - vendor/bin/phpunit -c vendor/caseboxdev/rpc-bundle/src/Tests/phpunit.xml 
 
