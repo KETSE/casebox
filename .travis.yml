@@ -22,8 +22,8 @@ before_install:
 
 install:
 #add databases, install solr with cores install nginx 
-   - sudo app/Travis/nginx/install-nginx.sh
-   - app/Travis/install.sh
+   - bash app/Travis/nginx/install-nginx.sh
+   - bash app/Travis/install.sh
 # install application   
    - curl -sS https://getcomposer.org/installer | php
    - php composer.phar install --no-interaction
@@ -48,5 +48,4 @@ script:
 
 after_script:
  - if [ -f vendor/bin/coveralls ] ; then php vendor/bin/coveralls -v || true ; fi
- - export SOLR_PORT="8180"
- - bash app/Travis/solr/solr5.sh --stop
+ - bash app/Travis/uninstall.sh
