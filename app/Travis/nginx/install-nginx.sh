@@ -1,9 +1,6 @@
 #!/bin/bash
-
 set -e
 set -x
-apt-get install nginx
-sudo apt-get install php7.0-fpm
 
 DIR=$(realpath $(dirname "$0"))
 USER=$(whoami)
