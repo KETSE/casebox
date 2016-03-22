@@ -14,7 +14,7 @@ addons:
     - realpath
     
   hosts:
-    - test.casebox.local
+    - localhost
 
 before_install:
     - mkdir -p $HOME/download-cache
@@ -44,7 +44,7 @@ before_script:
 
 script:
    - echo "check nginx"
-   - curl -vsf 'http://test.casebox.local:8080/c/default/' &> /dev/stdout
+   - curl -vsf 'http://localhost:8080/c/default/' &> /dev/stdout
    - cat /tmp/error.log
    # first test RPC
    - vendor/bin/phpunit -c vendor/caseboxdev/rpc-bundle/src/Tests/phpunit.xml 

@@ -3,7 +3,7 @@ parameters:
     core_name: default
     locale: en
     secret: 2d7fa56245fcfd4385b67ff584
-    server_name: 'http://test.casebox.local:8080/'
+    server_name: 'http://localhost:8080/'
     prefix: cb
     db_host: 127.0.0.1
     db_port: 3306
