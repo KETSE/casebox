@@ -20,5 +20,5 @@ function tpl {
         < $1 > $2
 }
 
-tpl "$DIR/.travis_nginx.conf" "/etc/nginx/nginx.conf"
-/etc/init.d/nginx restart
+sudo tpl "$DIR/.travis_nginx.conf" "/etc/nginx/nginx.conf"
+sudo /etc/init.d/nginx restart

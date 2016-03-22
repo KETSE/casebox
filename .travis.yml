@@ -12,7 +12,6 @@ addons:
     packages:
     - nginx
     - realpath
-    - php7.0-fpm
     
   hosts:
     - localhost
