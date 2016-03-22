@@ -10,7 +10,6 @@ mysql -u root -e "CREATE USER 'test'@'%' IDENTIFIED BY 'test'"
 mysql -u root -e "CREATE USER 'test'@'localhost' IDENTIFIED BY 'test'"
 mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'test'@'%'"
 mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'test'@'localhost'"
-mysql -u test --password=test -b 
 
 echo "create MySQL database" 
 mysql -u test --password=test -e "create database IF NOT EXISTS cb_default;"
