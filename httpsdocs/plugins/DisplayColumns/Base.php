@@ -241,17 +241,17 @@ class Base
                     if (empty($col['sortType']) && (empty($col['solr_column_name']))) {
                         switch ($templateField['type']) {
                             case 'date':
+                            case 'datetime':
+                                //set to users date format if not set
                                 if (empty($col['format'])) {
                                     $col['format'] = \CB\User::getUserConfigParam('short_date_format');
+                                    // add time if needed
+                                    if ($templateField['type'] == 'datetime') {
+                                        $col['format'] .= ' ' . \CB\User::getUserConfigParam('time_format');
+                                    }
                                 }
-                                $col['sortType'] = 'asDate';
-                                break;
 
-                            case 'datetime':
-                                if (empty($col['format'])) {
-                                    $col['format'] = \CB\User::getUserConfigParam('short_date_format') . ' ' .
-                                        \CB\User::getUserConfigParam('time_format');
-                                }
+                                $col['type'] = 'date';
                                 $col['sortType'] = 'asDate';
                                 break;
 
