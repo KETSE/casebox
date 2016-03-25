@@ -1,3 +1,12 @@
+CaseBox 1.9.590 (2016-03-25)
+==============================
+- #12277 Introduce "availableViews": "grid, chart, pivot, activity, calendar"
+- #12275 Add all Parent SOLR fields to Children records
+- rollback NotificationView preview on click behavior
+- #12003 Import eStatements files
+- #10310 Import HR files into Alhaq
+- #11049 Customizations to apply: Virtual folders, DC, facets
+
 CaseBox 1.9.589 (2016-03-23)
 ==============================
 - #10102 Field workers: one common list for HR & eStatements

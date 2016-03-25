@@ -735,9 +735,11 @@ class Object
             }
 
             if (!empty($children)) {
+                // $parentValues = $rez;
                 $rez['_childDocuments_'] = [];
                 foreach ($children as $k => $v) {
                     $rez['_childDocuments_'][] = array_merge(
+                        // $parentValues,
                         $v,
                         [
                             'id' => $this->id,

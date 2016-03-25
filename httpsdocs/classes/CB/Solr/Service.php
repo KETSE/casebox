@@ -350,7 +350,10 @@ class Service
         if (!empty($children)) {
             $childDocs = [];
             foreach ($children as $d) {
-                $childDocs[] = $this->arrayToSolrDocument($d);
+                $childDocs[] = $this->arrayToSolrDocument(
+                    //merge parent properties to children
+                    array_merge($arr, $d)
+                );
             }
             $rez->_childDocuments_ = $childDocs;
         }

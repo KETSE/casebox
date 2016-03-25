@@ -99,6 +99,7 @@ class Browser
         //set path and input params for last node
         //because iterating each class and requesting children can
         //invoke a search that will use last node to get facets and DC
+        $lastNode = null;
         if (!empty($this->path)) {
             $lastNode = $this->path[sizeof($path) - 1];
             $lastNode->path = $this->path;
@@ -125,6 +126,25 @@ class Browser
         $viewConfig = $this->detectViewConfig();
         $this->requestParams['view'] = $viewConfig;
         $this->result['view'] = $viewConfig;
+
+        //detect availableviews
+        $av = 'grid,charts,pivot';
+        if (!empty($lastNode)) {
+            $r = $lastNode->getNodeParam('availableViews');
+            if (!empty($r['data'])) {
+                $av = $r['data'];
+            }
+        } else {
+            $r = Config::get('availableViews');
+            if (empty($r)) {
+                $r = Config::get('default_availableViews');
+            }
+
+            if (!empty($r)) {
+                $av = $r;
+            }
+        }
+        $this->result['availableViews'] = Util\toTrimmedArray($av);
 
         //remove sorting for some views
         if (isset($viewConfig['type'])) {
