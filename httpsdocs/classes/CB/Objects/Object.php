@@ -735,9 +735,11 @@ class Object
             }
 
             if (!empty($children)) {
+                // $parentValues = $rez;
                 $rez['_childDocuments_'] = [];
                 foreach ($children as $k => $v) {
                     $rez['_childDocuments_'][] = array_merge(
+                        // $parentValues,
                         $v,
                         [
                             'id' => $this->id,
@@ -1206,7 +1208,14 @@ class Object
      */
     protected function fieldsArraySorter($a, $b)
     {
-        if (!empty($this->template)) {
+        if ($a['name'] == $b['name']) { //ordering duplicates by index
+            if ($a['idx'] < $b['idx']) {
+                return -1;
+            } elseif ($a['idx'] > $b['idx']) {
+                return 1;
+            }
+
+        } elseif (!empty($this->template)) {
             $o1 = $this->template->getFieldOrder($a['name']);
             $o2 = $this->template->getFieldOrder($b['name']);
             if ($o1 < $o2) {

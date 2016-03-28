@@ -1,3 +1,26 @@
+CaseBox 1.9.590 (2016-03-25)
+==============================
+- #12277 Introduce "availableViews": "grid, chart, pivot, activity, calendar"
+- #12275 Add all Parent SOLR fields to Children records
+- rollback NotificationView preview on click behavior
+- #12003 Import eStatements files
+- #10310 Import HR files into Alhaq
+- #11049 Customizations to apply: Virtual folders, DC, facets
+
+CaseBox 1.9.589 (2016-03-23)
+==============================
+- #10102 Field workers: one common list for HR & eStatements
+- #10050 eStatements DB: District field migration & HR DB Location field
+- #12006 Location & fldWorker fields are empty in eStatements
+- #12005 Location field should be split into District & Location fields
+- #12043 Use Objects fields Y/N instead of varchar
+- #12028 Field order: 10xincrement
+- #12002 Which tables from production server in kladr mysql db can be deleted?
+- #12188 Order of MultiInstance fields not the same in View/Edit modes
+- #12195 ContentObjects plugin should be always visible, otherwise I can't add subNodes
+- #12183 Issues with object_plugins for barebone core fresh install
+- #12080 Send INDEX of multiplied block in custom FN
+
 CaseBox 1.9.588 (2016-03-21)
 ==============================
 - #12139 Add hint with title=label for Bar/Column Charts

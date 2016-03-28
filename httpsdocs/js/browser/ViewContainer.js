@@ -701,6 +701,36 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     /**
+     * set available views
+     * @param array viewIds
+     *
+     * @return void
+     */
+    ,setAvailableViews: function(viewIds) {
+        if (Ext.isEmpty(viewIds) || !Ext.isArray(viewIds)) {
+            viewIds = ['grid', 'charts', 'pivot'];
+        }
+
+        for (var i = 0; i < viewIds.length; i++) {
+            viewIds[i] = 'CBBrowserView' + Ext.util.Format.capitalize(viewIds[i]);
+        }
+
+        var b = this.buttonCollection.get('apps');
+        b.menu.items.each(
+            function(i, idx, count) {
+                if (i.viewIndex !== undefined) {
+                    i.setVisible(
+                        viewIds.indexOf(
+                            this.cardContainer.items.getAt(i.viewIndex).getXType()
+                        ) > -1
+                    );
+                }
+            }
+            ,this
+        );
+    }
+
+    /**
      * change active view
      * @param variant indexOrName
      *
@@ -783,6 +813,8 @@ Ext.define('CB.browser.ViewContainer', {
         }
 
         this.descendantsCheckItem.setChecked(ep.descendants === true, true);
+
+        this.setAvailableViews(result.availableViews);
 
         /* change view if set in params */
         if(!this.userViewSet) {

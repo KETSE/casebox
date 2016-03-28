@@ -252,7 +252,7 @@ Ext.define('CB.notifications.View', {
 
     ,actionRenderer: function(v, m, r, ri, ci, s){
         var uid = r.get('user_id')
-            ,rez = '<span class="i-preview action-btn" title="' + L.Preview + '">&nbsp;</span> ';
+            ,rez = ''; //<span class="i-preview action-btn" title="' + L.Preview + '">&nbsp;</span> ';
 
         if(r.get('expandable')) {
             if(Ext.isEmpty(r.get('body'))) {
@@ -298,6 +298,12 @@ Ext.define('CB.notifications.View', {
         var el = e.getTarget('.obj-ref')
             ,selectionData = null;
         if(el) {
+            App.openObjectWindow({
+                id: el.getAttribute('itemid')
+                ,template_id: el.getAttribute('templateid')
+                ,name: el.getAttribute('title')
+            });
+
             selectionData = {
                 id: el.getAttribute('itemid')
                 ,read: d.read
@@ -328,13 +334,13 @@ Ext.define('CB.notifications.View', {
                     el.title = L.Expand;
                     break;
 
-                case L.Preview:
-                    selectionData = {
-                        id: record.get('object_id')
-                        ,read: record.get('read')
+                // case L.Preview:
+                //     selectionData = {
+                //         id: record.get('object_id')
+                //         ,read: record.get('read')
 
-                    };
-                    break;
+                //     };
+                //     break;
 
             }
         }
@@ -361,15 +367,22 @@ Ext.define('CB.notifications.View', {
     }
 
     ,onSelectionChange: function (grid, selected, eOpts) {
-        this.lastSelectedRecord = selected[0];
+        this.currentSelection = selected;
         //start 3 seconds delayed task to mark the notification as read
         this.selectionDelayTask.delay(3);
 
         if(!Ext.isEmpty(selected)) {
             var d = selected[0].data;
 
-            this.actions.markAsUnread.setDisabled(!this.lastSelectedRecord.get('read'));
+            this.actions.markAsUnread.setDisabled(!selected[0].get('read'));
 
+            this.fireEvent(
+                'selectionchange',
+                {
+                    'id': selected[0].data.object_id
+                    ,'read': selected[0].data.read
+                }
+            );
         } else {
             this.actions.markAsUnread.setDisabled(true);
         }

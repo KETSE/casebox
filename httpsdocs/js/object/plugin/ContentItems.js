@@ -86,26 +86,41 @@ Ext.define('CB.object.plugin.ContentItems', {
     }
 
     ,onLoadData: function(r, e) {
-        if(Ext.isEmpty(r.data)) {
-            return;
+        if(!Ext.isEmpty(r.data)) {
+            for (var i = 0; i < r.data.length; i++) {
+                r.data[i].iconCls = getItemIcon(r.data[i]);
+            }
+            this.store.loadData(r.data);
         }
-        for (var i = 0; i < r.data.length; i++) {
-            r.data[i].iconCls = getItemIcon(r.data[i]);
-        }
-        this.store.loadData(r.data);
 
         //set list display items limit
         this.dataView.tpl.displayLimit = Ext.valueFrom(r.limit, 5);
         this.dataView.tpl.itemCount = this.store.getCount();
 
         if(!Ext.isEmpty(r.title)) {
-            var title = r.title.replace('{total}', this.store.getCount());
-            this.setTitle(title);
+            this.params.title = r.title;
+            this.updateTitle(r.title);
         }
 
         if(!Ext.isEmpty(r.menu)) {
-            this.createMenu = r.menu
+            this.createMenu = r.menu;
         }
+    }
+
+    ,updateTitle: function(title)  {
+        if(!title && this.params) {
+            title = this.params.title;
+        }
+
+        if(!Ext.isEmpty(title)) {
+            var count = this.store.getCount()
+                ,total = (count > 0) ? '(' + count + ')' : '';
+
+            title = title.replace('({total})', total);
+            this.setTitle(title);
+        }
+
+        return title;
     }
 
     ,onItemClick: function (cmp, record, item, index, e, eOpts) {//dv, index, el, e

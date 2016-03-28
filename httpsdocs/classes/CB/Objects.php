@@ -814,6 +814,10 @@ class Objects
                 ? ''
                 : $p['template_id'];
 
+            if (is_numeric($className)) {
+                continue;
+            }
+
             $fullClassName = '\\CB\\Objects\\Plugins\\' . ucfirst($className);
 
             $pClass = new $fullClassName($v);
