@@ -190,10 +190,14 @@ class Object
                 ,'draft' => $isDraft
                 ,'draft_pid' => $draftPid
                 ,'cdate' => Util\coalesce(@$r['cdate'], 'CURRENT_TIMESTAMP')
-                ,'system' => @intval($r['system'])
                 ,'updated' => 1
             )
         );
+
+        //system flag shouldn't be updated if not set
+        if (isset($r['system'])) {
+            $r = intval($r['system']);
+        }
 
         return $r;
     }
@@ -753,7 +757,6 @@ class Object
             $tplCfg = $tpl->getData()['cfg'];
         }
 
-
         if (!empty($tplCfg['copySolrFields'])) {
             foreach ($tplCfg['copySolrFields'] as $fns => $sc) {
                 $values = array();
@@ -931,7 +934,6 @@ class Object
 
         return $rez;
     }
-
 
     /**
      *  get action flags that a user can do this object

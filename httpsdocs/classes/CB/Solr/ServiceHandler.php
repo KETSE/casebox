@@ -15,6 +15,24 @@ class ServiceHandler extends \Apache_Solr_Service
         $this->_searchUrl = $this->_constructUrl($searchHandler);
     }
 
+    protected function _generateQueryString($params)
+    {
+        $jsonFacets = empty($params['json.facet'])
+            ? []
+            : $params['json.facet'];
+
+        unset($params['json.facet']);
+
+        $rez = parent::_generateQueryString($params);
+
+        foreach ($jsonFacets as $k => $v) {
+            $fqs = urlencode(json_encode($v));
+            $rez .= "&json.facet.$k=" . $fqs;
+        }
+
+        return $rez;
+    }
+
     protected function _documentToXmlFragment(\Apache_Solr_Document $document)
     {
         $xml = '<doc';

@@ -47,16 +47,20 @@ class PivotFacet extends StringsFacet
         return $rez;
     }
 
-    public function loadSolrResult($solrResult, $statsSolrResult = null)
+    public function loadSolrResult($solrResult)
     {
         $this->solrData = array();
         $cfg = &$this->config;
 
-        if (!empty($cfg['field']) && !empty($solrResult->facet_pivot->{$cfg['field']})) {
-            $this->solrData = $solrResult->facet_pivot->{$cfg['field']};
+        if (!empty($solrResult->{$this->solrResultRoot})) {
+            $sr = &$solrResult->{$this->solrResultRoot};
 
-            if (!empty($statsSolrResult) && !empty($statsSolrResult->stats)) {
-                $this->totalStats = $statsSolrResult->stats;
+            if (!empty($cfg['field']) && !empty($sr->facet_pivot->{$cfg['field']})) {
+                $this->solrData = $sr->facet_pivot->{$cfg['field']};
+
+                if (!empty($solrResult->stats)) {
+                    $this->totalStats = $solrResult->stats;
+                }
             }
         }
     }

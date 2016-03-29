@@ -10,6 +10,8 @@ class StringsFacet
 
     protected $config = array();
 
+    protected $solrResultRoot = 'facet_counts';
+
     public function __construct($config)
     {
         $this->config = $config;
@@ -30,8 +32,16 @@ class StringsFacet
         if (!empty($this->config['child'])) {
             $rez = array(
                 'facet' => true
-                ,'requestHandler' => 'bjf'
-                ,'child.facet.field' => $this->field
+                // ,'requestHandler' => 'bjf'
+                ,'json.facet' => [
+                    $this->config['name'] => [
+                        'type' => 'terms',
+                        'field' => $this->field,
+                        'domain' => [
+                            'blockParent' => 'child:false'
+                        ]
+                    ]
+                ]
             );
         }
 
@@ -60,12 +70,27 @@ class StringsFacet
     public function loadSolrResult($solrResult)
     {
         $this->solrData = array();
-        $index = empty($this->config['child'])
-            ? $this->config['name']
-            : $this->config['field'];
 
-        if (!empty($solrResult->facet_fields->$index)) {
-            $this->solrData = $solrResult->facet_fields->$index;
+        $index = $this->config['name'];
+        if (!empty($this->config['child'])) {
+            $this->solrResultRoot = 'facets';
+        }
+
+        if (!empty($solrResult->{$this->solrResultRoot})) {
+            $sr = &$solrResult->{$this->solrResultRoot};
+
+            if (empty($this->config['child'])) {
+                if (!empty($sr->facet_fields->$index)) {
+                    $this->solrData = $sr->facet_fields->$index;
+                }
+            } elseif (!empty($sr->$index)) {
+                $data = (array) $sr->$index;
+                if (!empty($data['buckets'])) {
+                    foreach ($data['buckets'] as $k => $v) {
+                        $this->solrData[$v->val] = $v->count;
+                    }
+                }
+            }
         }
     }
 

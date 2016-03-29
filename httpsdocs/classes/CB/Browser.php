@@ -128,7 +128,7 @@ class Browser
         $this->result['view'] = $viewConfig;
 
         //detect availableviews
-        $av = 'grid,charts,pivot';
+        $av = 'grid,charts,pivot,activeStream';
         if (!empty($lastNode)) {
             $r = $lastNode->getNodeParam('availableViews');
             if (!empty($r['data'])) {

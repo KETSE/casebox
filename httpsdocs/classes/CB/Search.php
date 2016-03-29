@@ -60,7 +60,8 @@ class Search extends Solr\Client
             isset($p['facet']) ||
             isset($p['facet.field']) ||
             isset($p['facet.query']) ||
-            isset($p['child.facet.field'])
+            isset($p['json.facet']) //||
+            // isset($p['child.facet.field'])
         );
 
         $this->prepareParams();
@@ -428,7 +429,8 @@ class Search extends Solr\Client
                 ,'facet.range.gap'
                 ,'facet.sort'
                 ,'facet.missing' //"on" ?
-                ,'child.facet.field'
+                ,'json.facet'
+                // ,'child.facet.field'
                 ,'stats.field'
             );
 
@@ -446,7 +448,8 @@ class Search extends Solr\Client
                     'facet.field'
                     ,'facet.query'
                     ,'facet.pivot'
-                    ,'child.facet.field'
+                    ,'json.facet'
+                    // ,'child.facet.field'
                     ,'stats.field'
                 );
                 foreach ($copyParams as $pn) {
@@ -512,7 +515,7 @@ class Search extends Solr\Client
             $this->replaceSortFields();
 
             //dont escape query for BlockJoin faceting
-            $query = empty($this->params['child.facet.field'])
+            $query = (substr($this->query, 0, 9) != '{!parent ')
                 ? $this->escapeLuceneChars($this->query)
                 : $this->query;
 
@@ -633,11 +636,18 @@ class Search extends Solr\Client
             'facets' => $this->results->facet_counts
         );
 
+        //assign json facets to 'facet' key
+        if (!empty($this->results->facets)) {
+            foreach ($this->results->facets as $k => $v) {
+                $rez['facets']->$k = $v;
+            }
+        }
+
         if (!$this->facetsSetManually) {
             $rez = array();
 
             foreach ($this->facets as $facet) {
-                $facet->loadSolrResult($this->results->facet_counts, $this->results);
+                $facet->loadSolrResult($this->results);
 
                 $fr = $facet->getClientData();
 

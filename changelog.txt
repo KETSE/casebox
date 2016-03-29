@@ -1,3 +1,9 @@
+CaseBox 1.9.591 (2016-03-29)
+==============================
+- #12276 Make some fields of AffectedPerson indexed & create vFolder with view=pivot
+- Replace child.facet.field solr requests with json.facet
+- #12288 Pivot table labels issue
+
 CaseBox 1.9.590 (2016-03-25)
 ==============================
 - #12277 Introduce "availableViews": "grid, chart, pivot, activity, calendar"

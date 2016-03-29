@@ -146,22 +146,40 @@ class FacetNav extends Query
             }
 
             $sr = $s->query(
-                array(
-                    'query' => $query
-                    ,'rows' => 0
-                    ,'facet' => true
-                    ,'child.facet.field' => $facetField
-                ),
-                'bjf'
+                [
+                    'query' => $query,
+                    'fq' => $fq,
+                    'rows' => 0,
+                    'facet' => true,
+                    'json.facet' => [
+                        $facetName => [
+                            'type' => 'terms',
+                            'field' => $facetField,
+                            'domain' => [
+                                'blockParent' => 'child:false'
+                            ]
+                        ]
+                    ]
+                ]
             );
-            //block join is experimental and doesnt support aliasing
-            //for child.facet.field
-            $facetName = $facetField;
+
+            // $sr = $s->query(
+            //     array(
+            //         'query' => $query
+            //         ,'rows' => 0
+            //         ,'facet' => true
+            //         ,'child.facet.field' => $facetField
+            //     ),
+            //     'bjf'
+            // );
+            // //block join is experimental and doesnt support aliasing
+            // //for child.facet.field
+            // $facetName = $facetField;
         }
 
-        if (!empty($sr['facets']->facet_fields->{$facetName})) {
+        if (!empty($sr['facets']->{$facetName})) {
             $facetClass = Facets::getFacetObject($cffc);
-            $facetClass->loadSolrResult($sr['facets']);
+            $facetClass->loadSolrResult((object) $sr);
             $facetData = $facetClass->getClientData();
             $showChilds = (!$isLastFacetField || !empty($this->config['show_in_tree']));
 
