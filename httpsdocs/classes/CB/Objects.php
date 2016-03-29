@@ -81,11 +81,15 @@ class Objects
         // set type property from template
         $resultData['type'] = $templateData['type'];
 
-        return array(
+        $rez = array(
             'success' => true
             ,'data' => $resultData
             ,'menu' => Browser\CreateMenu::getMenuForPath($p['id'])
         );
+
+        fireEvent('onLoad', $rez);
+
+        return $rez;
     }
 
     /**
