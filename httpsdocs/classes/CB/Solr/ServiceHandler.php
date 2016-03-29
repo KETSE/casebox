@@ -50,7 +50,6 @@ class ServiceHandler extends \Apache_Solr_Service
             //adding here the check for child documents
             if ($key === "_childDocuments_") {
                 foreach ($value as $cd) {
-                    \CB\debug('cd', $cd);
                     $xml .= $this->_documentToXmlFragment($cd);
                 }
 

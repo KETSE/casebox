@@ -1,3 +1,7 @@
+CaseBox 1.9.592 (2016-03-29)
+==============================
+- add configurable domain support for child facet configs
+
 CaseBox 1.9.591 (2016-03-29)
 ==============================
 - #12276 Make some fields of AffectedPerson indexed & create vFolder with view=pivot

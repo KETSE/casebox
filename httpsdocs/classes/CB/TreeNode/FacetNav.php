@@ -145,6 +145,10 @@ class FacetNav extends Query
                 $query .= ' ' . implode(' ', $parentFilters);
             }
 
+            $domain = empty($cffc['domain'])
+                ? ['blockParent' => 'child:false']
+                : $cffc['domain'];
+
             $sr = $s->query(
                 [
                     'query' => $query,
@@ -155,9 +159,7 @@ class FacetNav extends Query
                         $facetName => [
                             'type' => 'terms',
                             'field' => $facetField,
-                            'domain' => [
-                                'blockParent' => 'child:false'
-                            ]
+                            'domain' => $domain
                         ]
                     ]
                 ]
@@ -177,7 +179,9 @@ class FacetNav extends Query
             // $facetName = $facetField;
         }
 
-        if (!empty($sr['facets']->{$facetName})) {
+        if (!empty($sr['facets']->facet_fields->{$facetName}) ||
+            !empty($sr['facets']->{$facetName})
+        ) {
             $facetClass = Facets::getFacetObject($cffc);
             $facetClass->loadSolrResult((object) $sr);
             $facetData = $facetClass->getClientData();

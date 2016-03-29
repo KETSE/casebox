@@ -30,6 +30,10 @@ class StringsFacet
         );
 
         if (!empty($this->config['child'])) {
+            $domain = empty($this->config['domain'])
+                ? ['blockParent' => 'child:false']
+                : $this->config['domain'];
+
             $rez = array(
                 'facet' => true
                 // ,'requestHandler' => 'bjf'
@@ -37,9 +41,7 @@ class StringsFacet
                     $this->config['name'] => [
                         'type' => 'terms',
                         'field' => $this->field,
-                        'domain' => [
-                            'blockParent' => 'child:false'
-                        ]
+                        'domain' => $domain
                     ]
                 ]
             );
@@ -76,9 +78,15 @@ class StringsFacet
             $this->solrResultRoot = 'facets';
         }
 
+        //detect facet results
+        $sr = null;
         if (!empty($solrResult->{$this->solrResultRoot})) {
             $sr = &$solrResult->{$this->solrResultRoot};
+        } elseif (!empty($solrResult->facets)) {
+            $sr = &$solrResult->facets;
+        }
 
+        if (!empty($sr)) {
             if (empty($this->config['child'])) {
                 if (!empty($sr->facet_fields->$index)) {
                     $this->solrData = $sr->facet_fields->$index;

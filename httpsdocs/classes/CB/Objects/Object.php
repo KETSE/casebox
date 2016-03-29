@@ -196,7 +196,7 @@ class Object
 
         //system flag shouldn't be updated if not set
         if (isset($r['system'])) {
-            $r = intval($r['system']);
+            $r['system'] = intval($r['system']);
         }
 
         return $r;
