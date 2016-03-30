@@ -189,7 +189,7 @@ class Search extends Solr\Client
             $fq = array('dstatus:' . intval($p['dstatus']));
         }
 
-        $fq[] = (empty($p['child']) || ($p['child'] == 'false'))
+        $fq[] = (empty($p['child']) || ($p['child'] == false))
             ? 'child:false'
             : 'child:true';
 

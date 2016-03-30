@@ -348,11 +348,23 @@ class Service
         }
 
         if (!empty($children)) {
+            //detect parent only values
+            $nonChildValues = $arr;
+            $childFields = [];
+            foreach ($children as $d) {
+                $childFields = array_merge($childFields, array_keys($d));
+            }
+            $childFields = array_unique($childFields);
+            foreach ($childFields as $fn) {
+                unset($nonChildValues[$fn]);
+            }
+
             $childDocs = [];
             foreach ($children as $d) {
                 $childDocs[] = $this->arrayToSolrDocument(
                     //merge parent properties to children
-                    array_merge($arr, $d)
+                    array_merge($nonChildValues, $d)
+                    // $d
                 );
             }
             $rez->_childDocuments_ = $childDocs;

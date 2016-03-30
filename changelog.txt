@@ -1,3 +1,7 @@
+CaseBox 1.9.594 (2016-03-30)
+==============================
+- pivot counting on child records
+
 CaseBox 1.9.593 (2016-03-29)
 ==============================
 - #11047 Can some fields be hidden on some permission users for example name of victim and compliant against name.

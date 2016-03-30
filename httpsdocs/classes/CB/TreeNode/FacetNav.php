@@ -231,7 +231,7 @@ class FacetNav extends Query
         $p = $this->requestParams;
 
         $fq = empty($this->config['fq'])
-            ? array()
+            ? []
             : $this->config['fq'];
 
         $p['fq'] = array_merge(
@@ -240,6 +240,10 @@ class FacetNav extends Query
         );
 
         $this->replaceFilterVars($p['fq']);
+
+        if (!empty($this->requestParams['view']['child'])) {
+            $p['child'] = true;
+        }
 
         $s = new \CB\Search();
         $rez = $s->query($p);
