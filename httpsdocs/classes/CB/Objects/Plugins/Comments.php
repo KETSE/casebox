@@ -32,7 +32,8 @@ class Comments extends Base
             ,'data' => array()
         );
 
-        if (empty(parent::getData($p['id']))) {
+        $prez = parent::getData($p['id']);
+        if (empty($prez)) {
             return $rez;
         }
 

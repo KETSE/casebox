@@ -646,6 +646,7 @@ Ext.define('CB.object.edit.Window', {
             this.grid.addCls('loading');
         }
 
+        this.grid.hideTemplateFields = r.hideTemplateFields;
         this.grid.reload();
 
         if(this.grid.store.getCount() > 0) {

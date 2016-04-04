@@ -370,6 +370,8 @@ class Object
 
         $this->loaded = true;
 
+        \CB\fireEvent('onObjectLoad', $this);
+
         return $this->data;
     }
 

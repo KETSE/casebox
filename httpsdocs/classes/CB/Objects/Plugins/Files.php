@@ -15,7 +15,8 @@ class Files extends Base
             ,'data' => array()
         );
 
-        if (empty(parent::getData($id))) {
+        $prez = parent::getData($id);
+        if (empty($prez)) {
             return $this->isVisible()
                 ? $rez
                 : null;

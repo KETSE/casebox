@@ -466,6 +466,7 @@ class Objects
 
                     \CB\Cache::set($varName, $o);
                     $rez[$objData['id']] = $o;
+                    fireEvent('onObjectLoad', $o);
                 }
             }
         }
