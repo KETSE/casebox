@@ -1259,17 +1259,21 @@ function initApp() {
                 var edConfig = {
                     enableKeyEvents: true
                     ,height: height
+                    ,plugins: []
                 };
 
                 if (cfg.maxLength) {
                     edConfig.maxLength = cfg.maxLength;
                     edConfig.enforceMaxLength = true;
+                    edConfig.plugins.push({
+                        ptype: 'CBPluginFieldRemainingCharsHint'
+                    });
                 }
 
                 if(cfg.mentionUsers) {
-                    edConfig.plugins = [{
+                    edConfig.plugins.push({
                         ptype: 'CBPluginFieldDropDownList'
-                    }];
+                    });
 
                 }
 

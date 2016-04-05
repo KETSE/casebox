@@ -1,3 +1,8 @@
+CaseBox 1.9.596 (2016-04-05)
+==============================
+- #12278 How to use a menu rule in vFolder
+- #10726 CUSTOMIZATION: Limit of signs / карточка дела ограничение на 500 знаков с пробелами
+
 CaseBox 1.9.595 (2016-04-04)
 ==============================
 - #11047 Can some fields be hidden on some permission users for example name of victim and compliant against name.
