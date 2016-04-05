@@ -708,7 +708,7 @@ Ext.define('CB.browser.ViewContainer', {
      */
     ,setAvailableViews: function(viewIds) {
         if (Ext.isEmpty(viewIds) || !Ext.isArray(viewIds)) {
-            viewIds = ['grid', 'charts', 'pivot'];
+            viewIds = ['grid', 'charts', 'pivot', 'activityStream'];
         }
 
         for (var i = 0; i < viewIds.length; i++) {

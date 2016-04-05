@@ -115,6 +115,7 @@ return array_merge(
 
             ,'//js/plugin/CustomInterface.js'
             ,'//js/plugin/field/DropDownList.js'
+            ,'//js/plugin/field/RemainingCharsHint.js'
             ,'//js/ux/Ext.ux.htmlEditor.js'
             ,'//js/ux/Ext.ux.plugins.defaultButton.js'
             ,'//js/ux/Ext.ux.plugins.IconCombo.js'

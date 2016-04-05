@@ -58810,7 +58810,7 @@ CREATE TABLE `translations` (
   UNIQUE KEY `UNIQUE_translations__name` (`name`),
   KEY `FK_translations__pid` (`pid`),
   CONSTRAINT `FK_translations__pid` FOREIGN KEY (`pid`) REFERENCES `translations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3159 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3161 DEFAULT CHARSET=utf8;
 
 /*Data for the table `translations` */
 
@@ -60428,9 +60428,9 @@ insert  into `translations`(`id`,`pid`,`name`,`en`,`es`,`ge`,`fr`,`hy`,`pt`,`ro`
 
 (2860,NULL,'AddGroup','Group','Grupo','ჯგუფი','Groupe','Խմբեր','Grupo','','Группy','المجموعة','小组',2,NULL,0),
 
-(2861,NULL,'monthNamesShort','Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec','Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec','\"იან, თებ, მარ, აპრ, მაი, ივნ, ივლ, აგვ, სექ, ოქტ, ნოე, დეკ\"','Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec','Հուն,Փետ,ապականել,Ապ,մայիս,Հուն,հլս,օգս,սեպ,հոկ,նոյ,դեկ','Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec','Ian,Feb,Mar,Apr,Mai,Iun,Iul,Aug,Sep,Oct,Noi,Dec','Янв,Фев,Марта,Апр,Мая,Июня,Июля,Авг,Сент,Окт,Ноября,Дек','Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec','一月,二月,三月,四月,五月,六月,七月,八月,九月,十月,十一月,十二月',1,NULL,0),
+(2861,NULL,'monthNamesShort','Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec','Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec','\"იან, თებ, მარ, აპრ, მაი, ივნ, ივლ, აგვ, სექ, ოქტ, ნოე, დეკ\"','Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec','Հուն,Փետ,ապականել,Ապ,մայիս,Հուն,հլս,օգս,սեպ,հոկ,նոյ,դեկ','Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec','Ian,Feb,Mar,Apr,Mai,Iun,Iul,Aug,Sep,Oct,Noi,Dec','Янв,Фев,Марта,Апр,Мая,Июня,Июля,Авг,Сент,Окт,Ноября,Дек','كانون الثاني,شباط,آذار,نيسان,أيار,حزيران,تموز,آب,أيلول,تشرين الأول,وتشرين الثاني,كانون الأول','一月,二月,三月,四月,五月,六月,七月,八月,九月,十月,十一月,十二月',1,NULL,0),
 
-(2862,NULL,'monthNames','January,February,March,April,May,June,July,August,September,October,November,December','January,February,March,April,May,June,July,August,September,October,November,December','\"იანვარი, თებერვალი, მარტი, აპრილი, მაისი, ივნისი, ივლისი, აგვისტო, სექტემბერი, ოქტომბერი, ნოემბერი, დეკემბერი\"','January,February,March,April,May,June,July,August,September,October,November,December','Հուն,Փետ,ապականել,Ապ,մայիս,Հուն,հլս,օգս,սեպ,հոկ,նոյ,դեկ','January,February,March,April,May,June,July,August,September,October,November,December','Ianuarie,Februarie,Martie,Aprilie,Mai,Iunie,Iulie,August,Septembrie,Octombrie,Noiembrie,Dec','Января,Февраля,Марта,Апреля,Мая,Июня,Июля,Августа,Сентября,Октября,Ноября,Декабря','January,February,March,April,May,June,July,August,September,October,November,December','一月,二月,三月,四月,五月,六月,七月,八月,九月,十月,十一月,十二月',1,NULL,0),
+(2862,NULL,'monthNames','January,February,March,April,May,June,July,August,September,October,November,December','January,February,March,April,May,June,July,August,September,October,November,December','\"იანვარი, თებერვალი, მარტი, აპრილი, მაისი, ივნისი, ივლისი, აგვისტო, სექტემბერი, ოქტომბერი, ნოემბერი, დეკემბერი\"','January,February,March,April,May,June,July,August,September,October,November,December','Հուն,Փետ,ապականել,Ապ,մայիս,Հուն,հլս,օգս,սեպ,հոկ,նոյ,դեկ','January,February,March,April,May,June,July,August,September,October,November,December','Ianuarie,Februarie,Martie,Aprilie,Mai,Iunie,Iulie,August,Septembrie,Octombrie,Noiembrie,Dec','Января,Февраля,Марта,Апреля,Мая,Июня,Июля,Августа,Сентября,Октября,Ноября,Декабря','كانون الثاني,شباط,آذار,نيسان,أيار,حزيران,تموز,آب,أيلول,تشرين الأول,وتشرين الثاني,كانون الأول','一月,二月,三月,四月,五月,六月,七月,八月,九月,十月,十一月,十二月',1,NULL,0),
 
 (2863,NULL,'dayNamesShort','Mon,Tue,Wed,Thu,Fri,Sat,Sun','Mon,Tue,Wed,Thu,Fri,Sat,Sun','\"ორშ, სამ, ოთხ, ხუთ, პარ, შაბ, კვ\"','Mon,Tue,Wed,Thu,Fri,Sat,Sun','Mon,Tue,Wed,Thu,Fri,Sat,Sun','Mon,Tue,Wed,Thu,Fri,Sat,Sun','Luni,Mar,Mer,Joi,Vin,Sâm,Dum','Пон,Вт,Ср,Чет,Пят,Суб,Вос','الإِثْنَيْن، الثُّلَاثاء، الاربعاء، الخميس، الجمعة، السبت،الاحد ','周一,周二,周三,周四,周五,周六,周日',1,NULL,0),
 
@@ -60734,7 +60734,7 @@ insert  into `translations`(`id`,`pid`,`name`,`en`,`es`,`ge`,`fr`,`hy`,`pt`,`ro`
 
 (3020,NULL,'ActionLog','Action log','Action log','Action log','Action log','Action log','Action log','Action log','Action log','Action log','Action log',1,NULL,0),
 
-(3021,NULL,'CurrentMonth','Current month','Current month','Current month','Current month','Current month','Current month','Current month','Current month','Current month','Current month',1,NULL,0),
+(3021,NULL,'CurrentMonth','Current month','Current month','Current month','Current month','Current month','Current month','Current month','Current month','الشهر الحالي','Current month',1,NULL,0),
 
 (3022,NULL,'Subscribe','Subscribe','Subscribe','Subscribe','Subscribe','Subscribe','Subscribe','Subscribe','Подписатся!','Subscribe','Subscribe',2,NULL,0),
 
@@ -61000,7 +61000,11 @@ insert  into `translations`(`id`,`pid`,`name`,`en`,`es`,`ge`,`fr`,`hy`,`pt`,`ro`
 
 (3157,NULL,'ShowUnread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread','Show unread',2,NULL,0),
 
-(3158,NULL,'ShowLegend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend',2,NULL,0);
+(3158,NULL,'ShowLegend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend','Show legend',2,NULL,0),
+
+(3159,NULL,'TotalCharsHint','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Максимальная длина поля - {total} символов','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars',2,NULL,0),
+
+(3160,NULL,'RemainingCharsHint','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','доступно символов - {left}','{left} remaining chars','{left} remaining chars',2,NULL,0);
 
 /*Table structure for table `zone` */
 
@@ -61877,6 +61881,7 @@ BEGIN
 		ADD COLUMN `caption` VARCHAR(150) NULL AFTER `zone_name`,
 		ADD COLUMN `gmt_offset` INT NULL AFTER `caption`;
 	END IF;
+
 	update zone set gmt_offset = (SELECT tz.gmt_offset
 		FROM `timezone` tz
 		WHERE tz.zone_id=zone.zone_id AND tz.time_start < UNIX_TIMESTAMP(UTC_TIMESTAMP()) AND tz.dst = 0

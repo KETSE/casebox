@@ -15,7 +15,8 @@ class Tasks extends Base
             'success' => true
         );
 
-        if (empty(parent::getData($id))) {
+        $prez = parent::getData($id);
+        if (empty($prez)) {
             return $rez;
         }
 

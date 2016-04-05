@@ -13,7 +13,8 @@ class TimeTracking extends Base
             'data' => []
         );
 
-        if (empty(parent::getData($id))) {
+        $prez = parent::getData($id);
+        if (empty($prez)) {
             return $rez;
         }
 

@@ -1,3 +1,8 @@
 .chrome-43 .x-form-text-wrap {
     vertical-align: top;
 }
+/* problems when displaying rtl text in locked columns #12288 */
+.x-grid-view.x-rtl.x-grid-view-default {
+    margin: 0 !important;
+    right: 0 !important;
+}

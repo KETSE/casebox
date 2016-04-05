@@ -1024,3 +1024,12 @@ border-top: 0;
 .list-expanded .limited-list .more { display: block;}
 .list-expanded .limited-list tr.more { display: table-row;}
 .list-expanded .limited-list .toggle {display: none;}
+
+.remaining-chars-hint{
+  color: #FF0000;
+}
+.remaining-chars-hint .x-form-item-label-inner {
+  text-transform: none;
+  font-weight: normal;
+  padding: 3px 5px;
+}

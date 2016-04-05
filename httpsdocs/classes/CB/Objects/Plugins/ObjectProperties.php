@@ -10,11 +10,9 @@ class ObjectProperties extends Base
 {
     public function getData($id = false)
     {
-        $rez = array(
-            'success' => true
-        );
+        $rez = parent::getData($id);
 
-        if (empty(parent::getData($id))) {
+        if (empty($rez)) {
             return null;
         }
 

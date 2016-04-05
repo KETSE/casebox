@@ -11,7 +11,9 @@ class Thumb extends Base
     public function getData($id = false)
     {
         $rez = array('success'=> true, 'data' => array());
-        if (empty(parent::getData($id))) {
+
+        $prez = parent::getData($id);
+        if (empty($prez)) {
             return null;
         }
 

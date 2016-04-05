@@ -1,3 +1,30 @@
+CaseBox 1.9.596 (2016-04-05)
+==============================
+- #12278 How to use a menu rule in vFolder
+- #10726 CUSTOMIZATION: Limit of signs / карточка дела ограничение на 500 знаков с пробелами
+
+CaseBox 1.9.595 (2016-04-04)
+==============================
+- #11047 Can some fields be hidden on some permission users for example name of victim and compliant against name.
+
+CaseBox 1.9.594 (2016-03-30)
+==============================
+- pivot counting on child records
+
+CaseBox 1.9.593 (2016-03-29)
+==============================
+- #11047 Can some fields be hidden on some permission users for example name of victim and compliant against name.
+
+CaseBox 1.9.592 (2016-03-29)
+==============================
+- add configurable domain support for child facet configs
+
+CaseBox 1.9.591 (2016-03-29)
+==============================
+- #12276 Make some fields of AffectedPerson indexed & create vFolder with view=pivot
+- Replace child.facet.field solr requests with json.facet
+- #12288 Pivot table labels issue
+
 CaseBox 1.9.590 (2016-03-25)
 ==============================
 - #12277 Introduce "availableViews": "grid, chart, pivot, activity, calendar"

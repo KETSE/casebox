@@ -430,7 +430,7 @@ Ext.define('CB.VerticalEditGrid', {
         }
         this.template_id = parseInt(this.template_id, 10);
 
-        this.templateStore = CB.DB['template' + this.template_id];
+        this.templateStore = Ext.clone(CB.DB['template' + this.template_id]);
 
         var idx = CB.DB.templates.findExact('id', this.template_id);
         if(idx >= 0) {
@@ -553,6 +553,16 @@ Ext.define('CB.VerticalEditGrid', {
         //skip check for root node
         if(Ext.isEmpty(r)) {
             return false;
+        }
+
+        if (Ext.isArray(this.hideTemplateFields)) {
+            var a = this.hideTemplateFields;
+            if ((a.indexOf(r.get('name')) > -1) ||
+                (a.indexOf(r.get('id')) > -1) ||
+                (a.indexOf(r.get('id') + '') > -1)
+            ) {
+                return false;
+            }
         }
 
         return (

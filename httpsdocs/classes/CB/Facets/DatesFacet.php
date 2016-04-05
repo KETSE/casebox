@@ -91,10 +91,15 @@ class DatesFacet extends StringsFacet
         $this->solrData = array();
         $cfg = &$this->config;
 
-        foreach ($cfg['queries'] as $key => $query) {
-            $qk = $cfg['name'].'_'.$key;
-            if (!empty($solrResult->facet_queries->{$qk})) {
-                $this->solrData[$query] = $solrResult->facet_queries->{$qk};
+        if (!empty($solrResult->{$this->solrResultRoot})) {
+            $sr = &$solrResult->{$this->solrResultRoot};
+
+            foreach ($cfg['queries'] as $key => $query) {
+                $qk = $cfg['name'].'_'.$key;
+
+                if (!empty($sr->facet_queries->{$qk})) {
+                    $this->solrData[$query] = $sr->facet_queries->{$qk};
+                }
             }
         }
     }
