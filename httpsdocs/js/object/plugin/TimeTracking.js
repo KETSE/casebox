@@ -34,14 +34,14 @@ Ext.define('CB.object.plugin.TimeTracking', {
             ,'<tpl for=".">'
             ,'<tr>'
             ,'    <td style="width:60%">'
-            ,'        <span class="click" title="{[ displayDateTime(values.cdate) ]}">{[ displayDateTime(values.date) ]}</span> &nbsp;'
-            ,'        <span class="click">{user}</span>'
+            ,'        <span class="click" title="{[ displayDateTime(values.cdate) ]}">{[ displayDateTime(values.date, App.longDateFormat) ]}</span> &nbsp;'
+            ,'        {user}'
             ,'    </td>'
             ,'    <td style="width:20%">'
-            ,'        {time}'
+            ,'        <span class="click">{time} / {cost}</span>'
             ,'    </td>'
-            ,'    <td style="width:20%">'
-            ,'        {cost}'
+            ,'    <td class="elips">'
+            ,'        <span class="click menu"></span>'
             ,'    </td>'
             ,'</tr>'
             ,'</tpl>'
@@ -97,14 +97,32 @@ Ext.define('CB.object.plugin.TimeTracking', {
         if(te.hasCls('menu')) {
             this.clickedItemData = this.store.getAt(index).data;
             this.showActionsMenu(e.getXY());
+
         } else if(te.hasCls('click')) {
-            var data = Ext.clone(this.store.getAt(index).data);
-            data.view = 'edit';
-            this.openObjectProperties(data);
+            this.clickedItemData = this.store.getAt(index).data;
+            this.onOpenClick(cmp, e);
         }
     }
 
     ,showActionsMenu: function(coord){
+        if(Ext.isEmpty(this.puMenu)) {
+            this.puMenu = new Ext.menu.Menu({
+                items: [
+                   {
+                        text: L.Edit
+                        ,scope: this
+                        ,handler: this.onOpenClick
+                    },'-',{
+                        text: L.Delete
+                        ,iconCls: 'i-trash'
+                        ,scope: this
+                        ,handler: this.onDeleteItemClick
+                    }
+                ]
+            });
+        }
+
+        this.puMenu.showAt(coord);
     }
 
     ,onDeleteItemClick: function(b, e) {
@@ -112,7 +130,11 @@ Ext.define('CB.object.plugin.TimeTracking', {
     }
 
     ,onOpenClick: function(b, e) {
-        this.openObjectProperties(this.clickedItemData);
+        var data = Ext.clone(this.clickedItemData);
+        data.view = 'edit';
+        data.modal = true;
+
+        this.openObjectProperties(data);
     }
 
     ,getToolbarItems: function() {
@@ -131,6 +153,7 @@ Ext.define('CB.object.plugin.TimeTracking', {
             ,template_id: tpl.get('id')
             ,path: this.params.path
             ,alignWindowTo: e.getXY()
+            ,modal: true
         };
 
         App.mainViewPort.fireEvent('createobject', d, e);

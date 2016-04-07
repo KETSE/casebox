@@ -382,13 +382,67 @@ class Browser
 
         if (!empty($fieldConfig['source'])) {
             if (is_array($fieldConfig['source'])) { // a custom source
+                $source = $fieldConfig['source'];
                 $rez = array();
+
+                //analize facet sources
+                if (!empty($source['facet'])) {
+                    //creating facets
+                    $facetsDefinitions = \CB\Config::get('facet_configs');
+
+                    if (!empty($facetsDefinitions[$source['facet']])) {
+                        $conf = $facetsDefinitions[$source['facet']];
+                        $conf['name'] = $source['facet'];
+
+                        if (!empty($source['sort'])) {
+                            $conf['sort'] = $source['sort'];
+                        }
+
+                        $facet = \CB\Facets::getFacetObject($conf);
+
+                        if (!empty($facet)) {
+                            $qp = [
+                                'rows' => 0,
+                                'facets' => [
+                                    $source['facet'] => &$facet
+                                ]
+                            ];
+                            $qp = array_merge(
+                                $qp
+                                ,array_intersect_key(
+                                    $source,
+                                    [
+                                        'templates' => 1,
+                                        'pid' => 1,
+                                        'fq' => 1,
+                                        'query' => 1,
+                                        'descendants' => 1
+                                    ]
+                                )
+                            );
+                            // array_merge($source, $facet->getSolrParams());
+
+                            $search = new Search();
+
+                            $rez = $search->query($qp);
+
+                            $cd =  $facet->getClientData();
+
+                            foreach ($cd['items'] as $id => $v) {
+                                $rez['data'][] = [
+                                    'id' => $id,
+                                    'name' => $v['name'] . ' (' . $v['count'] . ')'
+                                ];
+                            }
+                        }
+                    }
+                }
 
                 if (empty($p['fieldId'])) {
                     return $rez;
                 }
 
-                //get custom method from config
+                //analize custom method sources
                 if (empty($fieldConfig['source']['fn'])) {
                     return $rez;
                 }
@@ -396,6 +450,7 @@ class Browser
                 $method = explode('.', $fieldConfig['source']['fn']);
                 $class = new $method[0]();
                 $rez = $class->$method[1]($p);
+
                 if (!empty($rez)) {
                     return $rez;
                 }
