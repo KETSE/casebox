@@ -36,15 +36,15 @@ For security reasons, run:
 ## Install JAVA (1.7+)
 `$ sudo apt-get install default-jdk`
 
-## Install SOLR 5.2
+## Install SOLR 5.5
 - Navigate to: http://lucene.apache.org/solr/
 - Click on Download
 - Select a Mirror
-- Download: **solr-5.X.X.tgz** (as of this writting solr-5.2.0.tgz)
+- Download: **solr-5.X.X.tgz** (as of this writting solr-5.5.0.tgz)
 - On the terminal cd to the donwload location
 
-`$ tar xzf solr-5.2.0.tgz solr-5.2.0/bin/install_solr_service.sh --strip-components=2`
-`$ sudo bash ./install_solr_service.sh solr-5.2.0.tgz`
+`$ tar xzf solr-5.5.0.tgz solr-5.5.0/bin/install_solr_service.sh --strip-components=2`
+`$ sudo bash ./install_solr_service.sh solr-5.5.0.tgz`
 
 Follow on-screen instructions and then confirm by running
 `$ sudo service solr status`

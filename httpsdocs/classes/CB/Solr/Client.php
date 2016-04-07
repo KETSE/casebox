@@ -87,6 +87,7 @@ class Client extends Service
         if (empty($r['pids'])) {
             $r['pids'] = null;
             $r['path'] = null;
+
         } else {
             $r['pids'] = explode(',', $r['pids']);
             //exclude itself from pids
@@ -115,24 +116,9 @@ class Client extends Service
             $r['ym3'] = $ym3;
         }
 
-        $r['content'] = $r['name'] . "\n";
-
         if (!empty($r['sys_data']['solr'])) {
             foreach ($r['sys_data']['solr'] as $k => $v) {
                 $r[$k] = $v;
-
-                //add string values to content field
-                if (is_string($v)) {
-                    $r['content'] .= (in_array($k, array('date_start', 'date_end', 'dates'))
-                        ? substr($v, 0, 10)
-                        : $v
-                    )."\n";
-                }
-            }
-
-            //override content field if set in sys_data['solr']
-            if (!empty($r['sys_data']['solr']['content'])) {
-                $r['content'] = $r['sys_data']['solr']['content'];
             }
         }
 

@@ -1,3 +1,8 @@
+CaseBox 1.9.599 (2016-04-07)
+==============================
+- prepare "content" solr field before indexing into solr
+- change required solr to 5.5.0 for travis
+
 CaseBox 1.9.598 (2016-04-07)
 ==============================
 - moving cusor to start when selecting a dropdown value from combo and date fields
