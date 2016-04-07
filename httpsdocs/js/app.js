@@ -1098,6 +1098,11 @@ function initApp() {
                     enableKeyEvents: true
                     ,format: App.dateFormat
                     ,width: 100
+                    ,listeners: {
+                        select: function(ed) {
+                            ed.setCaretPosition(0);
+                        }
+                    }
                 });
                 break;
 
@@ -1106,6 +1111,11 @@ function initApp() {
                     enableKeyEvents: true
                     ,format: App.dateFormat+' ' + App.timeFormat
                     ,width: 130
+                    ,listeners: {
+                        select: function(ed) {
+                            ed.setCaretPosition(0);
+                        }
+                    }
                 });
                 break;
 
@@ -1113,6 +1123,11 @@ function initApp() {
                 rez = new Ext.form.field.Time({
                     enableKeyEvents: true
                     ,format: App.timeFormat
+                    ,listeners: {
+                        select: function(ed) {
+                            ed.setCaretPosition(0);
+                        }
+                    }
                 });
                 break;
 
@@ -1141,6 +1156,7 @@ function initApp() {
                 if(th === 'dependent'){
                     th = e.pidValue;
                 }
+
                 rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true

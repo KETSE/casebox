@@ -180,6 +180,8 @@ Ext.define('CB.ObjectsComboField', {
 
         Ext.apply(this, CB.ObjectsFieldCommonFunctions);
 
+        Ext.copyTo(this, this.cfg, 'editable');
+
         this.detectStore();
 
         //set template for item list
@@ -247,9 +249,7 @@ Ext.define('CB.ObjectsComboField', {
                     }
                     this.objectsStore.checkRecordExistance(record.data);
                 }
-                // ,blur: function(field){
-                //     this.setValue(this.value);
-                // }
+                ,select: this.onValueSelect
                 ,beforedestroy: function(){
                     this.store.un('beforeload', this.onBeforeLoadStore, this);
                     this.store.un('load', this.onStoreLoad, this);
@@ -258,14 +258,32 @@ Ext.define('CB.ObjectsComboField', {
                     // var idx = c.store.findExact('id', c.getValue()) -1;
                     // c.select(idx, true);
                 }
+                ,afterrender: this.onAfterRender
             }
         });
 
         this.callParent(arguments);
     }
 
+    ,onAfterRender: function(cmp) {
+        if (cmp.editable !== true) {
+            cmp.expand()
+        }
+    }
+
     ,onBeforeLoadStore: function(st, options){
         options.params = Ext.apply({}, this.cfg, options.params);
+    }
+
+    /**
+     * move cursor to begining on select
+     * @param  {[type]} combo
+     * @param  {[type]} record
+     * @param  {[type]} eOpts
+     * @return {[type]}
+     */
+    ,onValueSelect: function (combo, record, eOpts) {
+        combo.setCaretPosition(0);
     }
 
     ,setValue: function(v){

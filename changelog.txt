@@ -1,3 +1,10 @@
+CaseBox 1.9.598 (2016-04-07)
+==============================
+- moving cusor to start when selecting a dropdown value from combo and date fields
+- add editable option for objects combo and autoexpand for non editable
+- allow to specify custom fn along with facet source for a field,
+  so that the result facets could be filtered by cystom logic
+
 CaseBox 1.9.597 (2016-04-07)
 ==============================
 - updating order of template fields, on update, in template_structure table
