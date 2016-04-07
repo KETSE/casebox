@@ -704,6 +704,7 @@ function initApp() {
                     : 'CBObjectEditWindow'
                 )
                 ,data: config
+                ,modal: Ext.valueFrom(config.modal, false)
             };
 
         wndCfg.id = 'oew-' +

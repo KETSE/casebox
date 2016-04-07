@@ -17,7 +17,9 @@ class Comments extends Base
      */
     public function getData($id = false)
     {
-        return $this->loadMore(array('id' => $id));
+        return $this->isVisible()
+            ? $this->loadMore(array('id' => $id))
+            : null;
     }
 
     /**

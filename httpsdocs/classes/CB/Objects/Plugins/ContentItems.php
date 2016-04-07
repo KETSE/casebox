@@ -11,10 +11,18 @@ class ContentItems extends Base
 
     public function getData($id = false)
     {
+        if (!$this->isVisible()) {
+            return null;
+        }
+
         $rez = array(
             'success' => true,
             'data' => []
         );
+
+        if(empty($this->id)) {
+            return $rez;
+        }
 
         $params = $this->getSolrParams();
 

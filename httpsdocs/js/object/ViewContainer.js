@@ -1066,7 +1066,7 @@ Ext.define('CB.object.ViewContainer', {
             data = {id: data};
         }
 
-        if(!Ext.isEmpty(data.isNew)) {
+        if(!Ext.isEmpty(data.isNew) && (data.type !== 'time_tracking')) {
             this.requestedLoadData = data;
             this.doLoad();
             return;

@@ -47,6 +47,23 @@ class Object
      */
     protected $data = array();
 
+    protected $tableFields = [
+        'pid'
+        ,'user_id'
+        ,'system'
+        ,'template_id'
+        ,'tag_id'
+        ,'target_id'
+        ,'name'
+        ,'date'
+        ,'date_end'
+        ,'size'
+        ,'cfg'
+        ,'oid'
+        ,'did'
+        ,'dstatus'
+    ];
+
     public function __construct($id = null, $loadTemplate = true)
     {
         if (is_numeric($id)) {
@@ -425,23 +442,6 @@ class Object
         \CB\fireEvent('beforeNodeDbUpdate', $this);
 
         $p = &$this->data;
-
-        $this->tableFields = array(
-            'pid'
-            ,'user_id'
-            ,'system'
-            ,'template_id'
-            ,'tag_id'
-            ,'target_id'
-            ,'name'
-            ,'date'
-            ,'date_end'
-            ,'size'
-            ,'cfg'
-            ,'oid'
-            ,'did'
-            ,'dstatus'
-        );
 
         $data =  $this->collectModelData($p);
 
@@ -1857,7 +1857,7 @@ class Object
             // if ($timeSpent > 0) {
                 $body .= '<tr><td class="prop-key">' . L\get('TimeSpent') . '</td>' .
                     '<td class="prop-val"><span class="time-spent click">' .
-                    Util\formatSeconds($timeSpent['sec'], 'H:i') .
+                    gmdate("G\h i\m", $timeSpent['sec']) .
                     ' / $' . number_format($timeSpent['money'], 2) .
                     '</span> <a class="add-time-spent i-add click"></a>' .
                     '</td></tr>';

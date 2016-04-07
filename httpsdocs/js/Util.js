@@ -80,10 +80,11 @@ function getUserDisplayName(withEmail) {
     return rez;
 }
 
-function displayDateTime(date){
+function displayDateTime(date, format){
     var d = date_ISO_to_local_date(date);
     if(Ext.isDate(d)) {
-        return Ext.Date.format(d, App.longDateFormat + ' ' + App.timeFormat);
+        format = Ext.valueFrom(format, App.longDateFormat + ' ' + App.timeFormat);
+        return Ext.Date.format(d, format);
     }
     return '';
 }
@@ -218,6 +219,7 @@ function getStoreTitles(v){
 
     return texts.join(',');
 }
+
 function getStoreNames(v){
     if(Ext.isEmpty(v)) {
         return '';
