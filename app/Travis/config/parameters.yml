@@ -19,7 +19,7 @@ parameters:
     solr_password: null
     session.lifetime: 4320
     admin_email: admin@example.com
-    sender_email: emails.sender@example.com
+    sender_email: noreply@casebox.org
     comments_pass: null
     mailer_transport: smtp
     mailer_host: 127.0.0.1
