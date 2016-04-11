@@ -1,3 +1,10 @@
+CaseBox 1.9.600 (2016-04-11)
+==============================
+- #11916 HtmlPlugin object plugin based on BaseObjectPlugin
+- #12406 autoexpand editors popup list when editing a field
+- #12407 display field triggers at the right for rtl languages
+- #11895 Record.onCopy: exclude comments + add Copy/Move action types in log
+
 CaseBox 1.9.599 (2016-04-07)
 ==============================
 - prepare "content" solr field before indexing into solr

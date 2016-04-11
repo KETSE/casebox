@@ -171,6 +171,7 @@ return array_merge(
             ,'//js/object/plugin/Comments.js'
             ,'//js/object/plugin/ContentItems.js'
             ,'//js/object/plugin/Files.js'
+            ,'//js/object/plugin/Html.js'
             ,'//js/object/plugin/ObjectProperties.js'
             ,'//js/object/plugin/SystemProperties.js'
             ,'//js/object/plugin/Meta.js'

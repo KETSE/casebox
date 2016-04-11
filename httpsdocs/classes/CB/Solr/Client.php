@@ -95,6 +95,10 @@ class Client extends Service
             $r['path'] = implode('/', $r['pids']);
         }
 
+        if (!isset($r['content'])) {
+            $r['content'] = null;
+        }
+
         /* fill "ym" fields for date faceting by cdate, date, date_end */
         $ym1 = str_replace('-', '', substr($r['cdate'], 2, 5));
         $ym2 = str_replace('-', '', substr($r['date'], 2, 5));

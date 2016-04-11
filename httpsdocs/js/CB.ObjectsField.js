@@ -254,21 +254,10 @@ Ext.define('CB.ObjectsComboField', {
                     this.store.un('beforeload', this.onBeforeLoadStore, this);
                     this.store.un('load', this.onStoreLoad, this);
                 }
-                ,expand: function(c){
-                    // var idx = c.store.findExact('id', c.getValue()) -1;
-                    // c.select(idx, true);
-                }
-                ,afterrender: this.onAfterRender
             }
         });
 
         this.callParent(arguments);
-    }
-
-    ,onAfterRender: function(cmp) {
-        if (cmp.editable !== true) {
-            cmp.expand()
-        }
     }
 
     ,onBeforeLoadStore: function(st, options){

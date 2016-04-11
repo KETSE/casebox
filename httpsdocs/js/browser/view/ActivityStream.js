@@ -83,9 +83,14 @@ Ext.define('CB.browser.view.ActivityStream',{
                     }
 
                     switch(la.type) {
+                        case 'copy':
+                            rez += ' ' + Ext.valueFrom(L['copied'], la.type);
+                            break;
+
                         case 'comment':
                             rez += ' ' + Ext.valueFrom(L[la.type + 'ed'], la.type);
                             break;
+
                         default:
                             rez += ' ' + Ext.valueFrom(L[la.type + 'd'], la.type);
                     }

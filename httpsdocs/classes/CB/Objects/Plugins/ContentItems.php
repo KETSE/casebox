@@ -15,10 +15,8 @@ class ContentItems extends Base
             return null;
         }
 
-        $rez = array(
-            'success' => true,
-            'data' => []
-        );
+        $rez = parent::getData($id);
+        $rez['data'] = [];
 
         if(empty($this->id)) {
             return $rez;
@@ -38,23 +36,6 @@ class ContentItems extends Base
         $config = $this->config;
         if (isset($config['limit'])) {
             $rez['limit'] = $config['limit'];
-        }
-
-        if (!empty($config['header'])) {
-            $h = $config['header'];
-            $title = empty($h['title'])
-                ? ''
-                : Util\detectTitle($h['title']);
-
-            if (!empty($h['showTotal'])) {
-                $title .= ' ({total})';
-            }
-
-            $rez['title'] = $title;
-
-            if (!empty($h['menu'])) {
-                $rez['menu'] = $h['menu'];
-            }
         }
 
         return $rez;
@@ -108,14 +89,5 @@ class ContentItems extends Base
         }
 
         return $rez;
-    }
-
-    protected function getFunctionResult($fn)
-    {
-        $t = explode('.', $fn);
-        $class = new $t[0];
-        $method = $t[1];
-
-        return $class->$method($this->id);
     }
 }

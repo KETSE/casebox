@@ -540,18 +540,8 @@ class Objects
     {
         $class = $this->getCustomClassByObjectId($objectId);
         $data = $class->load();
-        $data['id'] = $targetId;
-        $data['pid'] = $pid;
 
-        $rez = $targetId;
-
-        if ($targetId === false) {
-            $rez = $class->create($data);
-        } else {
-            $class->update($data);
-        }
-
-        return $rez;
+        return $class->copyTo($pid, $targetId);
     }
 
     /**
@@ -828,8 +818,9 @@ class Objects
             $pClass = new $fullClassName($v);
             $prez = $pClass->getData();
             $prez['class'] = $className;
-
-            $rez['data'][$pindex] = $prez;
+            if (isset($prez['data'])) {
+                $rez['data'][$pindex] = $prez;
+            }
         }
 
         //set system properties to common if SystemProperties plugin is not required

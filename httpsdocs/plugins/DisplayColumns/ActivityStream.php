@@ -1,6 +1,7 @@
 <?php
 namespace DisplayColumns;
 
+use CB\L;
 use CB\Objects;
 use CB\Util;
 use CB\DataModel as DM;
@@ -50,15 +51,25 @@ class ActivityStream extends Base
         foreach ($logRecs as $r) {
             $d = Util\jsonDecode($r['data']);
 
-            $obj = Objects::getCachedObject($actionLogIds[$r['id']]['id']);
-            $diff = $obj->getDiff($d);
-            if (!empty($diff)) {
-                $html = '';
-                foreach ($diff as $fn => $fv) {
-                    $html .= "<tr><th>$fn</th><td>$fv</td></tr>";
-                }
+            switch($r['action_type']) {
+                case 'move':
+                case 'copy':
+                    $actionLogIds[$r['id']]['diff'] = '<table class="as-diff"><tr><th>' .
+                        L\get('Path') . '</th><td>' .
+                        $d['old']['path'] . ' &#10142; ' . $d['new']['path'] .'</td></tr></table>';
 
-                $actionLogIds[$r['id']]['diff'] = "<table class=\"as-diff\">$html</table>";
+                    break;
+                default:
+                    $obj = Objects::getCachedObject($actionLogIds[$r['id']]['id']);
+                    $diff = $obj->getDiff($d);
+                    if (!empty($diff)) {
+                        $html = '';
+                        foreach ($diff as $fn => $fv) {
+                            $html .= "<tr><th>$fn</th><td>$fv</td></tr>";
+                        }
+
+                        $actionLogIds[$r['id']]['diff'] = "<table class=\"as-diff\">$html</table>";
+                    }
             }
         }
     }

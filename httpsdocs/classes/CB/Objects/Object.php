@@ -1551,6 +1551,17 @@ class Object
             DM\Tree::moveActiveChildren($targetId, $this->id);
         }
 
+        $newObj = clone $this;
+        $newObj->load($objectId);
+
+        $this->logAction(
+            'copy',
+            array(
+                'old' => $this,
+                'new' => $newObj
+            )
+        );
+
         return $objectId;
     }
 

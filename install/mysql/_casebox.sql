@@ -1,8 +1,3 @@
-/*
-*********************************************************************
-*/
-
-
 /*!40101 SET NAMES utf8 */;
 
 /*!40101 SET SQL_MODE=''*/;
@@ -58810,7 +58805,7 @@ CREATE TABLE `translations` (
   UNIQUE KEY `UNIQUE_translations__name` (`name`),
   KEY `FK_translations__pid` (`pid`),
   CONSTRAINT `FK_translations__pid` FOREIGN KEY (`pid`) REFERENCES `translations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3161 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3162 DEFAULT CHARSET=utf8;
 
 /*Data for the table `translations` */
 
@@ -61004,7 +60999,9 @@ insert  into `translations`(`id`,`pid`,`name`,`en`,`es`,`ge`,`fr`,`hy`,`pt`,`ro`
 
 (3159,NULL,'TotalCharsHint','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Максимальная длина поля - {total} символов','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars',2,NULL,0),
 
-(3160,NULL,'RemainingCharsHint','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','доступно символов - {left}','{left} remaining chars','{left} remaining chars',2,NULL,0);
+(3160,NULL,'RemainingCharsHint','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','доступно символов - {left}','{left} remaining chars','{left} remaining chars',2,NULL,0),
+
+(3161,NULL,'copied','copied','copied','copied','copied','copied','copied','a copiat','скопировал','copied','copied',0,NULL,0);
 
 /*Table structure for table `zone` */
 

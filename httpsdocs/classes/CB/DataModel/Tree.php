@@ -458,10 +458,10 @@ class Tree extends Base
                 ,`is_main`
                 ,`cfg`
                 ,`inherit_acl`
-                ,`cid`
-                ,`cdate`
                 ,$3
                 ,CURRENT_TIMESTAMP
+                ,NULL
+                ,NULL
                 ,1
                 ,`oid`
                 ,`did`
