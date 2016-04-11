@@ -121,6 +121,17 @@
 		</lst>
 	</requestHandler>
 
+
+    <searchComponent name="blockJoinFacet" class="org.apache.solr.search.join.BlockJoinFacetComponent">
+    </searchComponent>
+
+    <requestHandler name="/bjf" class="org.apache.solr.handler.component.SearchHandler">
+        <arr name="last-components">
+            <str>blockJoinFacet</str>
+        </arr>
+    </requestHandler>
+
+
 	<!-- config for the admin interface -->
 	<admin>
 		<defaultQuery>*:*</defaultQuery>

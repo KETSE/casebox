@@ -41,8 +41,14 @@
 -->
 
 
-<!-- id: tree nodes unique identifier field (from tree table) -->
-<field name="id"           type="tlong"          indexed="true" stored="true" required="true" />
+<!-- id: nodes unique identifier field -->
+<field name="id"           type="tlong"         indexed="true" stored="true" required="true" />
+
+<!-- doc_id: tree nodes identifier field (from tree table) -->
+<field name="doc_id"       type="string"        indexed="true" stored="true" required="true" />
+
+<field name="child"       type="boolean"       indexed="true" stored="false" default="false" />
+
 
 <!-- pid: primary node id -->
 <field name="pid"          type="tlong"          indexed="true" stored="true" />
@@ -116,7 +122,7 @@ type: node type
     1 - deleted
     2 - deleted due to dependancy (for childs of deleted objects)
   -->
-<field name="dstatus"          type="tint"          indexed="true" stored="true" required="true" />
+<field name="dstatus"          type="tint"          indexed="true" stored="true" default="0" />
 
 <!-- case_id: indicates the id of the case if this node is in a case  -->
 <field name="case_id"          type="tint"          indexed="true" stored="true" />
