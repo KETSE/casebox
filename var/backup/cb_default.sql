@@ -54,33 +54,29 @@ CREATE TABLE `config` (
 
 /*Data for the table `config` */
 
-insert  into `config`(`id`,`pid`,`param`,`value`,`order`) values 
-
-(104,NULL,'project_name_en','CaseBox - Demo',NULL),
-
-(105,NULL,'templateIcons','\r\nicon-arrow-left-medium\r\nicon-arrow-left-medium-green\r\nicon-arrow-left\r\nicon-arrow-right-medium\r\nicon-arrow-right\r\nicon-case_card\r\nicon-complaint\r\nicon-complaint-subjects\r\nicon-info-action\r\nicon-decision\r\nicon-echr_complaint\r\nicon-echr_decision\r\nicon-petition\r\nicon-balloon\r\nicon-bell\r\nicon-blog-blue\r\nicon-blog-magenta\r\nicon-blue-document-small\r\nicon-committee-phase\r\nicon-document-medium\r\nicon-document-stamp\r\nicon-document-text\r\nicon-mail\r\nicon-object1\r\nicon-object2\r\nicon-object3\r\nicon-object4\r\nicon-object5\r\nicon-object6\r\nicon-object7\r\nicon-object8\r\nicon-zone\r\nicon-applicant\r\nicon-suspect\r\nicon-milestone',NULL),
-
-(106,NULL,'folder_templates','5,11,100',NULL),
-
-(107,NULL,'default_folder_template','5',NULL),
-
-(108,NULL,'default_file_template','6',NULL),
-
-(109,NULL,'default_task_template','7',NULL),
-
-(110,NULL,'default_language','en',NULL),
-
-(111,NULL,'languages','en',NULL),
-
-(112,NULL,'object_type_plugins','{\r\n  \"object\": [\"objectProperties\", \"files\", \"tasks\", \"contentItems\", \"comments\", \"systemProperties\"]\r\n  ,\"case\": [\"objectProperties\", \"files\", \"tasks\", \"contentItems\", \"comments\", \"systemProperties\"]\r\n  ,\"task\": [\"objectProperties\", \"files\", \"contentItems\", \"comments\", \"systemProperties\"]\r\n  ,\"file\": [\"thumb\", \"meta\", \"versions\", \"tasks\", \"comments\", \"systemProperties\"]\r\n}',NULL),
-
-(113,NULL,'treeNodes','',NULL),
-
-(114,113,'Tasks','{\n    \"pid\": 1\n}',1),
-
-(115,113,'Dbnode','[]',2),
-
-(116,113,'RecycleBin','{\r\n    \"pid\": \"1\",\r\n    \"facets\": [\r\n        \"did\"\r\n    ],\r\n    \"DC\": {\r\n        \"nid\": {}\r\n        ,\"name\": {}\r\n        ,\"cid\": {}\r\n        ,\"ddate\": {\r\n            \"solr_column_name\": \"ddate\"\r\n        }\r\n    }\r\n}',3);
+INSERT INTO `config` (`id`, `pid`, `param`, `value`, `order`)
+VALUES
+	(2,NULL,'timezone','UTC',NULL),
+	(3,NULL,'languages','en,fr,ru',NULL),
+	(4,NULL,'default_language','en',NULL),
+	(8,NULL,'files','{\r\n  \"max_versions\": \"*:1;php,odt,doc,docx,xls,xlsx:20;pdf:5;png,gif,jpg,jpeg,tif,tiff:2;\"\r\n\r\n  ,\"edit\" : {\r\n    \"text\": \"txt,php,js,xml,csv\"\r\n    ,\"html\": \"html,htm\"\r\n    ,\"webdav\": \"doc,docx,ppt,dot,dotx,xls,xlsm,xltx,ppt,pot,pps,pptx,odt,ott,odm,ods,odg,otg,odp,odf,odb\"\r\n  }\r\n\r\n  ,\"webdav_url\": \"https://webdav.host.com/{core_name}/edit-{node_id}/{name}\"\r\n}',NULL),
+	(11,NULL,'language_en','{\r\n\"name\": \"English\"\r\n,\"locale\": \"en_US\"\r\n,\"long_date_format\": \"%F %j, %Y\"\r\n,\"short_date_format\": \"%m/%d/%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}',NULL),
+	(13,NULL,'language_fr','{\r\n\"name\": \"French\"\r\n,\"locale\": \"fr_FR\"\r\n,\"long_date_format\": \"%j %F %Y\"\r\n,\"short_date_format\": \"%d.%m.%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}\r\n',NULL),
+	(15,NULL,'language_ru','{\r\n\"name\": \"Русский\"\r\n,\"locale\": \"ru_RU\"\r\n,\"long_date_format\": \"%j %F %Y\"\r\n,\"short_date_format\": \"%d.%m.%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}',NULL),
+	(104,NULL,'project_name_en','CaseBox - Demo',NULL),
+	(105,NULL,'templateIcons','\r\nicon-arrow-left-medium\r\nicon-arrow-left-medium-green\r\nicon-arrow-left\r\nicon-arrow-right-medium\r\nicon-arrow-right\r\nicon-case_card\r\nicon-complaint\r\nicon-complaint-subjects\r\nicon-info-action\r\nicon-decision\r\nicon-echr_complaint\r\nicon-echr_decision\r\nicon-petition\r\nicon-balloon\r\nicon-bell\r\nicon-blog-blue\r\nicon-blog-magenta\r\nicon-blue-document-small\r\nicon-committee-phase\r\nicon-document-medium\r\nicon-document-stamp\r\nicon-document-text\r\nicon-mail\r\nicon-object1\r\nicon-object2\r\nicon-object3\r\nicon-object4\r\nicon-object5\r\nicon-object6\r\nicon-object7\r\nicon-object8\r\nicon-zone\r\nicon-applicant\r\nicon-suspect\r\nicon-milestone',NULL),
+	(106,NULL,'folder_templates','5,11,100',NULL),
+	(107,NULL,'default_folder_template','5',NULL),
+	(108,NULL,'default_file_template','6',NULL),
+	(109,NULL,'default_task_template','7',NULL),
+	(110,NULL,'default_language','en',NULL),
+	(111,NULL,'languages','en',NULL),
+	(112,NULL,'object_type_plugins','{\r\n  \"object\": [\"objectProperties\", \"files\", \"tasks\", \"contentItems\", \"comments\", \"systemProperties\"]\r\n  ,\"case\": [\"objectProperties\", \"files\", \"tasks\", \"contentItems\", \"comments\", \"systemProperties\"]\r\n  ,\"task\": [\"objectProperties\", \"files\", \"contentItems\", \"comments\", \"systemProperties\"]\r\n  ,\"file\": [\"thumb\", \"meta\", \"versions\", \"tasks\", \"comments\", \"systemProperties\"]\r\n}',NULL),
+	(113,NULL,'treeNodes','',NULL),
+	(114,113,'Tasks','{\n    \"pid\": 1\n}',1),
+	(115,113,'Dbnode','[]',2),
+	(116,113,'RecycleBin','{\r\n    \"pid\": \"1\",\r\n    \"facets\": [\r\n        \"did\"\r\n    ],\r\n    \"DC\": {\r\n        \"nid\": {}\r\n        ,\"name\": {}\r\n        ,\"cid\": {}\r\n        ,\"ddate\": {\r\n            \"solr_column_name\": \"ddate\"\r\n        }\r\n    }\r\n}',3),
+	(117,NULL,'default_object_plugins','{\n\"objectProperties\": {\n\"visibility\": {\n\"!context\": \"window\"\n,\"!template_type\": \"file\"\n}\n,\"order\": 0\n}\n,\"files\": {\n\"visibility\": {\n\"template_type\": \"object,search,case,task\"\n}\n,\"order\": 2\n}\n,\"tasks\": {\n\"visibility\": {\n\"template_type\": \"object,search,case,task\"\n}\n,\"order\": 3\n}\n,\"contentItems\": {\n\"visibility\": {\n\"!template_type\": \"file,time_tracking\"\n}\n,\"order\": 4\n}\n,\"thumb\": {\n\"visibility\": {\n\"!context\": \"window\"\n,\"template_type\": \"file\"\n}\n,\"order\": 5\n}\n,\"currentVersion\": {\n\"visibility\": {\n\"context\": \"window\"\n,\"template_type\": \"file\"\n}\n,\"order\": 6\n}\n,\"versions\": {\n\"visibility\": {\n\"template_type\": \"file\"\n}\n,\"order\": 7\n}\n,\"meta\": {\n\"visibility\": {\n\"template_type\": \"file\"\n}\n,\"order\": 8\n}\n,\"comments\": {\n\"order\": 9\n,\"visibility\": {\n\"!template_type\": \"time_tracking\"\n}\n\n}\n}',NULL);
 
 /*Table structure for table `crons` */
 
