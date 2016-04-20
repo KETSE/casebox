@@ -79,6 +79,7 @@ Ext.define('CB.file.edit.Window', {
                     ,this.actions.webdavlink
                     ,this.actions.rename
                     ,this.actions.permalink
+                    ,this.actions.print
                     ,'-'
                     ,this.actions.notifyOn
                     ,this.actions.notifyOff

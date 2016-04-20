@@ -276,6 +276,13 @@ Ext.define('CB.object.ViewContainer', {
                 ,handler: this.onPermalinkClick
             }
 
+            ,print: {
+                text: L.Print
+                ,itemId: 'print'
+                ,scope: this
+                ,handler: this.onPrintClick
+            }
+
             ,'setOwner': {
                 text: L.SetOwner
                 ,itemId: 'setOwner'
@@ -1014,6 +1021,10 @@ Ext.define('CB.object.ViewContainer', {
         window.prompt(
             'Copy to clipboard: Ctrl+C, Enter'
             , window.location.origin + '/' + App.config.coreName + '/view/' + this.loadedData.id + '/');
+    }
+
+    ,onPrintClick: function(b, e) {
+        window.open(window.location.origin + '/' + App.config.coreName + '/print/' + this.loadedData.id + '/');
     }
 
     /**

@@ -17,6 +17,8 @@ require_once 'init.php';
 $coreUrl = Config::get('core_url');
 $filesPreviewDir = Config::get('files_preview_dir');
 
+$command = basename($_GET['command']); //view | print
+
 // get requested filename
 $filename = basename($_GET['subcommand']);
 
@@ -65,19 +67,24 @@ $obj = Objects::getCachedObject($id);
 $objData = $obj->getData();
 $objType = $obj->getType();
 
-// if external window then print the toolbar
-if (empty($_GET['i'])) {
+//add header and css for externa view
+if (($command == 'print') || empty($_GET['i'])) {
     require_once(LIB_DIR . 'MinifyCache.php');
     echo '<html><head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="' . $coreUrl . substr(getMinifyGroupUrl('preview'), 1) . '" /></head>
-        <body class="external">
-    ';
-    if ($objType == 'file') {
-        $toolbarItems[] = '<a href="' . $coreUrl . 'download/' . $id . '/">' . L\get('Download') .'</a>';
-    }
+        <link rel="stylesheet" type="text/css" href="' . $coreUrl . substr(getMinifyGroupUrl('preview'), 1) . '" /></head>';
 
-    echo '<table border="0" cellspacing="12" cellpading="12"><tr><td>'.implode('</td><td>', $toolbarItems).'</td></tr></table>';
+    if ($command == 'print') {
+        echo '<body class="external" onLoad="window.print()">';
+
+    } else {// if external window then print the toolbar
+        echo '<body class="external">';
+        if ($objType == 'file') {
+            $toolbarItems[] = '<a href="' . $coreUrl . 'download/' . $id . '/">' . L\get('Download') .'</a>';
+        }
+
+        echo '<table border="0" cellspacing="12" cellpading="12"><tr><td>'.implode('</td><td>', $toolbarItems).'</td></tr></table>';
+    }
 }
 
 $preview = array();
@@ -150,6 +157,7 @@ switch ($obj->getType()) {
         $preview = array();
         $o = new Objects();
         $pd = $o->getPluginsData(array('id' => $id));
+        $title = '';
 
         if (!empty($pd['data']['objectProperties'])) {
             $data = $pd['data']['objectProperties']['data'];

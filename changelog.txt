@@ -1,3 +1,8 @@
+CaseBox 1.9.601 (2016-04-20)
+==============================
+- #12476 Printing version with arabic support
+- #12477 Custom logo and favicon
+
 CaseBox 1.9.600 (2016-04-11)
 ==============================
 - #11916 HtmlPlugin object plugin based on BaseObjectPlugin

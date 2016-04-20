@@ -742,10 +742,12 @@ class Object
 
                 // add all textual fields to content
                 foreach ($values as $v) {
-                    $rez['content'] .= (in_array($f['name'], array('date_start', 'date_end', 'dates'))
-                        ? substr($v, 0, 10)
-                        : $v['value']
-                    )."\n";
+                    if (!empty($v['value'])) {
+                        $rez['content'] .= (in_array($f['name'], ['date_start', 'date_end', 'dates'])
+                            ? substr($v, 0, 10)
+                            : $v['value']
+                        )."\n";
+                    }
                 }
 
             }
@@ -1899,7 +1901,10 @@ class Object
         $top .= $body;
 
         if (!empty($top)) {
-            $top = '<table class="obj-preview"><tbody>'.$top.'</tbody></table><br />';
+            $rtl = empty(Config::get('rtl'))
+                ? ''
+                : ' drtl';
+            $top = '<table class="obj-preview' . $rtl . '"><tbody>' . $top . '</tbody></table><br />';
         }
 
         $rez = array(

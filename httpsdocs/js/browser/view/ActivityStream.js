@@ -44,8 +44,8 @@ Ext.define('CB.browser.view.ActivityStream',{
                 getTitleIcon: function(r){
                     var uid = r.lastAction.uids[0]
                         ,us = CB.DB.usersStore
-                        ,rez = '<img class="i40" src="/' +
-                            App.config.coreName + '/photo/' + uid + '.jpg?32=' +
+                        ,rez = '<img class="i40" src="' +
+                            App.config.photoPath + uid + '.jpg?32=' +
                             us.getPhotoParam(uid)  + '" title="' +
                             us.getName(uid)
                             + '">';

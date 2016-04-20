@@ -41,8 +41,8 @@ Ext.define('CB.field.CommentLight', {
                 xtype: 'label'
                 ,width: 50
                 ,padding: '2px 0'
-                ,html: '<img class="i32" src="/' + App.config.coreName +
-                        '/photo/' + App.loginData.id + '.jpg?32=' +
+                ,html: '<img class="i32" src="' + App.config.photoPath +
+                        App.loginData.id + '.jpg?32=' +
                         CB.DB.usersStore.getPhotoParam(App.loginData.id) +
                         '" title="' + getUserDisplayName(true) + '">'
             }

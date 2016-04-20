@@ -189,6 +189,13 @@ Ext.define('CB.object.edit.Window', {
                 ,handler: this.onPermalinkClick
             })
 
+            ,print: new Ext.Action({
+                text: L.Print
+                ,itemId: 'print'
+                ,scope: this
+                ,handler: this.onPrintClick
+            })
+
             ,notifyOn: new Ext.Action({
                 text: L.NotifyOn
                 ,hidden: true
@@ -249,6 +256,7 @@ Ext.define('CB.object.edit.Window', {
                     this.actions['delete']
                     ,this.actions.rename
                     ,this.actions.permalink
+                    ,this.actions.print
                     ,'-'
                     ,this.actions.notifyOn
                     ,this.actions.notifyOff
@@ -1277,6 +1285,10 @@ Ext.define('CB.object.edit.Window', {
             'Copy to clipboard: Ctrl+C, Enter'
             , window.location.origin + '/' + App.config.coreName + '/view/' + this.data.id + '/'
         );
+    }
+
+    ,onPrintClick: function(b, e) {
+        window.location.replace(window.location.origin + '/' + App.config.coreName + '/print/' + this.data.id + '/');
     }
 
     ,onStarClick: function(b, e) {

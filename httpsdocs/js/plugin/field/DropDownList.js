@@ -29,7 +29,7 @@ Ext.define('CB.plugin.field.DropDownList', {
                 '<tpl for=".">'
                     ,'<li role="option" class="x-boundlist-item users-list-item">'
                         ,'<div class="thumb">'
-                            ,'<img class="i32" src="/' + App.config.coreName + '/photo/{id}.jpg?32={[ CB.DB.usersStore.getPhotoParam(values.id) ]}" title="{text}">'
+                            ,'<img class="i32" src="' + App.config.photoPath + '{id}.jpg?32={[ CB.DB.usersStore.getPhotoParam(values.id) ]}" title="{text}">'
                         ,'</div>'
                         ,'<div class="text">'
                             ,'<span class="info">{[this.replaceLastQuery(values.info)]}</span>'

@@ -62,7 +62,7 @@ Ext.define('CB.object.plugin.Versions', {
             ,'<tpl for=".">'
             ,'<tr class="{cls}">'
             ,'    <td class="obj">'
-            ,'        <div><img class="i32" src="/' + App.config.coreName + '/photo/{cid}.jpg{[ CB.DB.usersStore.getPhotoParam(values.cid) ]}" title="{user}"></div>'
+            ,'        <div><img class="i32" src="' + App.config.photoPath + '{cid}.jpg{[ CB.DB.usersStore.getPhotoParam(values.cid) ]}" title="{user}"></div>'
             ,'    </td>'
             ,'    <td>'
             ,'        <span class="click">{name}</span><br />'

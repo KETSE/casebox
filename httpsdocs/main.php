@@ -9,6 +9,12 @@ $coreName = Config::get('core_name');
 
 $coreUrl = Config::get('core_url');
 
+$coreDir = Config::get('core_dir');
+
+$coreDirUri = '/cores' . Config::get('core_uri');
+
+$coreLogo = Config::get('customLogo');
+
 //remove last slash
 $coreUrl = substr($coreUrl, 0, strlen($coreUrl) -1);
 
@@ -41,9 +47,13 @@ loadMinifyUris();
     <meta name="description" content="Casebox">
     <meta name="robots" content="noindex">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
 <?php
+    if (file_exists($coreDir . 'favicon.ico')) {
+        echo '<link rel="shortcut icon" href="' . $coreDirUri  . 'favicon.ico" type="image/x-icon">';
+    } else {
+        echo '<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">';
+    }
 
 echo '<link rel="stylesheet" type="text/css" href="/libx/ext/packages/ext-theme-' . $theme . '/build/resources/ext-theme-' . $theme . '-all' . $rtl . '.css" />
     <link rel="stylesheet" type="text/css" href="/libx/extjs-ace/styles.css" />
@@ -138,6 +148,11 @@ if (Config::get('geoMapping', false)) {
 ?>
 
 <script type="text/javascript">
+    <?php
+      if(!empty($coreLogo)) {
+        echo 'coreLogo = "' . $coreDirUri  . basename($coreLogo) . '";';
+      }
+    ?>
     window.name = '<?php
         echo substr(str_shuffle(MD5(tempnam(sys_get_temp_dir(), 'pre') . microtime())), 0, rand(15, 50));
     ?>';

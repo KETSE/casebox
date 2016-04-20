@@ -272,10 +272,11 @@ class User
             $filesEdit[$k] = Util\toTrimmedArray($v);
         }
 
-        @$rez                         = array(
+        @$rez = array(
             'success' => true
-            , 'config' => array(
+            ,'config' => array(
                 'coreName' => $coreName
+                ,'photoPath' => '/' . $coreName . '/photo/'
                 , 'rtl' => Config::get('rtl')
                 , 'folder_templates' => Config::get('folder_templates')
                 , 'default_task_template' => Config::get('default_task_template')

@@ -212,6 +212,13 @@ Ext.define('CB.browser.ViewContainer', {
                 ,scope: this
                 ,handler: this.onPermalinkClick
             })
+
+            ,permalink: new Ext.Action({
+                text: L.Permalink
+                ,itemId: 'permalink'
+                ,scope: this
+                ,handler: this.onPermalinkClick
+            })
         };
 
         this.descendantsCheckItem = Ext.create({
