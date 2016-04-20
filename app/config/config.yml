@@ -28,4 +28,4 @@ framework:
     fragments: ~
     http_method_override: true
     assets: ~
-    translator: { fallbacks: [en] }
+    translator: { fallbacks: [en, ar, es, fr, ge, hy, pt, ro, ru, zh] }
