@@ -1288,7 +1288,7 @@ Ext.define('CB.object.edit.Window', {
     }
 
     ,onPrintClick: function(b, e) {
-        window.location.replace(window.location.origin + '/' + App.config.coreName + '/print/' + this.data.id + '/');
+        window.open(window.location.origin + '/' + App.config.coreName + '/print/' + this.data.id + '/');
     }
 
     ,onStarClick: function(b, e) {

@@ -1,3 +1,8 @@
+/*
+*********************************************************************
+*/
+
+
 /*!40101 SET NAMES utf8 */;
 
 /*!40101 SET SQL_MODE=''*/;
@@ -61003,7 +61008,7 @@ insert  into `translations`(`id`,`pid`,`name`,`en`,`es`,`ge`,`fr`,`hy`,`pt`,`ro`
 
 (3161,NULL,'copied','copied','copied','copied','copied','copied','copied','a copiat','скопировал','copied','copied',0,NULL,0),
 
-(3162,NULL,'Print','Print','Print','Print','Print','Print','Print','Tipar','Печать','տպել','Print',2,NULL,0);
+(3162,NULL,'Print','Print','Print','Print','Print','Print','Print','Tipar','Печать','طباعة','Print',2,NULL,0);
 
 /*Table structure for table `zone` */
 
