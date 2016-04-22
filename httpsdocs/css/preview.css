@@ -61,11 +61,15 @@ table.obj-preview  {
 
 table.obj-preview > tbody > tr > td, table.obj-preview > tbody > tr > th {vertical-align: top; padding: 6px 7px; border-top: 1px solid #DDD}
 table.obj-preview tr.prop-header th {font-weight: bold; background-color: #F9F7ED; text-align: left;}
-.x-rtl table.obj-preview tr.prop-header th {text-align: right;}
+table.obj-preview.drtl tr.prop-header th {text-align: right;}
 table.obj-preview td.prop-key {width: 30%; background-color: #F4F4F4}
 table.obj-preview td.prop-val {width: 70%}
 table.obj-preview p.prop-info {margin-top: 3px; color: #777; font-size: 11px}
-
+.drtl .icon-padding{
+    padding-right: 22px !important;
+    min-height: 16px;
+    background-position: 100% 50%;
+}
 .obj-preview-h {
     font-weight: bold;
     font-size: 12px;

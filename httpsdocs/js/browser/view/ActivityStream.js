@@ -44,8 +44,8 @@ Ext.define('CB.browser.view.ActivityStream',{
                 getTitleIcon: function(r){
                     var uid = r.lastAction.uids[0]
                         ,us = CB.DB.usersStore
-                        ,rez = '<img class="i40" src="/' +
-                            App.config.coreName + '/photo/' + uid + '.jpg?32=' +
+                        ,rez = '<img class="i40" src="' +
+                            App.config.photoPath + uid + '.jpg?32=' +
                             us.getPhotoParam(uid)  + '" title="' +
                             us.getName(uid)
                             + '">';
@@ -83,9 +83,14 @@ Ext.define('CB.browser.view.ActivityStream',{
                     }
 
                     switch(la.type) {
+                        case 'copy':
+                            rez += ' ' + Ext.valueFrom(L['copied'], la.type);
+                            break;
+
                         case 'comment':
                             rez += ' ' + Ext.valueFrom(L[la.type + 'ed'], la.type);
                             break;
+
                         default:
                             rez += ' ' + Ext.valueFrom(L[la.type + 'd'], la.type);
                     }

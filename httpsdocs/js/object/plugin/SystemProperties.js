@@ -90,6 +90,7 @@ Ext.define('CB.object.plugin.SystemProperties', {
                 rez.menu['metadata']  = {order: 17};
                 rez.menu['webdavlink']  = {order: 18};
                 rez.menu['permalink']  = {order: 19};
+                rez.menu['print']  = {order: 20};
             }
         }
 

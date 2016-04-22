@@ -87,11 +87,16 @@ class Client extends Service
         if (empty($r['pids'])) {
             $r['pids'] = null;
             $r['path'] = null;
+
         } else {
             $r['pids'] = explode(',', $r['pids']);
             //exclude itself from pids
             array_pop($r['pids']);
             $r['path'] = implode('/', $r['pids']);
+        }
+
+        if (!isset($r['content'])) {
+            $r['content'] = null;
         }
 
         /* fill "ym" fields for date faceting by cdate, date, date_end */
@@ -115,24 +120,9 @@ class Client extends Service
             $r['ym3'] = $ym3;
         }
 
-        $r['content'] = $r['name'] . "\n";
-
         if (!empty($r['sys_data']['solr'])) {
             foreach ($r['sys_data']['solr'] as $k => $v) {
                 $r[$k] = $v;
-
-                //add string values to content field
-                if (is_string($v)) {
-                    $r['content'] .= (in_array($k, array('date_start', 'date_end', 'dates'))
-                        ? substr($v, 0, 10)
-                        : $v
-                    )."\n";
-                }
-            }
-
-            //override content field if set in sys_data['solr']
-            if (!empty($r['sys_data']['solr']['content'])) {
-                $r['content'] = $r['sys_data']['solr']['content'];
             }
         }
 
@@ -181,6 +171,11 @@ class Client extends Service
 
             foreach ($cpaths as $id => $cpath) {
                 $r = &$fileRecords[$id];
+
+                if (!isset($r['content'])) {
+                    $r['content'] = '';
+                }
+
                 $filename =  $filesDir . $cpath . '.gz';
 
                 if (file_exists($filename)) {

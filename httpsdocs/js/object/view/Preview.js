@@ -347,6 +347,7 @@ Ext.define('CB.object.view.Preview', {
                 rez.menu['delete'] = { addDivider: 'top' };
                 rez.menu['webdavlink']  = { addDivider: 'top' };
                 rez.menu['permalink']  = {};
+                rez.menu['print']  = {};
             }
         }
 

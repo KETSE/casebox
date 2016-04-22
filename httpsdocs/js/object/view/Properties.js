@@ -20,8 +20,9 @@ Ext.define('CB.object.view.Properties', {
                 reload: {order: 12, addDivider: 'top'}
                 ,rename: {order: 13}
                 ,permalink: {order: 14}
-                ,setOwner: {order: 15}
-                ,permissions: {order: 16}
+                ,print: {order: 15}
+                ,setOwner: {order: 16}
+                ,permissions: {order: 17}
                 ,'delete': {order: 20, addDivider: 'top'}
             }
         };

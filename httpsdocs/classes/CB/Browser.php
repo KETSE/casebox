@@ -385,6 +385,23 @@ class Browser
                 $source = $fieldConfig['source'];
                 $rez = array();
 
+                if (empty($p['fieldId'])) {
+                    return $rez;
+                }
+
+                //analize custom method sources
+                if (!empty($fieldConfig['source']['fn'])) {
+                    $method = explode('.', $fieldConfig['source']['fn']);
+                    $class = new $method[0]();
+                    $rez = $class->$method[1]($p);
+
+                    // if custom source returned any result then return it right there
+                    // otherwise custom source can add some filtering params and we go further processing
+                    if (!empty($rez)) {
+                        return $rez;
+                    }
+                }
+
                 //analize facet sources
                 if (!empty($source['facet'])) {
                     //creating facets
@@ -401,30 +418,35 @@ class Browser
                         $facet = \CB\Facets::getFacetObject($conf);
 
                         if (!empty($facet)) {
-                            $qp = [
-                                'rows' => 0,
-                                'facets' => [
-                                    $source['facet'] => &$facet
-                                ]
+                            $p['rows'] = 0;
+                            $p['facets'] = [
+                                $source['facet'] => &$facet
                             ];
-                            $qp = array_merge(
-                                $qp
+
+                            if(empty($p['fq'])) {
+                                $p['fq'] = [];
+                            }
+                            if(!empty($source['fq'])) {
+                                $p['fq'] = array_unique(array_merge($p['fq'], $source['fq']));
+                            }
+
+                            //apply other params that are set in source
+                            $p = array_merge(
+                                $p
                                 ,array_intersect_key(
                                     $source,
                                     [
                                         'templates' => 1,
                                         'pid' => 1,
-                                        'fq' => 1,
                                         'query' => 1,
                                         'descendants' => 1
                                     ]
                                 )
                             );
-                            // array_merge($source, $facet->getSolrParams());
 
                             $search = new Search();
 
-                            $rez = $search->query($qp);
+                            $search->query($p);
 
                             $cd =  $facet->getClientData();
 
@@ -437,19 +459,6 @@ class Browser
                         }
                     }
                 }
-
-                if (empty($p['fieldId'])) {
-                    return $rez;
-                }
-
-                //analize custom method sources
-                if (empty($fieldConfig['source']['fn'])) {
-                    return $rez;
-                }
-
-                $method = explode('.', $fieldConfig['source']['fn']);
-                $class = new $method[0]();
-                $rez = $class->$method[1]($p);
 
                 if (!empty($rez)) {
                     return $rez;
@@ -581,8 +590,8 @@ class Browser
         }
 
         //increase number of returned items
-        if (empty($p['rows'])) {
-            if (empty($p['limit'])) {
+        if (!isset($p['rows'])) {
+            if (!isset($p['limit'])) {
                 if (empty($p['pageSize'])) {
                     $p['rows'] = 50;
                 } else {

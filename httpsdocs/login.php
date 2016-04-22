@@ -9,6 +9,8 @@ if (!empty($_SESSION['check_TSV']) && ((time() - $_SESSION['check_TSV']) > 180))
 }
 
 $coreName = Config::get('core_name');
+$coreDir  = Config::get('core_dir');
+$coreDirUri = '/cores' . Config::get('core_uri');
 $coreUrl  = Config::get('core_url');
 
 /* check if set an object id for view in url and store it in session for redirect after success login */
@@ -27,6 +29,13 @@ if (!empty($_GET['view']) && is_numeric($_GET['view'])) {
         <link rel="stylesheet" type="text/css" href="/css/bs/css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" href="/css/bs/css/bootstrap-responsive.min.css" />
         <link type='text/css' rel="stylesheet" href="/css/login.css" />
+        <?php
+        if (file_exists($coreDir . 'favicon.ico')) {
+            echo '<link rel="shortcut icon" href="' . $coreDirUri  . 'favicon.ico" type="image/x-icon">';
+        } else {
+            echo '<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">';
+        }
+        ?>
     </head>
     <body onload="javascript: e = document.getElementById('u');
             if (!e)

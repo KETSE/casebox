@@ -1,8 +1,3 @@
-/*
-*********************************************************************
-*/
-
-
 /*!40101 SET NAMES utf8 */;
 
 /*!40101 SET SQL_MODE=''*/;
@@ -20,7 +15,7 @@ CREATE TABLE `action_log` (
   `object_id` bigint(20) unsigned NOT NULL,
   `object_pid` bigint(20) unsigned DEFAULT NULL,
   `user_id` int(10) unsigned NOT NULL,
-  `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','close','rename','reopen','status_change','overdue','comment','comment_update','move','password_change','permissions','user_delete','user_create','login','login_fail','file_upload','file_update') NOT NULL,
+  `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','copy','close','rename','reopen','status_change','overdue','comment','comment_update','move','password_change','permissions','user_delete','user_create','login','login_fail','file_upload','file_update') NOT NULL,
   `action_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `data` mediumtext,
   `activity_data_db` mediumtext,
@@ -227,7 +222,7 @@ CREATE TABLE `notifications` (
   `object_id` bigint(20) unsigned DEFAULT NULL COMMENT 'think to remove it (doubles field from action_log)',
   `action_id` bigint(20) unsigned NOT NULL,
   `action_ids` mediumtext COMMENT 'list of last action ids for same grouped action',
-  `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','close','rename','reopen','status_change','overdue','comment','comment_update','move','password_change','permissions','user_delete','user_create','login','login_fail','file_upload','file_update') NOT NULL,
+  `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','copy','close','rename','reopen','status_change','overdue','comment','comment_update','move','password_change','permissions','user_delete','user_create','login','login_fail','file_upload','file_update') NOT NULL,
   `action_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'think to remove it (doubles field from action_log)',
   `prev_action_ids` text COMMENT 'previous action ids(for same obj, action type, user) that have not yet been read',
   `from_user_id` int(11) DEFAULT NULL,
@@ -239,8 +234,8 @@ CREATE TABLE `notifications` (
   KEY `FK_notifications__action_id` (`action_id`),
   KEY `FK_notifications_user_id` (`user_id`),
   KEY `IDX_notifications_seen` (`seen`),
-  CONSTRAINT `FK_notifications_user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_notifications__action_id` FOREIGN KEY (`action_id`) REFERENCES `action_log` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_notifications__action_id` FOREIGN KEY (`action_id`) REFERENCES `action_log` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_notifications_user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `notifications` */

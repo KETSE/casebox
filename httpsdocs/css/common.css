@@ -41,6 +41,7 @@
 .bgcY{ background-color: #FFFF88 !important } /*Interactive action yellow*/
 .bgcLR{ background-color: #FFCCCC !important }
 .gr {color: #777}
+.drtl {direction: rtl}
 
 .bgpLT{ background-position: 0 2px}
 .op02{opacity: 0.2}

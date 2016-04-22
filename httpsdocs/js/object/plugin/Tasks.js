@@ -19,7 +19,7 @@ Ext.define('CB.object.plugin.Tasks', {
             ,'<tpl for=".">'
             ,'<tr>'
             ,'    <td class="obj">'
-            ,'        <img class="i32" src="/' + App.config.coreName + '/photo/{cid}.jpg?32={[ CB.DB.usersStore.getPhotoParam(values.cid) ]}" title="{user}">'
+            ,'        <img class="i32" src="' + App.config.photoPath + '{cid}.jpg?32={[ CB.DB.usersStore.getPhotoParam(values.cid) ]}" title="{user}">'
             ,'    </td>'
             ,'    <td>'
             ,'        <span class="click">{name}</span><br />'

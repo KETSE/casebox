@@ -889,6 +889,7 @@ function initApp() {
             //enable key events by default
             enableKeyEvents: true
         };
+
         var objData = {
             ownerCt: e.ownerCt
             ,record: e.record
@@ -913,6 +914,14 @@ function initApp() {
                 )
                 : null
             );
+
+        var expandHandler = function(cmp) {
+                if (cmp && cmp.expand) {
+                    cmp.expand();
+                }
+            },
+            autoExpand = {'afterrender': expandHandler};
+
         switch(type){
             case '_objects':
                 //e should contain all necessary info
@@ -1049,6 +1058,7 @@ function initApp() {
                         return new CB.ObjectsComboField({
                             enableKeyEvents: true
                             ,data: objData
+                            ,listeners: autoExpand
                         });
                 }
 
@@ -1076,6 +1086,7 @@ function initApp() {
                     ,store: CB.DB.timeUnits
                     ,displayField: 'name'
                     ,valueField: 'id'
+                    ,listeners: autoExpand
                 });
                 break;
 
@@ -1090,6 +1101,7 @@ function initApp() {
                     ,store: CB.DB.importance
                     ,displayField: 'name'
                     ,valueField: 'id'
+                    ,listeners: autoExpand
                 });
                 break;
 
@@ -1098,6 +1110,7 @@ function initApp() {
                     enableKeyEvents: true
                     ,format: App.dateFormat
                     ,width: 100
+                    ,listeners: autoExpand
                 });
                 break;
 
@@ -1106,6 +1119,7 @@ function initApp() {
                     enableKeyEvents: true
                     ,format: App.dateFormat+' ' + App.timeFormat
                     ,width: 130
+                    ,listeners: autoExpand
                 });
                 break;
 
@@ -1113,6 +1127,7 @@ function initApp() {
                 rez = new Ext.form.field.Time({
                     enableKeyEvents: true
                     ,format: App.timeFormat
+                    ,listeners: autoExpand
                 });
                 break;
 
@@ -1141,6 +1156,7 @@ function initApp() {
                 if(th === 'dependent'){
                     th = e.pidValue;
                 }
+
                 rez = new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
@@ -1151,6 +1167,7 @@ function initApp() {
                     ,store: getThesauriStore(th)
                     ,displayField: 'name'
                     ,valueField: 'id'
+                    ,listeners: autoExpand
                 });
                 break;
 
@@ -1170,6 +1187,7 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                     ,iconClsField: 'name'
+                    ,listeners: autoExpand
                 });
                 break;
 
@@ -1184,6 +1202,7 @@ function initApp() {
                     ,store: CB.DB.languages
                     ,displayField: 'name'
                     ,valueField: 'id'
+                    ,listeners: autoExpand
                 });
                 break;
 
@@ -1198,6 +1217,7 @@ function initApp() {
                     ,store: CB.DB.sex
                     ,displayField: 'name'
                     ,valueField: 'id'
+                    ,listeners: autoExpand
                 });
                 break;
 
@@ -1212,6 +1232,7 @@ function initApp() {
                     ,store: CB.DB.templateTypes
                     ,displayField: 'name'
                     ,valueField: 'id'
+                    ,listeners: autoExpand
                 });
                 break;
 
@@ -1227,6 +1248,7 @@ function initApp() {
                     ,store: CB.DB.fieldTypes
                     ,displayField: 'name'
                     ,valueField: 'id'
+                    ,listeners: autoExpand
                 });
                 break;
 
@@ -1241,6 +1263,7 @@ function initApp() {
                     ,store: CB.DB.shortDateFormats
                     ,displayField: 'name'
                     ,valueField: 'id'
+                    ,listeners: autoExpand
                 });
                 break;
 

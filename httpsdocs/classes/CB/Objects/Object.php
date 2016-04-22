@@ -650,7 +650,9 @@ class Object
     {
         //iterate template fields and collect fieldnames
         //to be indexed in solr, as well as title fields
-        $rez = [];
+        $rez = [
+            'content' => ''
+        ];
         $children = [];
         $indexAsChildrenIds = [];
         $indexAsChildrenIndexes = [];
@@ -674,6 +676,8 @@ class Object
             }
 
             foreach ($fields as $f) {
+                $values = $this->getFieldValue($f['name']);
+
                 if (!empty($f['cfg']['indexAsChildren'])) {
                     $indexAsChildrenIds[] = $f['id'];
                     $indexAsChildrenIndexes[$f['id']] = empty($f['cfg']['indexingIdx'])
@@ -684,9 +688,8 @@ class Object
                 if (empty($f['solr_column_name']) && in_array($f['name'], $titleFields)) {
                     $sfn = $f['name'] . '_t';//solr field name
 
-                    $value = $this->getFieldValue($f['name'], 0);
-                    if (!empty($value['value'])) {
-                        $rez[$sfn] = $value['value'];
+                    if (!empty($values[0]['value'])) {
+                        $rez[$sfn] = $values[0]['value'];
                     }
 
                 } elseif (!empty($f['cfg']['faceting']) || //backward compatible check
@@ -697,8 +700,6 @@ class Object
                         : array_merge($pids[$f['pid']], [$f['id']]);
 
                     $childrenRecordIds = array_intersect($pids[$f['id']], $indexAsChildrenIds);
-
-                    $values = $this->getFieldValue($f['name']);
 
                     $resultValue = array();
 
@@ -738,6 +739,17 @@ class Object
                         $rez[$f['solr_column_name']] = $finalValue;
                     }
                 }
+
+                // add all textual fields to content
+                foreach ($values as $v) {
+                    if (!empty($v['value'])) {
+                        $rez['content'] .= (in_array($f['name'], ['date_start', 'date_end', 'dates'])
+                            ? substr($v, 0, 10)
+                            : $v['value']
+                        )."\n";
+                    }
+                }
+
             }
 
             if (!empty($children)) {
@@ -1541,6 +1553,17 @@ class Object
             DM\Tree::moveActiveChildren($targetId, $this->id);
         }
 
+        $newObj = clone $this;
+        $newObj->load($objectId);
+
+        $this->logAction(
+            'copy',
+            array(
+                'old' => $this,
+                'new' => $newObj
+            )
+        );
+
         return $objectId;
     }
 
@@ -1878,7 +1901,10 @@ class Object
         $top .= $body;
 
         if (!empty($top)) {
-            $top = '<table class="obj-preview"><tbody>'.$top.'</tbody></table><br />';
+            $rtl = empty(Config::get('rtl'))
+                ? ''
+                : ' drtl';
+            $top = '<table class="obj-preview' . $rtl . '"><tbody>' . $top . '</tbody></table><br />';
         }
 
         $rez = array(

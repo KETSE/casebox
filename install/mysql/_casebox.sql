@@ -58810,7 +58810,7 @@ CREATE TABLE `translations` (
   UNIQUE KEY `UNIQUE_translations__name` (`name`),
   KEY `FK_translations__pid` (`pid`),
   CONSTRAINT `FK_translations__pid` FOREIGN KEY (`pid`) REFERENCES `translations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3161 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3163 DEFAULT CHARSET=utf8;
 
 /*Data for the table `translations` */
 
@@ -60150,7 +60150,7 @@ insert  into `translations`(`id`,`pid`,`name`,`en`,`es`,`ge`,`fr`,`hy`,`pt`,`ro`
 
 (2710,NULL,'due_thisMonth','This month','El mes pasado','ეს თვე','Ce mois-ci','Այս ամսվա մեջ','El mes pasado','','Текущий месяц','هذا الشهر','这个月',2,NULL,0),
 
-(2712,NULL,'TaskAssigned','Assigned','Asignado','დანიშნული/მიწერილი/დავალებული','Аssigné','հանձնարարված','Asignado','','Присвоенное','مُكَلَّف','已指派',0,NULL,0),
+(2712,NULL,'TaskAssigned','Assigned','Asignado','დანიშნული/მიწერილი/დავალებული','Аssigné','հանձնարարված','Asignado','','Исполнитель','مُكَلَّف','已指派',0,NULL,0),
 
 (2713,NULL,'Start_End','Start/End','Inicio / Fin','დაწყება/დასრულება','Début/Fin','Սկիզբ/Վերջացնել','Inicio / Fin','','Начало/До','البداية \\ النهاية','开始/结束',2,NULL,0),
 
@@ -61004,7 +61004,11 @@ insert  into `translations`(`id`,`pid`,`name`,`en`,`es`,`ge`,`fr`,`hy`,`pt`,`ro`
 
 (3159,NULL,'TotalCharsHint','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars','Максимальная длина поля - {total} символов','Field is limited to maximum {total} chars','Field is limited to maximum {total} chars',2,NULL,0),
 
-(3160,NULL,'RemainingCharsHint','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','доступно символов - {left}','{left} remaining chars','{left} remaining chars',2,NULL,0);
+(3160,NULL,'RemainingCharsHint','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','{left} remaining chars','доступно символов - {left}','{left} remaining chars','{left} remaining chars',2,NULL,0),
+
+(3161,NULL,'copied','copied','copied','copied','copied','copied','copied','a copiat','скопировал','copied','copied',0,NULL,0),
+
+(3162,NULL,'Print','Print','Print','Print','Print','Print','Print','Tipar','Печать','طباعة','Print',2,NULL,0);
 
 /*Table structure for table `zone` */
 
@@ -61881,7 +61885,6 @@ BEGIN
 		ADD COLUMN `caption` VARCHAR(150) NULL AFTER `zone_name`,
 		ADD COLUMN `gmt_offset` INT NULL AFTER `caption`;
 	END IF;
-
 	update zone set gmt_offset = (SELECT tz.gmt_offset
 		FROM `timezone` tz
 		WHERE tz.zone_id=zone.zone_id AND tz.time_start < UNIX_TIMESTAMP(UTC_TIMESTAMP()) AND tz.dst = 0

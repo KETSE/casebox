@@ -6,3 +6,22 @@
     margin: 0 !important;
     right: 0 !important;
 }
+
+/**
+ * Fix displaying field triggers on the right for rtl languages
+ **/
+.x-field.x-rtl .x-form-text-field-body {
+    direction: ltr;
+}
+
+.x-field.x-rtl .x-form-text {
+    direction: rtl;
+}
+
+.x-form-trigger-toolbar.x-rtl {
+    background-image: url(/libx/ext/packages/ext-theme-classic/build/resources/images/form/trigger.gif);
+}
+
+.x-form-search-trigger.x-rtl {
+    background-image: url(/libx/ext/packages/ext-theme-classic/build/resources/images/form/search-trigger.gif);
+}

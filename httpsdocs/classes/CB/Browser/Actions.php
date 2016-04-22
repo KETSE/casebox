@@ -350,12 +350,15 @@ class Actions
             }
 
             // select direct childs of the objects and make a recursive call with them
+            // but skip comments
             $res = DB\dbQuery(
                 'SELECT t.id
                 FROM tree t
                 JOIN tree_info ti ON
                     t.id = ti.id '.$this->securitySetsFilter.'
-                WHERE t.pid = $1 AND t.dstatus = 0',
+                JOIN templates tt ON t.template_id = tt.id AND tt.type <> \'comment\'
+                WHERE t.pid = $1 AND
+                    t.dstatus = 0',
                 $objectId
             );
 

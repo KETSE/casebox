@@ -132,7 +132,7 @@ Ext.define('CB.ViewPort', {
                 ,border: false
                 ,style: 'background: #f4f4f4; text-align: center; border-bottom: 1px solid #99bce8 !important'
                 ,bodyStyle: 'background: #f4f4f4'
-                ,html: '<img src="logo.png" style="padding: 9px" />'
+                ,html: '<img src="' + Ext.valueFrom(window.coreLogo, 'logo.png')  + '" style="padding: 9px" />'
             })
             ,getState: function(){
                 var rez = {
@@ -154,7 +154,7 @@ Ext.define('CB.ViewPort', {
         this.searchField = Ext.create({
                 xtype: 'CBSearchField'
                 ,cls: 'mainSearch'
-                ,emptyText: L.Search + ' Casebox'
+                ,emptyText: L.SearchCaseBox
                 ,minListWidth: 150
                 ,width: 350
             }
@@ -364,7 +364,7 @@ Ext.define('CB.ViewPort', {
         var um, umIdx = App.mainTBar.items.findIndex( 'name', 'userMenu');
         if(umIdx > -1) {
             um = App.mainTBar.items.getAt(umIdx);
-            um.setIcon('/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg?32=' + CB.DB.usersStore.getPhotoParam(App.loginData.id));
+            um.setIcon(App.config.photoPath + App.loginData.id + '.jpg?32=' + CB.DB.usersStore.getPhotoParam(App.loginData.id));
         }
 
         // adding available languages to setting menu

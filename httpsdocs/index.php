@@ -8,14 +8,13 @@ if (empty($_GET['uri'])) {
 $uri = explode('/', $_GET['uri']);
 $uri = array_filter($uri, 'strlen');
 
-
-
 $coreName = array_shift($uri);
 
-         if( $coreName == 'oauth2callback') {
-                include 'oauth2callback.php';
-                return 0;
-         }
+if ($coreName == 'oauth2callback') {
+    include 'oauth2callback.php';
+
+    return 0;
+}
 
 $_GET['core'] = $coreName;
 
@@ -33,6 +32,15 @@ switch ($command) {
                 break;
 
             default:
+                require_once 'init.php';
+                if (!empty($loginPage = Config::get('loginPage'))) {
+                    $loginPage = Config::get('core_dir') . basename($loginPage);
+                    if (file_exists($loginPage)) {
+                        include $loginPage;
+
+                        return;
+                    }
+                }
                 include 'login.php';
         }
 
@@ -56,6 +64,7 @@ switch ($command) {
         break;
 
     case 'view':
+    case 'print':
         include 'preview.php';
         break;
 

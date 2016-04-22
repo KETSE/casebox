@@ -3,6 +3,7 @@ namespace CB;
 
 use \CB\Browser;
 use \CB\DataModel as DM;
+use \CB\Search;
 use \CB\Util;
 
 class Log
@@ -89,16 +90,16 @@ class Log
             ,'udate' => 1
         );
 
-        $oldData = empty($p['old'])
+        $allOldData = empty($p['old'])
             ? array()
             : $p['old']->getData();
 
-        $newData = empty($p['new'])
+        $allNewData = empty($p['new'])
             ? array()
             : $p['new']->getData();
 
-        $oldData = array_intersect_key($oldData, $fields);
-        $newData = array_intersect_key($newData, $fields);
+        $oldData = array_intersect_key($allOldData, $fields);
+        $newData = array_intersect_key($allNewData, $fields);
 
         $rez = $newData + $oldData;
 
@@ -122,6 +123,8 @@ class Log
             ? Objects::getPids($rez['id'])
             : Util\toNumericArray($rez['pids']);
 
+        $rez['pids'] = array_diff($rez['pids'], [$rez['id']]);
+
         $rez['path'] = htmlspecialchars(@Util\coalesce($rez['pathtext'], $rez['path']), ENT_COMPAT);
 
         switch ($p['type']) {
@@ -140,6 +143,24 @@ class Log
                 if (!empty($p['forUserId'])) {
                     $rez['forUserId'] = $p['forUserId'];
                 }
+                break;
+
+            case 'copy':
+            case 'move':
+                //set paths
+                $path = Util\toNumericArray($allOldData['pids']);
+                array_pop($path);
+                $allOldData['path'] = implode('/', $path);
+
+                $path = Util\toNumericArray($allNewData['pids']);
+                array_pop($path);
+                $allNewData['path'] = implode('/', $path);
+                $recs = [&$allOldData, &$allNewData];
+
+                Search::setPaths($recs);
+
+                $rez['old']['path'] = $allOldData['path'];
+                $rez['new']['path'] = $allNewData['path'];
                 break;
 
             default:

@@ -150,14 +150,14 @@ CentOS 7.1
     Download SOLR5 in /tmp/
 
     # extracts the install_solr_service.sh script from the archive into the current directory.
-    > tar xzf solr-5.3.0.tgz solr-5.3.0/bin/install_solr_service.sh --strip-components=2
+    > tar xzf solr-5.5.0.tgz solr-5.5.0/bin/install_solr_service.sh --strip-components=2
 
 
     # run as root
-    > sudo bash ./install_solr_service.sh solr-5.3.0.tgz
+    > sudo bash ./install_solr_service.sh solr-5.5.0.tgz
 
     # it is equivalent to:
-    # > sudo bash ./install_solr_service.sh solr-5.3.0.tgz -i /opt -d /var/solr -u solr -s solr -p 8983
+    # > sudo bash ./install_solr_service.sh solr-5.5.0.tgz -i /opt -d /var/solr -u solr -s solr -p 8983
 
     # Opening port 8983 for SOLR. NOTICE: you should allow access to this port only for admin IPs
     > firewall-cmd --add-port=8983/tcp --permanent

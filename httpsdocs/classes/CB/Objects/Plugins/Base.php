@@ -36,9 +36,30 @@ class Base
             return null;
         }
 
-        return array(
+        $rez = array(
             'success' => true
         );
+
+        $config = $this->config;
+
+        if (!empty($config['header'])) {
+            $h = $config['header'];
+            $title = empty($h['title'])
+                ? ''
+                : Util\detectTitle($h['title']);
+
+            if (!empty($h['showTotal'])) {
+                $title .= ' ({total})';
+            }
+
+            $rez['title'] = $title;
+
+            if (!empty($h['menu'])) {
+                $rez['menu'] = $h['menu'];
+            }
+        }
+
+        return $rez;
     }
 
     /**
@@ -55,10 +76,6 @@ class Base
             : $config['visibility'];
         $obj = Objects::getCachedObject($this->id);
 
-        // if (get_class($this) == 'CB\\Objects\\Plugins\\Files') {
-        //     var_export($config);
-        //     var_export($vcfg);
-        // }
         if (!empty($vcfg['fn'])) {
             $rez = $this->getFunctionResult($vcfg['fn']);
 
@@ -142,5 +159,19 @@ class Base
         }
 
         return $rez;
+    }
+
+    protected function getFunctionResult($fn)
+    {
+        $t = explode('.', $fn);
+        $class = new $t[0];
+        $method = $t[1];
+
+        $params = [
+            'id' => $this->id
+            ,'config' => $this->config
+        ];
+
+        return $class->$method($params);
     }
 }
