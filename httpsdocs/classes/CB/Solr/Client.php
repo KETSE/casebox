@@ -171,6 +171,11 @@ class Client extends Service
 
             foreach ($cpaths as $id => $cpath) {
                 $r = &$fileRecords[$id];
+
+                if (!isset($r['content'])) {
+                    $r['content'] = '';
+                }
+
                 $filename =  $filesDir . $cpath . '.gz';
 
                 if (file_exists($filename)) {

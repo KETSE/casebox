@@ -298,7 +298,7 @@ Ext.define('CB.ObjectsComboField', {
         var text = this.store.getTexts(v)
             ,r = this.findRecordByValue(v);
 
-        if(r) {
+        if(r && this.objectsStore) {
             this.objectsStore.checkRecordExistance(r.data);
         }
 

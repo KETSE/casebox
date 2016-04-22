@@ -1,3 +1,7 @@
+CaseBox 1.9.603 (2016-04-22)
+==============================
+- #12539 JS Error in dropdown
+
 CaseBox 1.9.602 (2016-04-21)
 ==============================
 - #12472 Field has no properties after copy&pasting it from one tmpl to another
