@@ -614,6 +614,7 @@ Ext.define('CB.VerticalEditGrid', {
         var t = tr.get('type');
         if(pw && !Ext.isEmpty(pw.data)){
             context.objectId = pw.data.id;
+            context.objectPid = pw.data.pid;
             context.path = pw.data.path;
         }
 

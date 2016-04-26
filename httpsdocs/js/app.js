@@ -899,6 +899,7 @@ function initApp() {
             ,grid: e.grid
             ,pidValue: e.pidValue
             ,objectId: e.objectId
+            ,objectPid: e.objectPid
             ,path: e.path
         };
         var w, th, ed, rez = null;

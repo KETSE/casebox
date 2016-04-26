@@ -199,7 +199,7 @@ Ext.define('CB.object.plugin.ContentItems', {
         var d = b.config.data;
         d.pid = this.params.id;
         d.path = this.params.path;
-        this.fireEvent('createobject', d, e);
+        App.mainViewPort.fireEvent('createobject', d, e);
     }
 
     ,onPermalinkClick: function(b, e) {

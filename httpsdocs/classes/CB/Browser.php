@@ -423,17 +423,17 @@ class Browser
                                 $source['facet'] => &$facet
                             ];
 
-                            if(empty($p['fq'])) {
+                            if (empty($p['fq'])) {
                                 $p['fq'] = [];
                             }
-                            if(!empty($source['fq'])) {
+                            if (!empty($source['fq'])) {
                                 $p['fq'] = array_unique(array_merge($p['fq'], $source['fq']));
                             }
 
                             //apply other params that are set in source
                             $p = array_merge(
-                                $p
-                                ,array_intersect_key(
+                                $p,
+                                array_intersect_key(
                                     $source,
                                     [
                                         'templates' => 1,
@@ -516,6 +516,8 @@ class Browser
                 case 'project': /* limiting pid to project. If not in a project then to parent directory */
                     if (!empty($p['objectId']) && is_numeric($p['objectId'])) {
                         $pids = DM\Tree::getCaseId($p['objectId']);
+                    } elseif (!empty($p['objectPid']) && is_numeric($p['objectPid'])) {
+                        $pids = DM\Tree::getCaseId($p['objectPid']);
                     } elseif (!empty($p['path'])) {
                         $pids = DM\Tree::getCaseId(Path::detectRealTargetId($p['path']));
                     }
