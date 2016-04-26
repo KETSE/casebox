@@ -63,6 +63,7 @@ CB.ObjectsFieldCommonFunctions = {
                                     ,this.data
                                     ,[
                                         'objectId'
+                                        ,'objectPid'
                                         ,'pidValue'
                                         ,'path'
                                         ,'objFields'
