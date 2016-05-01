@@ -12,7 +12,7 @@
  */
 class Minify_HTML_Helper {
     public $rewriteWorks = true;
-    public $minAppUri = '/min';
+    public $minAppUri = '/libx/min';
     public $groupsConfigFile = '';
 
     /**
