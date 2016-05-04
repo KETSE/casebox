@@ -1,3 +1,8 @@
+CaseBox 1.9.605 (2016-05-04)
+==============================
+- #12613 Suspected bug with entering a case from a specific user
+- #12598 User added a vFolder and it broke the instance
+
 CaseBox 1.9.604 (2016-04-26)
 ==============================
 - #12569 Can't create child nodes from objPlugin if object shown in popup window

@@ -270,6 +270,7 @@ Ext.define('CB.VerticalEditGrid', {
                 ,dataIndex: 'title'
                 ,stateId: 'title'
                 ,editable: false
+                ,hideable: false
                 ,scope: this
                 ,size: 100
                 ,renderer: this.renderers.title
@@ -279,6 +280,7 @@ Ext.define('CB.VerticalEditGrid', {
                 ,sortable: false
                 ,dataIndex: 'value'
                 ,stateId: 'value'
+                ,hideable: false
                 ,editor: new Ext.form.TextField()
                 ,scope: this
                 ,flex: 1

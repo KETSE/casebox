@@ -37,7 +37,14 @@ class GUID extends Base
             'ErroneousInputData' //' Empty name for GUID.'
         );
 
-        return parent::create($p);
+        //check if name already exists
+        $id = static::toId($p['name']);
+
+        if (empty($id)) {
+            $id = parent::create($p);
+        }
+
+        return $id;
     }
 
     /**
