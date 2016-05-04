@@ -921,7 +921,7 @@ function initApp() {
                     cmp.expand();
                 }
             },
-            autoExpand = {'afterrender': expandHandler};
+            autoExpand = {'boxready': expandHandler};
 
         switch(type){
             case '_objects':
