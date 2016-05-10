@@ -41,9 +41,8 @@ before_script:
     - bin/console casebox:min:assets --env=default
 
 script:
-   # Test rpc-bundle
-   - rm -r var/cache/test
-   - vendor/bin/phpunit -c vendor/caseboxdev/rpc-bundle/src/Tests/phpunit.xml
+   # Run tests
+   - bash tests/run.sh
 
 after_script:
     - if [ -f vendor/bin/coveralls ] ; then php vendor/bin/coveralls -v || true ; fi
