@@ -44,4 +44,4 @@ script:
    - bash tests/run.sh
 
 after_success:
-  - travis_retry php /var/www/casebox/vendor/bin/coveralls -v
+  - php /var/www/casebox/vendor/bin/coveralls -v
