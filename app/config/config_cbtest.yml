@@ -1,3 +1,0 @@
-imports:
-    - { resource: cbtest/parameters.yml }
-    - { resource: config.yml }

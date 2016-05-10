@@ -1,24 +1,23 @@
-# This file is auto-generated during the composer install
 parameters:
-    core_name: default
+    core_name: test
     locale: en
-    secret: 2d7fa56245fcfd4385b67ff584
-    server_name: 'http://localhost:8080/'
+    secret: 64e0681bae70c5e127209a8047
+    server_name: 'http://192.168.33.3.xip.io/'
     prefix: cb
     db_host: 127.0.0.1
     db_port: 3306
-    db_name: test
-    db_user: test
-    db_pass: test
+    db_name: ~
+    db_user: ~
+    db_pass: ~
     solr_schema: http
     solr_host: 127.0.0.1
-    solr_port: 8180
-    solr_core: test
-    solr_core_log: test_log
+    solr_port: 8983
+    solr_core: ~
+    solr_core_log: ~
     solr_username: null
     solr_password: null
     session.lifetime: 4320
-    admin_email: admin@example.com
+    admin_email: noreply@casebox.org
     sender_email: noreply@casebox.org
     comments_pass: null
     mailer_transport: smtp

@@ -1,10 +1,3 @@
-/*
-SQLyog Ultimate v12.14 (64 bit)
-MySQL - 5.5.9 : Database - cb_test
-*********************************************************************
-*/
-
-
 /*!40101 SET NAMES utf8 */;
 
 /*!40101 SET SQL_MODE=''*/;
@@ -50,33 +43,69 @@ CREATE TABLE `config` (
   `value` text NOT NULL,
   `order` smallint(6) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=117 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=133 DEFAULT CHARSET=utf8;
 
 /*Data for the table `config` */
 
-INSERT INTO `config` (`id`, `pid`, `param`, `value`, `order`)
-VALUES
-	(2,NULL,'timezone','UTC',NULL),
-	(3,NULL,'languages','en,fr,ru',NULL),
-	(4,NULL,'default_language','en',NULL),
-	(8,NULL,'files','{\r\n  \"max_versions\": \"*:1;php,odt,doc,docx,xls,xlsx:20;pdf:5;png,gif,jpg,jpeg,tif,tiff:2;\"\r\n\r\n  ,\"edit\" : {\r\n    \"text\": \"txt,php,js,xml,csv\"\r\n    ,\"html\": \"html,htm\"\r\n    ,\"webdav\": \"doc,docx,ppt,dot,dotx,xls,xlsm,xltx,ppt,pot,pps,pptx,odt,ott,odm,ods,odg,otg,odp,odf,odb\"\r\n  }\r\n\r\n  ,\"webdav_url\": \"https://webdav.host.com/{core_name}/edit-{node_id}/{name}\"\r\n}',NULL),
-	(11,NULL,'language_en','{\r\n\"name\": \"English\"\r\n,\"locale\": \"en_US\"\r\n,\"long_date_format\": \"%F %j, %Y\"\r\n,\"short_date_format\": \"%m/%d/%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}',NULL),
-	(13,NULL,'language_fr','{\r\n\"name\": \"French\"\r\n,\"locale\": \"fr_FR\"\r\n,\"long_date_format\": \"%j %F %Y\"\r\n,\"short_date_format\": \"%d.%m.%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}\r\n',NULL),
-	(15,NULL,'language_ru','{\r\n\"name\": \"Русский\"\r\n,\"locale\": \"ru_RU\"\r\n,\"long_date_format\": \"%j %F %Y\"\r\n,\"short_date_format\": \"%d.%m.%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}',NULL),
-	(104,NULL,'project_name_en','CaseBox - Demo',NULL),
-	(105,NULL,'templateIcons','\r\nicon-arrow-left-medium\r\nicon-arrow-left-medium-green\r\nicon-arrow-left\r\nicon-arrow-right-medium\r\nicon-arrow-right\r\nicon-case_card\r\nicon-complaint\r\nicon-complaint-subjects\r\nicon-info-action\r\nicon-decision\r\nicon-echr_complaint\r\nicon-echr_decision\r\nicon-petition\r\nicon-balloon\r\nicon-bell\r\nicon-blog-blue\r\nicon-blog-magenta\r\nicon-blue-document-small\r\nicon-committee-phase\r\nicon-document-medium\r\nicon-document-stamp\r\nicon-document-text\r\nicon-mail\r\nicon-object1\r\nicon-object2\r\nicon-object3\r\nicon-object4\r\nicon-object5\r\nicon-object6\r\nicon-object7\r\nicon-object8\r\nicon-zone\r\nicon-applicant\r\nicon-suspect\r\nicon-milestone',NULL),
-	(106,NULL,'folder_templates','5,11,100',NULL),
-	(107,NULL,'default_folder_template','5',NULL),
-	(108,NULL,'default_file_template','6',NULL),
-	(109,NULL,'default_task_template','7',NULL),
-	(110,NULL,'default_language','en',NULL),
-	(111,NULL,'languages','en',NULL),
-	(112,NULL,'object_type_plugins','{\r\n  \"object\": [\"objectProperties\", \"files\", \"tasks\", \"contentItems\", \"comments\", \"systemProperties\"]\r\n  ,\"case\": [\"objectProperties\", \"files\", \"tasks\", \"contentItems\", \"comments\", \"systemProperties\"]\r\n  ,\"task\": [\"objectProperties\", \"files\", \"contentItems\", \"comments\", \"systemProperties\"]\r\n  ,\"file\": [\"thumb\", \"meta\", \"versions\", \"tasks\", \"comments\", \"systemProperties\"]\r\n}',NULL),
-	(113,NULL,'treeNodes','',NULL),
-	(114,113,'Tasks','{\n    \"pid\": 1\n}',1),
-	(115,113,'Dbnode','[]',2),
-	(116,113,'RecycleBin','{\r\n    \"pid\": \"1\",\r\n    \"facets\": [\r\n        \"did\"\r\n    ],\r\n    \"DC\": {\r\n        \"nid\": {}\r\n        ,\"name\": {}\r\n        ,\"cid\": {}\r\n        ,\"ddate\": {\r\n            \"solr_column_name\": \"ddate\"\r\n        }\r\n    }\r\n}',3),
-	(117,NULL,'default_object_plugins','{\n\"objectProperties\": {\n\"visibility\": {\n\"!context\": \"window\"\n,\"!template_type\": \"file\"\n}\n,\"order\": 0\n}\n,\"files\": {\n\"visibility\": {\n\"template_type\": \"object,search,case,task\"\n}\n,\"order\": 2\n}\n,\"tasks\": {\n\"visibility\": {\n\"template_type\": \"object,search,case,task\"\n}\n,\"order\": 3\n}\n,\"contentItems\": {\n\"visibility\": {\n\"!template_type\": \"file,time_tracking\"\n}\n,\"order\": 4\n}\n,\"thumb\": {\n\"visibility\": {\n\"!context\": \"window\"\n,\"template_type\": \"file\"\n}\n,\"order\": 5\n}\n,\"currentVersion\": {\n\"visibility\": {\n\"context\": \"window\"\n,\"template_type\": \"file\"\n}\n,\"order\": 6\n}\n,\"versions\": {\n\"visibility\": {\n\"template_type\": \"file\"\n}\n,\"order\": 7\n}\n,\"meta\": {\n\"visibility\": {\n\"template_type\": \"file\"\n}\n,\"order\": 8\n}\n,\"comments\": {\n\"order\": 9\n,\"visibility\": {\n\"!template_type\": \"time_tracking\"\n}\n\n}\n}',NULL);
+insert  into `config`(`id`,`pid`,`param`,`value`,`order`) values
+
+(104,NULL,'project_name_en','CaseBox - Demo',NULL),
+
+(105,NULL,'templateIcons','\r\nicon-arrow-left-medium\r\nicon-arrow-left-medium-green\r\nicon-arrow-left\r\nicon-arrow-right-medium\r\nicon-arrow-right\r\nicon-case_card\r\nicon-complaint\r\nicon-complaint-subjects\r\nicon-info-action\r\nicon-decision\r\nicon-echr_complaint\r\nicon-echr_decision\r\nicon-petition\r\nicon-balloon\r\nicon-bell\r\nicon-blog-blue\r\nicon-blog-magenta\r\nicon-blue-document-small\r\nicon-committee-phase\r\nicon-document-medium\r\nicon-document-stamp\r\nicon-document-text\r\nicon-mail\r\nicon-object1\r\nicon-object2\r\nicon-object3\r\nicon-object4\r\nicon-object5\r\nicon-object6\r\nicon-object7\r\nicon-object8\r\nicon-zone\r\nicon-applicant\r\nicon-suspect\r\nicon-milestone',NULL),
+
+(106,NULL,'folder_templates','5,11,100',NULL),
+
+(107,NULL,'default_folder_template','5',NULL),
+
+(108,NULL,'default_file_template','6',NULL),
+
+(109,NULL,'default_task_template','7',NULL),
+
+(110,NULL,'default_language','en',NULL),
+
+(111,NULL,'languages','en',NULL),
+
+(112,NULL,'object_type_plugins','{\r\n  \"object\": [\"objectProperties\", \"files\", \"tasks\", \"contentItems\", \"comments\", \"systemProperties\"]\r\n  ,\"case\": [\"objectProperties\", \"files\", \"tasks\", \"contentItems\", \"comments\", \"systemProperties\"]\r\n  ,\"task\": [\"objectProperties\", \"files\", \"contentItems\", \"comments\", \"systemProperties\"]\r\n  ,\"file\": [\"thumb\", \"meta\", \"versions\", \"tasks\", \"comments\", \"systemProperties\"]\r\n}',NULL),
+
+(113,NULL,'treeNodes','',NULL),
+
+(114,113,'Tasks','{\n    \"pid\": 1\n}',1),
+
+(115,113,'Dbnode','[]',2),
+
+(116,113,'RecycleBin','{\r\n    \"pid\": \"1\",\r\n    \"facets\": [\r\n        \"did\"\r\n    ],\r\n    \"DC\": {\r\n        \"nid\": {}\r\n        ,\"name\": {}\r\n        ,\"cid\": {}\r\n        ,\"ddate\": {\r\n            \"solr_column_name\": \"ddate\"\r\n        }\r\n    }\r\n}',3),
+
+(117,NULL,'default_object_plugins','{\n\"objectProperties\": {\n\"visibility\": {\n\"!context\": \"window\"\n,\"!template_type\": \"file\"\n}\n,\"order\": 0\n}\n,\"files\": {\n\"visibility\": {\n\"template_type\": \"object,search,case,task\"\n}\n,\"order\": 2\n}\n,\"tasks\": {\n\"visibility\": {\n\"template_type\": \"object,search,case,task\"\n}\n,\"order\": 3\n}\n,\"contentItems\": {\n\"visibility\": {\n\"!template_type\": \"file,time_tracking\"\n}\n,\"order\": 4\n}\n,\"thumb\": {\n\"visibility\": {\n\"!context\": \"window\"\n,\"template_type\": \"file\"\n}\n,\"order\": 5\n}\n,\"currentVersion\": {\n\"visibility\": {\n\"context\": \"window\"\n,\"template_type\": \"file\"\n}\n,\"order\": 6\n}\n,\"versions\": {\n\"visibility\": {\n\"template_type\": \"file\"\n}\n,\"order\": 7\n}\n,\"meta\": {\n\"visibility\": {\n\"template_type\": \"file\"\n}\n,\"order\": 8\n}\n,\"comments\": {\n\"order\": 9\n,\"visibility\": {\n\"!template_type\": \"time_tracking\"\n}\n\n}\n}',NULL),
+
+(118,NULL,'files','{\r\n  \"max_versions\": \"*:1;php,odt,doc,docx,xls,xlsx:20;pdf:5;png,gif,jpg,jpeg,tif,tiff:2;\"\r\n\r\n  ,\"edit\" : {\r\n    \"text\": \"txt,php,js,xml,csv\"\r\n    ,\"html\": \"html,htm\"\r\n    ,\"webdav\": \"doc,docx,ppt,dot,dotx,xls,xlsm,xltx,ppt,pot,pps,pptx,odt,ott,odm,ods,odg,otg,odp,odf,odb\"\r\n  }\r\n\r\n  ,\"webdav_url\": \"https://webdav.host.com/{core_name}/edit-{node_id}/{name}\"\r\n}',NULL),
+
+(119,NULL,'timezone','UTC',NULL),
+
+(120,NULL,'language_en','{\r\n\"name\": \"English\"\r\n,\"locale\": \"en_US\"\r\n,\"long_date_format\": \"%F %j, %Y\"\r\n,\"short_date_format\": \"%m/%d/%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}',NULL),
+
+(121,NULL,'language_fr','{\r\n\"name\": \"French\"\r\n,\"locale\": \"fr_FR\"\r\n,\"long_date_format\": \"%j %F %Y\"\r\n,\"short_date_format\": \"%d.%m.%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}\r\n',NULL),
+
+(122,NULL,'language_ru','{\r\n\"name\": \"Русский\"\r\n,\"locale\": \"ru_RU\"\r\n,\"long_date_format\": \"%j %F %Y\"\r\n,\"short_date_format\": \"%d.%m.%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}',NULL),
+
+(123,NULL,'default_facet_configs','{\r\n  \"template_type\": {\r\n    \"title\": \"[Type]\"\r\n    ,\"type\": \"objectTypes\"\r\n  }\r\n  ,\"template\": {\r\n    \"title\": \"[Template]\"\r\n    ,\"field\": \"template_id\"\r\n    ,\"type\": \"objects\"\r\n  }\r\n  ,\"creator\": {\r\n    \"title\": \"[Creator]\"\r\n    ,\"field\": \"cid\"\r\n    ,\"type\": \"users\"\r\n  }\r\n  ,\"owner\": {\r\n    \"title\": \"[Owner]\"\r\n    ,\"field\": \"oid\"\r\n    ,\"type\": \"users\"\r\n  }\r\n  ,\"updater\": {\r\n    \"title\": \"Updater\"\r\n    ,\"field\": \"uid\"\r\n    ,\"type\": \"users\"\r\n  }\r\n  ,\"date\": {\r\n    \"title\": \"[Date]\"\r\n    ,\"facet\": \"query\"\r\n    ,\"type\": \"dates\"\r\n    ,\"manualPeriod\": true\r\n    ,\"queries\": [\r\n      \"today\"\r\n      ,\"yesterday\"\r\n      ,\"week\"\r\n      ,\"month\"\r\n    ]\r\n    ,\"boolMode\": true\r\n  }\r\n  ,\"date_end\": {\r\n    \"title\": \"End date\"\r\n    ,\"facet\": \"query\"\r\n    ,\"type\": \"dates\"\r\n    ,\"queries\": [\r\n      \"today\"\r\n      ,\"week\"\r\n      ,\"next7days\"\r\n      ,\"next31days\"\r\n      ,\"month\"\r\n    ]\r\n    ,\"boolMode\": true\r\n  }\r\n  ,\"status\": {\r\n    \"title\": \"[Status]\"\r\n    ,\"type\": \"objects\"\r\n }\r\n  ,\"task_status\": {\r\n    \"title\": \"[Status]\"\r\n    ,\"type\": \"taskStatuses\"\r\n }\r\n  ,\"assigned\": {\r\n    \"title\": \"[TaskAssigned]\"\r\n    ,\"field\": \"task_u_assignee\"\r\n    ,\"type\": \"users\"\r\n    ,\"boolMode\": true\r\n  }\r\n\r\n}',NULL),
+
+(124,NULL,'node_facets','{\r\n\"1\" : [\r\n  \"template_type\"\r\n  ,\"creator\"\r\n  ,\"template\"\r\n  ,\"date\"\r\n  ,\"status\"\r\n  ,\"assigned\"\r\n]\r\n}',NULL),
+
+(125,NULL,'default_object_plugins','{\r\n  \"objectProperties\": {\r\n    \"visibility\": {\r\n      \"!context\": \"window\"\r\n      ,\"!template_type\": \"file\"\r\n    }\r\n    ,\"order\": 0\r\n  }\r\n  ,\"files\": {\r\n    \"visibility\": {\r\n      \"template_type\": \"object,search,case,task\"\r\n    }\r\n    ,\"order\": 2\r\n  }\r\n  ,\"tasks\": {\r\n    \"visibility\": {\r\n      \"template_type\": \"object,search,case,task\"\r\n    }\r\n    ,\"order\": 3\r\n  }\r\n  ,\"contentItems\": {\r\n    \"visibility\": {\r\n      \"!template_type\": \"file,time_tracking\"\r\n    }\r\n    ,\"order\": 4\r\n  }\r\n  ,\"thumb\": {\r\n    \"visibility\": {\r\n      \"!context\": \"window\"\r\n      ,\"template_type\": \"file\"\r\n    }\r\n    ,\"order\": 5\r\n  }\r\n  ,\"currentVersion\": {\r\n    \"visibility\": {\r\n      \"context\": \"window\"\r\n      ,\"template_type\": \"file\"\r\n    }\r\n    ,\"order\": 6\r\n  }\r\n  ,\"versions\": {\r\n    \"visibility\": {\r\n      \"template_type\": \"file\"\r\n    }\r\n    ,\"order\": 7\r\n  }\r\n  ,\"meta\": {\r\n    \"visibility\": {\r\n      \"template_type\": \"file\"\r\n    }\r\n    ,\"order\": 8\r\n  }\r\n  ,\"comments\": {\r\n    \"order\": 9\r\n    ,\"visibility\": {\r\n      \"!template_type\": \"time_tracking\"\r\n    }\r\n\r\n  }\r\n}',NULL),
+
+(126,NULL,'images_display_size','512000',NULL),
+
+(127,NULL,'default_DC','{\r\n\"nid\": {}\r\n,\"name\": {\r\n  \"solr_column_name\": \"name\"\r\n}\r\n,\"date\": {\r\n  \"solr_column_name\": \"date\"\r\n}\r\n,\"size\": {\r\n  \"solr_column_name\": \"size\"\r\n}\r\n,\"cid\": {\r\n  \"solr_column_name\": \"cid\"\r\n}\r\n,\"oid\": {\r\n  \"solr_column_name\": \"oid\"\r\n}\r\n,\"cdate\": {\r\n  \"solr_column_name\": \"cdate\"\r\n}\r\n,\"udate\": {\r\n  \"solr_column_name\": \"udate\"\r\n}\r\n}',NULL),
+
+(128,NULL,'default_availableViews','grid,charts,pivot,activityStream',NULL),
+
+(129,NULL,'DCConfigs','',NULL),
+
+(130,129,'dc_tasks','{\r\n    \"nid\":[]\r\n    ,\"name\":[]\r\n    ,\"importance\":{\"solr_column_name\":\"task_importance\"}\r\n    ,\"order\":{\r\n        \"solr_column_name\":\"task_order\"\r\n        ,\"sortType\":\"asInt\"\r\n        ,\"align\":\"center\"\r\n        ,\"columnWidth\":\"10\"\r\n    }\r\n    ,\"time_estimated\":{\r\n        \"width\":\"20px\"\r\n        ,\"format\":\"H:i\"\r\n    }\r\n    ,\"phase\": {\r\n        \"solr_column_name\": \"task_phase\"\r\n    }\r\n    ,\"project\": {\r\n        \"solr_column_name\": \"task_projects\"\r\n    }\r\n    ,\"cid\":[]\r\n    ,\"assigned\":[]\r\n    ,\"comment_user_id\":[]\r\n    ,\"comment_date\":[]\r\n    ,\"cdate\":[]\r\n}',NULL),
+
+(131,129,'dc_tasks_closed','{\r\n    \"nid\":[]\r\n    ,\"name\":[]\r\n    ,\"importance\":{\"solr_column_name\":\"task_importance\"}\r\n    ,\"order\":{\"solr_column_name\":\"task_order\"\r\n        ,\"sortType\":\"asInt\"\r\n        ,\"align\":\"center\"\r\n        ,\"columnWidth\":\"10\"\r\n    }\r\n    ,\"project\": {\r\n        \"solr_column_name\": \"task_projects\"\r\n    }    \r\n    ,\"time_completed\":{\r\n        \"columnWidth\":\"20\"\r\n        ,\"format\":\"H:i\"\r\n    }\r\n    ,\"time_estimated\":{\r\n        \"width\":\"20px\"\r\n        ,\"format\":\"H:i\"\r\n    }\r\n    ,\"task_d_closed\":{\r\n        \"solr_column_name\":\"task_d_closed\"\r\n        ,\"xtype\":\"datecolumn\"\r\n        ,\"format\":\"Y-m-d\"\r\n        ,\"title\":\"Closed date\"\r\n    }\r\n    ,\"cid\":[]\r\n    ,\"cdate\":[]\r\n    ,\"assigned\":[]\r\n    ,\"comment_user_id\":[]\r\n    ,\"comment_date\":[]\r\n}',NULL),
+
+(132,NULL,'geoMapping','false',NULL);
 
 /*Table structure for table `crons` */
 
@@ -91,13 +120,9 @@ CREATE TABLE `crons` (
   `execution_info` longtext,
   `last_action` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `crons` */
-
-insert  into `crons`(`id`,`cron_id`,`cron_file`,`last_start_time`,`last_end_time`,`execution_info`,`last_action`) values 
-
-(1,'solr_update_tree',NULL,NULL,NULL,NULL,'2016-01-29 10:12:18');
 
 /*Table structure for table `favorites` */
 
@@ -214,7 +239,7 @@ CREATE TABLE `guids` (
 
 /*Data for the table `guids` */
 
-insert  into `guids`(`id`,`name`) values 
+insert  into `guids`(`id`,`name`) values
 
 (2,'Dbnode'),
 
@@ -258,11 +283,11 @@ CREATE TABLE `objects` (
   `data` mediumtext,
   `sys_data` mediumtext,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=133 DEFAULT CHARSET=utf8;
 
 /*Data for the table `objects` */
 
-insert  into `objects`(`id`,`data`,`sys_data`) values 
+insert  into `objects`(`id`,`data`,`sys_data`) values
 
 (1,'{\"_title\":\"Tree\",\"en\":\"Tree\"}',NULL),
 
@@ -466,7 +491,7 @@ insert  into `objects`(`id`,`data`,`sys_data`) values
 
 (101,'{\"name\":\"_title\",\"en\":\"Name\",\"type\":\"varchar\",\"order\":1}','{\"fu\":[1],\"solr\":[]}'),
 
-(102,'{\"name\":\"value\",\"en\":\"Value\",\"type\":\"text\",\"order\":2,\"cfg\":\"{\\\"editor\\\":\\\"ace\\\",\\\"format\\\":\\\"json\\\",\\\"validator\\\":\\\"json\\\"}\"}','{\"fu\":[1],\"solr\":[]}'),
+(102,'{\"en\":\"Value\",\"type\":\"text\",\"order\":2,\"cfg\":\"{\\n\\\"editor\\\":\\\"ace\\\",\\n\\\"format\\\":\\\"json\\\",\\n\\\"validator\\\":\\\"json\\\"\\n}\"}','{\"fu\":[1],\"solr\":{\"content\":\"Value\\ntext\\n2\\n{\\n\\\"editor\\\":\\\"ace\\\",\\n\\\"format\\\":\\\"json\\\",\\n\\\"validator\\\":\\\"json\\\"\\n}\\n\"},\"wu\":[],\"lastAction\":{\"type\":\"update\",\"users\":{\"1\":\"7\"},\"time\":\"2016-04-29T08:00:26Z\"}}'),
 
 (103,'{\"name\":\"order\",\"en\":\"Order\",\"type\":\"int\",\"order\":3,\"solr_column_name\":\"order\",\"cfg\":\"{\\\"indexed\\\":true}\"}','{\"fu\":[1],\"solr\":[]}'),
 
@@ -496,7 +521,37 @@ insert  into `objects`(`id`,`data`,`sys_data`) values
 
 (116,'{\"_title\":\"RecycleBin\",\"value\":\"{\\r\\n    \\\"pid\\\": \\\"1\\\",\\r\\n    \\\"facets\\\": [\\r\\n        \\\"did\\\"\\r\\n    ],\\r\\n    \\\"DC\\\": {\\r\\n        \\\"nid\\\": {}\\r\\n        ,\\\"name\\\": {}\\r\\n        ,\\\"cid\\\": {}\\r\\n        ,\\\"ddate\\\": {\\r\\n            \\\"solr_column_name\\\": \\\"ddate\\\"\\r\\n        }\\r\\n    }\\r\\n}\",\"order\":3}','{\"fu\":[1],\"solr\":{\"order\":3},\"wu\":[1],\"lastAction\":{\"type\":\"update\",\"users\":{\"1\":1},\"time\":\"2015-11-25T13:52:47Z\"}}'),
 
-(117,'{\"_title\":\"Create config options rule\",\"node_ids\":90,\"menu\":\"91,94,97,100\"}','{\"fu\":[1],\"solr\":[]}');
+(117,'{\"_title\":\"Create config options rule\",\"node_ids\":90,\"menu\":\"91,94,97,100\"}','{\"fu\":[1],\"solr\":[]}'),
+
+(118,'{\"_title\":\"files\",\"value\":\"{\\r\\n  \\\"max_versions\\\": \\\"*:1;php,odt,doc,docx,xls,xlsx:20;pdf:5;png,gif,jpg,jpeg,tif,tiff:2;\\\"\\r\\n\\r\\n  ,\\\"edit\\\" : {\\r\\n    \\\"text\\\": \\\"txt,php,js,xml,csv\\\"\\r\\n    ,\\\"html\\\": \\\"html,htm\\\"\\r\\n    ,\\\"webdav\\\": \\\"doc,docx,ppt,dot,dotx,xls,xlsm,xltx,ppt,pot,pps,pptx,odt,ott,odm,ods,odg,otg,odp,odf,odb\\\"\\r\\n  }\\r\\n\\r\\n  ,\\\"webdav_url\\\": \\\"https:\\/\\/webdav.host.com\\/{core_name}\\/edit-{node_id}\\/{name}\\\"\\r\\n}\"}','{\"wu\":[],\"solr\":{\"content\":\"files\\n{\\r\\n  \\\"max_versions\\\": \\\"*:1;php,odt,doc,docx,xls,xlsx:20;pdf:5;png,gif,jpg,jpeg,tif,tiff:2;\\\"\\r\\n\\r\\n  ,\\\"edit\\\" : {\\r\\n    \\\"text\\\": \\\"txt,php,js,xml,csv\\\"\\r\\n    ,\\\"html\\\": \\\"html,htm\\\"\\r\\n    ,\\\"webdav\\\": \\\"doc,docx,ppt,dot,dotx,xls,xlsm,xltx,ppt,pot,pps,pptx,odt,ott,odm,ods,odg,otg,odp,odf,odb\\\"\\r\\n  }\\r\\n\\r\\n  ,\\\"webdav_url\\\": \\\"https:\\/\\/webdav.host.com\\/{core_name}\\/edit-{node_id}\\/{name}\\\"\\r\\n}\\n\"},\"lastAction\":{\"type\":\"create\",\"time\":\"2016-04-29T07:53:55Z\",\"users\":{\"1\":\"1\"}}}'),
+
+(119,'{\"_title\":\"timezone\",\"value\":\"UTC\"}','{\"wu\":[],\"solr\":{\"content\":\"timezone\\nUTC\\n\"},\"lastAction\":{\"type\":\"create\",\"time\":\"2016-04-29T07:55:28Z\",\"users\":{\"1\":\"2\"}}}'),
+
+(120,'{\"_title\":\"language_en\",\"value\":\"{\\r\\n\\\"name\\\": \\\"English\\\"\\r\\n,\\\"locale\\\": \\\"en_US\\\"\\r\\n,\\\"long_date_format\\\": \\\"%F %j, %Y\\\"\\r\\n,\\\"short_date_format\\\": \\\"%m\\/%d\\/%Y\\\"\\r\\n,\\\"time_format\\\": \\\"%H:%i\\\"\\r\\n}\"}','{\"wu\":[],\"solr\":{\"content\":\"language_en\\n{\\r\\n\\\"name\\\": \\\"English\\\"\\r\\n,\\\"locale\\\": \\\"en_US\\\"\\r\\n,\\\"long_date_format\\\": \\\"%F %j, %Y\\\"\\r\\n,\\\"short_date_format\\\": \\\"%m\\/%d\\/%Y\\\"\\r\\n,\\\"time_format\\\": \\\"%H:%i\\\"\\r\\n}\\n\"},\"lastAction\":{\"type\":\"create\",\"time\":\"2016-04-29T07:56:08Z\",\"users\":{\"1\":\"3\"}}}'),
+
+(121,'{\"_title\":\"language_fr\",\"value\":\"{\\r\\n\\\"name\\\": \\\"French\\\"\\r\\n,\\\"locale\\\": \\\"fr_FR\\\"\\r\\n,\\\"long_date_format\\\": \\\"%j %F %Y\\\"\\r\\n,\\\"short_date_format\\\": \\\"%d.%m.%Y\\\"\\r\\n,\\\"time_format\\\": \\\"%H:%i\\\"\\r\\n}\\r\\n\"}','{\"wu\":[],\"solr\":{\"content\":\"language_fr\\n{\\r\\n\\\"name\\\": \\\"French\\\"\\r\\n,\\\"locale\\\": \\\"fr_FR\\\"\\r\\n,\\\"long_date_format\\\": \\\"%j %F %Y\\\"\\r\\n,\\\"short_date_format\\\": \\\"%d.%m.%Y\\\"\\r\\n,\\\"time_format\\\": \\\"%H:%i\\\"\\r\\n}\\r\\n\\n\"},\"lastAction\":{\"type\":\"create\",\"time\":\"2016-04-29T07:56:40Z\",\"users\":{\"1\":\"4\"}}}'),
+
+(122,'{\"_title\":\"language_ru\",\"value\":\"{\\r\\n\\\"name\\\": \\\"Русский\\\"\\r\\n,\\\"locale\\\": \\\"ru_RU\\\"\\r\\n,\\\"long_date_format\\\": \\\"%j %F %Y\\\"\\r\\n,\\\"short_date_format\\\": \\\"%d.%m.%Y\\\"\\r\\n,\\\"time_format\\\": \\\"%H:%i\\\"\\r\\n}\"}','{\"wu\":[],\"solr\":{\"content\":\"language_ru\\n{\\r\\n\\\"name\\\": \\\"Русский\\\"\\r\\n,\\\"locale\\\": \\\"ru_RU\\\"\\r\\n,\\\"long_date_format\\\": \\\"%j %F %Y\\\"\\r\\n,\\\"short_date_format\\\": \\\"%d.%m.%Y\\\"\\r\\n,\\\"time_format\\\": \\\"%H:%i\\\"\\r\\n}\\n\"},\"lastAction\":{\"type\":\"create\",\"time\":\"2016-04-29T07:57:06Z\",\"users\":{\"1\":\"5\"}}}'),
+
+(123,'{\"_title\":\"default_facet_configs\",\"value\":\"{\\r\\n  \\\"template_type\\\": {\\r\\n    \\\"title\\\": \\\"[Type]\\\"\\r\\n    ,\\\"type\\\": \\\"objectTypes\\\"\\r\\n  }\\r\\n  ,\\\"template\\\": {\\r\\n    \\\"title\\\": \\\"[Template]\\\"\\r\\n    ,\\\"field\\\": \\\"template_id\\\"\\r\\n    ,\\\"type\\\": \\\"objects\\\"\\r\\n  }\\r\\n  ,\\\"creator\\\": {\\r\\n    \\\"title\\\": \\\"[Creator]\\\"\\r\\n    ,\\\"field\\\": \\\"cid\\\"\\r\\n    ,\\\"type\\\": \\\"users\\\"\\r\\n  }\\r\\n  ,\\\"owner\\\": {\\r\\n    \\\"title\\\": \\\"[Owner]\\\"\\r\\n    ,\\\"field\\\": \\\"oid\\\"\\r\\n    ,\\\"type\\\": \\\"users\\\"\\r\\n  }\\r\\n  ,\\\"updater\\\": {\\r\\n    \\\"title\\\": \\\"Updater\\\"\\r\\n    ,\\\"field\\\": \\\"uid\\\"\\r\\n    ,\\\"type\\\": \\\"users\\\"\\r\\n  }\\r\\n  ,\\\"date\\\": {\\r\\n    \\\"title\\\": \\\"[Date]\\\"\\r\\n    ,\\\"facet\\\": \\\"query\\\"\\r\\n    ,\\\"type\\\": \\\"dates\\\"\\r\\n    ,\\\"manualPeriod\\\": true\\r\\n    ,\\\"queries\\\": [\\r\\n      \\\"today\\\"\\r\\n      ,\\\"yesterday\\\"\\r\\n      ,\\\"week\\\"\\r\\n      ,\\\"month\\\"\\r\\n    ]\\r\\n    ,\\\"boolMode\\\": true\\r\\n  }\\r\\n  ,\\\"date_end\\\": {\\r\\n    \\\"title\\\": \\\"End date\\\"\\r\\n    ,\\\"facet\\\": \\\"query\\\"\\r\\n    ,\\\"type\\\": \\\"dates\\\"\\r\\n    ,\\\"queries\\\": [\\r\\n      \\\"today\\\"\\r\\n      ,\\\"week\\\"\\r\\n      ,\\\"next7days\\\"\\r\\n      ,\\\"next31days\\\"\\r\\n      ,\\\"month\\\"\\r\\n    ]\\r\\n    ,\\\"boolMode\\\": true\\r\\n  }\\r\\n  ,\\\"status\\\": {\\r\\n    \\\"title\\\": \\\"[Status]\\\"\\r\\n    ,\\\"type\\\": \\\"objects\\\"\\r\\n }\\r\\n  ,\\\"task_status\\\": {\\r\\n    \\\"title\\\": \\\"[Status]\\\"\\r\\n    ,\\\"type\\\": \\\"taskStatuses\\\"\\r\\n }\\r\\n  ,\\\"assigned\\\": {\\r\\n    \\\"title\\\": \\\"[TaskAssigned]\\\"\\r\\n    ,\\\"field\\\": \\\"task_u_assignee\\\"\\r\\n    ,\\\"type\\\": \\\"users\\\"\\r\\n    ,\\\"boolMode\\\": true\\r\\n  }\\r\\n\\r\\n}\"}','{\"wu\":[],\"solr\":{\"content\":\"default_facet_configs\\n{\\r\\n  \\\"template_type\\\": {\\r\\n    \\\"title\\\": \\\"[Type]\\\"\\r\\n    ,\\\"type\\\": \\\"objectTypes\\\"\\r\\n  }\\r\\n  ,\\\"template\\\": {\\r\\n    \\\"title\\\": \\\"[Template]\\\"\\r\\n    ,\\\"field\\\": \\\"template_id\\\"\\r\\n    ,\\\"type\\\": \\\"objects\\\"\\r\\n  }\\r\\n  ,\\\"creator\\\": {\\r\\n    \\\"title\\\": \\\"[Creator]\\\"\\r\\n    ,\\\"field\\\": \\\"cid\\\"\\r\\n    ,\\\"type\\\": \\\"users\\\"\\r\\n  }\\r\\n  ,\\\"owner\\\": {\\r\\n    \\\"title\\\": \\\"[Owner]\\\"\\r\\n    ,\\\"field\\\": \\\"oid\\\"\\r\\n    ,\\\"type\\\": \\\"users\\\"\\r\\n  }\\r\\n  ,\\\"updater\\\": {\\r\\n    \\\"title\\\": \\\"Updater\\\"\\r\\n    ,\\\"field\\\": \\\"uid\\\"\\r\\n    ,\\\"type\\\": \\\"users\\\"\\r\\n  }\\r\\n  ,\\\"date\\\": {\\r\\n    \\\"title\\\": \\\"[Date]\\\"\\r\\n    ,\\\"facet\\\": \\\"query\\\"\\r\\n    ,\\\"type\\\": \\\"dates\\\"\\r\\n    ,\\\"manualPeriod\\\": true\\r\\n    ,\\\"queries\\\": [\\r\\n      \\\"today\\\"\\r\\n      ,\\\"yesterday\\\"\\r\\n      ,\\\"week\\\"\\r\\n      ,\\\"month\\\"\\r\\n    ]\\r\\n    ,\\\"boolMode\\\": true\\r\\n  }\\r\\n  ,\\\"date_end\\\": {\\r\\n    \\\"title\\\": \\\"End date\\\"\\r\\n    ,\\\"facet\\\": \\\"query\\\"\\r\\n    ,\\\"type\\\": \\\"dates\\\"\\r\\n    ,\\\"queries\\\": [\\r\\n      \\\"today\\\"\\r\\n      ,\\\"week\\\"\\r\\n      ,\\\"next7days\\\"\\r\\n      ,\\\"next31days\\\"\\r\\n      ,\\\"month\\\"\\r\\n    ]\\r\\n    ,\\\"boolMode\\\": true\\r\\n  }\\r\\n  ,\\\"status\\\": {\\r\\n    \\\"title\\\": \\\"[Status]\\\"\\r\\n    ,\\\"type\\\": \\\"objects\\\"\\r\\n }\\r\\n  ,\\\"task_status\\\": {\\r\\n    \\\"title\\\": \\\"[Status]\\\"\\r\\n    ,\\\"type\\\": \\\"taskStatuses\\\"\\r\\n }\\r\\n  ,\\\"assigned\\\": {\\r\\n    \\\"title\\\": \\\"[TaskAssigned]\\\"\\r\\n    ,\\\"field\\\": \\\"task_u_assignee\\\"\\r\\n    ,\\\"type\\\": \\\"users\\\"\\r\\n    ,\\\"boolMode\\\": true\\r\\n  }\\r\\n\\r\\n}\\n\"},\"lastAction\":{\"type\":\"create\",\"time\":\"2016-04-29T07:59:21Z\",\"users\":{\"1\":\"6\"}}}'),
+
+(124,'{\"_title\":\"node_facets\",\"value\":\"{\\r\\n\\\"1\\\" : [\\r\\n  \\\"template_type\\\"\\r\\n  ,\\\"creator\\\"\\r\\n  ,\\\"template\\\"\\r\\n  ,\\\"date\\\"\\r\\n  ,\\\"status\\\"\\r\\n  ,\\\"assigned\\\"\\r\\n]\\r\\n}\"}','{\"wu\":[],\"solr\":{\"content\":\"node_facets\\n{\\r\\n\\\"1\\\" : [\\r\\n  \\\"template_type\\\"\\r\\n  ,\\\"creator\\\"\\r\\n  ,\\\"template\\\"\\r\\n  ,\\\"date\\\"\\r\\n  ,\\\"status\\\"\\r\\n  ,\\\"assigned\\\"\\r\\n]\\r\\n}\\n\"},\"lastAction\":{\"type\":\"create\",\"time\":\"2016-04-29T08:01:22Z\",\"users\":{\"1\":\"8\"}}}'),
+
+(125,'{\"_title\":\"default_object_plugins\",\"value\":\"{\\r\\n  \\\"objectProperties\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"!context\\\": \\\"window\\\"\\r\\n      ,\\\"!template_type\\\": \\\"file\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 0\\r\\n  }\\r\\n  ,\\\"files\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"template_type\\\": \\\"object,search,case,task\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 2\\r\\n  }\\r\\n  ,\\\"tasks\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"template_type\\\": \\\"object,search,case,task\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 3\\r\\n  }\\r\\n  ,\\\"contentItems\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"!template_type\\\": \\\"file,time_tracking\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 4\\r\\n  }\\r\\n  ,\\\"thumb\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"!context\\\": \\\"window\\\"\\r\\n      ,\\\"template_type\\\": \\\"file\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 5\\r\\n  }\\r\\n  ,\\\"currentVersion\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"context\\\": \\\"window\\\"\\r\\n      ,\\\"template_type\\\": \\\"file\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 6\\r\\n  }\\r\\n  ,\\\"versions\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"template_type\\\": \\\"file\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 7\\r\\n  }\\r\\n  ,\\\"meta\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"template_type\\\": \\\"file\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 8\\r\\n  }\\r\\n  ,\\\"comments\\\": {\\r\\n    \\\"order\\\": 9\\r\\n    ,\\\"visibility\\\": {\\r\\n      \\\"!template_type\\\": \\\"time_tracking\\\"\\r\\n    }\\r\\n\\r\\n  }\\r\\n}\"}','{\"wu\":[],\"solr\":{\"content\":\"default_object_plugins\\n{\\r\\n  \\\"objectProperties\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"!context\\\": \\\"window\\\"\\r\\n      ,\\\"!template_type\\\": \\\"file\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 0\\r\\n  }\\r\\n  ,\\\"files\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"template_type\\\": \\\"object,search,case,task\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 2\\r\\n  }\\r\\n  ,\\\"tasks\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"template_type\\\": \\\"object,search,case,task\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 3\\r\\n  }\\r\\n  ,\\\"contentItems\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"!template_type\\\": \\\"file,time_tracking\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 4\\r\\n  }\\r\\n  ,\\\"thumb\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"!context\\\": \\\"window\\\"\\r\\n      ,\\\"template_type\\\": \\\"file\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 5\\r\\n  }\\r\\n  ,\\\"currentVersion\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"context\\\": \\\"window\\\"\\r\\n      ,\\\"template_type\\\": \\\"file\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 6\\r\\n  }\\r\\n  ,\\\"versions\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"template_type\\\": \\\"file\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 7\\r\\n  }\\r\\n  ,\\\"meta\\\": {\\r\\n    \\\"visibility\\\": {\\r\\n      \\\"template_type\\\": \\\"file\\\"\\r\\n    }\\r\\n    ,\\\"order\\\": 8\\r\\n  }\\r\\n  ,\\\"comments\\\": {\\r\\n    \\\"order\\\": 9\\r\\n    ,\\\"visibility\\\": {\\r\\n      \\\"!template_type\\\": \\\"time_tracking\\\"\\r\\n    }\\r\\n\\r\\n  }\\r\\n}\\n\"},\"lastAction\":{\"type\":\"update\",\"users\":{\"1\":\"13\"},\"time\":\"2016-04-29T08:15:53Z\"}}'),
+
+(126,'{\"_title\":\"images_display_size\",\"value\":512000}','{\"wu\":[],\"solr\":{\"content\":\"images_display_size\\n512000\\n\"},\"lastAction\":{\"type\":\"create\",\"time\":\"2016-04-29T08:11:54Z\",\"users\":{\"1\":\"10\"}}}'),
+
+(127,'{\"_title\":\"default_DC\",\"value\":\"{\\r\\n\\\"nid\\\": {}\\r\\n,\\\"name\\\": {\\r\\n  \\\"solr_column_name\\\": \\\"name\\\"\\r\\n}\\r\\n,\\\"date\\\": {\\r\\n  \\\"solr_column_name\\\": \\\"date\\\"\\r\\n}\\r\\n,\\\"size\\\": {\\r\\n  \\\"solr_column_name\\\": \\\"size\\\"\\r\\n}\\r\\n,\\\"cid\\\": {\\r\\n  \\\"solr_column_name\\\": \\\"cid\\\"\\r\\n}\\r\\n,\\\"oid\\\": {\\r\\n  \\\"solr_column_name\\\": \\\"oid\\\"\\r\\n}\\r\\n,\\\"cdate\\\": {\\r\\n  \\\"solr_column_name\\\": \\\"cdate\\\"\\r\\n}\\r\\n,\\\"udate\\\": {\\r\\n  \\\"solr_column_name\\\": \\\"udate\\\"\\r\\n}\\r\\n}\"}','{\"wu\":[],\"solr\":{\"content\":\"default_DC\\n{\\r\\n\\\"nid\\\": {}\\r\\n,\\\"name\\\": {\\r\\n  \\\"solr_column_name\\\": \\\"name\\\"\\r\\n}\\r\\n,\\\"date\\\": {\\r\\n  \\\"solr_column_name\\\": \\\"date\\\"\\r\\n}\\r\\n,\\\"size\\\": {\\r\\n  \\\"solr_column_name\\\": \\\"size\\\"\\r\\n}\\r\\n,\\\"cid\\\": {\\r\\n  \\\"solr_column_name\\\": \\\"cid\\\"\\r\\n}\\r\\n,\\\"oid\\\": {\\r\\n  \\\"solr_column_name\\\": \\\"oid\\\"\\r\\n}\\r\\n,\\\"cdate\\\": {\\r\\n  \\\"solr_column_name\\\": \\\"cdate\\\"\\r\\n}\\r\\n,\\\"udate\\\": {\\r\\n  \\\"solr_column_name\\\": \\\"udate\\\"\\r\\n}\\r\\n}\\n\"},\"lastAction\":{\"type\":\"create\",\"time\":\"2016-04-29T08:12:21Z\",\"users\":{\"1\":\"11\"}}}'),
+
+(128,'{\"_title\":\"default_availableViews\",\"value\":\"grid,charts,pivot,activityStream\"}','{\"wu\":[],\"solr\":{\"content\":\"default_availableViews\\ngrid,charts,pivot,activityStream\\n\"},\"lastAction\":{\"type\":\"create\",\"time\":\"2016-04-29T08:14:13Z\",\"users\":{\"1\":\"12\"}}}'),
+
+(129,'{\"_title\":\"DCConfigs\"}','{\"wu\":[],\"solr\":{\"content\":\"DCConfigs\\n\"},\"lastAction\":{\"type\":\"create\",\"time\":\"2016-04-29T08:17:58Z\",\"users\":{\"1\":\"14\"}}}'),
+
+(130,'{\"_title\":\"dc_tasks\",\"value\":\"{\\r\\n    \\\"nid\\\":[]\\r\\n    ,\\\"name\\\":[]\\r\\n    ,\\\"importance\\\":{\\\"solr_column_name\\\":\\\"task_importance\\\"}\\r\\n    ,\\\"order\\\":{\\r\\n        \\\"solr_column_name\\\":\\\"task_order\\\"\\r\\n        ,\\\"sortType\\\":\\\"asInt\\\"\\r\\n        ,\\\"align\\\":\\\"center\\\"\\r\\n        ,\\\"columnWidth\\\":\\\"10\\\"\\r\\n    }\\r\\n    ,\\\"time_estimated\\\":{\\r\\n        \\\"width\\\":\\\"20px\\\"\\r\\n        ,\\\"format\\\":\\\"H:i\\\"\\r\\n    }\\r\\n    ,\\\"phase\\\": {\\r\\n        \\\"solr_column_name\\\": \\\"task_phase\\\"\\r\\n    }\\r\\n    ,\\\"project\\\": {\\r\\n        \\\"solr_column_name\\\": \\\"task_projects\\\"\\r\\n    }\\r\\n    ,\\\"cid\\\":[]\\r\\n    ,\\\"assigned\\\":[]\\r\\n    ,\\\"comment_user_id\\\":[]\\r\\n    ,\\\"comment_date\\\":[]\\r\\n    ,\\\"cdate\\\":[]\\r\\n}\"}','{\"wu\":[],\"solr\":{\"content\":\"dc_tasks\\n{\\r\\n    \\\"nid\\\":[]\\r\\n    ,\\\"name\\\":[]\\r\\n    ,\\\"importance\\\":{\\\"solr_column_name\\\":\\\"task_importance\\\"}\\r\\n    ,\\\"order\\\":{\\r\\n        \\\"solr_column_name\\\":\\\"task_order\\\"\\r\\n        ,\\\"sortType\\\":\\\"asInt\\\"\\r\\n        ,\\\"align\\\":\\\"center\\\"\\r\\n        ,\\\"columnWidth\\\":\\\"10\\\"\\r\\n    }\\r\\n    ,\\\"time_estimated\\\":{\\r\\n        \\\"width\\\":\\\"20px\\\"\\r\\n        ,\\\"format\\\":\\\"H:i\\\"\\r\\n    }\\r\\n    ,\\\"phase\\\": {\\r\\n        \\\"solr_column_name\\\": \\\"task_phase\\\"\\r\\n    }\\r\\n    ,\\\"project\\\": {\\r\\n        \\\"solr_column_name\\\": \\\"task_projects\\\"\\r\\n    }\\r\\n    ,\\\"cid\\\":[]\\r\\n    ,\\\"assigned\\\":[]\\r\\n    ,\\\"comment_user_id\\\":[]\\r\\n    ,\\\"comment_date\\\":[]\\r\\n    ,\\\"cdate\\\":[]\\r\\n}\\n\"},\"lastAction\":{\"type\":\"create\",\"time\":\"2016-04-29T08:18:25Z\",\"users\":{\"1\":\"15\"}}}'),
+
+(131,'{\"_title\":\"dc_tasks_closed\",\"value\":\"{\\r\\n    \\\"nid\\\":[]\\r\\n    ,\\\"name\\\":[]\\r\\n    ,\\\"importance\\\":{\\\"solr_column_name\\\":\\\"task_importance\\\"}\\r\\n    ,\\\"order\\\":{\\\"solr_column_name\\\":\\\"task_order\\\"\\r\\n        ,\\\"sortType\\\":\\\"asInt\\\"\\r\\n        ,\\\"align\\\":\\\"center\\\"\\r\\n        ,\\\"columnWidth\\\":\\\"10\\\"\\r\\n    }\\r\\n    ,\\\"project\\\": {\\r\\n        \\\"solr_column_name\\\": \\\"task_projects\\\"\\r\\n    }    \\r\\n    ,\\\"time_completed\\\":{\\r\\n        \\\"columnWidth\\\":\\\"20\\\"\\r\\n        ,\\\"format\\\":\\\"H:i\\\"\\r\\n    }\\r\\n    ,\\\"time_estimated\\\":{\\r\\n        \\\"width\\\":\\\"20px\\\"\\r\\n        ,\\\"format\\\":\\\"H:i\\\"\\r\\n    }\\r\\n    ,\\\"task_d_closed\\\":{\\r\\n        \\\"solr_column_name\\\":\\\"task_d_closed\\\"\\r\\n        ,\\\"xtype\\\":\\\"datecolumn\\\"\\r\\n        ,\\\"format\\\":\\\"Y-m-d\\\"\\r\\n        ,\\\"title\\\":\\\"Closed date\\\"\\r\\n    }\\r\\n    ,\\\"cid\\\":[]\\r\\n    ,\\\"cdate\\\":[]\\r\\n    ,\\\"assigned\\\":[]\\r\\n    ,\\\"comment_user_id\\\":[]\\r\\n    ,\\\"comment_date\\\":[]\\r\\n}\"}','{\"wu\":[],\"solr\":{\"content\":\"dc_tasks_closed\\n{\\r\\n    \\\"nid\\\":[]\\r\\n    ,\\\"name\\\":[]\\r\\n    ,\\\"importance\\\":{\\\"solr_column_name\\\":\\\"task_importance\\\"}\\r\\n    ,\\\"order\\\":{\\\"solr_column_name\\\":\\\"task_order\\\"\\r\\n        ,\\\"sortType\\\":\\\"asInt\\\"\\r\\n        ,\\\"align\\\":\\\"center\\\"\\r\\n        ,\\\"columnWidth\\\":\\\"10\\\"\\r\\n    }\\r\\n    ,\\\"project\\\": {\\r\\n        \\\"solr_column_name\\\": \\\"task_projects\\\"\\r\\n    }    \\r\\n    ,\\\"time_completed\\\":{\\r\\n        \\\"columnWidth\\\":\\\"20\\\"\\r\\n        ,\\\"format\\\":\\\"H:i\\\"\\r\\n    }\\r\\n    ,\\\"time_estimated\\\":{\\r\\n        \\\"width\\\":\\\"20px\\\"\\r\\n        ,\\\"format\\\":\\\"H:i\\\"\\r\\n    }\\r\\n    ,\\\"task_d_closed\\\":{\\r\\n        \\\"solr_column_name\\\":\\\"task_d_closed\\\"\\r\\n        ,\\\"xtype\\\":\\\"datecolumn\\\"\\r\\n        ,\\\"format\\\":\\\"Y-m-d\\\"\\r\\n        ,\\\"title\\\":\\\"Closed date\\\"\\r\\n    }\\r\\n    ,\\\"cid\\\":[]\\r\\n    ,\\\"cdate\\\":[]\\r\\n    ,\\\"assigned\\\":[]\\r\\n    ,\\\"comment_user_id\\\":[]\\r\\n    ,\\\"comment_date\\\":[]\\r\\n}\\n\"},\"lastAction\":{\"type\":\"create\",\"time\":\"2016-04-29T08:20:59Z\",\"users\":{\"1\":\"16\"}}}'),
+
+(132,'{\"_title\":\"geoMapping\",\"value\":\"false\"}','{\"wu\":[],\"solr\":{\"content\":\"geoMapping\\nfalse\\n\"},\"lastAction\":{\"type\":\"create\",\"time\":\"2016-04-29T08:22:54Z\",\"users\":{\"1\":\"17\"}}}');
 
 /*Table structure for table `sessions` */
 
@@ -516,10 +571,6 @@ CREATE TABLE `sessions` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /*Data for the table `sessions` */
-
-insert  into `sessions`(`id`,`pid`,`last_action`,`expires`,`user_id`,`data`) values 
-
-('bgnb39ser5k0mtogg4k2hdvf96','bgnb39ser5k0mtogg4k2hdvf96','2016-02-04 10:04:43',NULL,1,'ips|s:11:\"|127.0.0.1|\";key|s:32:\"0f64083585a5ab4be12448711ffb8981\";user|a:15:{s:2:\"id\";s:1:\"1\";s:4:\"name\";s:4:\"root\";s:10:\"first_name\";s:13:\"Administrator\";s:9:\"last_name\";s:0:\"\";s:3:\"sex\";s:1:\"m\";s:5:\"email\";s:1:\"a\";s:11:\"language_id\";s:1:\"1\";s:3:\"cfg\";a:10:{s:17:\"short_date_format\";s:5:\"m/d/Y\";s:16:\"long_date_format\";s:6:\"F j, Y\";s:12:\"country_code\";s:0:\"\";s:5:\"phone\";s:0:\"\";s:8:\"timezone\";s:0:\"\";s:5:\"state\";a:4:{s:3:\"mAc\";a:2:{s:5:\"width\";i:250;s:6:\"weight\";i:-10;}s:4:\"mopp\";a:1:{s:6:\"weight\";i:-20;}s:6:\"oew100\";a:5:{s:5:\"width\";i:600;s:6:\"height\";i:450;s:9:\"maximized\";b:0;s:4:\"size\";a:2:{s:5:\"width\";i:600;s:6:\"height\";i:450;}s:3:\"pos\";a:2:{i:0;i:853;i:1;i:500;}}s:4:\"oevg\";a:2:{s:7:\"columns\";a:2:{s:5:\"title\";a:2:{s:3:\"idx\";i:0;s:5:\"width\";i:100;}s:5:\"value\";a:2:{s:3:\"idx\";i:1;s:4:\"flex\";i:1;}}s:5:\"group\";N;}}s:5:\"color\";s:7:\"#8fada9\";s:14:\"lastNotifyTime\";s:19:\"2016-01-29 10:19:02\";s:11:\"time_format\";s:3:\"H:i\";s:5:\"theme\";s:7:\"classic\";}s:4:\"data\";a:1:{s:5:\"email\";s:1:\"a\";}s:8:\"language\";s:2:\"en\";s:6:\"locale\";s:5:\"en_US\";s:5:\"admin\";b:1;s:6:\"manage\";b:1;s:6:\"groups\";a:0:{}s:11:\"TSV_checked\";b:1;}message|N;');
 
 /*Table structure for table `templates` */
 
@@ -548,7 +599,7 @@ CREATE TABLE `templates` (
 
 /*Data for the table `templates` */
 
-insert  into `templates`(`id`,`pid`,`is_folder`,`type`,`name`,`l1`,`l2`,`l3`,`l4`,`order`,`visible`,`iconCls`,`default_field`,`cfg`,`title_template`,`info_template`) values 
+insert  into `templates`(`id`,`pid`,`is_folder`,`type`,`name`,`l1`,`l2`,`l3`,`l4`,`order`,`visible`,`iconCls`,`default_field`,`cfg`,`title_template`,`info_template`) values
 
 (5,3,0,'object','folder','Folder','Folder','Folder','Folder',5,1,'icon-folder',NULL,'{\"createMethod\":\"inline\",\n\n  \"object_plugins\":\n      [\"objectProperties\",\n       \"comments\",\n       \"systemProperties\"\n      ]\n\n}','{name}',NULL),
 
@@ -610,7 +661,7 @@ CREATE TABLE `templates_structure` (
 
 /*Data for the table `templates_structure` */
 
-insert  into `templates_structure`(`id`,`pid`,`template_id`,`tag`,`level`,`name`,`l1`,`l2`,`l3`,`l4`,`type`,`order`,`cfg`,`solr_column_name`) values 
+insert  into `templates_structure`(`id`,`pid`,`template_id`,`tag`,`level`,`name`,`l1`,`l2`,`l3`,`l4`,`type`,`order`,`cfg`,`solr_column_name`) values
 
 (13,10,10,'f',0,'en','Full name (en)',NULL,NULL,NULL,'varchar',1,NULL,NULL),
 
@@ -722,7 +773,7 @@ insert  into `templates_structure`(`id`,`pid`,`template_id`,`tag`,`level`,`name`
 
 (101,100,100,NULL,0,'_title','Name',NULL,NULL,NULL,'varchar',1,NULL,NULL),
 
-(102,100,100,NULL,0,'value','Value',NULL,NULL,NULL,'text',2,'{\"editor\":\"ace\",\"format\":\"json\",\"validator\":\"json\"}',NULL),
+(102,100,100,NULL,0,'value','Value',NULL,NULL,NULL,'field',2,'{\n\"editor\":\"ace\",\n\"format\":\"json\",\n\"validator\":\"json\"\n}',NULL),
 
 (103,100,100,NULL,0,'order','Order',NULL,NULL,NULL,'int',3,'{\"indexed\":true}','order');
 
@@ -795,11 +846,11 @@ CREATE TABLE `tree` (
   KEY `tree_draft` (`draft`),
   CONSTRAINT `tree_pid` FOREIGN KEY (`pid`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `tree_template_id` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=133 DEFAULT CHARSET=utf8;
 
 /*Data for the table `tree` */
 
-insert  into `tree`(`id`,`pid`,`user_id`,`system`,`type`,`draft`,`draft_pid`,`template_id`,`tag_id`,`target_id`,`name`,`date`,`date_end`,`size`,`is_main`,`cfg`,`inherit_acl`,`cid`,`cdate`,`uid`,`udate`,`updated`,`oid`,`did`,`ddate`,`dstatus`) values 
+insert  into `tree`(`id`,`pid`,`user_id`,`system`,`type`,`draft`,`draft_pid`,`template_id`,`tag_id`,`target_id`,`name`,`date`,`date_end`,`size`,`is_main`,`cfg`,`inherit_acl`,`cid`,`cdate`,`uid`,`udate`,`updated`,`oid`,`did`,`ddate`,`dstatus`) values
 
 (1,NULL,NULL,1,1,0,NULL,5,NULL,NULL,'Tree',NULL,NULL,NULL,1,'[]',0,1,'2012-11-17 17:10:21',1,'2014-01-17 13:53:00',0,1,NULL,NULL,0),
 
@@ -1003,7 +1054,7 @@ insert  into `tree`(`id`,`pid`,`user_id`,`system`,`type`,`draft`,`draft_pid`,`te
 
 (101,100,NULL,0,NULL,0,NULL,12,NULL,NULL,'_title',NULL,NULL,NULL,NULL,NULL,1,1,'2015-09-09 12:58:27',NULL,NULL,0,1,NULL,NULL,0),
 
-(102,100,NULL,0,NULL,0,NULL,12,NULL,NULL,'value',NULL,NULL,NULL,NULL,'{\"editor\":\"ace\",\"format\":\"json\",\"validator\":\"json\"}',1,1,'2015-09-09 12:58:27',NULL,NULL,0,1,NULL,NULL,0),
+(102,100,NULL,0,NULL,0,NULL,12,NULL,NULL,'value',NULL,NULL,NULL,NULL,'{\"editor\":\"ace\",\"format\":\"json\",\"validator\":\"json\"}',1,1,'2015-09-09 12:58:27',1,'2016-04-29 08:00:26',0,1,NULL,NULL,0),
 
 (103,100,NULL,0,NULL,0,NULL,12,NULL,NULL,'order',NULL,NULL,NULL,NULL,'{\"indexed\":true}',1,1,'2015-09-09 12:58:27',NULL,NULL,0,1,NULL,NULL,0),
 
@@ -1033,7 +1084,37 @@ insert  into `tree`(`id`,`pid`,`user_id`,`system`,`type`,`draft`,`draft_pid`,`te
 
 (116,113,NULL,0,NULL,0,NULL,100,NULL,NULL,'RecycleBin',NULL,NULL,NULL,NULL,NULL,1,1,'2015-09-09 12:58:27',1,'2015-11-25 13:52:47',0,1,NULL,NULL,0),
 
-(117,60,NULL,0,NULL,0,NULL,62,NULL,NULL,'Create config options rule',NULL,NULL,NULL,NULL,NULL,1,1,'2015-09-09 12:58:27',NULL,NULL,0,1,NULL,NULL,0);
+(117,60,NULL,0,NULL,0,NULL,62,NULL,NULL,'Create config options rule',NULL,NULL,NULL,NULL,NULL,1,1,'2015-09-09 12:58:27',NULL,NULL,0,1,NULL,NULL,0),
+
+(118,90,NULL,0,NULL,0,NULL,100,NULL,NULL,'files',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 07:53:55',NULL,NULL,0,1,NULL,NULL,0),
+
+(119,90,NULL,0,NULL,0,NULL,94,NULL,NULL,'timezone',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 07:55:28',NULL,NULL,0,1,NULL,NULL,0),
+
+(120,90,NULL,0,NULL,0,NULL,100,NULL,NULL,'language_en',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 07:56:08',NULL,NULL,0,1,NULL,NULL,0),
+
+(121,90,NULL,0,NULL,0,NULL,100,NULL,NULL,'language_fr',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 07:56:40',NULL,NULL,0,1,NULL,NULL,0),
+
+(122,90,NULL,0,NULL,0,NULL,100,NULL,NULL,'language_ru',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 07:57:06',NULL,NULL,0,1,NULL,NULL,0),
+
+(123,90,NULL,0,NULL,0,NULL,100,NULL,NULL,'default_facet_configs',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 07:59:21',NULL,NULL,0,1,NULL,NULL,0),
+
+(124,90,NULL,0,NULL,0,NULL,100,NULL,NULL,'node_facets',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 08:01:22',NULL,NULL,0,1,NULL,NULL,0),
+
+(125,90,NULL,0,NULL,0,NULL,100,NULL,NULL,'default_object_plugins',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 08:04:38',1,'2016-04-29 08:15:53',0,1,NULL,NULL,0),
+
+(126,90,NULL,0,NULL,0,NULL,91,NULL,NULL,'images_display_size',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 08:11:54',NULL,NULL,0,1,NULL,NULL,0),
+
+(127,90,NULL,0,NULL,0,NULL,100,NULL,NULL,'default_DC',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 08:12:21',NULL,NULL,0,1,NULL,NULL,0),
+
+(128,90,NULL,0,NULL,0,NULL,94,NULL,NULL,'default_availableViews',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 08:14:13',NULL,NULL,0,1,NULL,NULL,0),
+
+(129,90,NULL,0,NULL,0,NULL,100,NULL,NULL,'DCConfigs',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 08:17:58',NULL,NULL,0,1,NULL,NULL,0),
+
+(130,129,NULL,0,NULL,0,NULL,100,NULL,NULL,'dc_tasks',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 08:18:25',NULL,NULL,0,1,NULL,NULL,0),
+
+(131,129,NULL,0,NULL,0,NULL,100,NULL,NULL,'dc_tasks_closed',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 08:20:58',NULL,NULL,0,1,NULL,NULL,0),
+
+(132,90,NULL,0,NULL,0,NULL,94,NULL,NULL,'geoMapping',NULL,NULL,NULL,NULL,NULL,1,1,'2016-04-29 08:22:54',NULL,NULL,0,1,NULL,NULL,0);
 
 /*Table structure for table `tree_acl` */
 
@@ -1125,7 +1206,7 @@ CREATE TABLE `tree_info` (
 
 /*Data for the table `tree_info` */
 
-insert  into `tree_info`(`id`,`pids`,`path`,`case_id`,`acl_count`,`security_set_id`,`updated`) values 
+insert  into `tree_info`(`id`,`pids`,`path`,`case_id`,`acl_count`,`security_set_id`,`updated`) values
 
 (1,'1','',NULL,0,NULL,0),
 
@@ -1359,7 +1440,37 @@ insert  into `tree_info`(`id`,`pids`,`path`,`case_id`,`acl_count`,`security_set_
 
 (116,'1,2,90,113,116',NULL,NULL,0,NULL,0),
 
-(117,'1,2,60,117',NULL,NULL,0,NULL,0);
+(117,'1,2,60,117',NULL,NULL,0,NULL,0),
+
+(118,'1,2,90,118',NULL,NULL,0,NULL,0),
+
+(119,'1,2,90,119',NULL,NULL,0,NULL,0),
+
+(120,'1,2,90,120',NULL,NULL,0,NULL,0),
+
+(121,'1,2,90,121',NULL,NULL,0,NULL,0),
+
+(122,'1,2,90,122',NULL,NULL,0,NULL,0),
+
+(123,'1,2,90,123',NULL,NULL,0,NULL,0),
+
+(124,'1,2,90,124',NULL,NULL,0,NULL,0),
+
+(125,'1,2,90,125',NULL,NULL,0,NULL,0),
+
+(126,'1,2,90,126',NULL,NULL,0,NULL,0),
+
+(127,'1,2,90,127',NULL,NULL,0,NULL,0),
+
+(128,'1,2,90,128',NULL,NULL,0,NULL,0),
+
+(129,'1,2,90,129',NULL,NULL,0,NULL,0),
+
+(130,'1,2,90,129,130',NULL,NULL,0,NULL,0),
+
+(131,'1,2,90,129,131',NULL,NULL,0,NULL,0),
+
+(132,'1,2,90,132',NULL,NULL,0,NULL,0);
 
 /*Table structure for table `tree_user_config` */
 
@@ -1424,11 +1535,11 @@ CREATE TABLE `users_groups` (
 
 /*Data for the table `users_groups` */
 
-insert  into `users_groups`(`id`,`type`,`system`,`name`,`first_name`,`last_name`,`l1`,`l2`,`l3`,`l4`,`sex`,`email`,`photo`,`password`,`password_change`,`recover_hash`,`language_id`,`cfg`,`data`,`last_login`,`login_successful`,`login_from_ip`,`last_logout`,`last_action_time`,`enabled`,`cid`,`cdate`,`uid`,`udate`,`did`,`ddate`,`searchField`,`salt`, `roles`) values 
+insert  into `users_groups`(`id`,`type`,`system`,`name`,`first_name`,`last_name`,`l1`,`l2`,`l3`,`l4`,`sex`,`email`,`photo`,`password`,`password_change`,`recover_hash`,`language_id`,`cfg`,`data`,`last_login`,`login_successful`,`login_from_ip`,`last_logout`,`last_action_time`,`enabled`,`cid`,`cdate`,`uid`,`udate`,`did`,`ddate`,`searchField`,`salt`,`roles`) values
 
-(1,2,1,'root','Administrator','','Administrator','Administrator','Administrator','Administrator','m','a',NULL,'50775b4f5109fd22c46dabb17f710c17','2015-05-21',NULL,1,'{\"short_date_format\":\"%m\\/%d\\/%Y\",\"long_date_format\":\"%F %j, %Y\",\"country_code\":\"\",\"phone\":\"\",\"timezone\":\"\",\"security\":{\"recovery_email\":true,\"email\":\"admin@mail.server.com\"},\"state\":{\"mAc\":{\"width\":250,\"weight\":-10},\"mopp\":{\"weight\":-20},\"oew100\":{\"width\":600,\"height\":450,\"maximized\":false,\"size\":{\"width\":600,\"height\":450},\"pos\":[853,500]},\"oevg\":{\"columns\":{\"title\":{\"idx\":0,\"width\":100},\"value\":{\"idx\":1,\"flex\":1}},\"group\":null}},\"color\":\"#8fada9\",\"lastNotifyTime\":\"2016-02-04 09:30:02\"}','{\"email\": \"a\"}','2016-02-10 12:18:16',1,'|127.0.0.1|',NULL,'2016-02-04 10:04:43',1,1,NULL,1,'2013-03-20 12:57:29',NULL,NULL,' root Administrator  Administrator Administrator Administrator Administrator a ', '', '{“ROLE_USER\":\"ROLE_USER”}'),
+(1,2,1,'root','Administrator','','Administrator','Administrator','Administrator','Administrator','m','a',NULL,'50775b4f5109fd22c46dabb17f710c17','2015-05-21',NULL,1,'{\"short_date_format\":\"%m\\/%d\\/%Y\",\"long_date_format\":\"%F %j, %Y\",\"country_code\":\"\",\"phone\":\"\",\"timezone\":\"\",\"security\":{\"recovery_email\":true,\"email\":\"admin@mail.server.com\"},\"state\":{\"mAc\":{\"width\":250,\"weight\":-10},\"mopp\":{\"weight\":-20},\"oew100\":{\"width\":600,\"height\":450,\"maximized\":false,\"size\":{\"width\":600,\"height\":450},\"pos\":[1010,106]},\"oevg\":{\"columns\":{\"title\":{\"idx\":0,\"width\":100},\"value\":{\"idx\":1,\"flex\":1}},\"group\":null},\"oew94\":{\"width\":600,\"height\":450,\"maximized\":false,\"size\":{\"width\":600,\"height\":450},\"pos\":[1010,106]},\"oew12\":{\"width\":600,\"height\":450,\"maximized\":false,\"size\":{\"width\":600,\"height\":450},\"pos\":[604,106]},\"oew91\":{\"width\":600,\"height\":450,\"maximized\":false,\"size\":{\"width\":600,\"height\":450},\"pos\":[1010,106]}},\"color\":\"#8fada9\",\"lastNotifyTime\":\"2016-04-29 08:26:36\"}','{\"email\": \"a\"}','2016-02-10 12:18:16',1,'|127.0.0.1|',NULL,'2016-02-04 10:04:43',1,1,NULL,1,'2013-03-20 12:57:29',NULL,NULL,' root Administrator  Administrator Administrator Administrator Administrator a ','','{“ROLE_USER\":\"ROLE_USER”}'),
 
-(2,1,1,'everyone','Everyone',NULL,'Everyone','Everyone','Everyone','Everyone',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,'2015-05-20 17:17:52',NULL,'0000-00-00 00:00:00',NULL,NULL,' everyone Everyone Everyone Everyone Everyone  ', '', '');
+(2,1,1,'everyone','Everyone',NULL,'Everyone','Everyone','Everyone','Everyone',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,'2015-05-20 17:17:52',NULL,'0000-00-00 00:00:00',NULL,NULL,' everyone Everyone Everyone Everyone Everyone  ','','');
 
 /*Table structure for table `users_groups_association` */
 
@@ -1721,7 +1832,7 @@ DELIMITER $$
 /*!50003 CREATE */ /*!50003 TRIGGER `tree_au` AFTER UPDATE ON `tree` FOR EACH ROW BEGIN
 	DECLARE tmp_old_pids
 		,tmp_new_pids TEXT DEFAULT '';
-	
+
 	DECLARE tmp_old_case_id
 		,tmp_new_case_id
 		,tmp_old_security_set_id
@@ -1731,7 +1842,7 @@ DELIMITER $$
 	DECLARE tmp_old_pids_length
 		,tmp_old_security_set_length
 		,tmp_acl_count INT UNSIGNED DEFAULT 0;
-	
+
 	/* get pids path, case_id and store them in tree_info table*/
 	IF( (COALESCE(old.pid, 0) <> COALESCE(new.pid, 0) )
 	    OR ( old.inherit_acl <> new.inherit_acl )
@@ -1752,12 +1863,12 @@ DELIMITER $$
 		FROM tree_info ti
 		LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
 		WHERE ti.id = new.id;
-		
+
 		/* check if updated node is a case */
 		IF(tmp_old_case_id = old.id) THEN
 			SET tmp_new_case_id = new.id;
 		END IF;
-		
+
 		/* form new data based on new parent
 		*/
 		if(new.pid is null) THEN
@@ -1780,7 +1891,7 @@ DELIMITER $$
 			LEFT JOIN tree_info ti ON t.id = ti.id
 			LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
 			WHERE t.id = new.pid;
-			
+
 			SET tmp_new_pids = TRIM( ',' FROM CONCAT( tmp_new_pids, ',', new.id) );
 		END IF;
 		/* end of form new data based on new parent */
@@ -1792,7 +1903,7 @@ DELIMITER $$
 			else
 				SET tmp_new_security_set = TRIM( ',' FROM CONCAT(tmp_new_security_set, ',', new.id ) );
 			END IF;
-			
+
 			UPDATE tree_acl_security_sets
 			SET `set` = tmp_new_security_set
 				,updated = 1
@@ -1916,12 +2027,12 @@ DELIMITER $$
 	from tree_info ti
 	left join `tree_acl_security_sets` ts on ti.security_set_id = ts.id
 	where ti.id = new.node_id;
-	
+
 	/* we have to analize 2 cases when node has already other security rules attached and when this is the first rule attached.
 	In first case we have to mark as updated only the security set assigned to this node and child sets
 	In second case we have to add the new security set and update all lower security sets form that tree branch
 	*/
-	IF((tmp_acl_count > 1) OR 
+	IF((tmp_acl_count > 1) OR
 	  (tmp_old_security_set = new.node_id) OR
 	  (CONCAT(',', tmp_old_security_set) LIKE CONCAT('%,', new.node_id))
 	 ) THEN
@@ -1945,7 +2056,7 @@ DELIMITER $$
 		update id = last_insert_id(id);
 		set tmp_new_security_set_id = last_insert_id();
 		/* end of create new security set*/
-		
+
 		UPDATE tree_info
 		SET 	acl_count = tmp_acl_count
 			,security_set_id = tmp_new_security_set_id
@@ -2614,7 +2725,7 @@ DELIMITER $$
     SQL SECURITY INVOKER
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_clear_lost_ids(id bigint UNSIGNED);
-	
+
 	delete from tmp_clear_lost_ids;
 	insert into tmp_clear_lost_ids
 		SELECT o.id
@@ -2678,13 +2789,13 @@ BEGIN
 	DELETE FROM tmp_achild_ids2;
 	insert into tmp_achild_ids select id from tree where pid = in_id;
 	while(ROW_COUNT() > 0)do
-		update tree, tmp_achild_ids 
+		update tree, tmp_achild_ids
 		  set tree.did = NULL
 		  ,tree.ddate = NULL
-		  ,tree.dstatus = 0 
+		  ,tree.dstatus = 0
 		  , tree.updated = 1
 		where tmp_achild_ids.id = tree.id;
-		
+
 		DELETE FROM tmp_achild_ids2;
 		insert into tmp_achild_ids2 select id from tmp_achild_ids;
 		delete from tmp_achild_ids;
@@ -2709,13 +2820,13 @@ BEGIN
 	DELETE FROM tmp_dchild_ids2;
 	insert into tmp_dchild_ids select id from tree where pid = in_id;
 	while(ROW_COUNT() > 0)do
-		update tree, tmp_dchild_ids 
+		update tree, tmp_dchild_ids
 		    set tree.did = in_did
 			,tree.ddate = CURRENT_TIMESTAMP
 			,tree.dstatus = 2
 			,tree.updated = 1
 		    where tmp_dchild_ids.id = tree.id;
-		    
+
 		DELETE FROM tmp_dchild_ids2;
 		insert into tmp_dchild_ids2 select id from tmp_dchild_ids;
 		delete from tmp_dchild_ids;
@@ -2736,31 +2847,31 @@ DELIMITER $$
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_achild_ids(id bigint UNSIGNED);
 	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_achild_ids2(id BIGINT UNSIGNED);
-	
+
 	delete from tmp_achild_ids;
 	DELETE FROM tmp_achild_ids2;
-	insert into tmp_achild_ids 
-		select id 
-		from tree 
+	insert into tmp_achild_ids
+		select id
+		from tree
 		where pid = in_id and draft = 1;
-	
+
 	while(ROW_COUNT() > 0)do
-		update tree, tmp_achild_ids 
+		update tree, tmp_achild_ids
 		  set 	tree.draft = 0
 			,tree.updated = 1
 		where tmp_achild_ids.id = tree.id;
-		
+
 		DELETE FROM tmp_achild_ids2;
-		
-		insert into tmp_achild_ids2 
-			select id 
+
+		insert into tmp_achild_ids2
+			select id
 			from tmp_achild_ids;
 		delete from tmp_achild_ids;
-		
-		INSERT INTO tmp_achild_ids 
-			SELECT t.id 
-			FROM tree t 
-			join tmp_achild_ids2 c 
+
+		INSERT INTO tmp_achild_ids
+			SELECT t.id
+			FROM tree t
+			join tmp_achild_ids2 c
 			  on t.pid = c.id and t.draft = 1;
 	END WHILE;
     END */$$
@@ -2933,8 +3044,8 @@ BEGIN
 		,tree_acl_security_sets
 		SET tree_acl_security_sets.`set` = CONCAT(
 			tmp_to_security_set
-			,CASE WHEN tmp_security_set_length IS NULL 
-			THEN 
+			,CASE WHEN tmp_security_set_length IS NULL
+			THEN
 			  CONCAT(',', tree_acl_security_sets.set)
 			ELSE
 			 SUBSTRING(tree_acl_security_sets.set, tmp_security_set_length)
@@ -2971,38 +3082,38 @@ DELIMITER $$
     SQL SECURITY INVOKER
 BEGIN
 	DECLARE `tmp_level` INT DEFAULT 0;
-	
+
 	CREATE TABLE IF NOT EXISTS tmp_level_id (`id` INT(11) UNSIGNED NOT NULL, PRIMARY KEY (`id`));
 	CREATE TABLE IF NOT EXISTS tmp_level_pid (`id` INT(11) UNSIGNED NOT NULL, PRIMARY KEY (`id`));
-	
+
 	INSERT INTO tmp_level_id
 	  SELECT ts1.id
 	  FROM templates_structure ts1
 	  LEFT JOIN templates_structure ts2 ON ts1.pid = ts2.id
 	  WHERE ts2.id IS NULL;
-	  
+
 	WHILE (ROW_COUNT() > 0) DO
 	  UPDATE templates_structure, tmp_level_id
-	  SET templates_structure.`level` = tmp_level 
+	  SET templates_structure.`level` = tmp_level
 	  WHERE templates_structure.id = tmp_level_id.id;
-	
+
 	  DELETE FROM tmp_level_pid;
-	  
+
 	  INSERT INTO tmp_level_pid
 		SELECT id FROM tmp_level_id;
-	  
+
 	  DELETE FROM tmp_level_id;
 	  INSERT INTO tmp_level_id
 	    SELECT ts1.id
 	    FROM templates_structure ts1
 	    JOIN tmp_level_pid ts2 ON ts1.pid = ts2.id;
-	    
+
 	  SET tmp_level = tmp_level + 1;
 	END WHILE;
-	
+
 	DROP TABLE tmp_level_id;
 	DROP TABLE tmp_level_pid;
-	
+
     END */$$
 DELIMITER ;
 

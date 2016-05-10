@@ -21,34 +21,29 @@ before_install:
     - mkdir -p build/logs
 
 install:
-#add databases, install solr with cores install nginx 
-   - bash app/Travis/nginx/install-nginx.sh
-   - bash app/Travis/install.sh
-# install application   
-   - curl -sS https://getcomposer.org/installer | php
-   - php composer.phar install --no-interaction
-#   - echo "See php extensions:"
-#   - php -m
+    #add databases, install solr with cores install nginx
+    - bash ci/travis/nginx/install-nginx.sh
+    - bash ci/travis/install.sh
+    # install application
+    - curl -sS https://getcomposer.org/installer | php
+    - php composer.phar install --no-interaction
 
 
 before_script:
-  # autoinstall CASEBOX
-   - echo "CASEBOX | Index Casebox test core."
-   - bin/console casebox:solr:update --all=true --env=default
-   - echo "CASEBOX | Clear cache."
-   - bin/console ca:cl --env=default
-   - echo "CASEBOX | Update Casebox database schema."
-   - bin/console doctrine:schema:update --force
-   - echo "CASEBOX | Add Casebox assests."
-   - bin/console casebox:min:assets --env=default
+    # autoinstall CASEBOX
+    - echo "CASEBOX | Index Casebox default core."
+    - bin/console casebox:solr:update --all=true --env=default
+    - echo "CASEBOX | Clear cache."
+    - bin/console ca:cl --env=default
+    - echo "CASEBOX | Update Casebox database schema."
+    - bin/console doctrine:schema:update --force
+    - echo "CASEBOX | Add Casebox assests."
+    - bin/console casebox:min:assets --env=default
 
 script:
-#   - echo "check nginx"
-#   - curl -vsf 'http://localhost:8080/c/default/' &> /dev/stdout
-#   - cat /tmp/error.log
-   # first test RPC
-   - vendor/bin/phpunit -c vendor/caseboxdev/rpc-bundle/src/Tests/phpunit.xml 
+   # Test rpc-bundle
+   - vendor/bin/phpunit -c vendor/caseboxdev/rpc-bundle/src/Tests/phpunit.xml
 
 after_script:
- - if [ -f vendor/bin/coveralls ] ; then php vendor/bin/coveralls -v || true ; fi
- - bash app/Travis/uninstall.sh
+    - if [ -f vendor/bin/coveralls ] ; then php vendor/bin/coveralls -v || true ; fi
+    - bash ci/travis/uninstall.sh

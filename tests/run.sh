@@ -1,11 +1,13 @@
-#/bin/bash
+#!/bin/bash bash
+
+set -e
+
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-# first test RPC
-$DIR/../vendor/bin/phpunit --colors --verbose --debug --configuration $DIR/../vendor/caseboxdev/rpc-bundle/src/Tests/phpunit.xml
+# rpc-bundle
+rm -r $DIR/../var/cache/test
+bash $DIR/../vendor/caseboxdev/rpc-bundle/src/Tests/run.sh
 
-# second test REST
-$DIR/../vendor/bin/phpunit --colors --verbose --debug --configuration $DIR/../vendor/caseboxdev/rest-bundle/src/Tests/phpunit.xml
-
-# third test CORE
-$DIR/../vendor/bin/phpunit --colors --verbose --debug --configuration $DIR/../vendor/caseboxdev/core-bundle/src/Tests/phpunit.xml
+# core-bundle
+rm -r $DIR/../var/cache/test
+bash $DIR/../vendor/caseboxdev/core-bundle/src/Tests/run.sh
