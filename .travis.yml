@@ -43,6 +43,5 @@ script:
    - sleep 10
    - bash tests/run.sh
 
-after_script:
-    - if [ -f vendor/bin/coveralls ] ; then bash ci/travis/coveralls.sh || true ; fi
-    - bash ci/travis/uninstall.sh
+after_success:
+  - travis_retry php /var/www/casebox/vendor/bin/coveralls -v
