@@ -42,6 +42,7 @@ before_script:
 
 script:
    # Test rpc-bundle
+   - rm -r var/cache/test
    - vendor/bin/phpunit -c vendor/caseboxdev/rpc-bundle/src/Tests/phpunit.xml
 
 after_script:
