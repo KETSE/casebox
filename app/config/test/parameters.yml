@@ -1,3 +1,4 @@
+# This file is auto-generated during the composer install
 parameters:
     core_name: test
     locale: en
@@ -6,19 +7,19 @@ parameters:
     prefix: cb
     db_host: 127.0.0.1
     db_port: 3306
-    db_name: ~
-    db_user: ~
-    db_pass: ~
+    db_name: default
+    db_user: default
+    db_pass: 4390fec28389c0e6bbf5
     solr_schema: http
     solr_host: 127.0.0.1
     solr_port: 8983
-    solr_core: ~
-    solr_core_log: ~
+    solr_core: default
+    solr_core_log: default_log
     solr_username: null
     solr_password: null
     session.lifetime: 4320
-    admin_email: noreply@casebox.org
-    sender_email: noreply@casebox.org
+    admin_email: admin@example.com
+    sender_email: emails.sender@example.com
     comments_pass: null
     mailer_transport: smtp
     mailer_host: 127.0.0.1
