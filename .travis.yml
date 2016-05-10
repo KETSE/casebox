@@ -44,4 +44,4 @@ script:
    - bash tests/run.sh
 
 after_success:
-  - php /var/www/casebox/vendor/bin/coveralls -v
+  - php vendor/bin/coveralls -v
