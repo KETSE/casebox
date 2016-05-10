@@ -32,5 +32,6 @@ bash $DIR/solr/solr5.sh --addcore
 
 # create config 
 cp "$DIR/config/parameters.yml" "$ROOT/app/config/test/parameters.yml"
+cp "$DIR/config/parameters.yml" "$ROOT/app/config/default/parameters.yml"
 
 
