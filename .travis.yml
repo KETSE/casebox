@@ -37,8 +37,6 @@ before_script:
     - bin/console ca:cl --env=default
     - echo "CASEBOX | Update Casebox database schema."
     - bin/console doctrine:schema:update --force
-    - echo "CASEBOX | Add Casebox assests."
-    - bin/console casebox:min:assets --env=default
 
 script:
    # Run tests
