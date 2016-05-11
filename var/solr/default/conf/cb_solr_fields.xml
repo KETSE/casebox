@@ -1,0 +1,288 @@
+<!-- Valid attributes for fields:
+ name: mandatory - the name for the field
+ type: mandatory - the name of a previously defined type from the
+     <types> section
+ indexed: true if this field should be indexed (searchable or sortable)
+ stored: true if this field should be retrievable
+ compressed: [false] if this field should be stored using gzip compression
+     (this will only apply if the field type is compressable; among
+     the standard field types, only TextField and StrField are)
+ multiValued: true if this field may contain multiple values per document
+ omitNorms: (expert) set to true to omit the norms associated with
+     this field (this disables length normalization and index-time
+     boosting for the field, and saves some memory).  Only full-text
+     fields or fields that need an index-time boost need norms.
+ termVectors: [false] set to true to store the term vector for a
+     given field.
+     When using MoreLikeThis, fields used for similarity should be
+     stored for best performance.
+ termPositions: Store position information with the term vector.
+     This will increase storage costs.
+ termOffsets: Store offset information with the term vector. This
+     will increase storage costs.
+ default: a value that should be used if no value is specified
+     when adding a document.
+
+ PERFORMANCE NOTE: this schema includes many optional features and should not
+ be used for benchmarking.  To improve performance one could
+    - set stored="false" for all fields possible (esp large fields) when you
+        only need to search on the field but don't need to return the original
+        value.
+    - set indexed="false" if you don't need to search on the field, but only
+        return the field as a result of searching on other indexed fields.
+    - remove all unneeded copyField statements
+    - for best index size and searching performance, set "index" to false
+        for all general text fields, use copyField to copy them to the
+        catchall "text" field, and use that for searching.
+    - For maximum indexing performance, use the StreamingUpdateSolrServer
+        java client.
+    - Remember to run the JVM in server mode, and use a higher logging level
+        that avoids logging every request
+-->
+
+
+<!-- id: nodes unique identifier field -->
+<field name="id"           type="tlong"         indexed="true" stored="true" required="true" />
+
+<!-- doc_id: tree nodes identifier field (from tree table) -->
+<field name="doc_id"       type="string"        indexed="true" stored="true" required="true" />
+
+<field name="child"       type="boolean"       indexed="true" stored="false" default="false" />
+
+
+<!-- pid: primary node id -->
+<field name="pid"          type="tlong"          indexed="true" stored="true" />
+
+<!-- pids: multivalued field with all upward parent ids of this node -->
+<field name="pids"         type="tlong"          indexed="true" stored="true" multiValued="true" />
+
+<!-- path: node full text path (/Home/Documents/FOlder1/action5). Used for display purposes -->
+<field name="path"         type="text_general"   indexed="true" stored="true" />
+
+<!-- name: node name -->
+<field name="name"         type="text_general"   indexed="true" stored="true" />
+
+<!-- system: field for delimiting system elements from tree, like some folders, system messages etc -->
+<field name="system"       type="tint"           indexed="true" stored="true" />
+
+<!-- target_id: target_id for shortcuts -->
+<field name="target_id"    type="tlong"          indexed="true" stored="true" />
+
+<!-- target_type: template type of target_id item (for shortcuts) -->
+<field name="target_type"  type="string"         indexed="true" stored="true" />
+
+<!--
+Note: This field is obsolete, we rely on templates and template_types.
+Should be removed on cleanup if wouldn't be used for other purposes.
+
+type: node type
+    1. Folder
+    2. Link
+    3. Case
+    4. Case object
+    5. File
+    6. Task
+    7. Event
+    8. Message (Email)
+    This definition can be updated when needed
+ -->
+<field name="type"            type="tint"          indexed="true" stored="true" />
+
+<!-- size: used for file sizes  -->
+<field name="size"             type="tlong"         indexed="true" stored="true" />
+
+<!-- date: date field for all objects  -->
+<field name="date"             type="tdate"         indexed="true" stored="true" />
+
+<!-- date_end: used for objects that have an end date (tasks)  -->
+<field name="date_end"         type="tdate"         indexed="true" stored="true" />
+
+<!-- oid: owner id. Owners have full access to their objects despite other security rules -->
+<field name="oid"              type="tint"          indexed="true" stored="true" />
+
+<!-- cid: creator id. User that created / uploaded this object  -->
+<field name="cid"              type="tint"          indexed="true" stored="true" />
+
+<!-- cdate: creation date  -->
+<field name="cdate"            type="tdate"         indexed="true" stored="true" />
+
+<!-- uid: updater id. Last user id that have updated this object  -->
+<field name="uid"              type="tint"          indexed="true" stored="true" />
+
+<!-- udate: last update date  -->
+<field name="udate"            type="tdate"         indexed="true" stored="true" />
+
+<!-- did: deleter id. User id that have deleted this node  -->
+<field name="did"              type="tint"          indexed="true" stored="true" />
+
+<!-- ddate: delete date  -->
+<field name="ddate"            type="tdate"         indexed="true" stored="true" />
+<!-- dstatus: indicates delete status of node
+    0 - not deleted
+    1 - deleted
+    2 - deleted due to dependancy (for childs of deleted objects)
+  -->
+<field name="dstatus"          type="tint"          indexed="true" stored="true" default="0" />
+
+<!-- case_id: indicates the id of the case if this node is in a case  -->
+<field name="case_id"          type="tint"          indexed="true" stored="true" />
+
+<!-- case: case name. Stored for display purposes  -->
+<field name="case"             type="text_general"  indexed="true" stored="true" />
+
+<!-- template_id: the themplate id of the object  -->
+<field name="template_id"      type="tint"          indexed="true" stored="true" />
+
+<!-- template_type: case, object, file, task, email -->
+<field name="template_type"    type="string"        indexed="true" stored="true" />
+
+<!-- cls: custom css class  -->
+<field name="cls"              type="string"        indexed="true" stored="true" />
+
+<!-- acl_count: count of security rules assigned to this node -->
+<field name="acl_count"        type="tint"          indexed="true" stored="true" />
+
+<!-- security_set_id: security set id -->
+<field name="security_set_id"  type="tint"          indexed="true" stored="true" />
+
+<!-- status: used for objects that have status values specified from tree thesauri -->
+<field name="status"           type="tlong"         indexed="true" stored="true" multiValued="true" />
+
+<!-- user_ids: this field can be used now for assigned users in tasks  -->
+<field name="user_ids"         type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<!-- TASKS SPECIFIC FIELDS -->
+
+
+<field name="task_u_assignee"  type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<field name="task_u_started"   type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<field name="task_u_ongoing"   type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<field name="task_u_done"      type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<field name="task_u_blocker"   type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<field name="task_u_all"       type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<!-- task_d_closed: completed date of the task. It can be completed automaticly (when all reponsible users mark the task as completed ) or the owner can close it manually   -->
+<field name="task_d_closed"        type="tdate"         indexed="true" stored="true" />
+
+<!-- YearMonth field stored as an int (2014.01 -> 1401). Used for faceting filtering. -->
+<field name="task_ym_closed"   type="tint"          indexed="true" stored="true" />
+
+<!-- task_status: the tasks status (1 Overdue, 2 Active, 3 Closed, 4 Pending)
+    can also be used, when needed, for other objects to specify their status -->
+<field name="task_status"      type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<!-- END OF TASKS SPECIFIC FIELDS -->
+
+
+<!-- versions: versions count. Used for files -->
+<field name="versions"         type="tint"          indexed="true" stored="true"/>
+
+<!-- metas: designed to contain metadata of the object for searching by medatada properties. Not used for now -->
+<field name="metas"            type="text_ws"      indexed="true" stored="true" />
+
+<!-- content: content of the objects for searching by content (including parsed files content). -->
+<field name="content"          type="text_general" indexed="true"  stored="true" />
+
+<!-- ntsc: node type sort coolumn. Used to sort Folders first -->
+<field name="ntsc"             type="tint"         indexed="true" stored="true" />
+
+<!-- sort_name: designed to sort by name -->
+<field name="sort_name"        type="text_general_sort" indexed="true" stored="true" />
+
+<!-- order: custom ordering number -->
+<field name="order"            type="tint"         indexed="true" stored="true" />
+
+<!-- sort_path: designed to sort by path -->
+<field name="sort_path"        type="text_general_sort" indexed="true" stored="true" />
+
+<!-- comment_user_id: id of last user that commented the object -->
+<field name="comment_user_id"  type="tint"          indexed="true" stored="true" />
+
+<!-- comment_date: timestamp of the last comment  -->
+<field name="comment_date"     type="tdate"         indexed="true" stored="true" />
+
+<!-- name_first_letter: first letter of the name -->
+<field name="name_first_letter" type="first_letter" indexed="true" stored="false" />
+
+<!-- YearMonth field stored as an int (2014.01 -> 1401). Used for faceting filtering. By default this field contains data from creation object date  -->
+<field name="ym1"              type="tint"          indexed="true" stored="true" />
+
+<!-- YearMonth field stored as an int (2014.01 -> 1401). Used for faceting filtering. By default this field contains start date for tasks  -->
+<field name="ym2"              type="tint"          indexed="true" stored="true" />
+
+<!-- YearMonth field stored as an int (2014.01 -> 1401). Used for faceting filtering.
+By default this field contains end date for tasks or creation date if end date is empty -->
+<field name="ym3"              type="tint"          indexed="true" stored="true" />
+
+
+<!-- role_ids: these columns can be used by object templates to store specific values and later to be able to filter or search by them.
+    For example: in case_card template there can be fields that define Managers, Lawyers, Helpers for a case.
+    For these fields, in db.templates_structure we specify the value for column "solr_column_name" = 'role_ids1' / 'role_ids2' etc.
+    So specified values for these kind of fields will be joined together per solr_column_name. This means we can have many and different objects in a case that can define role_ids.
+    The result set for role_ids is specified for absolutely all objects in a case.
+ -->
+<field name="role_ids1"     type="tint"     indexed="true" stored="true" multiValued="true" />
+<field name="role_ids2"     type="tint"     indexed="true" stored="true" multiValued="true" />
+<field name="role_ids3"     type="tint"     indexed="true" stored="true" multiValued="true" />
+<field name="role_ids4"     type="tint"     indexed="true" stored="true" multiValued="true" />
+<field name="role_ids5"     type="tint"     indexed="true" stored="true" multiValued="true" />
+
+
+
+<!-- If you remove this field, you must _also_ disable the update log in solrconfig.xml
+     or Solr won't start. _version_ and update log are required for SolrCloud
+-->
+<field name="_version_"  type="long"  indexed="true" stored="true" />
+
+
+
+ <!-- Dynamic field definitions allow using convention over configuration
+       for fields via the specification of patterns to match field names.
+       EXAMPLE:  name="*_i" will match any field ending in _i (like myid_i, z_i)
+       RESTRICTION: the glob-like pattern in the name attribute must have
+       a "*" only at the start or the end.  -->
+
+<dynamicField name="*_i"  type="int"    indexed="true"  stored="true"/>
+<dynamicField name="*_is" type="int"    indexed="true"  stored="true"  multiValued="true"/>
+<dynamicField name="*_s"  type="string"  indexed="true"  stored="true" />
+<dynamicField name="*_ss" type="string"  indexed="true"  stored="true" multiValued="true"/>
+<dynamicField name="*_l"  type="long"   indexed="true"  stored="true"/>
+<dynamicField name="*_ls" type="long"   indexed="true"  stored="true"  multiValued="true"/>
+<dynamicField name="*_t"  type="text_general"    indexed="true"  stored="true"/>
+<dynamicField name="*_txt" type="text_general"   indexed="true"  stored="true" multiValued="true"/>
+<!-- <dynamicField name="*_en"  type="text_en"    indexed="true"  stored="true" multiValued="true"/>  -->
+<dynamicField name="*_b"  type="boolean" indexed="true" stored="true"/>
+<dynamicField name="*_bs" type="boolean" indexed="true" stored="true"  multiValued="true"/>
+<dynamicField name="*_f"  type="float"  indexed="true"  stored="true"/>
+<dynamicField name="*_fs" type="float"  indexed="true"  stored="true"  multiValued="true"/>
+<dynamicField name="*_d"  type="double" indexed="true"  stored="true"/>
+<dynamicField name="*_ds" type="double" indexed="true"  stored="true"  multiValued="true"/>
+
+<!-- Type used to index the lat and lon components for the "location" FieldType -->
+<dynamicField name="*_coordinate"  type="tdouble" indexed="true"  stored="false" />
+<dynamicField name="*_gp"  type="location" indexed="true"  stored="true" />
+
+<dynamicField name="*_dt"  type="date"    indexed="true"  stored="true"/>
+<dynamicField name="*_dts" type="date"    indexed="true"  stored="true" multiValued="true"/>
+<dynamicField name="*_p"  type="location" indexed="true" stored="true"/>
+
+<!-- some trie-coded dynamic fields for faster range queries -->
+<dynamicField name="*_ti" type="tint"    indexed="true"  stored="true"/>
+<dynamicField name="*_tl" type="tlong"   indexed="true"  stored="true"/>
+<dynamicField name="*_tf" type="tfloat"  indexed="true"  stored="true"/>
+<dynamicField name="*_td" type="tdouble" indexed="true"  stored="true"/>
+<dynamicField name="*_tdt" type="tdate"  indexed="true"  stored="true"/>
+
+
+<!-- some trie-coded dynamic fields, MultiValued! for faster range queries -->
+<dynamicField name="*_tis" type="tint"    indexed="true"  stored="true" multiValued="true"/>
+<dynamicField name="*_tls" type="tlong"   indexed="true"  stored="true" multiValued="true"/>
+<dynamicField name="*_tfs" type="tfloat"  indexed="true"  stored="true" multiValued="true"/>
+<dynamicField name="*_tds" type="tdouble" indexed="true"  stored="true" multiValued="true"/>
+
+

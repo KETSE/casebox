@@ -1,0 +1,31 @@
+imports:
+    - { resource: security.yml }
+    - { resource: services.yml }
+    - { resource: twig.yml }
+    - { resource: doctrine.yml }
+    - { resource: swiftmailer.yml }
+    - { resource: monolog.yml }
+    - { resource: rest.yml }
+
+framework:
+    secret: "%secret%"
+    router:
+        resource: "%kernel.root_dir%/config/routing.yml"
+        strict_requirements: ~
+    form:            ~
+    csrf_protection: ~
+    validation: { enable_annotations: true }
+    #serializer: { enable_annotations: true }
+    templating:
+        engines: ['twig']
+        #assets_version: SomeVersionScheme
+    default_locale: "%locale%"
+    trusted_hosts: ~
+    trusted_proxies: ~
+    session:
+        handler_id: ~
+        save_path: "%kernel.root_dir%/../var/sessions/%kernel.environment%"
+    fragments: ~
+    http_method_override: true
+    assets: ~
+    translator: { fallbacks: [en, ar, es, fr, ge, hy, pt, ro, ru, zh] }

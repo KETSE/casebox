@@ -1,0 +1,50 @@
+sudo: false
+language: php
+php:
+  - 7.0
+
+cache:
+    directories:
+        - $HOME/download-cache
+
+services:
+  - redis-server
+
+addons:
+  apt:
+    packages:
+    - nginx
+    - realpath
+
+  hosts:
+    - localhost
+
+before_install:
+    - mkdir -p $HOME/download-cache
+    - mkdir -p build/logs
+
+install:
+    #add databases, install solr with cores install nginx
+    - bash ci/travis/nginx/install-nginx.sh
+    - bash ci/travis/install.sh
+    # install application
+    - curl -sS https://getcomposer.org/installer | php
+    - php composer.phar install --no-interaction
+
+
+before_script:
+    # autoinstall CASEBOX
+    - echo "CASEBOX | Index Casebox default core."
+    - bin/console casebox:solr:update --all=true --env=default
+    - echo "CASEBOX | Clear cache."
+    - bin/console ca:cl --env=default
+    - echo "CASEBOX | Update Casebox database schema."
+    - bin/console doctrine:schema:update --force
+
+script:
+   # Run tests
+   - sleep 11
+   - bash tests/run.sh
+
+after_success:
+  - php vendor/bin/coveralls -v

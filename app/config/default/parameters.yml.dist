@@ -1,0 +1,37 @@
+parameters:
+    core_name: default
+    locale: en
+    secret: ~
+    server_name: ~
+    prefix: cb
+    db_host: 127.0.0.1
+    db_port: 3306
+    db_name: ~
+    db_user: ~
+    db_pass: ~
+    solr_schema: http
+    solr_host: 127.0.0.1
+    solr_port: 8983
+    solr_core: ~
+    solr_core_log: ~
+    solr_username: ~
+    solr_password: ~
+    session.lifetime: 4320
+    admin_email: ~
+    sender_email: ~
+    #comments_email: ~
+    #comments_host: 127.0.0.1
+    #comments_port: 993
+    #comments_ssl: 1
+    #comments_user: ~
+    comments_pass: ~
+    mailer_transport: smtp
+    mailer_host: 127.0.0.1
+    mailer_user: null
+    mailer_password: null
+    convert_doc_unoconv_cmd: '/usr/bin/python3 /usr/bin/unoconv'
+    convert_doc_url: 'http://convert.devops.site/document/convert'
+    # As converter casebox can use ConverDOC API (api) or UNOCONV (unoconv) from command line. Default is 'api'
+    converter: 'api' # api|unoconv
+    redis_host: 127.0.0.1
+    redis_port: 6379

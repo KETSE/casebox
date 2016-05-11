@@ -1,0 +1,76 @@
+{
+  "name": "KETSE/casebox",
+  "license": "AGPL",
+  "type": "project",
+  "config": {
+    "preferred-install": "dist",
+    "autoloader-suffix": "Casebox",
+    "github-protocols": ["https"],
+    "process-timeout": 600
+  },
+  "autoload": {
+    "psr-4": {
+      "": "src/"
+    },
+    "classmap": [
+      "app/AppKernel.php",
+      "app/AppCache.php",
+      "app/AppEnv.php"
+    ]
+  },
+  "require": {
+    "php": ">=5.5.9",
+    "symfony/symfony": "3.0.*",
+    "doctrine/orm": "^2.5",
+    "doctrine/doctrine-bundle": "^1.6",
+    "doctrine/doctrine-cache-bundle": "^1.2",
+    "symfony/swiftmailer-bundle": "^2.3",
+    "symfony/monolog-bundle": "^2.8",
+    "symfony/translation": "*",
+    "sensio/distribution-bundle": "^5.0",
+    "sensio/generator-bundle": "^3.0",
+    "symfony/doctrine-bridge": "^3.0",
+    "sensio/framework-extra-bundle": "^3.0.2",
+    "kwi/urllinker": "@dev"
+  },
+  "require-dev": {
+    "caseboxdev/core-bundle": "@dev",
+    "caseboxdev/rpc-bundle": "@dev",
+    "caseboxdev/rest-bundle": "@dev",
+    "phpunit/phpunit": "^5.2.12",
+    "phpunit/php-code-coverage": "^3.3.0",
+    "satooshi/php-coveralls": "dev-master"
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget",
+      "Casebox\\CoreBundle\\Composer\\ScriptHandler::buildAssets"
+    ],
+    "post-update-cmd": [
+      "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget",
+      "Casebox\\CoreBundle\\Composer\\ScriptHandler::buildAssets",
+      "Casebox\\CoreBundle\\Composer\\ScriptHandler::buildTranslations"
+    ]
+  },
+  "extra": {
+    "symfony-app-dir": "app",
+    "symfony-bin-dir": "bin",
+    "symfony-var-dir": "var",
+    "symfony-web-dir": "web",
+    "symfony-tests-dir": "tests",
+    "symfony-assets-install": "relative",
+    "incenteev-parameters": {
+      "file": "app/config/default/parameters.yml"
+    }
+  }
+}

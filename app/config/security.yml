@@ -1,0 +1,21 @@
+# Security configurations
+security:
+    encoders:
+        Casebox\CoreBundle\Entity\UsersGroups: sha512
+
+    providers:
+        db_provider:
+            entity: { class: Casebox\CoreBundle\Entity\UsersGroups, property: email }
+
+    firewalls:
+        static:
+            pattern: ^/(css|images|js)/
+            security: false
+
+        main:
+            anonymous: ~
+
+    role_hierarchy:
+        ROLE_USER: ROLE_USER
+        ROLE_ADMIN: ROLE_USER
+        ROLE_SUPER_ADMIN: [ ROLE_USER, ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH ]
