@@ -41,7 +41,7 @@ before_script:
 
 script:
    # Run tests
-   - sleep 10
+   - sleep 11
    - bash tests/run.sh
 
 after_success:
