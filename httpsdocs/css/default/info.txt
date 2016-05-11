@@ -1,5 +1,0 @@
-s - small (<=16px)
-m - medium (<=24px)
-b - big (>24px)
-l - large (> 100px)
-d - dymanic (gifs)
