@@ -12,7 +12,8 @@ addons:
     packages:
     - nginx
     - realpath
-    
+    - redis
+
   hosts:
     - localhost
 
