@@ -7,12 +7,14 @@ cache:
     directories:
         - $HOME/download-cache
 
+services:
+  - redis-server
+
 addons:
   apt:
     packages:
     - nginx
     - realpath
-    - redis
 
   hosts:
     - localhost
