@@ -1,3 +1,6 @@
 imports:
     - { resource: default/parameters.yml }
     - { resource: config.yml }
+imports:
+    - { resource: default/parameters.yml }
+    - { resource: config.yml }

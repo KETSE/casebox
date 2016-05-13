@@ -2,31 +2,31 @@
 parameters:
     core_name: test
     locale: en
-    secret: 64e0681bae70c5e127209a8047
-    server_name: 'http://192.168.33.3.xip.io/'
-    prefix: cb
+    server_name: http://192.168.33.3.xip.io/
     db_host: 127.0.0.1
     db_port: 3306
-    db_name: default
-    db_user: default
-    db_pass: 4390fec28389c0e6bbf5
-    solr_schema: http
+    db_name: test
+    db_user: test
+    db_pass: 1bd8a3d3135a1ace52b7
     solr_host: 127.0.0.1
     solr_port: 8983
-    solr_core: default
-    solr_core_log: default_log
-    solr_username: null
-    solr_password: null
+    solr_core: test
+    solr_core_log: test_log
+    solr_username: 
+    solr_password: 
     session.lifetime: 4320
     admin_email: admin@example.com
     sender_email: emails.sender@example.com
-    comments_pass: null
+    comments_pass:
     mailer_transport: smtp
     mailer_host: 127.0.0.1
     mailer_user: null
     mailer_password: null
-    convert_doc_unoconv_cmd: '/usr/bin/python3 /usr/bin/unoconv'
-    convert_doc_url: 'http://convert.devops.site/document/convert'
+    secret: 2e68c446c2b750709fbe7d3467
+    prefix: cb
+    solr_schema: http
+    convert_doc_unoconv_cmd: /usr/bin/python3 /usr/bin/unoconv
+    convert_doc_url: http://convert.devops.site/document/convert
     converter: unoconv
     redis_host: 127.0.0.1
     redis_port: 6379

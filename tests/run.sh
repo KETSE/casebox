@@ -1,13 +1,8 @@
-#!/bin/bash bash
-
-set -e
-
+#!/usr/bin/env bash
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-
-# rpc-bundle
-[ -d var/cache/test/ ] && rm -r var/cache/test
-bash $DIR/../vendor/caseboxdev/rpc-bundle/src/Tests/run.sh
-
-# core-bundle
-[ -d var/cache/test/ ] && rm -r var/cache/test
-bash $DIR/../vendor/caseboxdev/core-bundle/src/Tests/run.sh
+echo -e "\n[*] Run PHPUnit tests.\n"
+bash $DIR/tests.sh
+echo -e "\n[*] Run PHP Code Sniffer.\n"
+bash $DIR/phpcs.sh
+echo -e "\n[*] Run PHP Mess Detector.\n"
+bash $DIR/phpmd.sh

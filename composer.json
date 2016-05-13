@@ -39,7 +39,10 @@
     "caseboxdev/rest-bundle": "@dev",
     "phpunit/phpunit": "^5.2.12",
     "phpunit/php-code-coverage": "^3.3.0",
-    "satooshi/php-coveralls": "dev-master"
+    "satooshi/php-coveralls": "dev-master",
+    "squizlabs/php_codesniffer": "^2.6",
+    "escapestudios/symfony2-coding-standard": "^2.9",
+    "phpmd/phpmd": "^2.4"
   },
   "scripts": {
     "post-install-cmd": [
