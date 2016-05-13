@@ -44,7 +44,7 @@ before_script:
 script:
    # Run tests
    - sleep 10
-   - bash tests/run.sh
+#   - bash tests/run.sh
 
 after_success:
   - php vendor/bin/coveralls
