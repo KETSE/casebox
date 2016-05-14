@@ -67,7 +67,7 @@
         - 'mysql-client'
         - 'mysql-server'
 
-     - os_user: "{{ os_user }}"
+    - os_user: "{{ os_user }}"
 
     # Casebox
     - casebox_server_name: '{{ casebox_server_name }}'
