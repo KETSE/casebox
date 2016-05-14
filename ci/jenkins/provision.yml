@@ -17,6 +17,7 @@
         - 'curl'
         - 'imagemagick'
         - 'sendmail'
+        - 'mailutils'
         - 'dos2unix'
         - 'openssl'
 
