@@ -1,17 +1,15 @@
-#!/bin/bash bash
-
-set -e
+#!/usr/bin/env sh
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PHP=$(which php)
 
 echo -e "\n[*] Run core-bundle tests.\n"
 [ -d var/cache/test/ ] && sudo rm -r var/cache/test
-bash $DIR/../vendor/caseboxdev/core-bundle/src/Tests/run.sh
+sh $DIR/../vendor/caseboxdev/core-bundle/src/Tests/run.sh
 
 echo -e "\n[*] Run rpc-bundle tests.\n"
 [ -d var/cache/test/ ] && sudo rm -r var/cache/test
-bash $DIR/../vendor/caseboxdev/rpc-bundle/src/Tests/run.sh
+sh $DIR/../vendor/caseboxdev/rpc-bundle/src/Tests/run.sh
 
 echo -e "\n[*] Merge coverage-clover reports to clover.xml file.\n"
 [ -d build/logs/clover.xml ] && sudo rm build/logs/clover.xml
