@@ -1,0 +1,780 @@
+#
+# File: provision.yml
+# Description: Casebox environment installation provision.
+#
+---
+
+- hosts: "*"
+
+  #
+  # Variables
+  #
+  vars:
+    # Common software
+    - common_packages:
+        - 'git'
+        - 'wget'
+        - 'curl'
+        - 'imagemagick'
+        - 'sendmail'
+        - 'dos2unix'
+        - 'openssl'
+
+    # Locale
+    - locales:
+        - 'export LANGUAGE=en_US.UTF-8'
+        - 'export LANG=en_US.UTF-8'
+        - 'export LC_ALL=en_US.UTF-8'
+        - 'locale-gen en_US.UTF-8'
+
+    # JAVA
+    - java_packages:
+        - 'oracle-java8-installer'
+        - 'ca-certificates'
+        - 'oracle-java8-set-default'
+
+    # PHP
+    - php_packages:
+        - 'php7.0-cli'
+        - 'php7.0-cgi'
+        - 'php7.0-dev'
+        - 'php7.0-fpm'
+        - 'php7.0-json'
+        - 'php7.0-tidy'
+        - 'php7.0-curl'
+        - 'php7.0-mbstring'
+        - 'php7.0-bcmath'
+        - 'php7.0-common'
+        - 'php7.0-mysql'
+        - 'php-imagick'
+
+    - php_inifile: '/etc/php/7.0/fpm/php.ini'
+
+    # LibreOFFICE
+    - libreoffice_packages:
+        - 'libreoffice-core'
+        - 'libreoffice-common'
+        - 'libreoffice-writer'
+        - 'libreoffice-script-provider-python'
+
+    # MySQL
+    - root_db_pass_file: '/root/.mysql.root.password'
+    - mysql_packages:
+        - 'python-pycurl'
+        - 'python-mysqldb'
+        - 'mysql-common'
+        - 'mysql-client'
+        - 'mysql-server'
+
+    # Casebox
+    - casebox_server_name: '{{ casebox_server_name }}'
+    - casebox_core: "{{ casebox_core }}"
+    - casebox_root_dir: "{{ casebox_root_dir }}"
+    - casebox_htdocs_dir: '{{ casebox_root_dir }}/web'
+
+    - casebox_git_url: 'https://github.com/KETSE/casebox.git'
+    - casebox_git_branch: 'master'
+
+    - casebox_db_user: "{{ casebox_core }}"
+    - casebox_db_pass_file: '~/.mysql.{{ casebox_core }}.password'
+    - casebox_db_names:
+      - { db: '{{ casebox_core }}', file: '{{ casebox_root_dir }}/var/backup/cb_default.sql'}
+    - casebox_db_hosts:
+        - '127.0.0.1'
+        - 'localhost'
+        - '::1'
+        - '%'
+        - '{{ ansible_hostname }}'
+
+    - casebox_solr_host: '127.0.0.1'
+    - casebox_solr_port: '8983'
+    - casebox_solr_username: ''
+    - casebox_solr_password: ''
+
+    - casebox_solr_links:
+      - { src: '{{ casebox_root_dir }}/var/solr/default', dest: '/var/solr/data/configsets/casebox'}
+      - { src: '{{ casebox_root_dir }}/var/solr/log', dest: '/var/solr/data/configsets/casebox_log'}
+
+    - casebox_default_passw_path: '~/.casebox.password chars=ascii_letters'
+    - casebox_default_passw: "{{ lookup('password', 'casebox_default_passw_path') }}"
+
+    # Nginx
+    - nginx_sites:
+      - { src: '/etc/nginx/sites-available/http_{{ casebox_core }}.conf', dest: '/etc/nginx/sites-enabled/http_{{ casebox_core }}.conf' }
+      - { src: '/etc/nginx/sites-available/https_{{ casebox_core }}.conf', dest: '/etc/nginx/sites-enabled/https_{{ casebox_core }}.conf' }
+
+    # Solr
+    - solr_url: 'http://www-eu.apache.org/dist/lucene/solr/6.0.0/solr-6.0.0.tgz'
+    - solr_ver: 'solr-6.0.0'
+
+    # Lock files
+    - rabbitmq_lock_file: '~/.rabbitmq.lock'
+    - php_lock_file: '~/.php7.lock'
+    - composer_lock_file: '~/.composer.lock'
+    - java_lock_file: '~/.java.lock'
+    - libreoffice_lock_file: '~/.libreoffice.lock'
+    - solr_lock_file: '~/.solr.lock'
+    - solr_configsets_lock_file: '~/.solr.configsets.lock'
+    - mysql_lock_file: '~/.mysql.lock'
+
+  #
+  # Tasks
+  #
+  tasks:
+    # Common packages
+    - name: "APT | Install common packages."
+      apt: pkg={{ item }} update_cache=yes state=present
+      with_items: "{{ common_packages }}"
+      become: yes
+
+    # Locales
+    - name: "LOCALE | Fix locales."
+      shell: "{{ item }}"
+      with_items: "{{ locales }}"
+      become: yes
+
+    # Nginx webserver
+    - name: "NGINX | Install Nginx webserver."
+      apt: pkg={{ item }} update_cache=yes state=present
+      with_items:
+        - nginx
+      become: yes
+
+    - name: "NGINX | Remove Nginx default virtual host."
+      file: path=/etc/nginx/sites-enabled/default state=absent
+      become: yes
+
+    # Redis server
+    - name: "REDIS | Install redis server."
+      apt: pkg=redis-server update_cache=yes state=present
+      become: yes
+
+    # RABBITMQ
+    - name: "RABBITMQ | Lock file."
+      stat: path="{{ rabbitmq_lock_file }}"
+      register: rabbitmq_lock
+      become: yes
+
+    - name: "RABBITMQ | Adding rabbitmq repository."
+      shell: "echo 'deb http://www.rabbitmq.com/debian/ testing main' | sudo tee /etc/apt/sources.list.d/rabbitmq.list"
+      when: rabbitmq_lock.stat.exists == False
+      become: yes
+
+    - name: "RABBITMQ | Obtaining rabbitmq public key."
+      shell: "wget -O- https://www.rabbitmq.com/rabbitmq-signing-key-public.asc | sudo apt-key add -"
+      when: rabbitmq_lock.stat.exists == False
+      become: yes
+
+    - name: "RABBITMQ | APT update."
+      shell: 'apt-get update --fix-missing'
+      when: rabbitmq_lock.stat.exists == False
+      become: yes
+
+    - name: "RABBITMQ | APT install rabbitmq packages."
+      apt: pkg='rabbitmq-server' state=present
+      when: rabbitmq_lock.stat.exists == False
+      become: yes
+
+    - name: "RABBITMQ | Add lock file."
+      file: path="{{ rabbitmq_lock_file }}" state=touch
+      when: rabbitmq_lock.stat.exists == False
+      become: yes
+
+    # PHP
+    - name: "PHP7 | Lock file."
+      stat: path="{{ php_lock_file }}"
+      register: php_lock
+      become: yes
+
+    - name: "PHP7 | Add PHP7 ppa repository."
+      apt_repository: repo=ppa:ondrej/php
+      when: php_lock.stat.exists == False
+      become: yes
+
+    - name: "PHP7 | Update apt cache."
+      apt: update_cache=yes
+      when: php_lock.stat.exists == False
+      become: yes
+
+    - name: "PHP7 | Install PHP7 packages."
+      apt: pkg={{ item }} state=latest
+      with_items: "{{ php_packages }}"
+      when: php_packages is defined and php_lock.stat.exists == False
+      become: yes
+
+    - name: "PHP7 | Install pear."
+      apt: pkg=php-pear state=latest
+      when: php_lock.stat.exists == False
+      become: yes
+
+    - name: "PHP7 | Check /etc/php/7.0/fpm/php.ini file."
+      stat: path={{ php_inifile }}
+      register: phpfpm
+      when: php_lock.stat.exists == False
+      become: yes
+
+    - name: "PHP7 | Update fpm memory limit."
+      lineinfile: dest="{{ php_inifile }}" regexp='memory_limit = 128M' line='memory_limit = 256M'
+      when: phpfpm.stat.exists and php_lock.stat.exists == False
+      become: yes
+
+    - name: "PHP7 | Fix fpm cgi.fix_pathinfo."
+      lineinfile: dest="{{ php_inifile }}" regexp=';cgi.fix_pathinfo=1' line='cgi.fix_pathinfo = 0'
+      when: phpfpm.stat.exists and php_lock.stat.exists == False
+      become: yes
+
+    - name: "PHP7 | Add lock file."
+      file: path="{{ php_lock_file }}" state=touch
+      when: php_lock.stat.exists == False
+      become: yes
+
+    # Composer
+    - name: "COMPOSER | Lock file."
+      stat: path="{{ composer_lock_file }}"
+      register: composer_lock
+      become: yes
+
+    - name: "COMPOSER | Check if composer exist."
+      stat: path='/usr/local/bin/composer'
+      register: composer
+      become: yes
+
+    - name: "COMPOSER | Download composer."
+      shell: "cd /tmp; curl -sS https://getcomposer.org/installer | php"
+      when: composer.stat.exists == False and composer_lock.stat.exists == False
+
+    - name: "COMPOSER | Install composer."
+      shell: "cd /tmp; mv composer.phar /usr/local/bin/composer"
+      when: composer.stat.exists == False and composer_lock.stat.exists == False
+      become: yes
+
+    - name: "COMPOSER | Add lock file."
+      file: path="{{ composer_lock_file }}" state=touch
+      when: composer_lock.stat.exists == False
+      become: yes
+
+    # Java
+    - name: "JAVA | Lock file."
+      stat: path="{{ java_lock_file }}"
+      register: java_lock
+      become: yes
+
+    - name: "JAVA | Add Oracle Java Repository."
+      apt_repository: repo='ppa:webupd8team/java'
+      when: java_lock.stat.exists == False
+      become: yes
+
+    - name: "JAVA | Accept Java 8 License."
+      debconf: name='oracle-java8-installer' question='shared/accepted-oracle-license-v1-1' value='true' vtype='select'
+      when: java_lock.stat.exists == False
+      become: yes
+
+    - name: "JAVA | Install Oracle Java 8."
+      apt: name={{item}} state=latest
+      with_items: "{{ java_packages }}"
+      when: java_lock.stat.exists == False
+      become: yes
+
+    - name: "JAVA | Add lock file."
+      file: path="{{ java_lock_file }}" state=touch
+      when: java_lock.stat.exists == False
+      become: yes
+
+    # LibreOffice and Unoconv
+    - name: "LIBREOFFICE | Lock file."
+      stat: path="{{ libreoffice_lock_file }}"
+      register: libreoffice_lock
+      become: yes
+
+    - name: "LIBREOFFICE | Install LibreOffice."
+      apt: pkg={{item}} state=present
+      with_items: "{{ libreoffice_packages }}"
+      when: libreoffice_lock.stat.exists == False
+      become: yes
+
+    - name: "UNOCONV | Cleanup."
+      shell: 'rm -rf /tmp/unoconv'
+      when: libreoffice_lock.stat.exists == False
+      become: true
+
+    - name: "UNOCONV | Clone unoconv rep."
+      git: repo='https://github.com/dagwieers/unoconv.git' dest='/tmp/unoconv'
+      when: libreoffice_lock.stat.exists == False
+
+    - name: "UNOCONV | Build unoconv."
+      shell: 'cd /tmp/unoconv; make install'
+      when: libreoffice_lock.stat.exists == False
+      become: true
+
+    - name: "UNOCONV | Cleanup."
+      shell: 'rm -rf /tmp/unoconv'
+      when: libreoffice_lock.stat.exists == False
+      become: true
+
+    - name: "UNOCONV | Remove /etc/init.d/unoconvd file."
+      file: path='/etc/init.d/unoconvd' state=absent
+      when: libreoffice_lock.stat.exists == False
+      become: true
+
+    - name: "UNOCONV | Create unoconv service."
+      lineinfile: dest='/etc/init.d/unoconvd' line={{ item }} create=yes state=present
+      with_items:
+        - "### BEGIN INIT INFO\r"
+        - "# Provides: unoconvd\r"
+        - "# Required-Start: $network\r"
+        - "# Required-Stop: $network\r"
+        - "# Default-Start: 2 3 4 5\r"
+        - "# Default-Stop: 0 1 6\r"
+        - "# Description: unoconvd Converting documents\r"
+        - "### END INIT INFO\r"
+        - "#!/bin/sh\r"
+        - "case \"$1\" in\r"
+        - "    status)\r"
+        - "        if [ $(ps ax | grep '/usr/lib/libreoffice/program/soffice.bin' | grep 'accept=socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ComponentContext' | wc -l) -gt 0 ]; then\r"
+        - "            echo 'Unoconv listener active'\r"
+        - "        else\r"
+        - "            echo 'Unoconv listener inactive'\r"
+        - "        fi\r"
+        - "        ;;\r"
+        - "    start)\r"
+        - "        if [ $(ps ax | grep '/usr/lib/libreoffice/program/soffice.bin' | grep 'accept=socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ComponentContext' | wc -l) -gt 0 ]; then\r"
+        - "            echo 'Unoconv listener already started.'\r"
+        - "        else\r"
+        - "            /usr/bin/python3 /usr/bin/unoconv --listener &\r"
+        - "            echo 'Unoconv listener started.'\r"
+        - "        fi\r"
+        - "        ;;\r"
+        - "    stop)\r"
+        - "        if [ $(ps ax | grep '/usr/lib/libreoffice/program/soffice.bin' | grep 'accept=socket,host=127.0.0.1,port=2002,tcpNoDelay=1;urp;StarOffice.ComponentContext' | wc -l) -gt 0 ]; then\r"
+        - "            killall soffice.bin\r"
+        - "            echo 'Unoconv listener stopped.'\r"
+        - "        else\r"
+        - "            echo 'Unoconv isn’t running.'\r"
+        - "        fi\r"
+        - "        ;;\r"
+        - "    restart)\r"
+        - "        $0 stop\r"
+        - "        sleep 1\r"
+        - "        $0 start\r"
+        - "        ;;\r"
+        - "    *)\r"
+        - "        echo 'Usage: /etc/init.d/unoconvd {start|stop|restart|status}'\r"
+        - "        exit 1\r"
+        - "        ;;\r"
+        - "esac\r"
+      become: true
+      when: libreoffice_lock.stat.exists == False
+
+    - name: "UNOCONV | Fix /etc/init.d/unoconvd file format."
+      shell: 'dos2unix /etc/init.d/unoconvd'
+      when: libreoffice_lock.stat.exists == False
+      become: true
+
+    - name: "UNOCONV | Fix /etc/init.d/unoconvd file permissions."
+      shell: 'chmod +x /etc/init.d/unoconvd'
+      when: libreoffice_lock.stat.exists == False
+      become: true
+
+    - name: "UNOCONV | Init service."
+      command: 'update-rc.d unoconvd defaults'
+      when: libreoffice_lock.stat.exists == False
+      become: true
+
+    - name: "UNOCONV | Restart unoconv."
+      service: name=unoconvd state=running
+      when: libreoffice_lock.stat.exists == False
+      become: true
+
+    - name: "UNOCONV | Add lock file."
+      file: path="{{ libreoffice_lock_file }}" state=touch
+      when: libreoffice_lock.stat.exists == False
+      become: yes
+
+    # Solr
+    - name: "SOLR | Lock file."
+      stat: path="{{ solr_lock_file }}"
+      register: solr_lock
+      become: yes
+
+    - name: "SOLR | Check Apache Solr status."
+      stat: path='/etc/init.d/solr'
+      register: solr_service_status
+      when: solr_lock.stat.exists == False
+      become: yes
+
+    - name: "SOLR | Download Apache Solr."
+      shell: "cd /tmp; wget {{ solr_url }}"
+      when: solr_service_status.stat.exists == False and solr_lock.stat.exists == False
+
+    - name: "SOLR | Extract Apache Solr."
+      shell: "cd /tmp; tar xzf {{ solr_ver }}.tgz {{ solr_ver }}/bin/install_solr_service.sh --strip-components=2"
+      when: solr_service_status.stat.exists == False and solr_lock.stat.exists == False
+
+    - name: "SOLR | Install Apache Solr."
+      shell: "cd /tmp ; ./install_solr_service.sh {{ solr_ver }}.tgz"
+      when: solr_service_status.stat.exists == False and solr_lock.stat.exists == False
+      become: yes
+
+    - name: "SOLR | Add lock file."
+      file: path="{{ solr_lock_file }}" state=touch
+      when: solr_lock.stat.exists == False
+      become: yes
+
+    # Nginx
+    - name: "NGINX | Remove Casebox http virtual host."
+      file: path="/etc/nginx/sites-available/http_{{ casebox_core }}.conf" state=absent
+      become: yes
+
+    - name: "NGINX | Add http virtual host."
+      lineinfile: dest="/etc/nginx/sites-available/http_{{ casebox_core }}.conf" line="{{ item }}" create=yes state=present insertafter=EOF
+      with_items:
+        - "server {"
+        - "    listen 80;\n"
+        - "    server_name {{ casebox_server_name }};"
+        - "    root {{ casebox_htdocs_dir }};"
+        - "    rewrite ^/index\\.php/?(.*)$ /$1 permanent;\n"
+        - "    location / {"
+        - "        index index.php;"
+        - "        try_files $uri @rewriteapp;"
+        - "    }\n"
+        - "    location @rewriteapp { "
+        - "        rewrite ^(.*)$ /index.php/$1 last;"
+        - "    }\n"
+        - "    location ~ ^/(index)\\.php(/|$) {"
+        - "        fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;"
+        - "        fastcgi_split_path_info ^(.+\\.php)(/.*)$;"
+        - "        include fastcgi_params;"
+        - "        fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;"
+        - "        fastcgi_param  HTTPS off;"
+        - "    }\n"
+        - "    error_log /var/log/nginx/http_{{ casebox_core }}.error.log;"
+        - "    access_log /var/log/nginx/http_{{ casebox_core }}.access.log;"
+        - "}\n"
+      become: yes
+
+    - name: "NGINX | Remove Casebox https virtual host."
+      file: path="/etc/nginx/sites-available/https_{{ casebox_core }}.conf" state=absent
+      become: yes
+
+    - name: "NGINX | Add Casebox https virtual host."
+      lineinfile: dest="/etc/nginx/sites-available/https_{{ casebox_core }}.conf" line="{{ item }}" create=yes state=present insertafter=EOF
+      with_items:
+        - "server {"
+        - "    listen 443;\n"
+        - "    server_name {{ casebox_server_name }};"
+        - "    root {{ casebox_htdocs_dir }};"
+        - "    rewrite ^/index\\.php/?(.*)$ /$1 permanent;\n"
+        - "    ssl on;"
+        - "    ssl_certificate {{ casebox_root_dir }}/var/ssl/ssl-cert.pem;"
+        - "    ssl_certificate_key {{ casebox_root_dir }}/var/ssl/ssl-cert.key;\n"
+        - "    location / {"
+        - "        index index.php;"
+        - "        try_files $uri @rewriteapp;"
+        - "    }\n"
+        - "    location @rewriteapp { "
+        - "        rewrite ^(.*)$ /index.php/$1 last;"
+        - "    }\n"
+        - "    location ~ ^/(index)\\.php(/|$) {"
+        - "        fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;"
+        - "        fastcgi_split_path_info ^(.+\\.php)(/.*)$;"
+        - "        include fastcgi_params;"
+        - "        fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;"
+        - "        fastcgi_param  HTTPS on;"
+        - "    }\n"
+        - "    error_log /var/log/nginx/https_{{ casebox_core }}.error.log;"
+        - "    access_log /var/log/nginx/https_{{ casebox_core }}.access.log;"
+        - "}\n"
+      become: yes
+
+    - name: "NGINX | Enable Casebox virtual hosts."
+      file: src="{{ item.src }}" dest="{{ item.dest }}" state=link
+      with_items: "{{ nginx_sites }}"
+      become: yes
+
+    # MySQL
+    - name: "MYSQL | Check lock file."
+      stat: path="{{ mysql_lock_file }}"
+      register: mysql_lock
+      become: yes
+
+    - name: "MYSQL | Install MySQL packages."
+      apt: pkg="{{ item }}" force=yes update_cache=yes state=present
+      with_items: "{{ mysql_packages }}"
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      become: yes
+      when: mysql_lock.stat.exists == False
+
+    - name: "MYSQL | Update MySQL configuration file."
+      lineinfile: dest='/etc/mysql/my.cnf' line="{{ item }}" create=yes
+      with_items:
+        - '[client]'
+        - 'port=3306'
+        - 'socket=/var/run/mysqld/mysqld.sock'
+        - '[mysqld_safe]'
+        - 'socket=/var/run/mysqld/mysqld.sock'
+        - 'nice=0'
+        - '[mysqld]'
+        - 'user=mysql'
+        - 'pid-file=/var/run/mysqld/mysqld.pid'
+        - 'socket=/var/run/mysqld/mysqld.sock'
+        - 'port=3306'
+        - 'basedir=/usr'
+        - 'datadir=/var/lib/mysql'
+        - 'tmpdir=/tmp'
+        - 'lc-messages-dir=/usr/share/mysql'
+        - 'bind-address=0.0.0.0'
+        - 'key_buffer=16M'
+        - 'max_allowed_packet=16M'
+        - 'thread_stack=192K'
+        - 'thread_cache_size=8'
+        - 'myisam-recover=BACKUP'
+        - 'query_cache_limit=1M'
+        - 'query_cache_size=16M'
+        - 'log_error=/var/log/mysql/error.log'
+        - 'expire_logs_days=10'
+        - 'max_binlog_size=100M'
+        - '[mysqldump]'
+        - 'quick'
+        - 'quote-names'
+        - 'max_allowed_packet=16M'
+        - '[mysql]'
+        - '[isamchk]'
+        - 'key_buffer=16M'
+      become: yes
+      when: mysql_lock.stat.exists == False
+
+    - name: "MYSQL | Add MySQL .mysql.cnf.lock file."
+      file: path="{{ mysql_lock_file }}" state=touch
+      when: mysql_lock.stat.exists == False
+      become: yes
+
+    - name: "MYSQL | Check MySQL root password."
+      stat: path="{{ root_db_pass_file }}"
+      register: root_db_pass_file_exist
+      become: yes
+
+    - name: "MYSQL | Generate MySQL root password."
+      lineinfile: dest="{{ root_db_pass_file }}" line="{{ lookup('pipe', 'openssl rand -hex 10') }}" create=yes state=present
+      when: root_db_pass_file_exist.stat.exists == False
+      become: yes
+
+    - name: "MYSQL | Fetch MySQL root password."
+      shell: "cat {{ root_db_pass_file }}"
+      register: mysq_root_password
+      become: yes
+
+    - name: "MYSQL | Update MySQL root password for localhost."
+      mysql_user: name=root host="{{ item }}" password="{{ mysq_root_password.stdout }}"
+      with_items:
+        - '127.0.0.1'
+        - '::1'
+        - 'localhost'
+      when: root_db_pass_file_exist.stat.exists == False
+      become: yes
+
+    # Casebox
+    - name: "CASEBOX | Check casebox directory."
+      stat: path="{{ casebox_root_dir }}/web/index.php"
+      register: casebox_dir
+      become: yes
+
+    - name: "CASEBOX | Create casebox directory."
+      file: path="{{ casebox_root_dir }}" state=directory mode=0755
+      when: casebox_dir.stat.exists == False
+      become: yes
+
+    - name: "CASEBOX | Clone casebox."
+      git: repo="{{ casebox_git_url }}" dest="{{ casebox_root_dir }}" version="{{ casebox_git_branch }}"
+      when: casebox_dir.stat.exists == False
+      become: yes
+
+    - name: "CASEBOX | Check casebox config file."
+      stat: path="{{ casebox_root_dir }}/app/config/{{ casebox_core }}/parameters.yml"
+      register: config_file_exist
+
+    - name: "CASEBOX | Check MySQL casebox core password."
+      stat: path={{ casebox_db_pass_file }}
+      register: db_pass_file_exist
+
+    - name: "CASEBOX | Generate MySQL casebox core password."
+      lineinfile: dest="{{ casebox_db_pass_file }}" line="{{ lookup('pipe', 'openssl rand -hex 10') }}" create=yes state=present
+      when: db_pass_file_exist.stat.exists == False and config_file_exist.stat.exists == False
+
+    - name: "CASEBOX | Fetch MySQL casebox core password."
+      shell: "cat {{ casebox_db_pass_file }}"
+      register: mysql_casebox_password
+      when: config_file_exist.stat.exists == False
+
+    - name: "CASEBOX | Fetch mysql root password."
+      shell: "cat {{ root_db_pass_file }}"
+      register: mysq_root_password
+      when: config_file_exist.stat.exists == False
+      become: yes
+
+    - name: "CASEBOX | Create databases."
+      mysql_db: name={{ item.db }} login_user=root login_password={{ mysq_root_password.stdout }} state=present
+      with_items: "{{ casebox_db_names }}"
+      when: config_file_exist.stat.exists == False
+
+    - name: "CASEBOX | Grant user permissions."
+      mysql_user: name={{ casebox_db_user }} host={{ item[0] }} priv={{ item[1].db }}.*:ALL append_privs=yes password={{ mysql_casebox_password.stdout }} login_user=root login_password={{ mysq_root_password.stdout }} state=present
+      with_nested:
+        - "{{ casebox_db_hosts }}"
+        - "{{ casebox_db_names }}"
+      when: config_file_exist.stat.exists == False
+
+    - name: "CASEBOX | Import Casebox databases."
+      mysql_db: name={{ item.db }} login_user=root login_password={{ mysq_root_password.stdout }} target={{ item.file }} state=import
+      with_items: "{{ casebox_db_names }}"
+      when: config_file_exist.stat.exists == False
+
+    - name: "CASEBOX | Check .solr.lock file."
+      stat: path="{{ solr_configsets_lock_file }}"
+      register: solr_configsets_lock
+      become: yes
+
+    - name: "CASEBOX | Creates Solr configsets directory."
+      file: path='/var/solr/data/configsets' group=solr owner=solr recurse=yes state=directory
+      when: solr_configsets_lock.stat.exists == False
+      become: yes
+
+    - name: "CASEBOX | Create Casebox Solr links."
+      file: src={{ item.src }} dest={{ item.dest }} group=solr owner=solr state=link
+      with_items: "{{ casebox_solr_links }}"
+      when: solr_configsets_lock.stat.exists == False
+      become: yes
+
+    - name: "CASEBOX | Fix Solr configsets directory owner."
+      shell: "chown solr:solr /var/solr/data/configsets -R"
+      when: solr_configsets_lock.stat.exists == False
+      become: yes
+
+    - name: "CASEBOX | Add solr.configsets lock file."
+      file: path="{{ solr_configsets_lock_file }}" state=touch
+      when: solr_configsets_lock.stat.exists == False
+      become: yes
+
+    - name: "CASEBOX | Check config_{core-name}.yml file."
+      stat: path="{{ casebox_root_dir }}/app/config/config_{{ casebox_core }}.yml"
+      register: stat_core_config
+      become: yes
+
+    - name: "CASEBOX | Create config_{core-name}.yml file."
+      file: path="{{ casebox_root_dir }}/app/config/config_{{ casebox_core }}.yml"
+            state=touch
+      when: stat_core_config.stat.exists == False
+      become: yes
+
+    - name: "CASEBOX | Populate config_{core-name}.yml file."
+      shell: "echo '{{ item }}' >> {{ casebox_root_dir }}/app/config/config_{{ casebox_core }}.yml"
+      with_items:
+        - 'imports:'
+        - "    - { resource: {{ casebox_core }}/parameters.yml }"
+        - '    - { resource: config.yml }'
+      when: stat_core_config.stat.exists == False
+      become: yes
+
+    - name: "CASEBOX | Create directory."
+      shell: "mkdir -p {{ casebox_root_dir }}/app/config/{{ casebox_core }}"
+      become: yes
+
+    - name: "CASEBOX | Create casebox parameters file."
+      file: path="{{ casebox_root_dir }}/app/config/{{ casebox_core }}/parameters.yml"
+            state=touch
+      when: config_file_exist.stat.exists == False
+      become: yes
+
+    - name: "CASEBOX | Populate casebox parameters."
+      shell: "echo '{{ item }}' >> {{ casebox_root_dir }}/app/config/{{ casebox_core }}/parameters.yml"
+      with_items:
+        - '# This file is auto-generated during the composer install'
+        - 'parameters:'
+        - "    core_name: {{ casebox_core }}"
+        - '    locale: en'
+        - "    server_name: http://{{ casebox_server_name }}/"
+        - '    db_host: 127.0.0.1'
+        - '    db_port: 3306'
+        - "    db_name: {{ casebox_core }}"
+        - "    db_user: {{ casebox_db_user }}"
+        - "    db_pass: {{ mysql_casebox_password.stdout }}"
+        - "    solr_host: {{ casebox_solr_host }}"
+        - "    solr_port: {{ casebox_solr_port }}"
+        - "    solr_core: {{ casebox_core }}"
+        - "    solr_core_log: {{ casebox_core }}_log"
+        - "    solr_username: {{ casebox_solr_username }}"
+        - "    solr_password: {{ casebox_solr_password }}"
+        - '    session.lifetime: 4320'
+        - '    admin_email: noreply@ci.casebox.org'
+        - '    sender_email: noreply@ci.casebox.org'
+        - '    comments_pass:'
+        - '    mailer_transport: smtp'
+        - '    mailer_host: 127.0.0.1'
+        - '    mailer_user: null'
+        - '    mailer_password: null'
+        - "    secret: {{ lookup('pipe', 'openssl rand -hex 13') }}"
+        - '    prefix: cb'
+        - '    solr_schema: http'
+        - "    convert_doc_unoconv_cmd: /usr/bin/python3 /usr/bin/unoconv"
+        - "    convert_doc_url: http://convert.devops.site/document/convert"
+        - '    converter: unoconv'
+        - '    redis_host: 127.0.0.1'
+        - '    redis_port: 6379'
+      when: config_file_exist.stat.exists == False
+      become: yes
+
+    - name: "CASEBOX | Check default parameters file."
+      stat: path="{{ casebox_root_dir }}/app/config/default/parameters.yml"
+      become: yes
+      register: stat_default_parameters_file
+
+    - name: "CASEBOX | Populate default parameters file."
+      copy: src="{{ casebox_root_dir }}/app/config/{{ casebox_core }}/parameters.yml"
+            dest="{{ casebox_root_dir }}/app/config/default/parameters.yml"
+      when: stat_default_parameters_file.stat.exists == False
+      become: yes
+
+    - name: "CASEBOX | Composer update."
+      shell: "composer update --working-dir={{ casebox_root_dir }}"
+      become: yes
+
+    - name: "CASEBOX | Set vagrant:vagrant owner for docroot."
+      shell: "chown vagrant:vagrant {{ casebox_root_dir }} -R"
+      become: yes
+
+    - name: "CASEBOX | Solr create Casebox default core."
+      shell: "php {{ casebox_root_dir }}/bin/console casebox:solr:create --env={{ casebox_core }}"
+      ignore_errors: yes
+
+    - name: "CASEBOX | Solr index Casebox default core."
+      shell: "php {{ casebox_root_dir }}/bin/console casebox:solr:update --all=true --env={{ casebox_core }}"
+      ignore_errors: yes
+
+    - name: "CASEBOX | Clear cache."
+      shell: "php {{ casebox_root_dir }}/bin/console ca:cl --env={{ casebox_core }}"
+
+    - name: "CASEBOX | Update Casebox database schema."
+      shell: "php {{ casebox_root_dir }}/bin/console doctrine:schema:update --force"
+
+    - name: "CASEBOX | Add Casebox assests."
+      shell: "php {{ casebox_root_dir }}/bin/console casebox:min:assets --env={{ casebox_core }}"
+
+    - name: "CASEBOX | Set var/* directory write permissions."
+      shell: "chmod 0777 -R {{ casebox_root_dir }}/var/{{ item }} -R"
+      with_items:
+        - 'logs'
+        - 'cache'
+        - 'files'
+      become: yes
+
+    - name: "NGINX | Restart Nginx webserver."
+      shell: "service nginx restart"
+      become: yes
+
+    - name: "MYSQL | Restart MySQL server."
+      shell: "service mysql restart"
+      become: yes
+
+    - name: "SOLR | Restart Solr webserver."
+      shell: "service solr restart"
+      become: yes
