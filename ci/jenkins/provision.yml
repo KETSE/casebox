@@ -211,7 +211,6 @@
     - name: "PHP7 | Check /etc/php/7.0/fpm/php.ini file."
       stat: path={{ php_inifile }}
       register: phpfpm
-      when: php_lock.stat.exists == False
       become: yes
 
     - name: "PHP7 | Update fpm memory limit."
