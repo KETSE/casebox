@@ -32,5 +32,5 @@ Tests and sniffers reports will be available in `/var/www/casebox/buil/logs` fol
 Code status
 -----------
 
-[![Build Status](http://ci.casebox.org:8080/buildStatus/icon?job=casebox/development)](http://ci.casebox.org:8080/job/casebox/development)
+[![Build Status](http://ci.casebox.org:8080/buildStatus/icon?job=casebox/development)](http://ci.casebox.org:8080/job/casebox/job/development)
 
