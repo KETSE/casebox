@@ -32,6 +32,4 @@ Tests and sniffers reports will be available in `/var/www/casebox/buil/logs` fol
 Code status
 -----------
 
-[![Build Status](https://travis-ci.org/KETSE/casebox.svg?branch=master)](https://travis-ci.org/KETSE/casebox)
-
-[![Coverage Status](https://coveralls.io/repos/github/KETSE/casebox/badge.svg?branch=master)](https://coveralls.io/github/KETSE/casebox?branch=master)
+[![Build Status](http://casebox.xyz:8080/buildStatus/icon?job=casebox/development)](http://casebox.xyz:8080/job/casebox/development)
