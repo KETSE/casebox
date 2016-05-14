@@ -399,7 +399,6 @@
     - name: "SOLR | Check Apache Solr status."
       stat: path='/etc/init.d/solr'
       register: solr_service_status
-      when: solr_lock.stat.exists == False
       become: yes
 
     - name: "SOLR | Download Apache Solr."
