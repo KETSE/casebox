@@ -1,12 +1,10 @@
-#!/usr/bin/env sh
-
-set -e
+#!/usr/bin/env bash
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 echo -e "\n[*] Run PHPUnit tests.\n"
-sh $DIR/tests.sh
+bash $DIR/tests.sh
 echo -e "\n[*] Run PHP Code Sniffer.\n"
-sh $DIR/phpcs.sh
+bash $DIR/phpcs.sh
 echo -e "\n[*] Run PHP Mess Detector.\n"
-sh $DIR/phpmd.sh
+bash $DIR/phpmd.sh
