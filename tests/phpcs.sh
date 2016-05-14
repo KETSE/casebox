@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -e
 PHP=$( which php )
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 $PHP vendor/bin/phpcs --config-set installed_paths vendor/escapestudios/symfony2-coding-standard
