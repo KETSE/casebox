@@ -96,9 +96,6 @@
       - { src: '{{ casebox_root_dir }}/var/solr/default', dest: '/var/solr/data/configsets/casebox'}
       - { src: '{{ casebox_root_dir }}/var/solr/log', dest: '/var/solr/data/configsets/casebox_log'}
 
-    - casebox_default_passw_path: '~/.casebox.password chars=ascii_letters'
-    - casebox_default_passw: "{{ lookup('password', 'casebox_default_passw_path') }}"
-
     # Nginx
     - nginx_sites:
       - { src: '/etc/nginx/sites-available/http_{{ casebox_core }}.conf', dest: '/etc/nginx/sites-enabled/http_{{ casebox_core }}.conf' }
@@ -591,19 +588,23 @@
     - name: "CASEBOX | Check casebox config file."
       stat: path="{{ casebox_root_dir }}/app/config/{{ casebox_core }}/parameters.yml"
       register: config_file_exist
+      become: yes
 
     - name: "CASEBOX | Check MySQL casebox core password."
       stat: path={{ casebox_db_pass_file }}
       register: db_pass_file_exist
+      become: yes
 
     - name: "CASEBOX | Generate MySQL casebox core password."
       lineinfile: dest="{{ casebox_db_pass_file }}" line="{{ lookup('pipe', 'openssl rand -hex 10') }}" create=yes state=present
       when: db_pass_file_exist.stat.exists == False and config_file_exist.stat.exists == False
+      become: yes
 
     - name: "CASEBOX | Fetch MySQL casebox core password."
       shell: "cat {{ casebox_db_pass_file }}"
       register: mysql_casebox_password
       when: config_file_exist.stat.exists == False
+      become: yes
 
     - name: "CASEBOX | Fetch mysql root password."
       shell: "cat {{ root_db_pass_file }}"
@@ -615,6 +616,7 @@
       mysql_db: name={{ item.db }} login_user=root login_password={{ mysq_root_password.stdout }} state=present
       with_items: "{{ casebox_db_names }}"
       when: config_file_exist.stat.exists == False
+      become: yes
 
     - name: "CASEBOX | Grant user permissions."
       mysql_user: name={{ casebox_db_user }} host={{ item[0] }} priv={{ item[1].db }}.*:ALL append_privs=yes password={{ mysql_casebox_password.stdout }} login_user=root login_password={{ mysq_root_password.stdout }} state=present
@@ -622,11 +624,13 @@
         - "{{ casebox_db_hosts }}"
         - "{{ casebox_db_names }}"
       when: config_file_exist.stat.exists == False
+      become: yes
 
     - name: "CASEBOX | Import Casebox databases."
       mysql_db: name={{ item.db }} login_user=root login_password={{ mysq_root_password.stdout }} target={{ item.file }} state=import
       with_items: "{{ casebox_db_names }}"
       when: config_file_exist.stat.exists == False
+      become: yes
 
     - name: "CASEBOX | Check .solr.lock file."
       stat: path="{{ solr_configsets_lock_file }}"
@@ -724,8 +728,8 @@
 
     - name: "CASEBOX | Check default parameters file."
       stat: path="{{ casebox_root_dir }}/app/config/default/parameters.yml"
-      become: yes
       register: stat_default_parameters_file
+      become: yes
 
     - name: "CASEBOX | Populate default parameters file."
       copy: src="{{ casebox_root_dir }}/app/config/{{ casebox_core }}/parameters.yml"
