@@ -758,9 +758,6 @@
     - name: "CASEBOX | Clear cache."
       shell: "php {{ casebox_root_dir }}/bin/console ca:cl --env={{ casebox_core }}"
 
-    - name: "CASEBOX | Update Casebox database schema."
-      shell: "php {{ casebox_root_dir }}/bin/console doctrine:schema:update --force"
-
     - name: "CASEBOX | Add Casebox assests."
       shell: "php {{ casebox_root_dir }}/bin/console casebox:min:assets --env={{ casebox_core }}"
 
