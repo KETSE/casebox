@@ -758,9 +758,6 @@
     - name: "CASEBOX | Clear cache."
       shell: "php {{ casebox_root_dir }}/bin/console ca:cl --env={{ casebox_core }}"
 
-    - name: "CASEBOX | Add Casebox assests."
-      shell: "php {{ casebox_root_dir }}/bin/console casebox:min:assets --env={{ casebox_core }}"
-
     - name: "CASEBOX | Set var/* directory write permissions."
       shell: "chmod 0777 -R {{ casebox_root_dir }}/var/{{ item }} -R"
       with_items:
@@ -774,9 +771,9 @@
       become: yes
 
     - name: "MYSQL | Restart MySQL server."
-      shell: "service mysql restart"
+      service: name=mysql state=restarted
       become: yes
 
     - name: "SOLR | Restart Solr webserver."
-      shell: "service solr restart"
+      service: name=solr state=restarted
       become: yes
