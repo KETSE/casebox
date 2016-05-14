@@ -382,7 +382,7 @@
       become: true
 
     - name: "UNOCONV | Restart unoconv."
-      service: name=unoconvd state=running
+      shell: '/etc/init.d/unoconvd restart'
       when: libreoffice_lock.stat.exists == False
       become: true
 
