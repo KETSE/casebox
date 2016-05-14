@@ -775,3 +775,5 @@
     - name: "SOLR | Restart Solr webserver."
       service: name=solr state=restarted
       become: yes
+
+    - pause: seconds=10
