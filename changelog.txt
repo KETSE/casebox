@@ -1,3 +1,7 @@
+CaseBox 1.9.606 (2016-05-18)
+==============================
+- #12710 Object field with "scope: project" shows all records
+
 CaseBox 1.9.605 (2016-05-04)
 ==============================
 - #12613 Suspected bug with entering a case from a specific user
