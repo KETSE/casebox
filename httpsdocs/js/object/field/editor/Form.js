@@ -232,6 +232,7 @@ Ext.define('CB.object.field.editor.Form', {
                                     ,this.data
                                     ,[
                                         'objectId'
+                                        ,'objectPid'
                                         ,'pidValue'
                                         ,'path'
                                         ,'objFields'

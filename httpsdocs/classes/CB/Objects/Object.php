@@ -1282,6 +1282,7 @@ class Object
                     if (!isset($data[$headerField['name']])) {
                         $rez[] = [
                             'name' => $headerField['name']
+                            ,'idx' => $maxInstancesIndex
                             ,'value' => null
                         ];
                     }

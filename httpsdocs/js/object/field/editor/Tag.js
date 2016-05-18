@@ -94,6 +94,7 @@ Ext.define('CB.object.field.editor.Tag', {
                                     ,d
                                     ,[
                                         'objectId'
+                                        ,'objectPid'
                                         ,'pidValue'
                                         ,'path'
                                         ,'objFields'
