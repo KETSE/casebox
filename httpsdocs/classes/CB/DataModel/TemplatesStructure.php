@@ -89,8 +89,18 @@ class TemplatesStructure extends Base
         return $rez;
     }
 
-    public static function copy($sourceId, $targetId, $parentTemplate)
+    public static function copy($sourceId, $targetId)
     {
+        //detect target template
+        $r = Tree::read($targetId);
+
+        $tsr = static::read($r['pid']);
+
+        $parentTemplate = empty($tsr)
+            ? $r['pid']
+            : $r['template_id'];
+
+        //copying record
         DB\dbQuery(
             'INSERT INTO `templates_structure`
                 (`id`
