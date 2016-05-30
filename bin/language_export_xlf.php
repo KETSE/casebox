@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /*
-    Export language translation to a CSV file:
+    Export language translation to a XLF file:
 
     Parameters:
     1st: filename
@@ -50,6 +50,9 @@ function exportTranslation($dbh)
         $id = $r['id'];
         $name = $r['name'];
         $info = $r['info'];
+        $group = ($r['type'] == 1)
+            ? 'messages'
+            : 'frontend';
 
         unset($r['id']);
         unset($r['pid']);
@@ -66,31 +69,39 @@ function exportTranslation($dbh)
                 ? $r['en']
                 : $v;
 
-            $rez[$k][] = '<trans-unit id="' . $id . '">
+            if (strip_tags($v) !== $v) {
+                $v = "<![CDATA[$v]]>";
+            } else {
+                $v = htmlspecialchars($v, ENT_XML1, 'UTF-8');
+            }
+
+            $rez[$group][$k][] = '<trans-unit id="' . $id . '">
                 <source>' . $name . '</source>
                 <target>' . $v . '</target>' .
                 (empty($info)
                     ? ''
                     : '
-                    <note> ' . $info . ' </note>'
+                    <note> ' . htmlspecialchars($info, ENT_XML1, 'UTF-8') . ' </note>'
                 )
                 .'
             </trans-unit>';
         }
     }
 
-    foreach ($rez as $k => &$v) {
-        $content = '<!-- app/resources/translations/' . $k . '.xlf -->
-<?xml version="1.0"?>
+    foreach ($rez as $group => $values) {
+        foreach ($values as $k => &$v) {
+            $content = //'<!-- app/resources/translations/' . $k . '.xlf -->
+'<?xml version="1.0" encoding="utf-8"?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file source-language="en" target-language="' . $k . '" datatype="plaintext" original="en.xlf">
+    <file source-language="en" target-language="' . $k . '" datatype="plaintext" original="' . $group . '.en.xlf">
         <body>
             ' . implode("\n            ", $v) . '
         </body>
     </file>
 </xliff>
 ';
-        file_put_contents($k . '.xlf', $content);
+            file_put_contents("$group." . $k . '.xlf', $content);
+        }
     }
     echo "\nLanguages exported\n";
 }

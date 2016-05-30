@@ -1,3 +1,7 @@
+CaseBox 1.9.607 (2016-05-30)
+==============================
+- #12739 Fields not visible after Copy&Paste from one Search template to another
+
 CaseBox 1.9.606 (2016-05-18)
 ==============================
 - #12710 Object field with "scope: project" shows all records
