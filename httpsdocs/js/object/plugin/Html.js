@@ -6,6 +6,17 @@ Ext.define('CB.object.plugin.Html', {
 
     ,title: 'Html'
 
+    ,initComponent: function(){
+        Ext.apply(this, {
+            listeners: {
+                scope: this
+                ,afterrender: this.onAfterRender
+            }
+        });
+
+        this.callParent(arguments);
+    }
+
     /**
      * method to be overriten in descendant classes
      * @param  array r
@@ -19,4 +30,35 @@ Ext.define('CB.object.plugin.Html', {
 
         this.setTitle(Ext.valueFrom(r.title), this.title);
     }
+
+    ,onAfterRender: function(){
+        var a = this.getEl().query('[data-action]');
+
+        Ext.each(
+            a
+            ,function(t){
+                Ext.get(t).addListener('click', this.onDataActionClick, this);
+            }
+            ,this
+        );
+    }
+
+    ,onDataActionClick: function(ev, el) {
+        el = Ext.get(el);
+        if(el) {
+            var action = el.getAttribute('data-action');
+
+            switch(action) {
+                case 'node-view':
+                    App.controller.openObjectWindowById(el.getAttribute('data-node-id'));
+                    break;
+
+                case 'select-path':
+                    App.openPath(el.getAttribute('data-path'));
+                    break;
+            }
+
+        }
+    }
+
 });

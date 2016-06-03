@@ -1,3 +1,7 @@
+CaseBox 1.9.608 (2016-06-03)
+==============================
+- #12783 Process 'data-action', 'data-params' in objectHtmlPlugin
+
 CaseBox 1.9.607 (2016-05-30)
 ==============================
 - #12739 Fields not visible after Copy&Paste from one Search template to another
