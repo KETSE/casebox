@@ -34,7 +34,7 @@
     "kwi/urllinker": "@dev"
   },
   "require-dev": {
-    "caseboxdev/core-bundle": "@dev",
+    "caseboxdev/core-bundle": "dev-dev-ext6",
     "caseboxdev/rpc-bundle": "@dev",
     "caseboxdev/rest-bundle": "@dev",
     "phpunit/phpunit": "^5.2.12",
