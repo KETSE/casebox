@@ -104,6 +104,16 @@ class Files
             ,'name' => $data['name']
             ,'type' => $data['type']
         );
+
+        // $['data'] is the contents of the file received, you can update it before it's save in CB
+        //
+        $params = [
+            'id' => $p['id'],            // file id
+            'fileData' => $data,         // CB fileData
+            'content'  => &$p['data']    // pointer to content
+        ];
+        \CB\fireEvent('beforeFileSaveContent', $params);
+
         file_put_contents($content['tmp_name'], $p['data']);
         $content['size'] = filesize($content['tmp_name']);
 
@@ -985,7 +995,7 @@ class Files
         if (!empty($preview)) {
             DM\FilePreviews::update(
                 array(
-                    'id' => $content['id']
+                    'id' => $file['content_id']
                     ,'filename' => $rez['filename']
                 )
             );
@@ -993,7 +1003,7 @@ class Files
         } else {
             DM\FilePreviews::create(
                 array(
-                    'id' => $content['id']
+                    'id' => $file['content_id']
                     ,'filename' => $rez['filename']
                 )
             );
