@@ -985,7 +985,7 @@ class Files
         if (!empty($preview)) {
             DM\FilePreviews::update(
                 array(
-                    'id' => $content['id']
+                    'id' => $file['content_id']
                     ,'filename' => $rez['filename']
                 )
             );
@@ -993,7 +993,7 @@ class Files
         } else {
             DM\FilePreviews::create(
                 array(
-                    'id' => $content['id']
+                    'id' => $file['content_id']
                     ,'filename' => $rez['filename']
                 )
             );
