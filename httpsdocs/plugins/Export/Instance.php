@@ -61,8 +61,13 @@ class Instance
             foreach ($results['data'] as $r) {
                 $record = array();
                 foreach ($columns as $colName => $col) {
-
-                    if (@$col['xtype'] == 'datecolumn') {
+                    $colType = empty($col['xtype'])
+                        ? (empty($col['type'])
+                            ? ''
+                            : $col['type']
+                            )
+                        : $col['xtype'];
+                    if (in_array($colType, ['datecolumn', 'datetime', 'date'])) {
                         $value = Util\dateISOToMysql(@$r[$colName]);
 
                         if (!empty($col['format'])) {
