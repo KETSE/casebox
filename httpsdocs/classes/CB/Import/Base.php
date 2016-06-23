@@ -265,6 +265,10 @@ class Base
             }
             if (!empty($v['cfg'])) {
                 $data['cfg'] = $v['cfg'];
+                //replace previous template id placeholders if any
+                foreach ($this->templateIds as $tplKey => $tplId) {
+                    $data['cfg'] = str_replace('{template_'.$tplKey.'}', $tplId, $data['cfg']);
+                }
             }
             if (!empty($v['title_template'])) {
                 $data['title_template'] = $v['title_template'];
@@ -321,16 +325,23 @@ class Base
                     ? 10 * $i++
                     : $fv['order'];
 
-                $data = array(
-                    'name' => $fn
-                    ,'_title' => $fn
-                    ,'en' => $name
-                    ,'type' => $type
-                    ,'order' => $order
+                $data = array_merge(
+                    [
+                        'name' => $fn,
+                        '_title' => $fn,
+                        'en' => $name,
+                        'type' => $type,
+                        'order' => $order
+                    ],
+                    empty($fv['data']) ? [] : $fv['data']
                 );
 
                 if (!empty($fv['ru'])) {
                     $data['ru'] = $fv['ru'];
+                }
+
+                if (!empty($fv['hy'])) {
+                    $data['hy'] = $fv['hy'];
                 }
 
                 if (!empty($fv['solr_column_name'])) {
@@ -338,7 +349,10 @@ class Base
                 }
 
                 $cfg = empty($fv['cfg'])
-                    ? array()
+                    ? (empty($fv['data']['cfg'])
+                            ? []
+                            : $fv['data']['cfg']
+                      )
                     : $fv['cfg'];
 
                 if (!empty($cfg['savedScope'])) {
