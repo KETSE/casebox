@@ -1,3 +1,7 @@
+CaseBox 1.9.609 (2016-06-23)
+==============================
+#12940 - BUG when creating a new case, case folders show empty
+
 CaseBox 1.9.608 (2016-06-03)
 ==============================
 - #12783 Process 'data-action', 'data-params' in objectHtmlPlugin

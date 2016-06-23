@@ -1,8 +1,8 @@
 <?php
 namespace SystemFolders;
 
+use CB\DataModel as DM;
 use CB\DB;
-use \CB\Browser;
 use CB\Util;
 
 class Listeners
@@ -23,6 +23,7 @@ class Listeners
         }
 
         $templateData = $template->getData();
+
         if (empty($templateData['cfg']['system_folders'])) {
             return;
         }
@@ -33,31 +34,26 @@ class Listeners
             return;
         }
 
-        $p = array(
-            'sourceIds' => array()
-            ,'targetId' => $o->getData()['id']
-        );
+        $pid = $o->getData()['id'];
+        $copyIds = [];
 
-        $browserActionsClass = new Browser\Actions();
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE pid in ('.implode(',', $folderIds).')
-                AND dstatus = 0'
-        );
+        $res = DB\dbQuery('SELECT id FROM tree WHERE pid in (' . implode(',', $folderIds). ') AND dstatus = 0');
         while ($r = $res->fetch_assoc()) {
-            $p['sourceIds'][] = $r['id'];
+            $copyIds[] = ['id' => $r['id'], 'pid' => $pid];
         }
         $res->close();
 
-        // $browserActionsClass->copy($p);
+        while (!empty($copyIds)) {
+            $r = array_shift($copyIds);
+            $newId = DM\Tree::copy($r['id'], $r['pid']);
+            DM\Objects::copy($r['id'], $newId);
 
-        $browserActionsClass->objectsClass = new \CB\Objects();
-
-        $browserActionsClass->doRecursiveAction(
-            'copy',
-            $p['sourceIds'],
-            $p['targetId']
-        );
+            //collect children of copied element and add them to the end
+            $res = DB\dbQuery('SELECT id FROM tree WHERE pid = $1 AND dstatus = 0', $r['id']);
+            while ($r = $res->fetch_assoc()) {
+                $copyIds[] = ['id' => $r['id'], 'pid' => $newId];
+            }
+            $res->close();
+        }
     }
 }
