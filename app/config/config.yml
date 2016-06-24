@@ -15,15 +15,14 @@ framework:
     form:            ~
     csrf_protection: ~
     validation: { enable_annotations: true }
-    #serializer: { enable_annotations: true }
     templating:
         engines: ['twig']
-        #assets_version: SomeVersionScheme
     default_locale: "%locale%"
     trusted_hosts: ~
     trusted_proxies: ~
     session:
         handler_id: ~
+        storage_id: 'casebox_core.service.domain_session_storage'
         save_path: "%kernel.root_dir%/../var/sessions/%kernel.environment%"
     fragments: ~
     http_method_override: true
