@@ -246,8 +246,8 @@ Ext.define('CB.browser.view.Pivot',{
         if(this.chartData) {
             if(this.selectedFacets) {
                 selectedValues = {
-                    xfield: this.selectedFacets[0]
-                    ,yfield: this.selectedFacets[1]
+                    xField: this.selectedFacets[0]
+                    ,yField: this.selectedFacets[1]
                 };
             }
 

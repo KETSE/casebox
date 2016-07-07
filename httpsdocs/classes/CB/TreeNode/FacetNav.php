@@ -24,6 +24,8 @@ class FacetNav extends Query
                     break;
 
                 case 'varchar':
+                case 'int':
+                case 'integer':
                     $rez = $id;
                     break;
 

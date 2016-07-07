@@ -1253,40 +1253,10 @@ class Object
 
         $template = $this->getTemplate();
         $templateData = $template->getData();
-        $headers = $templateData['headers'];
 
         foreach ($data as $fieldName => $fieldValue) {
             if ($this->isFieldValue($fieldValue)) {
                 $fieldValue = array($fieldValue);
-            }
-
-            $templateField = $template->getField($fieldName);
-            $level = $templateField['level'];
-
-            if ($templateField['type'] == 'H') {
-                $prevHeaderField = $templateField;
-
-            } else {
-                $headerField = (empty($headers[$fieldName]))
-                    ? false
-                    : $headers[$fieldName];
-
-                if (!empty($headerField) &&
-                    (
-                        empty($prevHeaderField) ||
-                        ($headerField['name'] !== $prevHeaderField['name'])
-                    )
-                ) {
-                    $prevHeaderField = $headerField;
-
-                    if (!isset($data[$headerField['name']])) {
-                        $rez[] = [
-                            'name' => $headerField['name']
-                            ,'idx' => $maxInstancesIndex
-                            ,'value' => null
-                        ];
-                    }
-                }
             }
 
             $idx = $maxInstancesIndex;
@@ -1309,6 +1279,47 @@ class Object
 
         if ($sorted) {
             usort($rez, array($this, 'fieldsArraySorter'));
+
+            //add headers if not present (notice its only for sorted = true)
+            $prevHeaderField = false;
+            $headers = $templateData['headers'];
+
+            $i=0;
+            while ($i < sizeof($rez)) {
+                $fn = $rez[$i]['name'];
+                $templateField = $template->getField($fn);
+
+                if ($templateField['type'] == 'H') {
+                    $prevHeaderField = $templateField;
+
+                } else {
+                    $headerField = (empty($headers[$fn]))
+                        ? false
+                        : $headers[$fn];
+                    if (!empty($headerField) &&
+                        (
+                            empty($prevHeaderField) ||
+                            ($headerField['name'] !== $prevHeaderField['name'])
+                        )
+                    ) {
+                        $prevHeaderField = $headerField;
+
+                        array_splice(
+                            $rez,
+                            $i,
+                            0,
+                            [
+                                [
+                                    'name' => $headerField['name'],
+                                    'idx' => $maxInstancesIndex,
+                                    'value' => null
+                                ]
+                            ]
+                        );
+                    }
+                }
+                $i++;
+            }
         }
 
         $sortedRez = array();
@@ -1782,11 +1793,7 @@ class Object
                 continue;
             }
 
-            if (empty($tf['cfg'])) {
-                $group = 'body';
-            } elseif (@$tf['cfg']['showIn'] == 'top') {
-                $group = 'body'; //top
-            } elseif (@$tf['cfg']['showIn'] == 'tabsheet') {
+            if (@$tf['cfg']['editMode'] == 'standalone') {
                 $group = 'bottom';
             } else {
                 $group = 'body';

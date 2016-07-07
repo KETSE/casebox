@@ -4,6 +4,7 @@ namespace SystemFolders;
 use CB\DataModel as DM;
 use CB\DB;
 use CB\Util;
+use CB\User;
 
 class Listeners
 {
@@ -34,6 +35,7 @@ class Listeners
             return;
         }
 
+        $ownerId = User::getId();
         $pid = $o->getData()['id'];
         $copyIds = [];
 
@@ -45,7 +47,7 @@ class Listeners
 
         while (!empty($copyIds)) {
             $r = array_shift($copyIds);
-            $newId = DM\Tree::copy($r['id'], $r['pid']);
+            $newId = DM\Tree::copy($r['id'], $r['pid'], $ownerId);
             DM\Objects::copy($r['id'], $newId);
 
             //collect children of copied element and add them to the end
