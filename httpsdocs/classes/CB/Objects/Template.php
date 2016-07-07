@@ -432,6 +432,11 @@ class Template extends Object
                         $obj = &$objects[$id];
 
                         $d = $obj->getData();
+                        //skip displaying deleted items
+                        if (!empty($d['dstatus'])) {
+                            continue;
+                        }
+
                         $label = $obj->getHtmlSafeName();
 
                         $pids = $d['pids'];

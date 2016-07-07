@@ -831,6 +831,7 @@ class Search extends Solr\Client
                         'fl' => $fieldList
                         ,'facet' => false
                         ,'skipSecurity' => true
+                        ,'rows' => 200
                         ,'fq' => array(
                             'id:(' . implode(' OR ', $chunk). ')'
                         )

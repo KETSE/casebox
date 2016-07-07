@@ -1,3 +1,10 @@
+CaseBox 1.9.611 (2016-07-07)
+==============================
+- #13011 Deleted thesauri items are shown in object preview
+- #13043 Not all records are shown in EditMode in objects field
+- #13045 Integer Facet interpreted as Object in BreadCrumb
+- #13089 BUG with default folder ownership / Casebox
+
 CaseBox 1.9.610 (2016-07-07)
 ==============================
 - fixed headers doubling in preview
