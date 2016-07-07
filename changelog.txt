@@ -1,3 +1,10 @@
+CaseBox 1.9.610 (2016-07-07)
+==============================
+- fixed headers doubling in preview
+- custom "uid" field not displayed correctly in DC because of built-in uid
+- validating standalone fields
+- replace shoIn = tabsheet to editMode = standalone
+
 CaseBox 1.9.609 (2016-06-23)
 ==============================
 #12940 - BUG when creating a new case, case folders show empty

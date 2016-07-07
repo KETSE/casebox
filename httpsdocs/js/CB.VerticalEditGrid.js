@@ -568,15 +568,8 @@ Ext.define('CB.VerticalEditGrid', {
         }
 
         return (
-            (r.get('type') !== 'G')
-            &&
-            (
-                (r.get('cfg').showIn !== 'top') ||
-                ((r.get('cfg').showIn === 'top') &&
-                    this.includeTopFields
-                )
-            ) &&
-            (r.get('cfg').showIn !== 'tabsheet') &&
+            (r.get('type') !== 'G') &&
+            (r.get('cfg').editMode !== 'standalone') &&
             (node.data.visible !== false)
         );
     }
@@ -805,14 +798,7 @@ Ext.define('CB.VerticalEditGrid', {
             var validator = tr.get('cfg').validator;
 
             if(!Ext.isEmpty(validator)) {
-                if(!Ext.isDefined(CB.Validators[validator])) {
-                    plog('Undefined field validator: ' + validator);
-
-                } else {
-                    //empty values are considered valid by default
-                    node.data.valid = Ext.isEmpty(context.value) || CB.Validators[validator](context.value);
-                    context.record.set('valid', node.data.valid);
-                }
+                context.record.set('valid', CB.Validators.isValidValue(validator, context.value) === true);
             }
 
             if(context.value != context.originalValue){

@@ -179,7 +179,6 @@ Ext.define('CB.object.edit.Form', {
                     ,autoHeight: true
                     ,hidden: true
                     ,refOwner: this
-                    ,includeTopFields: true
                     ,stateId: 'oevg' //object edit vertical grid
                     ,autoExpandColumn: 'value'
                     ,scrollable: false
@@ -225,7 +224,7 @@ Ext.define('CB.object.edit.Form', {
             var fields = [];
             this.grid.templateStore.each(
                 function(r) {
-                    if(r.get('cfg').showIn === 'tabsheet') {
+                    if(r.get('cfg').editMode === 'standalone') {
                         var cfg = {
                             border: false
                             ,title: r.get('title')

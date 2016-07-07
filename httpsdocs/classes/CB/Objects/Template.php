@@ -329,231 +329,231 @@ class Template extends Object
         }
 
         /*check if field is not rezerved field for usernames (cid, oid, uid, did)*/
-        if (!empty($field['name']) && in_array($field['name'], array('cid', 'oid', 'uid', 'did'))) {
-            $value = Util\toNumericArray($value);
-            for ($i=0; $i < sizeof($value); $i++) {
-                $value[$i] = User::getDisplayName($value[$i]);
-            }
-            $value = implode(', ', $value);
+        // if (!empty($field['name']) && in_array($field['name'], array('cid', 'oid', 'uid', 'did'))) {
+        //     $value = Util\toNumericArray($value);
+        //     for ($i=0; $i < sizeof($value); $i++) {
+        //         $value[$i] = User::getDisplayName($value[$i]);
+        //     }
+        //     $value = implode(', ', $value);
 
-        } else {
-            switch ($field['type']) {
-                case 'boolean':
-                case 'checkbox':
-                    $value = empty($value)
-                        ? ''
-                        : (($value) < 0
-                            ? L\get('no')
-                            : L\get('yes')
-                        );
+        // } else {
+        switch ($field['type']) {
+            case 'boolean':
+            case 'checkbox':
+                $value = empty($value)
+                    ? ''
+                    : (($value) < 0
+                        ? L\get('no')
+                        : L\get('yes')
+                    );
 
-                    break;
+                break;
 
-                case '_sex':
-                    switch ($value) {
-                        case 'm':
-                            $value = L\get('male');
-                            break;
-                        case 'f':
-                            $value = L\get('female');
-                            break;
-                        default:
-                            $value = '';
-                    }
-                    break;
-
-                case '_language':
-                    @$value = @\CB\Config::get('language_settings')[\CB\Config::get('languages')[$value -1]][0];
-                    break;
-
-                case 'combo':
-
-                case '_objects':
-                    if (empty($value)) {
+            case '_sex':
+                switch ($value) {
+                    case 'm':
+                        $value = L\get('male');
+                        break;
+                    case 'f':
+                        $value = L\get('female');
+                        break;
+                    default:
                         $value = '';
-                        break;
+                }
+                break;
+
+            case '_language':
+                @$value = @\CB\Config::get('language_settings')[\CB\Config::get('languages')[$value -1]][0];
+                break;
+
+            case 'combo':
+
+            case '_objects':
+                if (empty($value)) {
+                    $value = '';
+                    break;
+                }
+                $ids = Util\toNumericArray($value);
+                if (empty($ids)) {
+                    if (empty($field['cfg']['source']) || !is_array($field['cfg']['source'])) {
+                        $value = '';
                     }
-                    $ids = Util\toNumericArray($value);
-                    if (empty($ids)) {
-                        if (empty($field['cfg']['source']) || !is_array($field['cfg']['source'])) {
-                            $value = '';
+                    break;
+                }
+
+                $value = array();
+
+                if (in_array(
+                    @$field['cfg']['source'],
+                    array(
+                        'users'
+                        ,'groups'
+                        ,'usersgroups'
+                    )
+                )) {
+
+                    $udp = UsersGroups::getDisplayData($ids);
+
+                    foreach ($ids as $id) {
+                        if (empty($udp[$id])) {
+                            continue;
                         }
-                        break;
-                    }
+                        $r = &$udp[$id];
 
-                    $value = array();
+                        $label = @htmlspecialchars(Util\coalesce($r['title'], $r['name']), ENT_COMPAT);
 
-                    if (in_array(
-                        @$field['cfg']['source'],
-                        array(
-                            'users'
-                            ,'groups'
-                            ,'usersgroups'
-                        )
-                    )) {
-
-                        $udp = UsersGroups::getDisplayData($ids);
-
-                        foreach ($ids as $id) {
-                            if (empty($udp[$id])) {
-                                continue;
-                            }
-                            $r = &$udp[$id];
-
-                            $label = @htmlspecialchars(Util\coalesce($r['title'], $r['name']), ENT_COMPAT);
-
-                            if ($html) {
-                                switch (@$field['cfg']['renderer']) {
-                                    case 'listGreenIcons':
-                                        $label = '<li class="icon-padding icon-element">' . $label . '</li>';
-                                        break;
-
-                                    // case 'listObjIcons':
-                                    default:
-                                        $icon = empty($r['iconCls'])
-                                            ? 'icon-none'
-                                            : $r['iconCls'];
-
-                                        $label = '<li class="icon-padding '.$icon.'">'.$label.'</li>';
-                                        break;
-                                }
-                            }
-
-                            $value[] = $label;
-                        }
-
-                    } else {
-                        $objects = \CB\Objects::getCachedObjects($ids);
-                        foreach ($ids as $id) {
-                            if (empty($objects[$id])) {
-                                continue;
-                            }
-
-                            $obj = &$objects[$id];
-
-                            $d = $obj->getData();
-                            $label = $obj->getHtmlSafeName();
-
-                            $pids = $d['pids'];
-
-                            if ($html && !empty($pids)) {
-                                $pids = str_replace(',', '/', $pids);
-                                $linkType = empty($field['cfg']['linkType'])
-                                    ? ''
-                                    : 'link-type-' . $field['cfg']['linkType'];
-
-                                $label = '<a class="click ' . $linkType . '" template_id="'.$d['template_id'].'" path="'.$pids.'" nid="'.$id.'">'.$label.'</a>';
-                            }
-
+                        if ($html) {
                             switch (@$field['cfg']['renderer']) {
                                 case 'listGreenIcons':
-                                    $value[] =  $html
-                                        ? '<li class="icon-padding icon-element">'.$label.'</li>'
-                                        : $label;
+                                    $label = '<li class="icon-padding icon-element">' . $label . '</li>';
                                     break;
+
                                 // case 'listObjIcons':
                                 default:
-                                    $icon = \CB\Browser::getIcon($d);
+                                    $icon = empty($r['iconCls'])
+                                        ? 'icon-none'
+                                        : $r['iconCls'];
 
-                                    if (empty($icon)) {
-                                        $icon = 'icon-none';
-                                    }
-
-                                    $value[] = $html
-                                        ? '<li class="icon-padding '.$icon.'">'.$label.'</li>'
-                                        : $label;
+                                    $label = '<li class="icon-padding '.$icon.'">'.$label.'</li>';
                                     break;
                             }
                         }
+
+                        $value[] = $label;
                     }
 
-                    $value = $html
-                        ? '<ul class="clean">'.implode('', $value).'</ul>'
-                        : implode(', ', $value);
-                    break;
-
-                case '_fieldTypesCombo':
-                    $value = L\get(@static::$fieldTypeNames[$value]);
-                    break;
-
-                case 'date':
-                    $value = Util\formatMysqlDate(Util\dateISOToMysql($value));
-                    break;
-
-                case 'datetime':
-                    $value = Util\UTCTimeToUserTimezone($value);
-
-                    break;
-
-                case 'time':
-                    if (empty($value)) {
-                        continue;
-                    }
-
-                    $format = empty($field['format'])
-                        ? 'H:i'
-                        : $field['format'];
-
-                    if (is_numeric($value)) {
-                        $s = $value % 60;
-                        $value = floor($value / 60);
-                        $m = $value % 60;
-                        $value = floor($value / 60);
-                        if (strlen($value) < 2) {
-                            $value = '0' . $value;
-                        }
-                        if (strlen($m) < 2) {
-                            $m = '0' . $m;
-                        }
-                        $value .= ':' . $m;
-                        if (!empty($s)) {
-                            if (strlen($s) < 2) {
-                                $s = '0' . $s;
-                            }
-                            $value .= ':' . $s;
+                } else {
+                    $objects = \CB\Objects::getCachedObjects($ids);
+                    foreach ($ids as $id) {
+                        if (empty($objects[$id])) {
+                            continue;
                         }
 
-                    } else {
-                        $date = \DateTime::createFromFormat($format, $value);
+                        $obj = &$objects[$id];
 
-                        if (is_object($date)) {
-                            $value = $date->format($format);
+                        $d = $obj->getData();
+                        $label = $obj->getHtmlSafeName();
+
+                        $pids = $d['pids'];
+
+                        if ($html && !empty($pids)) {
+                            $pids = str_replace(',', '/', $pids);
+                            $linkType = empty($field['cfg']['linkType'])
+                                ? ''
+                                : 'link-type-' . $field['cfg']['linkType'];
+
+                            $label = '<a class="click ' . $linkType . '" template_id="'.$d['template_id'].'" path="'.$pids.'" nid="'.$id.'">'.$label.'</a>';
+                        }
+
+                        switch (@$field['cfg']['renderer']) {
+                            case 'listGreenIcons':
+                                $value[] =  $html
+                                    ? '<li class="icon-padding icon-element">'.$label.'</li>'
+                                    : $label;
+                                break;
+                            // case 'listObjIcons':
+                            default:
+                                $icon = \CB\Browser::getIcon($d);
+
+                                if (empty($icon)) {
+                                    $icon = 'icon-none';
+                                }
+
+                                $value[] = $html
+                                    ? '<li class="icon-padding '.$icon.'">'.$label.'</li>'
+                                    : $label;
+                                break;
                         }
                     }
+                }
 
-                    break;
+                $value = $html
+                    ? '<ul class="clean">'.implode('', $value).'</ul>'
+                    : implode(', ', $value);
+                break;
 
-                case 'html':
+            case '_fieldTypesCombo':
+                $value = L\get(@static::$fieldTypeNames[$value]);
+                break;
+
+            case 'date':
+                $value = Util\formatMysqlDate(Util\dateISOToMysql($value));
+                break;
+
+            case 'datetime':
+                $value = Util\UTCTimeToUserTimezone($value);
+
+                break;
+
+            case 'time':
+                if (empty($value)) {
+                    continue;
+                }
+
+                $format = empty($field['format'])
+                    ? 'H:i'
+                    : $field['format'];
+
+                if (is_numeric($value)) {
+                    $s = $value % 60;
+                    $value = floor($value / 60);
+                    $m = $value % 60;
+                    $value = floor($value / 60);
+                    if (strlen($value) < 2) {
+                        $value = '0' . $value;
+                    }
+                    if (strlen($m) < 2) {
+                        $m = '0' . $m;
+                    }
+                    $value .= ':' . $m;
+                    if (!empty($s)) {
+                        if (strlen($s) < 2) {
+                            $s = '0' . $s;
+                        }
+                        $value .= ':' . $s;
+                    }
+
+                } else {
+                    $date = \DateTime::createFromFormat($format, $value);
+
+                    if (is_object($date)) {
+                        $value = $date->format($format);
+                    }
+                }
+
+                break;
+
+            case 'html':
+                $cacheValue = false;
+                // $value = trim(strip_tags($value));
+                // $value = nl2br($value);
+                break;
+            case 'varchar':
+            case 'memo':
+            case 'text':
+                $cacheValue = false;
+
+                $renderers = '';
+                if (!empty($field['cfg']['linkRenderers'])) {
+                    $renderers = $field['cfg']['linkRenderers'];
+                } elseif (!empty($field['cfg']['text_renderer'])) {
+                    $renderers = $field['cfg']['text_renderer'];
+                }
+
+                $value = empty($renderers)
+                    ? nl2br(htmlspecialchars($value, ENT_COMPAT))
+                    : nl2br(Comment::processAndFormatMessage($value), $renderers);
+                break;
+
+            default:
+                if (is_array($value)) {
                     $cacheValue = false;
-                    // $value = trim(strip_tags($value));
-                    // $value = nl2br($value);
-                    break;
-                case 'varchar':
-                case 'memo':
-                case 'text':
-                    $cacheValue = false;
-
-                    $renderers = '';
-                    if (!empty($field['cfg']['linkRenderers'])) {
-                        $renderers = $field['cfg']['linkRenderers'];
-                    } elseif (!empty($field['cfg']['text_renderer'])) {
-                        $renderers = $field['cfg']['text_renderer'];
-                    }
-
-                    $value = empty($renderers)
-                        ? nl2br(htmlspecialchars($value, ENT_COMPAT))
-                        : nl2br(Comment::processAndFormatMessage($value), $renderers);
-                    break;
-
-                default:
-                    if (is_array($value)) {
-                        $cacheValue = false;
-                        $value = Util\jsonEncode($value);
-                    } else {
-                        $value = htmlspecialchars($value, ENT_COMPAT);
-                    }
-            }
+                    $value = Util\jsonEncode($value);
+                } else {
+                    $value = htmlspecialchars($value, ENT_COMPAT);
+                }
         }
+        // }
 
         if ($showInfo) {
             $value .= ' &nbsp; <span style="color: gray">' . Util\adjustTextForDisplay($info) . '</span>';
