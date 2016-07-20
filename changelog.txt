@@ -1,3 +1,7 @@
+CaseBox 1.9.613 (2016-07-20)
+==============================
+- #13105 Add "by month" as quick filter to pivot tables and search templates for consultation
+
 CaseBox 1.9.612 (2016-07-20)
 ==============================
 - #13159 Bug: Changing parameters in pivot table leads to empty tables
