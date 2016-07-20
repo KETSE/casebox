@@ -1351,7 +1351,7 @@ function initApp() {
                 });
 
                 if(!Ext.isEmpty(e.grid)) {
-                    w.on('hide', e.grid.gainFocus, e.grid);
+                    rez.on('hide', e.grid.gainFocus, e.grid);
                 }
                 rez.show();
                 break;

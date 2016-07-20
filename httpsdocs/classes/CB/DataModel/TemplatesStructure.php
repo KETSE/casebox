@@ -82,11 +82,66 @@ class TemplatesStructure extends Base
 
             $r['title'] = Util\detectTitle($r);
 
-            $rez[] = $r;
+            $rez[] = static::replaceBackwardCompatibleFieldOptions($r);
         }
         $res->close();
 
         return $rez;
+    }
+
+    public static function replaceBackwardCompatibleFieldOptions($f)
+    {
+        if (!empty($f['cfg']['showIn'])) {
+            if ($f['cfg']['showIn'] == 'tabsheet') {
+                $f['cfg']['editMode'] = 'standalone';
+            }
+
+            unset($f['cfg']['showIn']);
+        }
+
+        /*switch ($f['type']) {
+            case 'checkbox':
+                $f['type'] = 'combo';
+                $f['cfg']['source'] = 'yesno';
+                break;
+
+            case 'iconcombo':
+                $f['type'] = 'combo';
+                $f['cfg']['source'] = 'templatesIconSet';
+                break;
+
+            case '_language':
+                $f['type'] = 'combo';
+                $f['cfg']['source'] = 'languages';
+                break;
+
+            case '_sex':
+                $f['type'] = 'combo';
+                $f['cfg']['source'] = 'sex';
+                break;
+
+            case '_short_date_format':
+                $f['type'] = 'combo';
+                $f['cfg']['source'] = 'shortDateFormats';
+                break;
+
+            case '_fieldTypesCombo':
+                $f['type'] = 'combo';
+                $f['cfg']['source'] = 'fieldTypes';
+                break;
+
+            case '_templateTypesCombo':
+                $f['type'] = 'combo';
+                $f['cfg']['source'] = 'templateTypes';
+                break;
+
+            case 'timeunits':
+                $f['type'] = 'combo';
+                $f['cfg']['source'] = 'timeUnits';
+                break;
+        }/**/
+
+        return $f;
     }
 
     public static function copy($sourceId, $targetId)
