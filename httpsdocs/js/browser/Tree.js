@@ -651,13 +651,18 @@ Ext.define('CB.browser.Tree', {
     }
 
     ,applyState: function (state) {
-        if(!this.rendered || Ext.isEmpty(state)){
+        if(!this.rendered){
             return;
         }
 
-        if(!Ext.isEmpty(state.paths)) {
-            this.expandPaths(state.paths);
-        }
+        state = Ext.valueFrom(state, {});
+
+        var expandPath = Ext.valueFrom(
+            state.paths
+            ,'/' +  this.getRootNode().data.nid
+        );
+
+        this.expandPaths(expandPath);
 
         if(!Ext.isEmpty(state.selected) && (state.selected !== '/0')) {
             this.selectPath(

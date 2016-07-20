@@ -987,6 +987,13 @@ border-top: 0;
     color: gray;
 }
 
+/*4. Editing Text inline in grid should not visually move the field/value/**/
+pre {
+    margin: 0;
+    font-family: inherit;
+    line-height: 20px;
+}
+
 .numbersButton .x-btn-inner {
   display: block;
   position: absolute;

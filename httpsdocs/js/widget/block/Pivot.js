@@ -28,7 +28,7 @@ Ext.define('CB.widget.block.Pivot', {
         }
 
         if(data.pivot) {
-            var key = ''
+            var key = rez.xField + ',' + rez.yField
                 ,arr;
             if(Ext.isEmpty(rez.xField) || Ext.isEmpty(rez.yField)) {
                 //just get the facets the server returned the pivot for

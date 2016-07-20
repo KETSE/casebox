@@ -74,13 +74,13 @@ $data = array(
     ,array('_language', L\get('ftLanguage')) //Language
     ,array('memo', L\get('ftMemo')) //Memo
     ,array('_objects', L\get('ftObjects')) //Objects
-    // ,array('_sex', L\get('ftSex')) //Sex
+    ,array('_sex', L\get('ftSex')) //Sex
     ,array('_short_date_format', L\get('ftShortDateFormat')) //Short date format combo
     ,array('_fieldTypesCombo', L\get('ftFieldTypesCombo')) //Template field types combo
     ,array('_templateTypesCombo', L\get('ftTemplateTypesCombo')) //Template types combo
     ,array('text', L\get('ftText')) //Text
     ,array('time', L\get('ftTime')) //Time
-    // ,array('timeunits', L\get('ftTimeunits')) //Time units
+    ,array('timeunits', L\get('ftTimeunits')) //Time units
     ,array('varchar', L\get('ftVarchar')) //Varchar
 );
 ?>
