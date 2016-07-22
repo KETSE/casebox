@@ -1,3 +1,7 @@
+CaseBox 1.9.614 (2016-07-22)
+==============================
+- #13197 If a file can't be uploaded due to file permissions, CB is blocked
+
 CaseBox 1.9.613 (2016-07-20)
 ==============================
 - #13105 Add "by month" as quick filter to pivot tables and search templates for consultation
