@@ -163,7 +163,6 @@ class Files
             header('Pragma: public');
             header('Content-Length: '.$content['size']);
             readfile(Config::get('files_dir') . $content['path'] . DIRECTORY_SEPARATOR . $content['id']);
-
         } else {
             throw new \Exception(L\get('Object_not_found'));
         }
@@ -347,7 +346,6 @@ class Files
                         array($agoTime, $user),
                         $data['text']
                     );
-
                 }
 
                 /* suggested new filename */
@@ -360,7 +358,8 @@ class Files
                 /* end of suggested new filename */
                 break;
 
-            default: // multiple files match
+            default:
+                // multiple files match
 
                 break;
         }
@@ -379,9 +378,11 @@ class Files
             if (!empty($id)) {
                 $r = DM\FilesContent::read($id);
                 //give affirmative result only if the correspondig file content exists
-                $p[$k] = file_exists($filesDir . $r['path'] . DIRECTORY_SEPARATOR . $r['id'])
-                    ? $r['id']
-                    : null;
+                if (file_exists($filesDir . $r['path'] . DIRECTORY_SEPARATOR . $r['id'])) {
+                    $p[$k] = $r['id'];
+                } else {
+                    $p[$k] = null;
+                }
             } else {
                 unset($p[$k]);
             }
@@ -523,7 +524,6 @@ class Files
 
         return $rez;
     }
-
 
     public function saveUploadParams($p)
     {
@@ -686,7 +686,6 @@ class Files
 
             if (!empty($r)) {
                 $pid = $r['id'];
-
             } else {
                 $pid = DM\Tree::create(
                     array(
@@ -728,13 +727,15 @@ class Files
         }
         $md5 = $this->getFileMD5($f);
 
+        $replaceNotExistingContentId = false;
         $contentId = DM\FilesContent::toId($md5, 'md5');
         if (!empty($contentId)) {
             $content = DM\FilesContent::read($contentId);
             if (file_exists($filePath . $content['path'] . '/' . $content['id'])) {
                 $f['content_id'] = $content['id'];
+            } else {
+                $replaceNotExistingContentId = $contentId;
             }
-
         }
 
         if (!empty($f['content_id'])) {
@@ -754,20 +755,27 @@ class Files
             ? date('Y/m/d', filemtime($f['tmp_name']))
             : date('Y/m/d', $date);
 
-        $f['content_id'] = DM\FilesContent::create(
-            array(
-                'size' => $f['size']
-                ,'type' => $f['type']
-                ,'path' => $storage_subpath
-                ,'md5' => $md5
-            )
-        );
+        $data = [
+            'size' => $f['size']
+            ,'type' => $f['type']
+            ,'path' => $storage_subpath
+            ,'md5' => $md5
+        ];
+
+        if (!$replaceNotExistingContentId) {
+            $f['content_id'] = DM\FilesContent::create($data);
+        } else {
+            $data['id'] = $replaceNotExistingContentId;
+            DM\FilesContent::update($data);
+            $f['content_id'] = $data['id'];
+        }
 
         @mkdir($filePath . $storage_subpath . '/', 0777, true);
 
         if (copy($f['tmp_name'], $filePath . $storage_subpath . '/' . $f['content_id']) !== true) {
             throw new \Exception("Error copying file to destination folder, possible permission problems.", 1);
         }
+
 
         @unlink($f['tmp_name']);
 
@@ -831,7 +839,6 @@ class Files
                     return array(
                         'html' => L\get('ErrorCreatingPreview')
                     );
-
             }
         }
 
@@ -896,7 +903,6 @@ class Files
             case 'html':
             case 'dhtml':
             case 'xhtml':
-
                 require_once LIB_DIR.'PreviewExtractor.php';
                 $content = file_get_contents($fn);
                 $pe = new PreviewExtractor();
@@ -921,7 +927,6 @@ class Files
             case 'ini':
             case 'sys':
             case 'sql':
-
                 file_put_contents(
                     $previewFilename,
                     '<pre>' .Util\adjustTextForDisplay(file_get_contents($fn)).'<pre>'
@@ -999,7 +1004,6 @@ class Files
                     ,'filename' => $rez['filename']
                 )
             );
-
         } else {
             DM\FilePreviews::create(
                 array(
