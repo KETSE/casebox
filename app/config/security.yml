@@ -12,8 +12,18 @@ security:
             pattern: ^/(css|images|js)/
             security: false
 
+        webdav:
+            pattern: ^/dav/*
+            anonymous: ~
+            http_basic:  ~
+            provider: db_provider
+            security: true
+
         main:
             anonymous: ~
+
+    access_control:
+        - { path: ^/dav/*, roles: ROLE_USER }
 
     role_hierarchy:
         ROLE_USER: ROLE_USER
