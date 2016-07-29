@@ -150,6 +150,11 @@ class Files
                 throw new \Exception(L\get('Access_denied'));
             }
 
+            //replace any other db content type for pdfs with application/pdf (sometimes it is binary/octet-stream)
+            if (strtolower(substr($r['name'], -4)) == '.pdf') {
+                $content['type'] = 'application/pdf';
+            }
+
             header('Content-Description: File Transfer');
             header('Content-Type: '.$content['type'].'; charset=UTF-8');
             if ($asAttachment || ($content['type'] !== 'application/pdf')) {
