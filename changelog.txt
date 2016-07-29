@@ -1,3 +1,7 @@
+CaseBox 1.9.615 (2016-07-29)
+==============================
+- #13233 PDF preview doesn't work
+
 CaseBox 1.9.614 (2016-07-22)
 ==============================
 - #13197 If a file can't be uploaded due to file permissions, CB is blocked
