@@ -254,7 +254,6 @@ class Objects
         } else {
             $template = new Objects\Template($p['template_id']);
             $template->load();
-
         }
 
         if (!empty($p['data']) && is_array($p['data'])) {
@@ -656,7 +655,6 @@ class Objects
             } else {
                 $pid = null;
             }
-
         } while (!empty($pid) && !empty($name));
 
         return $pid;
@@ -742,7 +740,9 @@ class Objects
                 return $rez;
             }
 
-            \CB\raiseErrorIf(!Security::canRead($id), 'Access_denied');
+            if (!Security::canRead($id)) {
+                return $rez;
+            }
 
             $rez['menu'] = Browser\CreateMenu::getMenuForPath($id);
 
@@ -788,7 +788,6 @@ class Objects
             if (is_scalar($v)) {
                 $className = $v;
                 $v = [];
-
             } else {
                 $className = $k;
                 if (!empty($v['class'])) {
@@ -904,7 +903,6 @@ class Objects
                 'success' => true
                 ,'data' => \CB\Objects\Plugins\Comments::loadComment($commentData['id'])
             );
-
         }
 
         return $rez;

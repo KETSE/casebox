@@ -61,7 +61,6 @@ Ext.define('CB.plugin.field.DropDownList', {
         Ext.apply(this, defaultConfig);
 
         this.callParent(arguments);
-        // CB.plugin.field.DropDownList.superclass.constructor.call(defaultConfig);
     }
 
     ,init: function(owner) {
