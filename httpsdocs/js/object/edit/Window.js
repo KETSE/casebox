@@ -1289,7 +1289,7 @@ Ext.define('CB.object.edit.Window', {
             rez = this.grid.isValid();
         }
 
-        rez = this.complexFieldContainer.getForm().isValid();
+        rez = rez && this.complexFieldContainer.getForm().isValid();
 
         return rez;
     }

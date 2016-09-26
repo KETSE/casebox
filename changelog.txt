@@ -1,3 +1,8 @@
+CaseBox 1.9.616 (2016-09-26)
+==============================
+- #13440 Error in logs when navigating to root folder
+- #13439 CB allows to save a record with empty required fields
+
 CaseBox 1.9.615 (2016-07-29)
 ==============================
 - #13233 PDF preview doesn't work

@@ -200,6 +200,7 @@ Ext.define('CB.file.edit.Window', {
             this.previewPanel
         );
 
+        this.previewPanel.data = Ext.clone(this.data);
         this.previewPanel.loadPreview(this.data.id, this.loadedVersionId);
     }
 

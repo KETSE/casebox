@@ -14,6 +14,7 @@ Ext.define('CB.object.view.Preview', {
     ,loader: {
         autoLoad: false
     }
+    ,data: {}
 
     ,initComponent: function(){
         Ext.apply(this, {
@@ -77,7 +78,7 @@ Ext.define('CB.object.view.Preview', {
     }
 
     ,processLoad: function(el, success, r, e){
-        this.data = {id: this.newId};
+        this.data.id = this.newId;
         this.loadedVersionId = this.newVersionId;
         this.body.scrollTo('top', 0);
         switch(r.responseText){
