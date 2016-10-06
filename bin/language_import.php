@@ -21,7 +21,6 @@
 $cnfFilename = realpath(__DIR__.'/../httpsdocs').'/config.ini';
 
 if (file_exists($cnfFilename)) {
-
     $cnf = parse_ini_file($cnfFilename);
 
     $dbConfig = [
@@ -109,7 +108,11 @@ function connectDB($dbConfig)
     $dbh = pdoConnect($dbConfig);
     $dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-    $dbh->set_charset('utf8');
+    // $dbh->set_charset('utf8');
+
+    $dbh->exec('SET NAMES utf8');
+    $dbh->exec('SET CHARACTER SET utf8');
+
     $dbh->exec("SET AUTOCOMMIT = 0");
 
     return $dbh;
