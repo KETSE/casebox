@@ -1,3 +1,8 @@
+CaseBox 1.9.617 (2016-10-12)
+==============================
+- #7881 Added 'preview' as default action for objPreviewGrid onClick object fields
+- corrected an error in Path.php->getPath
+
 CaseBox 1.9.616 (2016-09-26)
 ==============================
 - #13440 Error in logs when navigating to root folder
