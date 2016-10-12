@@ -263,13 +263,19 @@ class Base
             if (!empty($v['iconCls'])) {
                 $data['iconCls'] = $v['iconCls'];
             }
+
             if (!empty($v['cfg'])) {
                 $data['cfg'] = $v['cfg'];
+                unset($v['cfg']);
+            }
+
+            if (!empty($data['cfg'])) {
                 //replace previous template id placeholders if any
                 foreach ($this->templateIds as $tplKey => $tplId) {
                     $data['cfg'] = str_replace('{template_'.$tplKey.'}', $tplId, $data['cfg']);
                 }
             }
+
             if (!empty($v['title_template'])) {
                 $data['title_template'] = $v['title_template'];
             }
@@ -363,7 +369,6 @@ class Base
                 if (!empty($cfg['scope']) && substr($cfg['scope'], 0, 1) == '/') {
                     if (!empty($this->thesauriIds[$cfg['scope']]['id'])) {
                         $cfg['scope'] = $this->thesauriIds[$cfg['scope']]['id'];
-
                     } elseif ($cfg['scope'] == 'root') {
                         $cfg['scope'] = \CB\Path::getId($cfg['scope']);
                     }
