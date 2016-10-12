@@ -42,15 +42,18 @@ Ext.define('CB.object.plugin.ObjectProperties', {
         var a = this.getEl().query('a.click');
         Ext.each(
             a
-            ,function(t){
+            ,function(t) {
                 Ext.get(t).addListener(
                     'click'
-                    ,function(ev, el){
+                    ,function(ev, el) {
 
                         el = Ext.get(el);
-                        if(el) {
-                            if(el.hasCls('link-type-grid')) {
+                        if (el) {
+                            if (el.hasCls('link-type-grid')) {
                                 App.openPath(el.getAttribute('path'));
+                            } else { // else if (el.hasCls('link-type-preview')) {
+                                // App.openObjectWindow(this.params);
+                                App.openObjectWindow({'id': el.getAttribute('nid'), 'template_id': el.getAttribute('template_id')});
                             }
                         }
                     }

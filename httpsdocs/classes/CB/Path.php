@@ -34,7 +34,10 @@ class Path
         if (!empty($r)) {
             $p = explode(',', $r['pids']);
             if ($excludeItself) {
-                array_pop($r['pids']);
+                // oburlaca: next commented line seems a bug: $r['pids'] is a string
+                // array_pop($r['pids']);
+
+                array_pop($p);
             }
             $p = implode('/', $p);
 
