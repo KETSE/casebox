@@ -502,7 +502,7 @@ Ext.define('CB.controller.Browsing', {
     }
 
     /**
-    * open path on active explorer tabsheet or in default eplorer tabsheet
+    * open path on active explorer tabsheet or in default explorer tabsheet
     *
     * this function will not reset explorer navigation params (filters, search query, descendants)
     *
