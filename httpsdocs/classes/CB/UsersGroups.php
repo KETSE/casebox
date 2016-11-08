@@ -58,7 +58,6 @@ class UsersGroups
                 $rez[] = $r;
             }
             $res->close();
-
         } elseif (is_null($nodeType)) { /* root node childs*/
             $res = DB\dbQuery(
                 'SELECT
@@ -720,9 +719,11 @@ class UsersGroups
         $href = Util\getCoreHost().'recover/reset-password/?h='.$hash;
 
         /* replacing placeholders in template and subject */
+        $displayName = User::getDisplayName($userData);
         $replacements  = array(
             '{projectTitle}' => Config::getProjectName()
-            ,'{fullName}' => User::getDisplayName($userData)
+            ,'{name}' => $displayName
+            ,'{fullName}' => $displayName
             ,'{username}' => User::getUsername($userData)
             ,'{userEmail}' => $userEmail
             ,'{creatorFullName}' => User::getDisplayName()
@@ -738,7 +739,7 @@ class UsersGroups
         $mail = str_replace($search, $replace, $mail);
         $subject = str_replace($search, $replace, $subject);
 
-        return @System::sendMail(
+        return System::sendMail(
             $userEmail,
             $subject,
             $mail
