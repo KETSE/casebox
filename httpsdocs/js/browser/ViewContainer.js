@@ -285,9 +285,14 @@ Ext.define('CB.browser.ViewContainer', {
             })
             ,new Ext.Button({
                 qtip: L.New
-                ,text: L.New
+                ,text: ' &nbsp; ' + L.New + ' &nbsp; '
                 ,itemId: 'create'
-                ,iconCls: 'im-create'
+                // ,iconCls: 'im-create'
+                ,cls: 'red-btn'
+                ,overCls: 'red-btn-over'
+                ,focusCls: 'red-btn-focus'
+                // ,arrowCls: 'white-arrow'
+
                 ,disabled: true
                 ,scale: 'medium'
                 ,menu: [
@@ -351,7 +356,7 @@ Ext.define('CB.browser.ViewContainer', {
             ,split: {
                 size: 3
                 ,collapsible: false
-                ,style: 'background-color: #dfe8f6'
+                ,style: 'background-color: #EEE'
             }
             ,collapsible: true
             ,collapseMode: 'mini'

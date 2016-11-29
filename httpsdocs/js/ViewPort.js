@@ -130,7 +130,7 @@ Ext.define('CB.ViewPort', {
                 xtype: 'panel'
                 ,height: 51
                 ,border: false
-                ,style: 'background: #f4f4f4; text-align: center; border-bottom: 1px solid #99bce8 !important'
+                ,style: 'background: #f4f4f4; text-align: center; border-bottom: 1px solid #CCC !important'
                 ,bodyStyle: 'background: #f4f4f4'
                 ,html: '<img src="' + Ext.valueFrom(window.coreLogo, 'logo.png')  + '" style="padding: 9px" />'
             })
@@ -574,7 +574,7 @@ Ext.define('CB.ViewPort', {
                     ,split: {
                         size: 3
                         ,collapsible: true
-                        ,style: 'background-color: #dfe8f6'
+                        ,style: 'background-color: #EEE'
                     }
                     ,stateful: true
                     ,stateId: 'lpsr'

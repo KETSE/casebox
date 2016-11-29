@@ -62,7 +62,7 @@ Ext.define('CB.object.edit.Window', {
 
         Ext.apply(this, {
             cls: 'x-panel-white'
-            ,bodyStyle: 'border: 0; padding: 0; border-top: 1px solid #99bce8'
+            ,bodyStyle: 'border: 0; padding: 0; border-top: 1px solid #EEE'
 
             ,tbar: this.getToolbarButtons()
 
@@ -113,17 +113,27 @@ Ext.define('CB.object.edit.Window', {
     ,initActions: function() {
         this.actions = {
             edit: new Ext.Action({
-                text: L.Edit
-                ,iconCls: 'i-edit-obj'
+                text: ' &nbsp; ' + L.Edit + ' &nbsp; '
+                // ,iconCls: 'i-edit-obj'
+
+                ,cls: 'blue-btn'
+                ,overCls: 'blue-btn-over'
+                ,focusCls: 'blue-btn-focus'
+                ,scale: 'medium'
+
                 ,hidden: true
                 ,scope: this
                 ,handler: this.onEditClick
             })
 
             ,save: new Ext.Action({
-                text: L.Save
-                ,iconCls: 'icon-save'
+                text: ' &nbsp; ' + L.Save + ' &nbsp;  '
+                // ,iconCls: 'icon-save'
                 // ,disabled: true
+                ,cls: 'blue-btn'
+                ,overCls: 'blue-btn-over'
+                ,focusCls: 'blue-btn-focus'
+                ,scale: 'medium'
                 ,hidden: true
                 ,scope: this
                 ,handler: this.onSaveClick
@@ -131,8 +141,9 @@ Ext.define('CB.object.edit.Window', {
 
             ,cancel: new Ext.Action({
                 text: L.Cancel
-                ,iconCls: 'i-cancel'
+                // ,iconCls: 'i-cancel'
                 ,hidden: true
+                ,scale: 'medium'
                 ,scope: this
                 ,handler: this.close
             })
@@ -145,8 +156,9 @@ Ext.define('CB.object.edit.Window', {
             })
 
             ,refresh: new Ext.Action({
-                iconCls: 'i-refresh'
+                iconCls: 'im-refresh'
                 ,scope: this
+                ,scale: 'medium'
                 ,handler: this.onRefreshClick
             })
 
@@ -160,6 +172,7 @@ Ext.define('CB.object.edit.Window', {
                 iconCls: 'i-star'
                 ,qtip: L.Star
                 ,itemId: 'star'
+                ,scale: 'medium'
                 ,hidden: true
                 ,scope: this
                 ,handler: this.onStarClick
@@ -232,6 +245,7 @@ Ext.define('CB.object.edit.Window', {
                     ,itemId: 'more'
                     ,arrowVisible: false
                     ,iconCls: 'i-points'
+                    ,scale: 'medium'
                     ,menu: [
                         this.actions['delete']
                     ]
@@ -251,7 +265,8 @@ Ext.define('CB.object.edit.Window', {
                 qtip: L.More
                 ,itemId: 'more'
                 ,arrowVisible: false
-                ,iconCls: 'i-points'
+                ,iconCls: 'im-points'
+                ,scale: 'medium'
                 ,menu: [
                     this.actions['delete']
                     ,this.actions.rename
