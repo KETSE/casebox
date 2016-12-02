@@ -322,7 +322,9 @@ body::-webkit-scrollbar-corner{background-color:#f5f5f5}
 
 
 
-
+.x-resizable-pinned .x-resizable-handle-south, .x-resizable-pinned .x-resizable-handle-north {
+    background-image: url(i/s-handle.gif);
+}
 
 a{ text-decoration: none; color: #333333 }
 a:hover{ text-decoration: underline }
