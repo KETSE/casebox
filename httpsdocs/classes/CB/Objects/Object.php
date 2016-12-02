@@ -1838,7 +1838,7 @@ class Object
                 if (($f['tf']['type'] == 'H')) {
                     $style = empty($f['tf']['level'])
                         ? ''
-                        : 'padding-left: ' . (20 + $f['tf']['level'] * 20).'px;';
+                        : 'padding-left: ' . ($f['tf']['level'] * 20).'px;';
 
                     $style .= empty($f['tf']['cfg']['style'])
                         ? ''
@@ -1861,7 +1861,7 @@ class Object
                     $body .= '<td'.(
                         empty($f['tf']['level'])
                         ? ''
-                        : ' style="padding-left: ' . (20 + $f['tf']['level'] * 20).'px"'
+                        : ' style="padding-left: ' . ($f['tf']['level'] * 20).'px"'
                     ) . ' class="prop-key">' . $f['tf']['title'] .'</td>' .
                     '<td class="prop-val">';
                 } else {

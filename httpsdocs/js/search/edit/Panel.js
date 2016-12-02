@@ -11,10 +11,16 @@ Ext.define('CB.search.edit.Panel', {
     ,initComponent: function(){
         this.actions = {
             search: new Ext.Action({
-                text: L.Search
-                ,iconCls: 'im-search'
+                text: ' &nbsp; ' + L.Search + ' &nbsp; '
+                // ,iconCls: 'im-search'
                 ,itemId: 'search'
                 ,scale: 'medium'
+
+                ,cls: 'blue-btn'
+                ,overCls: 'blue-btn-over'
+                ,focusCls: 'blue-btn-focus'
+                ,scale: 'medium'
+
                 ,tooltip: L.Search
                 ,scope: this
                 ,handler: this.onSearchClick
