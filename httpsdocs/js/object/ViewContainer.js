@@ -102,9 +102,13 @@ Ext.define('CB.object.ViewContainer', {
         this.actions = {
 
             edit: new Ext.Action({
-                iconCls: 'im-edit-obj'
+                // iconCls: 'im-edit-obj'
+                cls: 'blue-btn'
+                ,overCls: 'blue-btn-over'
+                ,focusCls: 'blue-btn-focus'
+
                 ,itemId: 'edit'
-                ,text: L.Edit
+                ,text: ' &nbsp; ' + L.Edit + ' &nbsp; '
                 ,disabled: true
                 ,scale: 'medium'
                 ,scope: this

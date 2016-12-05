@@ -1,3 +1,7 @@
+CaseBox 1.9.618 (2016-11-28)
+==============================
+- changed Toolbar & Window CSS
+
 CaseBox 1.9.617 (2016-10-12)
 ==============================
 - #7881 Added 'preview' as default action for objPreviewGrid onClick object fields

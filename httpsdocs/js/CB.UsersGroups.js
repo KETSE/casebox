@@ -348,8 +348,13 @@ Ext.define('CB.UsersGroupsTree', {
 
             ,tbar: [
                 {
-                    text: L.Add
-                    ,iconCls: 'im-create'
+                    text: ' &nbsp; ' + L.Add + ' &nbsp; '
+                    // ,iconCls: 'im-create'
+
+                    ,cls: 'red-btn'
+                    ,overCls: 'red-btn-over'
+                    ,focusCls: 'red-btn-focus'
+
                     ,scale: 'medium'
                     ,menu: [
                         this.actions.addUser
