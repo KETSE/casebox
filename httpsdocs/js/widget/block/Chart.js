@@ -66,7 +66,10 @@ Ext.define('CB.widget.block.Chart', {
                 width: '100%'
                 ,store: this.chartDataStore
                 ,colors: App.colors
-                ,resizable: true
+                ,resizable: {
+                    pinned: true,
+                    handles: 'all'
+                }
                 ,axes: [
                     {
                         type: 'numeric'
@@ -109,7 +112,10 @@ Ext.define('CB.widget.block.Chart', {
                 width: '100%'
                 ,store: this.chartDataStore
                 ,colors: App.colors
-                ,resizable: true
+                ,resizable: {
+                    pinned: true,
+                    handles: 'all'
+                }
                 ,axes: [{
                         type: 'numeric'
                         ,position: 'left'
@@ -147,7 +153,10 @@ Ext.define('CB.widget.block.Chart', {
             }
             ,'pie': {
                 width: '100%'
-                ,resizable: true
+                ,resizable: {
+                    pinned: true,
+                    handles: 'all'
+                }
                 ,store: this.chartDataStore
                 ,series: [{
                     type: 'pie',
