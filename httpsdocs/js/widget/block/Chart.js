@@ -66,6 +66,10 @@ Ext.define('CB.widget.block.Chart', {
                 width: '100%'
                 ,store: this.chartDataStore
                 ,colors: App.colors
+                ,resizable: {
+                    pinned: true,
+                    handles: 'all'
+                }
                 ,axes: [
                     {
                         type: 'numeric'
@@ -108,6 +112,10 @@ Ext.define('CB.widget.block.Chart', {
                 width: '100%'
                 ,store: this.chartDataStore
                 ,colors: App.colors
+                ,resizable: {
+                    pinned: true,
+                    handles: 'all'
+                }
                 ,axes: [{
                         type: 'numeric'
                         ,position: 'left'
@@ -145,7 +153,12 @@ Ext.define('CB.widget.block.Chart', {
             }
             ,'pie': {
                 width: '100%'
+                ,resizable: {
+                    pinned: true,
+                    handles: 'all'
+                }
                 ,store: this.chartDataStore
+                ,interactions: ['rotate']
                 ,series: [{
                     type: 'pie',
                     donut: 0,
@@ -153,7 +166,22 @@ Ext.define('CB.widget.block.Chart', {
                     label: {
                         field: 'shortname',
                         display: 'outside',
-                        calloutLine: true
+                        calloutLine: true,
+                        renderer: function (value, sprite, config, renderData, index) {
+                            /*
+                             * update in task_#392
+                             * hide labels where sections are too small to avoid labels
+                             * overlapping and making the chart unreable
+                             */
+                            var angle = Math.abs(renderData.endAngle - renderData.startAngle);
+                            /*
+                             * the threshold selected here is arbitrary and seemed to work
+                             * well for the charts I tested with.
+                             */
+                            var threshold = 400;
+                            if (angle > threshold) return value;
+                            return '';
+                        }
                     },
                     showInLegend: true
                     ,highlight: true
@@ -252,6 +280,7 @@ Ext.define('CB.widget.block.Chart', {
         this.removeAll(true);
 
         var cfg = Ext.clone(this.chartConfigs[charts[0]]);
+        var chartClass = 'Ext.chart.Chart';
 
         if(!Ext.isEmpty(cfg)) {
             // cfg.height = Math.max(cfg.store.getCount() * 25, 300);
