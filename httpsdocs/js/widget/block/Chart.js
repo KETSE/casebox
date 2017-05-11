@@ -168,10 +168,19 @@ Ext.define('CB.widget.block.Chart', {
                         display: 'outside',
                         calloutLine: true,
                         renderer: function (value, sprite, config, renderData, index) {
+                            /*
+                             * update in task_#392
+                             * hide labels where sections are too small to avoid labels
+                             * overlapping and making the chart unreable
+                             */
                             var angle = Math.abs(renderData.endAngle - renderData.startAngle);
-                            console.log('value', value, 'angle', angle);
-                            if (angle > 400) return value;
-                            return ''   ;
+                            /*
+                             * the threshold selected here is arbitrary and seemed to work
+                             * well for the charts I tested with.
+                             */
+                            var threshold = 400;
+                            if (angle > threshold) return value;
+                            return '';
                         }
                     },
                     showInLegend: true
