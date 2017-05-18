@@ -21,6 +21,9 @@ namespace CB;
 
 ini_set('max_execution_time', 0);
 
+// include cron init script
+// sets up the environment and also
+// the DB based on the selected core
 $cronPath = realpath(
     dirname(__FILE__) . DIRECTORY_SEPARATOR .
     '..' . DIRECTORY_SEPARATOR .
@@ -32,6 +35,37 @@ $cron_id = 'dummy';
 include $cronPath.'init.php';
 
 \CB\Config::setFlag('disableActivityLog', true);
+
+
+// run the script
+run();
+
+
+/**
+ * runs the import script based on cmd option
+ */
+function run () {
+	$options = getopt('c:f:');
+	// the `c` (core) param is already checked by the cron init script
+	if(!array_key_exists('f', $options)) {
+		printLine("Error: please specify filename");
+		printUsage();
+		return;
+	}
+	$filename = $options['f'];
+	printLine("Opening $filename...");
+	$file = fopen($filename, 'r');
+	if(!$file) {
+		printLine("Error: could not open file");
+		return;
+	}
+
+	printLine("Importing translations...");
+	importTranslationsFromFile($file);
+
+	fclose($file);
+	printLine("Done!");
+}
 
 
 /**
@@ -48,6 +82,7 @@ function importTranslationsFromFile ($file) {
 	$langs = parseHeader($file);
 	while (!feof($file)) {
 		$row = parseNextTranslations($file, $langs);
+		if(!$row) continue; // skip empty lines
 		updateObjectTranslations($row['id'], $row['translations']);
 	}
 }
@@ -63,6 +98,12 @@ function importTranslationsFromFile ($file) {
  */
 function updateObjectTranslations ($id, $translations) {
 	$obj = Objects::getCustomClassByObjectId($id);
+	if(!$obj) {
+		printLine("Object #".$id." not found");
+		return;
+	}
+	// load data from DB first in order not to overwrite/lose
+	// existing data that's not part of the update
 	$obj->load();
 	$data = $obj->getData();
 	foreach($translations as $lg=>$text) {
@@ -83,8 +124,8 @@ function updateObjectTranslations ($id, $translations) {
  */
 function parseHeader ($file) {
 	$header = fgetcsv($file);
-	$langs = array_slice($header, 1);
-	return $langs
+	$langs = array_map(trim, array_slice($header, 1));
+	return $langs;
 }
 
 /**
@@ -97,12 +138,17 @@ function parseHeader ($file) {
  * size of the $langs array
  * @param handle $file
  * @param array $langs array of language codes
- * @return array associative array with keys id and
+ * @return array|null associative array with keys id and
  * translations, where translations is an associative
  * array mapping languages to translations for the given object id
+ * returns null if the line is empty
  */
 function parseNextTranslations ($file, $langs) {
 	$row = fgetcsv($file);
+	if (empty($row)) {
+		// return null on empty lines
+		return null;
+	}
 	$id = $row[0];
 	// clean id if it starts with # character
 	if($id[0] == '#') {
@@ -115,4 +161,20 @@ function parseNextTranslations ($file, $langs) {
 		"id" => $id,
 		"translations" => $trans
 	];
+}
+
+/**
+ * helper to echo logs
+ * @param string $str
+ */
+function printLine ($str) {
+	echo $str."\n";
+}
+
+/**
+ * prints usage example and instructions
+ */
+function printUsage () {
+	printLine("USAGE:");
+	printLine("php import_objects_translations -c corename -f filename");
 }
