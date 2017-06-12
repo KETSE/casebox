@@ -610,9 +610,12 @@ class Browser
 
         $search = new Search();
 
-        // temporary: Don't use permissions for Objects fields
-        // it can be later reinforced per field in config
-        $p['skipSecurity'] = true;
+        
+        if (!isset($p['skipSecurity'])) {
+            // temporary: Don't use permissions for Objects fields
+            // it can be later reinforced per field in config
+            $p['skipSecurity'] = true;
+        }
         $rez = $search->query($p);
 
         $this->setCustomIcons($rez['data']);
