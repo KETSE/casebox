@@ -124,7 +124,7 @@ function updateObjectTranslations ($id, $translations) {
  */
 function parseHeader ($file) {
 	$header = fgetcsv($file);
-	$langs = array_map(trim, array_slice($header, 1));
+	$langs = array_map('trim', array_slice($header, 1));
 	return $langs;
 }
 
