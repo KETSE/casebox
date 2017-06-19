@@ -195,7 +195,12 @@ class Object
             $p['cid'] = User::getId();
         }
         if (empty($p['oid'])) {
-            $p['oid'] = $p['cid'];
+            $oid = DM\Tree::getOwner($p['id']);
+
+            if (empty($oid))
+                $p['oid'] = $p['cid'];
+            else
+                $p['oid'] = $oid;
         }
 
         if (empty($p['cdate'])) {
