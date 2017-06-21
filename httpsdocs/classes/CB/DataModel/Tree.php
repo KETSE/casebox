@@ -214,7 +214,7 @@ class Tree extends Base
     }
 
     /**
-     * Update owner for ginev ids
+     * Update owner for given ids
      * @param  int  $ids
      * @param  int  $ownerId
      * @return void
@@ -237,6 +237,33 @@ class Tree extends Base
                 )
             );
         }
+    }
+
+    /**
+     * Get owner for given id
+     * @param  int  $id
+     * @return int
+     */
+    public static function getOwner($id)
+    {
+        $rez = null;
+
+        $res = DB\dbQuery(
+            'SELECT oid
+            FROM tree
+            WHERE id = $1',
+            array(
+                $id
+            )
+        );
+
+        if ($r = $res->fetch_assoc())
+            $rez = $r['oid'];
+
+        $res->close();
+        // var_dump($rez);
+
+        return $rez;
     }
 
     public static function getRootId()
