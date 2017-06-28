@@ -55,7 +55,7 @@ Ext.define('CB.widget.block.Chart', {
             trackMouse: true
             ,style: 'background: #FFF; overflow: visible'
             ,height: 20
-            ,width: 200
+            ,width: 'auto'
             ,renderer: function(storeItem, item) {
                 this.setTitle(storeItem.get('name') + ': ' + storeItem.get('count'));
             }
