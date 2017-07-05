@@ -22,7 +22,6 @@ Ext.define('CB.widget.block.Chart', {
                 type: 'vbox'
                 ,pack: 'top'
             }
-
             ,listeners: {
                 scope: this
                 ,afterrender: this.onAfterRender
