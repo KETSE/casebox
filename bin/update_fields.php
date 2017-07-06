@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-/**
+/*
  Updates objects field names
 
  When template fields are modified and their names are changed, objects
@@ -75,10 +75,8 @@ function run () {
 	}
 	$fs = parseFields($opts['f']);
 	println("Updating objects...");
-	var_dump($fs);
-	var_dump($ts);
-	// $updater = new FieldUpdater($fs, $ts);
-	// $updater->updateObjects();
+	$updater = new FieldUpdater($fs, $ts);
+	$updater->updateObjects();
 	println('Done');
 	println("Now update solr prepared data and reindex the solr core");
 }
