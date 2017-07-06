@@ -22,6 +22,8 @@
 
  	php update_fields.php -c mycore -t 1123,230 -f age:victim_age,sex:gender
 	php update_fields.php -c mycore -f name:first_name
+
+ After running this script, you should update the solr prepared date and reindex the solr core.
 	
 
  */
@@ -78,34 +80,29 @@ function run () {
 	// $updater = new FieldUpdater($fs, $ts);
 	// $updater->updateObjects();
 	println('Done');
+	println("Now update solr prepared data and reindex the solr core");
 }
 
 
 class FieldUpdater {
 
-	private $templateId;
+	private $templateIds;
 	private $fields;
 
+	/**
+	 * @param array $fs mapping of old field names to new names
+	 * @param array $ts list of template ids
+	 */
 	function __construct ($fs, $ts=null) {
 		$this->templateIds = $ts;
 		$this->fields = $fs;
 	}
 
-	private function fetchObjectIds () {
-		$q = $this->buildQuery();
-		return DB\dbQuery($q);
-	}
-
-	private function buildQuery () {
-		$q = "SELECT o.id
-			  FROM objects o";
-		if (!empty($this->templateIds)) {
-			$ids = implode(',', $this->templateIds);
-			$q .= " JOIN tree t on o.id=t.id AND t.template_id in (".$ids.")";
-		}
-		return $q;
-	}
-
+	/**
+	 * Fetches and updates objects
+	 * based on the set template ids and field
+	 * names to udpate
+	 */
 	public function updateObjects () {
 		$res = $this->fetchObjectIds();
 		while ($row = $res->fetch_assoc()) {
@@ -113,6 +110,10 @@ class FieldUpdater {
 		}
 	}
 
+	/**
+	 * update the object with the specified id
+	 * @param mixed $id
+	 */
 	public function updateObject ($id) {
 		$o = Objects::getCustomClassById($id);
 		$o->load();
@@ -124,6 +125,30 @@ class FieldUpdater {
 			}
 		}
 		$o->update($data);
+	}
+
+	/**
+	 * fetch object ids from the db
+	 * @return resource the db cursor
+	 */
+	private function fetchObjectIds () {
+		$q = $this->buildQuery();
+		return DB\dbQuery($q);
+	}
+
+	/**
+	 * builds sql query to use for fetching
+	 * objects based on the specified templates
+	 * @return string
+	 */
+	private function buildQuery () {
+		$q = "SELECT o.id
+			  FROM objects o";
+		if (!empty($this->templateIds)) {
+			$ids = implode(',', $this->templateIds);
+			$q .= " JOIN tree t on o.id=t.id AND t.template_id in (".$ids.")";
+		}
+		return $q;
 	}
 }
 
@@ -155,6 +180,9 @@ function parseFields ($f) {
 	}, []);
 }
 
+/**
+ * prints helpful usage info
+ */
 function printUsage() {
 	println('php update_fields.php -c <core> -f <fields> -t <templates>');
 	println('Options:');
@@ -168,6 +196,10 @@ function printUsage() {
 	println("php update_fields.php -c demo -f age:victim_age,sex:gender -t 3849,1234");
 }
 
+/**
+ * ouputs the specified string followed by a new line
+ * @param string $s
+ */
 function println ($s='') {
 	echo "$s\n";
 }
