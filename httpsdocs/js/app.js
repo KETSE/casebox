@@ -981,6 +981,26 @@ function initApp() {
                         }
                         break;
 
+                    case 'int':
+                        ed = new Ext.form.Int({
+                            data: objData
+
+                            ,plugins: [{
+                                ptype: 'CBPluginFieldDropDownList'
+                                ,commands: [
+                                    {
+                                        prefix: ' '
+                                        ,regex: /^([\w\d_\.]+)/i
+
+                                        ,insertField: 'info'
+
+                                        ,handler: CB.plugin.field.DropDownList.prototype.onAtCommand
+                                    }
+                                ]
+                            }]
+                        });
+                        break;
+
                     case 'text':
                         ed = new Ext.form.Text({
                             data: objData
