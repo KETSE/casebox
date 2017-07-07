@@ -22,11 +22,22 @@ Ext.define('CB.widget.block.Chart', {
                 type: 'vbox'
                 ,pack: 'top'
             }
-
             ,listeners: {
                 scope: this
                 ,afterrender: this.onAfterRender
             }
+            ,dockedItems: [{
+                xtype: 'toolbar',
+                items: [{
+                    xtype: 'button',
+                    text: 'Download Chart as PNG Image',
+                    handler: function(btn, e, eOpts) {
+                        btn.up('CBWidgetBlockChart').down("chart").save({
+                            type: "image/png"
+                        })
+                    }
+                }]
+            }]
         });
 
         this.callParent(arguments);
