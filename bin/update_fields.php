@@ -50,9 +50,9 @@ include $cronPath.'init.php';
 run();
 
 function run () {
-	$opts = getopt('c:f:t:h', ['help']);
+	$opts = getopt('c:f:t:h');
 	var_dump($opts);
-	if (isset($opts['h']) || isset($opts['help'])) {
+	if (isset($opts['h'])) {
 		printUsage();
 		return;
 	}
@@ -113,12 +113,12 @@ class FieldUpdater {
 	 * @param mixed $id
 	 */
 	public function updateObject ($id) {
-		$o = Objects::getCustomClassById($id);
+		$o = Objects::getCustomClassByObjectId($id);
 		$o->load();
 		$data = $o->getData();
 		foreach ($this->fields as $old=>$new) {
-			if (isset($data['data'][$old])) {
-				$data['data'][$new] = $data[$old];
+			if (array_key_exists($old, $data['data'])) {
+				$data['data'][$new] = $data['data'][$old];
 				unset($data['data'][$old]);
 			}
 		}
