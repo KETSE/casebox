@@ -6,6 +6,7 @@ sys/solr_configsets/default_config/
 !sys/solr_configsets/default_config/conf
 
 ssl/
+\[ssl\]/
 
 # ignore custom import scripts
 install/import/
