@@ -51,7 +51,6 @@ run();
 
 function run () {
 	$opts = getopt('c:f:t:h');
-	var_dump($opts);
 	if (isset($opts['h'])) {
 		printUsage();
 		return;
@@ -110,10 +109,14 @@ class FieldUpdater {
 
 	/**
 	 * update the object with the specified id
-	 * @param mixed $id
+	 * @param array $row db row with id and data fields
 	 */
 	public function updateObject ($row) {
 		$data = json_decode($row['data'], true);
+		if (empty($data)) {
+			println("Empty data for object ".$row['id']);
+			return;
+		}
 		foreach ($this->fields as $old=>$new) {
 			if (array_key_exists($old, $data)) {
 				$data[$new] = $data[$old];
