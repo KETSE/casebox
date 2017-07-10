@@ -104,7 +104,7 @@ class FieldUpdater {
 	public function updateObjects () {
 		$res = $this->fetchObjectIds();
 		while ($row = $res->fetch_assoc()) {
-			$this->updateObject($row['id']);
+			$this->updateObject($row);
 		}
 	}
 
@@ -112,17 +112,15 @@ class FieldUpdater {
 	 * update the object with the specified id
 	 * @param mixed $id
 	 */
-	public function updateObject ($id) {
-		$o = Objects::getCustomClassByObjectId($id);
-		$o->load();
-		$data = $o->getData();
+	public function updateObject ($row) {
+		$data = json_decode($row['data'], true);
 		foreach ($this->fields as $old=>$new) {
-			if (array_key_exists($old, $data['data'])) {
-				$data['data'][$new] = $data['data'][$old];
-				unset($data['data'][$old]);
+			if (array_key_exists($old, $data)) {
+				$data[$new] = $data[$old];
+				unset($data[$old]);
 			}
 		}
-		$o->update($data);
+		$this->saveToDb($row['id'], $data);
 	}
 
 	/**
@@ -140,13 +138,25 @@ class FieldUpdater {
 	 * @return string
 	 */
 	private function buildQuery () {
-		$q = "SELECT o.id
+		$q = "SELECT o.id, o.data
 			  FROM objects o";
 		if (!empty($this->templateIds)) {
 			$ids = implode(',', $this->templateIds);
 			$q .= " JOIN tree t on o.id=t.id AND t.template_id in (".$ids.")";
 		}
 		return $q;
+	}
+
+	/**
+	 * persists object data in db
+	 * @param mixed $id id of the object to update
+	 * @param array $data
+	 */
+	private function saveToDb ($id, $data) {
+		$data = json_encode($data);
+		$q = "UPDATE objects SET data=$2
+			  WHERE id=$1";
+		DB\dbQuery($q, [$id, $data]);
 	}
 }
 
