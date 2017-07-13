@@ -70,7 +70,7 @@ Ext.define('CB.widget.block.Chart', {
             ,renderer: function(storeItem, item) {
                 this.setTitle(storeItem.get('name') + ': ' + storeItem.get('count'));
             }
-        };
+        };console.log('colors', App.colors);
 
         this.chartConfigs = {
             'bar': {
@@ -117,6 +117,12 @@ Ext.define('CB.widget.block.Chart', {
                         scope: this
                         ,itemclick: this.onChartItemClick
                     }
+                    ,renderer: function (sprite, record, attr, index, store) {
+                        var colorChoice = index % App.colors.length;
+                        return Ext.apply(attr, {
+                            fill: App.colors[colorChoice]
+                        });
+                    }
                 }]
             }
             ,'column': {
@@ -159,6 +165,12 @@ Ext.define('CB.widget.block.Chart', {
                     ,listeners: {
                         scope: this
                         ,itemclick: this.onChartItemClick
+                    }
+                    ,renderer: function (sprite, record, attr, index, store) {
+                        var colorChoice = index % App.colors.length;
+                        return Ext.apply(attr, {
+                            fill: App.colors[colorChoice]
+                        });
                     }
                 }]
             }
