@@ -22,11 +22,22 @@ Ext.define('CB.widget.block.Chart', {
                 type: 'vbox'
                 ,pack: 'top'
             }
-
             ,listeners: {
                 scope: this
                 ,afterrender: this.onAfterRender
             }
+            ,dockedItems: [{
+                xtype: 'toolbar',
+                items: [{
+                    xtype: 'button',
+                    text: 'Download Chart as PNG Image',
+                    handler: function(btn, e, eOpts) {
+                        btn.up('CBWidgetBlockChart').down("chart").save({
+                            type: "image/png"
+                        })
+                    }
+                }]
+            }]
         });
 
         this.callParent(arguments);
@@ -55,17 +66,21 @@ Ext.define('CB.widget.block.Chart', {
             trackMouse: true
             ,style: 'background: #FFF; overflow: visible'
             ,height: 20
-            ,width: 200
+            ,width: 'auto'
             ,renderer: function(storeItem, item) {
                 this.setTitle(storeItem.get('name') + ': ' + storeItem.get('count'));
             }
-        };
+        };console.log('colors', App.colors);
 
         this.chartConfigs = {
             'bar': {
                 width: '100%'
                 ,store: this.chartDataStore
                 ,colors: App.colors
+                ,resizable: {
+                    pinned: true,
+                    handles: 'all'
+                }
                 ,axes: [
                     {
                         type: 'numeric'
@@ -102,12 +117,22 @@ Ext.define('CB.widget.block.Chart', {
                         scope: this
                         ,itemclick: this.onChartItemClick
                     }
+                    ,renderer: function (sprite, record, attr, index, store) {
+                        var colorChoice = index % App.colors.length;
+                        return Ext.apply(attr, {
+                            fill: App.colors[colorChoice]
+                        });
+                    }
                 }]
             }
             ,'column': {
                 width: '100%'
                 ,store: this.chartDataStore
                 ,colors: App.colors
+                ,resizable: {
+                    pinned: true,
+                    handles: 'all'
+                }
                 ,axes: [{
                         type: 'numeric'
                         ,position: 'left'
@@ -141,11 +166,22 @@ Ext.define('CB.widget.block.Chart', {
                         scope: this
                         ,itemclick: this.onChartItemClick
                     }
+                    ,renderer: function (sprite, record, attr, index, store) {
+                        var colorChoice = index % App.colors.length;
+                        return Ext.apply(attr, {
+                            fill: App.colors[colorChoice]
+                        });
+                    }
                 }]
             }
             ,'pie': {
                 width: '100%'
+                ,resizable: {
+                    pinned: true,
+                    handles: 'all'
+                }
                 ,store: this.chartDataStore
+                ,interactions: ['rotate']
                 ,series: [{
                     type: 'pie',
                     donut: 0,
@@ -153,7 +189,22 @@ Ext.define('CB.widget.block.Chart', {
                     label: {
                         field: 'shortname',
                         display: 'outside',
-                        calloutLine: true
+                        calloutLine: true,
+                        renderer: function (value, sprite, config, renderData, index) {
+                            /*
+                             * update in task_#392
+                             * hide labels where sections are too small to avoid labels
+                             * overlapping and making the chart unreable
+                             */
+                            var angle = Math.abs(renderData.endAngle - renderData.startAngle);
+                            /*
+                             * the threshold selected here is arbitrary and seemed to work
+                             * well for the charts I tested with.
+                             */
+                            var threshold = 400;
+                            if (angle > threshold) return value;
+                            return '';
+                        }
                     },
                     showInLegend: true
                     ,highlight: true
@@ -252,6 +303,7 @@ Ext.define('CB.widget.block.Chart', {
         this.removeAll(true);
 
         var cfg = Ext.clone(this.chartConfigs[charts[0]]);
+        var chartClass = 'Ext.chart.Chart';
 
         if(!Ext.isEmpty(cfg)) {
             // cfg.height = Math.max(cfg.store.getCount() * 25, 300);

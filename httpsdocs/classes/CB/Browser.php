@@ -393,7 +393,7 @@ class Browser
                 if (!empty($fieldConfig['source']['fn'])) {
                     $method = explode('.', $fieldConfig['source']['fn']);
                     $class = new $method[0]();
-                    $rez = $class->$method[1]($p);
+                    $rez = $class->{$method[1]}($p);
 
                     // if custom source returned any result then return it right there
                     // otherwise custom source can add some filtering params and we go further processing
@@ -610,9 +610,12 @@ class Browser
 
         $search = new Search();
 
-        // temporary: Don't use permissions for Objects fields
-        // it can be later reinforced per field in config
-        $p['skipSecurity'] = true;
+
+        if (!isset($p['skipSecurity'])) {
+            // temporary: Don't use permissions for Objects fields
+            // it can be later reinforced per field in config
+            $p['skipSecurity'] = true;
+        }
         $rez = $search->query($p);
 
         $this->setCustomIcons($rez['data']);

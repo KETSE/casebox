@@ -407,7 +407,7 @@ function verifyDBConfig(&$cfg)
     $success = true;
 
     try {
-        @new \mysqli(
+        new \mysqli(
             $cfg['db_host'],
             $cfg['su_db_user'],
             (isset($cfg['su_db_pass']) ? $cfg['su_db_pass'] : null),
