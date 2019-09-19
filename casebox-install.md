@@ -25,7 +25,7 @@ sudo apt-get update
 sudo apt-get install -y oracle-java8-installer
 
 cd ~
-wget http://ftp.carnet.hr/misc/apache/lucene/solr/5.5.5/solr-5.5.5.tgz
+wget http://archive.apache.org/dist/lucene/solr/5.5.5/solr-5.5.5.tgz
 tar xzf solr-5.5.5.tgz solr-5.5.5/bin/install_solr_service.sh --strip-components=2
 sudo bash ./install_solr_service.sh solr-5.5.5.tgz
 sudo service solr status
